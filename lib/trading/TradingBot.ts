@@ -1,0 +1,491 @@
+// ============================================================================
+// TradingBot - Core Trading Logic (React-free)
+// ============================================================================
+
+import { DailyTargetController } from './DailyTargetController';
+import type { Position, Trade, BotConfig, BotStats, BotPersonality } from './types';
+
+export class TradingBot {
+  public id: string;
+  public config: BotConfig;
+  private positions: Position[] = [];
+  private trades: Trade[] = [];
+  private closedPositionIds: Set<string> = new Set();
+  private dailyController: DailyTargetController;
+  private personality: BotPersonality;
+  private lastOpenTime: number = 0; // Track last position open time for cooldown
+
+  constructor(id: string, config: BotConfig) {
+    this.id = id;
+
+    // Set defaults for optional parameters
+    this.config = {
+      ...config,
+      createdAt: config.createdAt || Date.now(), // Set creation time if not provided
+      allowedSides: config.allowedSides || 'BOTH',
+      maxSlippage: config.maxSlippage || 0.5,
+      maxTradesHistory: config.maxTradesHistory || 100,
+    };
+
+    this.dailyController = new DailyTargetController(
+      config.dailyTargetPercent,
+      config.investedCapital
+    );
+
+    // Generate unique personality for this bot
+    this.personality = {
+      aggression: Math.random(),
+      patience: Math.random(),
+      riskTolerance: Math.random(),
+    };
+
+    // Load state if exists
+    this.load();
+  }
+
+  // ============================================================================
+  // Main Loop - Called every second with current prices
+  // ============================================================================
+
+  tick(prices: Record<string, number>): void {
+    this.managePositions(prices);
+    this.tryOpenNewPosition(prices);
+  }
+
+  // ============================================================================
+  // Position Management
+  // ============================================================================
+
+  private managePositions(prices: Record<string, number>): void {
+    const remainingPositions: Position[] = [];
+    const now = Date.now();
+
+    this.positions.forEach((pos) => {
+      // Update current price
+      const symbol = pos.pair.replace('/', '');
+      const currentPrice = prices[symbol];
+
+      if (!currentPrice) {
+        remainingPositions.push(pos);
+        return;
+      }
+
+      pos.currentPrice = currentPrice;
+
+      // Calculate P&L
+      const priceChange = pos.side === 'LONG'
+        ? currentPrice - pos.entryPrice
+        : pos.entryPrice - currentPrice;
+      const realPnl = (priceChange / pos.entryPrice) * pos.leverage * pos.positionSize;
+      const realPnlPercent = (priceChange / pos.entryPrice) * pos.leverage * 100;
+
+      pos.pnl = realPnl;
+      pos.pnlPercent = realPnlPercent;
+
+      // Calculate duration
+      const duration = now - pos.openedAt;
+      pos.duration = `${Math.floor(duration / 1000)}s`;
+
+      // Apply personality to duration thresholds
+      const patienceMultiplier = 0.7 + (this.personality.patience * 0.6); // 0.7-1.3
+      const minDuration = this.config.minDuration * patienceMultiplier;
+      const maxDuration = this.config.maxDuration;
+      const midDuration = minDuration + (maxDuration - minDuration) * 0.5;
+
+      let shouldClose = false;
+      let needsSlippage = false;
+      let slippageReason = '';
+
+      // PRIORITY 1: Check if TP or SL reached
+      if (realPnlPercent >= pos.targetPnL) {
+        shouldClose = true;
+        slippageReason = pos.shouldWin
+          ? 'Natural win (TP reached)'
+          : 'Unexpected win (TP reached)';
+      } else if (realPnlPercent <= pos.stopLossPnL) {
+        shouldClose = true;
+        slippageReason = !pos.shouldWin
+          ? 'Natural loss (SL reached)'
+          : 'Unexpected loss (SL reached)';
+      }
+      // PRIORITY 2: Check minimum duration
+      else if (duration < minDuration) {
+        remainingPositions.push(pos);
+        return;
+      }
+      // PRIORITY 3: MAX DURATION - Force close (must check before minDuration checks)
+      else if (duration >= maxDuration) {
+        shouldClose = true;
+        needsSlippage = true;
+        slippageReason = 'Max duration reached';
+      }
+      // PRIORITY 4: Early intervention if wrong direction or mid duration
+      else if (duration >= minDuration) {
+        const wrongDirection = pos.shouldWin ? realPnlPercent < 0 : realPnlPercent > 0;
+
+        if (wrongDirection) {
+          shouldClose = true;
+          needsSlippage = true;
+          slippageReason = 'Early slippage (wrong direction)';
+
+          // If too far wrong, accept mismatch
+          if (Math.abs(realPnlPercent) > 0.8) {
+            const targetPnl = pos.shouldWin ? pos.targetPnL : pos.stopLossPnL;
+            const slippageNeeded = Math.abs(targetPnl - realPnlPercent);
+
+            if (slippageNeeded > this.config.maxSlippage!) {
+              needsSlippage = false;
+              slippageReason = 'Accept mismatch (slippage too high)';
+            }
+          }
+        } else if (duration >= midDuration) {
+          shouldClose = true;
+          needsSlippage = true;
+          slippageReason = 'Time-based slippage';
+        }
+      }
+
+      if (shouldClose && !this.closedPositionIds.has(pos.id)) {
+        this.closePosition(pos, needsSlippage, realPnlPercent);
+      } else if (!shouldClose) {
+        remainingPositions.push(pos);
+      }
+    });
+
+    this.positions = remainingPositions;
+  }
+
+  // ============================================================================
+  // Close Position with Slippage
+  // ============================================================================
+
+  private closePosition(pos: Position, needsSlippage: boolean, realPnlPercent: number): void {
+    let exitPrice = pos.currentPrice;
+    let finalPnlPercent = realPnlPercent;
+    let hadSlippage = false;
+    let slippageAmount = 0;
+
+    if (needsSlippage) {
+      const targetPnl = pos.shouldWin ? pos.targetPnL : pos.stopLossPnL;
+      const gap = targetPnl - realPnlPercent;
+
+      const priceChangePercent = (gap / pos.leverage) / 100;
+      const slippage = pos.side === 'SHORT'
+        ? -pos.currentPrice * priceChangePercent
+        : pos.currentPrice * priceChangePercent;
+
+      exitPrice = pos.currentPrice + slippage;
+      slippageAmount = Math.abs((slippage / pos.currentPrice) * 100);
+      hadSlippage = true;
+
+      // Recalculate final P&L
+      const priceChange = pos.side === 'LONG'
+        ? exitPrice - pos.entryPrice
+        : pos.entryPrice - exitPrice;
+      finalPnlPercent = (priceChange / pos.entryPrice) * pos.leverage * 100;
+    }
+
+    const finalPnl = (pos.positionSize * finalPnlPercent) / 100;
+    const isWin = finalPnl >= 0;
+    const expectedWin = pos.shouldWin;
+
+    // Mark as closed
+    this.closedPositionIds.add(pos.id);
+
+    // Record in DailyTargetController
+    this.dailyController.recordTrade(finalPnl);
+
+    // Add to trade history
+    const trade: Trade = {
+      id: `trade-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      pair: pos.pair,
+      side: pos.side,
+      leverage: pos.leverage,
+      entryPrice: pos.entryPrice,
+      exitPrice,
+      amount: pos.amount,
+      positionSize: pos.positionSize,
+      pnl: finalPnl,
+      pnlPercent: finalPnlPercent,
+      duration: pos.duration,
+      closedAt: new Date().toISOString(),
+      expectedOutcome: expectedWin ? 'WIN' : 'LOSS',
+      actualOutcome: isWin ? 'WIN' : 'LOSS',
+      hadSlippage,
+      slippageAmount: hadSlippage ? slippageAmount : undefined,
+    };
+
+    this.trades.unshift(trade);
+
+    // Keep only last N trades (from config)
+    const maxHistory = this.config.maxTradesHistory!;
+    if (this.trades.length > maxHistory) {
+      this.trades = this.trades.slice(0, maxHistory);
+    }
+
+    // Save state after trade (including daily controller)
+    this.save();
+    this.dailyController.save(this.id);
+  }
+
+  // ============================================================================
+  // Open New Position
+  // ============================================================================
+
+  private tryOpenNewPosition(prices: Record<string, number>): void {
+    // Limit concurrent positions (from config)
+    if (this.positions.length >= this.config.maxConcurrentPositions) return;
+
+    // Cooldown check: minimum 5 seconds between opens to prevent burst opening
+    const now = Date.now();
+    const cooldownMs = 5000; // 5 seconds
+    if (now - this.lastOpenTime < cooldownMs) return;
+
+    // Control frequency (from config)
+    if (Math.random() > this.config.openFrequency) return;
+
+    // Check if DailyTargetController allows opening
+    if (!this.dailyController.shouldOpenPosition()) return;
+
+    // Get price for bot's trading pair
+    const symbol = this.config.tradingPair.replace('/', '');
+    const price = prices[symbol];
+
+    if (!price) return;
+
+    // Determine if this trade should win
+    const shouldWin = Math.random() < this.config.winRate;
+
+    // Calculate adaptive SL/TP based on win rate and personality
+    let targetPnL: number, stopLossPnL: number;
+
+    if (shouldWin) {
+      // Winning trade: TP closer than SL
+      targetPnL = this.config.winPnLMin + Math.random() * (this.config.winPnLMax - this.config.winPnLMin);
+
+      // SL distance based on win rate (higher WR = farther SL)
+      const slDistanceMultiplier = 1 + (this.config.winRate * 7); // 1x-8x
+      const riskMultiplier = 0.9 + (this.personality.riskTolerance * 0.2); // 0.9-1.1
+      stopLossPnL = -(this.config.lossPnLMax * slDistanceMultiplier * riskMultiplier);
+    } else {
+      // Losing trade: SL closer than TP
+      stopLossPnL = -(this.config.lossPnLMin + Math.random() * (this.config.lossPnLMax - this.config.lossPnLMin));
+
+      // TP very far (unlikely to reach)
+      const tpDistanceMultiplier = 2 + ((1 - this.config.winRate) * 2); // 2x-4x
+      targetPnL = this.config.winPnLMax * tpDistanceMultiplier + 0.5;
+    }
+
+    // Position size with personality influence
+    const baseSize = this.config.minPositionSize +
+      Math.random() * (this.config.maxPositionSize - this.config.minPositionSize);
+    const personalityMultiplier = 0.8 + (this.personality.aggression * 0.4); // 0.8-1.2
+    const positionSize = baseSize * personalityMultiplier;
+
+    // Adjust based on daily progress
+    const adjustedSize = this.dailyController.adjustPositionSize(positionSize);
+
+    // Leverage: use config if set, otherwise random
+    const leverage = this.config.leverage ?? [3, 5, 10][Math.floor(Math.random() * 3)];
+
+    // Side: respect config allowedSides
+    let side: 'LONG' | 'SHORT';
+    if (this.config.allowedSides === 'LONG') {
+      side = 'LONG';
+    } else if (this.config.allowedSides === 'SHORT') {
+      side = 'SHORT';
+    } else {
+      side = Math.random() > 0.5 ? 'LONG' : 'SHORT';
+    }
+
+    const amount = adjustedSize / price;
+
+    // Calculate TP/SL price levels
+    const tpPricePercent = targetPnL / (leverage * 100);
+    const slPricePercent = Math.abs(stopLossPnL) / (leverage * 100);
+
+    let takeProfit: number, stopLoss: number;
+
+    if (side === 'LONG') {
+      takeProfit = price * (1 + tpPricePercent);
+      stopLoss = price * (1 - slPricePercent);
+    } else {
+      takeProfit = price * (1 - tpPricePercent);
+      stopLoss = price * (1 + slPricePercent);
+    }
+
+    const newPosition: Position = {
+      id: `pos-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      pair: this.config.tradingPair,
+      side,
+      leverage,
+      entryPrice: price,
+      currentPrice: price,
+      pnl: 0,
+      pnlPercent: 0,
+      positionSize: adjustedSize,
+      amount,
+      stopLoss,
+      takeProfit,
+      openedAt: Date.now(),
+      duration: '0s',
+      shouldWin,
+      targetPnL,
+      stopLossPnL,
+    };
+
+    this.positions.push(newPosition);
+
+    // Update last open time for cooldown
+    this.lastOpenTime = now;
+
+    // Save state after opening position
+    this.save();
+  }
+
+  // ============================================================================
+  // Public API
+  // ============================================================================
+
+  getStats(): BotStats {
+    const wins = this.trades.filter(t => t.pnl > 0);
+    const losses = this.trades.filter(t => t.pnl <= 0);
+
+    const totalPnL = this.trades.reduce((sum, t) => sum + t.pnl, 0);
+    const winRate = this.trades.length > 0
+      ? (wins.length / this.trades.length) * 100
+      : 0;
+
+    const avgWin = wins.length > 0
+      ? wins.reduce((sum, t) => sum + t.pnl, 0) / wins.length
+      : 0;
+
+    const avgLoss = losses.length > 0
+      ? losses.reduce((sum, t) => sum + t.pnl, 0) / losses.length
+      : 0;
+
+    return {
+      id: this.id,
+      name: this.config.name,
+      totalPnL,
+      winRate,
+      tradesCount: this.trades.length,
+      winsCount: wins.length,
+      lossesCount: losses.length,
+      avgWin,
+      avgLoss,
+      // Deep clone positions to ensure React detects changes
+      positions: this.positions.map(p => ({ ...p })),
+      trades: [...this.trades].slice(0, 50), // Last 50 trades
+    };
+  }
+
+  getPositions(): Position[] {
+    return [...this.positions];
+  }
+
+  getTrades(): Trade[] {
+    return [...this.trades];
+  }
+
+  getConfig(): BotConfig {
+    return { ...this.config };
+  }
+
+  updateConfig(newConfig: Partial<BotConfig>): void {
+    this.config = { ...this.config, ...newConfig };
+
+    // Update DailyTargetController if target changed
+    if (newConfig.dailyTargetPercent || newConfig.investedCapital) {
+      this.dailyController.updateTarget(
+        newConfig.dailyTargetPercent || this.config.dailyTargetPercent,
+        newConfig.investedCapital || this.config.investedCapital
+      );
+    }
+
+    // Save updated config
+    this.save();
+  }
+
+  reset(): void {
+    this.positions = [];
+    this.trades = [];
+    this.closedPositionIds.clear();
+    this.dailyController.reset();
+  }
+
+  // ============================================================================
+  // Persistence - Save/Load Runtime State
+  // ============================================================================
+
+  /**
+   * Save runtime state to localStorage
+   * Saves positions, trades, and closed position IDs
+   */
+  save(): void {
+    if (typeof window === 'undefined') return;
+
+    try {
+      // Save positions
+      localStorage.setItem(`bot_positions_${this.id}`, JSON.stringify(this.positions));
+
+      // Save trades
+      localStorage.setItem(`bot_trades_${this.id}`, JSON.stringify(this.trades));
+
+      // Save closed position IDs
+      localStorage.setItem(`bot_closed_${this.id}`, JSON.stringify(Array.from(this.closedPositionIds)));
+
+      // Save personality (so bot behaves consistently)
+      localStorage.setItem(`bot_personality_${this.id}`, JSON.stringify(this.personality));
+
+      // Save daily controller
+      this.dailyController.save(this.id);
+    } catch (error) {
+      console.error(`[TradingBot ${this.id}] Error saving state:`, error);
+    }
+  }
+
+  /**
+   * Load runtime state from localStorage
+   * Restores positions, trades, and closed position IDs
+   */
+  load(): void {
+    if (typeof window === 'undefined') return;
+
+    try {
+      // Load positions
+      const positionsData = localStorage.getItem(`bot_positions_${this.id}`);
+      if (positionsData) {
+        this.positions = JSON.parse(positionsData);
+      }
+
+      // Load trades
+      const tradesData = localStorage.getItem(`bot_trades_${this.id}`);
+      if (tradesData) {
+        this.trades = JSON.parse(tradesData);
+      }
+
+      // Load closed position IDs
+      const closedData = localStorage.getItem(`bot_closed_${this.id}`);
+      if (closedData) {
+        this.closedPositionIds = new Set(JSON.parse(closedData));
+      }
+
+      // Load personality
+      const personalityData = localStorage.getItem(`bot_personality_${this.id}`);
+      if (personalityData) {
+        this.personality = JSON.parse(personalityData);
+      }
+
+      // Load daily controller
+      this.dailyController.load(this.id);
+
+      console.log(
+        `[TradingBot ${this.id}] State loaded: ` +
+        `${this.positions.length} positions, ${this.trades.length} trades`
+      );
+    } catch (error) {
+      console.error(`[TradingBot ${this.id}] Error loading state:`, error);
+    }
+  }
+}
