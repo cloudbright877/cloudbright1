@@ -20,6 +20,7 @@ import {
   BarChart3,
   MessageCircle,
   Gauge,
+  ShieldCheck,
 } from 'lucide-react';
 
 interface NavItemProps {
@@ -202,6 +203,14 @@ export default function Sidebar() {
             icon={<Settings className="w-6 h-6" />}
             label="Settings"
             active={pathname?.startsWith('/dashboard-v2/settings')}
+            isCollapsed={isCollapsed}
+          />
+
+          <NavItem
+            href="/dashboard-v2/admin/bots"
+            icon={<ShieldCheck className="w-6 h-6" />}
+            label="Bot Admin"
+            active={pathname?.startsWith('/dashboard-v2/admin')}
             isCollapsed={isCollapsed}
           />
         </nav>
