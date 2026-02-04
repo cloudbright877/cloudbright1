@@ -1,9 +1,27 @@
 /**
  * User Copy - Lightweight record referencing a Master Bot
  *
- * User copies do NOT trade independently. They are records that reference
- * a master bot and store the user's investment amount. Stats are calculated
- * proportionally from the master bot.
+ * ⚠️ CRITICAL ARCHITECTURE CONCEPT:
+ *
+ * User copies are NOT TradingBot instances! They are lightweight records
+ * that reference a Master Bot and store the user's investment amount.
+ *
+ * Architecture:
+ * ```
+ * Master Bot (1 TradingBot instance)
+ *   ├── User Copy 1 (lightweight record: { masterBotId, investedAmount })
+ *   ├── User Copy 2 (lightweight record)
+ *   └── User Copy 3 (lightweight record)
+ * ```
+ *
+ * How it works:
+ * - Master Bot trades and generates positions/trades
+ * - User copies DON'T trade - they just reference the master
+ * - Stats are calculated on-the-fly from master bot (see lib/userCopyStats.ts)
+ * - Positions are scaled proportionally to user's invested amount
+ *
+ * ❌ WRONG: Creating TradingBot instance for each copy (defeats the purpose)
+ * ✅ RIGHT: Creating lightweight record that references master bot ID
  */
 
 export interface UserCopy {

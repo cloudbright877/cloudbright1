@@ -23,9 +23,23 @@ export class BotManager {
    * @param config Bot configuration
    * @param customId Optional custom ID (for Master Bots)
    * @returns Bot ID
+   *
+   * ⚠️ IMPORTANT: Do NOT use this to create user copies!
+   * User copies are NOT TradingBot instances - they are lightweight records.
+   * Use createUserCopy() from lib/userCopies.ts instead.
    */
   createBot(config: BotConfig, customId?: string): string {
     const id = customId || `bot_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+    // PROTECTION: Prevent creating TradingBot instances for user copies
+    if (id.startsWith('copy_')) {
+      throw new Error(
+        `[BotManager] Cannot create TradingBot for copy ID '${id}'!\n` +
+        `User copies are lightweight records, not TradingBot instances.\n` +
+        `Use createUserCopy() from lib/userCopies.ts instead.`
+      );
+    }
+
     const bot = new TradingBot(id, config);
     this.bots.set(id, bot);
     this.save();

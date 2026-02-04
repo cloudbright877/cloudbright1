@@ -523,96 +523,82 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
 
   // Update stats in real-time
   useEffect(() => {
-    // Wait for initial data to load
-    let mounted = true;
-    let checkInterval: NodeJS.Timeout;
+    if (!masterBotData) return; // Wait for initial data
 
-    // Wait until masterBotData is available
-    const waitForData = setInterval(() => {
-      if (masterBotData && mounted) {
-        clearInterval(waitForData);
+    const updateInterval = setInterval(async () => {
+      try {
+        const demoBot = getDemoBotBySlug(slug);
+        if (!demoBot) {
+          console.warn('[DemoBot] Real-time: Bot not found');
+          return;
+        }
 
-        // Now start the update interval
-        checkInterval = setInterval(async () => {
-          try {
-            const demoBot = getDemoBotBySlug(slug);
-            if (!demoBot) {
-              console.warn('[DemoBot] Real-time: Bot not found');
-              return;
-            }
+        // Get fresh aggregated stats
+        const aggStats = await botsApi.getMasterBotStats(demoBot.id);
+        console.log('[DemoBot] Real-time update:', {
+          totalCopiers: aggStats.totalCopiers,
+          totalInvested: aggStats.totalInvested,
+          totalPnL: aggStats.masterBotStats.totalPnL,
+          tradesCount: aggStats.masterBotStats.tradesCount,
+          positionsCount: aggStats.masterBotStats.positions.length,
+        });
 
-            // Get fresh aggregated stats
-            const aggStats = await botsApi.getMasterBotStats(demoBot.id);
-            console.log('[DemoBot] Real-time update:', {
-              totalCopiers: aggStats.totalCopiers,
-              totalInvested: aggStats.totalInvested,
-              totalPnL: aggStats.masterBotStats.totalPnL,
-              tradesCount: aggStats.masterBotStats.tradesCount,
-              positionsCount: aggStats.masterBotStats.positions.length,
-            });
+        // Update masterBotData with fresh data
+        setMasterBotData(prev => {
+          if (!prev) return prev;
 
-            // Update masterBotData with fresh data
-            setMasterBotData(prev => {
-              if (!prev) return prev;
+          // Calculate real-time stats
+          const trades = aggStats.masterBotStats.trades || [];
+          const totalWins = aggStats.masterBotStats.avgWin * aggStats.masterBotStats.winsCount;
+          const totalLosses = Math.abs(aggStats.masterBotStats.avgLoss) * aggStats.masterBotStats.lossesCount;
+          const profitFactor = totalLosses > 0 ? totalWins / totalLosses : 0;
+          const bestTrade = trades.length > 0 ? Math.max(...trades.map(t => t.pnl)) : 0;
+          const totalVolume = trades.reduce((sum, t) => sum + (t.positionSize || 0), 0);
 
-              // Calculate real-time stats
-              const trades = aggStats.masterBotStats.trades || [];
-              const totalWins = aggStats.masterBotStats.avgWin * aggStats.masterBotStats.winsCount;
-              const totalLosses = Math.abs(aggStats.masterBotStats.avgLoss) * aggStats.masterBotStats.lossesCount;
-              const profitFactor = totalLosses > 0 ? totalWins / totalLosses : 0;
-              const bestTrade = trades.length > 0 ? Math.max(...trades.map(t => t.pnl)) : 0;
-              const totalVolume = trades.reduce((sum, t) => sum + (t.positionSize || 0), 0);
+          // Convert Position[] to OpenPosition[] (convert openedAt from number to string)
+          const openPositions: OpenPosition[] = (aggStats.masterBotStats.positions || []).map(pos => ({
+            ...pos,
+            openedAt: pos.duration, // Use duration as openedAt string (already formatted)
+          }));
 
-              // Convert Position[] to OpenPosition[] (convert openedAt from number to string)
-              const openPositions: OpenPosition[] = (aggStats.masterBotStats.positions || []).map(pos => ({
-                ...pos,
-                openedAt: pos.duration, // Use duration as openedAt string (already formatted)
-              }));
+          // Convert Trade[] to add botName field
+          const recentTrades = trades.map(t => ({
+            ...t,
+            botName: aggStats.masterBotStats.name,
+          }));
 
-              // Convert Trade[] to add botName field
-              const recentTrades = trades.map(t => ({
-                ...t,
-                botName: aggStats.masterBotStats.name,
-              }));
-
-              return {
-                ...prev,
-                totalCopiers: aggStats.totalCopiers,
-                totalInvestedByAll: aggStats.totalInvested,
-                aggregateProfit: aggStats.masterBotStats.totalPnL,
-                activePositions: aggStats.masterBotStats.positions.length,
-                openPositions,
-                recentTrades,
-                stats: {
-                  ...prev.stats,
-                  winRate: aggStats.masterBotStats.winRate,
-                  totalTrades: aggStats.masterBotStats.tradesCount,
-                  winningTrades: aggStats.masterBotStats.winsCount,
-                  losingTrades: aggStats.masterBotStats.lossesCount,
-                  averageWin: aggStats.masterBotStats.avgWin,
-                  averageLoss: aggStats.masterBotStats.avgLoss,
-                  profitFactor,
-                  bestTrade,
-                  totalVolume,
-                  avgTradeSize: aggStats.masterBotStats.positions.length > 0
-                    ? aggStats.masterBotStats.positions.reduce((sum, p) => sum + p.positionSize, 0) / aggStats.masterBotStats.positions.length
-                    : prev.stats.avgTradeSize,
-                },
-              };
-            });
-          } catch (err) {
-            console.error('[DemoBot] Failed to update stats:', err);
-          }
-        }, 1000); // Update every second
+          return {
+            ...prev,
+            totalCopiers: aggStats.totalCopiers,
+            totalInvestedByAll: aggStats.totalInvested,
+            aggregateProfit: aggStats.masterBotStats.totalPnL,
+            activePositions: aggStats.masterBotStats.positions.length,
+            openPositions,
+            recentTrades,
+            stats: {
+              ...prev.stats,
+              winRate: aggStats.masterBotStats.winRate,
+              totalTrades: aggStats.masterBotStats.tradesCount,
+              winningTrades: aggStats.masterBotStats.winsCount,
+              losingTrades: aggStats.masterBotStats.lossesCount,
+              averageWin: aggStats.masterBotStats.avgWin,
+              averageLoss: aggStats.masterBotStats.avgLoss,
+              profitFactor,
+              bestTrade,
+              totalVolume,
+              avgTradeSize: aggStats.masterBotStats.positions.length > 0
+                ? aggStats.masterBotStats.positions.reduce((sum, p) => sum + p.positionSize, 0) / aggStats.masterBotStats.positions.length
+                : prev.stats.avgTradeSize,
+            },
+          };
+        });
+      } catch (err) {
+        console.error('[DemoBot] Failed to update stats:', err);
       }
-    }, 100); // Check every 100ms
+    }, 2000); // Update every 2 seconds
 
-    return () => {
-      mounted = false;
-      clearInterval(waitForData);
-      if (checkInterval) clearInterval(checkInterval);
-    };
-  }, [slug]); // Only depend on slug, not masterBotData
+    return () => clearInterval(updateInterval);
+  }, [slug, masterBotData]); // Depend on both slug and masterBotData
 
   // Generate heatmap data
   const heatmapData = useMemo(() => {

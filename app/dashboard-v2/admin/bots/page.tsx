@@ -31,26 +31,51 @@ export default function AdminBotsPage() {
     });
   };
 
-  const handleSave = (botId: string) => {
-    setBots(prevBots =>
-      prevBots.map(bot => {
-        if (bot.id === botId && editedConfig) {
-          return {
-            ...bot,
-            config: {
-              ...editedConfig,
-              winRate: editedConfig.winRate / 100, // Convert back to decimal
-            }
-          };
-        }
-        return bot;
-      })
-    );
+  const handleSave = async (botId: string) => {
+    if (!editedConfig) return;
 
-    setEditingBot(null);
-    setEditedConfig(null);
-    setSavedMessage(`Bot ${botId} updated successfully!`);
-    setTimeout(() => setSavedMessage(null), 3000);
+    try {
+      // Convert config back to decimal format
+      const configToSave = {
+        ...editedConfig,
+        winRate: editedConfig.winRate / 100, // Convert percentage back to decimal
+      };
+
+      // Update the actual Master Bot via botsApi
+      const { botsApi } = await import('@/lib/api/botsApi');
+      const success = await botsApi.updateMasterBotConfig(botId, configToSave);
+
+      if (!success) {
+        console.error('[AdminBots] Failed to update bot config');
+        setSavedMessage(`Failed to update bot ${botId}`);
+        setTimeout(() => setSavedMessage(null), 3000);
+        return;
+      }
+
+      // Update local state to reflect changes
+      setBots(prevBots =>
+        prevBots.map(bot => {
+          if (bot.id === botId) {
+            return {
+              ...bot,
+              config: configToSave
+            };
+          }
+          return bot;
+        })
+      );
+
+      setEditingBot(null);
+      setEditedConfig(null);
+      setSavedMessage(`Bot ${botId} updated successfully!`);
+      setTimeout(() => setSavedMessage(null), 3000);
+
+      console.log(`[AdminBots] Bot ${botId} config updated:`, configToSave);
+    } catch (error) {
+      console.error('[AdminBots] Error saving bot config:', error);
+      setSavedMessage(`Error updating bot ${botId}`);
+      setTimeout(() => setSavedMessage(null), 3000);
+    }
   };
 
   const handleCancel = () => {

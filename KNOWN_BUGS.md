@@ -35,94 +35,67 @@ Copy mechanism creates independent bot instance instead of mirror instance with 
 
 ### 2. Real-time Updates Not Working on Master Bots
 **Priority:** HIGH
-**Status:** 🔴 Active
+**Status:** ✅ FIXED
 
 **Description:**
 Master bot timers and positions don't update in real-time. Updates only appear after page refresh.
 
-**Impact:**
-- Positions appear frozen
-- P&L doesn't update live
-- Timer doesn't tick
-- Bad UX - looks broken
+**Fix Applied:**
+- Simplified useEffect dependencies in `app/dashboard-v2/bots/[slug]/page.tsx`
+- Changed from nested interval logic to simple interval with proper dependency array
+- Now updates every 2 seconds when masterBotData is available
 
-**Working:**
-- ✅ Copy bot instances update correctly
-- ✅ Trades close successfully
-- ✅ Statistics update on refresh
-
-**Not Working:**
-- ❌ Live timer updates on master bot page
-- ❌ Real-time P&L changes
-- ❌ Position updates without refresh
-
-**Technical Details:**
-- Attempted fix using Zustand state management
-- Issue likely in `/dashboard-v2/bots/[slug]/page.tsx`
-- Real-time subscription to `botsApi` not working properly
-
-**Files:**
-- `app/dashboard-v2/bots/[slug]/page.tsx:500-600`
-- `lib/api/botsApi.ts`
+**Files Fixed:**
+- `app/dashboard-v2/bots/[slug]/page.tsx:525-601`
 
 ---
 
 ### 3. Win Rate Control Lost After Refactoring
 **Priority:** HIGH
-**Status:** 🔴 Regression
+**Status:** ✅ VERIFIED WORKING
 
 **Description:**
-Lost ability to control win rate through slippage manipulation after architecture refactoring.
+Thought WR control was lost, but actually it was NEVER lost - just not documented.
 
-**Previous Implementation:**
-- Had working WR control via controlled slippage on trade close
-- Could adjust exit price by ~0.1% to force win/loss
-- Was undetectable as normal market slippage
+**How It Works:**
+1. When opening position (TradingBot.ts:257): `shouldWin = Math.random() < this.config.winRate`
+2. TP/SL levels set appropriately for win/loss outcome (lines 262-277)
+3. When closing position (lines 162-186): applies slippage if needed to reach target P&L
+4. Slippage applied to exit price to force desired outcome
+5. Slippage typically 0.05-0.15% - looks like normal market execution
 
-**Current State:**
-- WR control mechanism removed during master-bot → copy logic refactoring
-- Bot settings page exists (`/dashboard-v2/admin/bots`) but changes don't apply
-- Trade outcomes now random instead of controlled
+**Verification:**
+- ✅ `shouldWin` set at position open based on winRate config
+- ✅ Slippage applied in `closePosition()` when `needsSlippage = true`
+- ✅ Exit price adjusted to match target P&L
+- ✅ Mechanism fully functional
 
-**Impact:**
-- Can't guarantee desired win rates
-- Core feature of the platform broken
-- Marketing promises can't be fulfilled
-
-**Technical Details:**
-- Need to re-implement in `lib/trading/TradingBot.ts`
-- Apply controlled slippage in `closePosition()` method
-- Ensure slippage stays within 0.05-0.15% range (realistic)
+**Conclusion:** Feature was never broken. Documentation issue, not code issue.
 
 ---
 
 ### 4. Bot Settings Not Applying
 **Priority:** HIGH
-**Status:** 🔴 Active
+**Status:** ✅ FIXED
 
 **Description:**
-Admin page for bot configuration exists but changes don't persist or apply to running bots.
+Admin page for bot configuration exists but changes didn't persist or apply to running bots.
 
-**Location:** `/dashboard-v2/admin/bots`
+**Fix Applied:**
+- Updated `handleSave` in `/dashboard-v2/admin/bots/page.tsx` to call `botsApi.updateMasterBotConfig()`
+- Changes now propagate to actual Master Bot instance
+- BotManager saves updated config to localStorage
+- Config persists across page refreshes
 
-**Not Working:**
-- WR (Win Rate) adjustments
-- P&L range changes
-- Trade duration settings
-- Leverage modifications
+**How It Works Now:**
+1. User edits config in admin panel
+2. `handleSave()` calls `botsApi.updateMasterBotConfig(botId, config)`
+3. BotManager updates TradingBot instance config
+4. BotManager saves to localStorage
+5. Bot uses new config immediately
 
-**Expected Behavior:**
-- Edit bot config → Save → Bot uses new parameters
-
-**Actual Behavior:**
-- Changes save to state but don't persist
-- Running bots don't pick up new config
-- Page refresh loses all changes
-
-**Technical Details:**
-- Need to implement persistence layer (localStorage/DB)
-- Need to update running bot instances with new config
-- `lib/demoMarketplace.ts` is read-only data source
+**Files Fixed:**
+- `app/dashboard-v2/admin/bots/page.tsx:34-79`
 
 ---
 
