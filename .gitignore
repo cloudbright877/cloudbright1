@@ -96,3 +96,17 @@ data-backup/
 .claude/
 .cursor/
 .windsurf/
+
+# E2E Testing
+/tests/
+/e2e/
+playwright.config.ts
+playwright-report/
+test-results/
+
+# CI/CD
+/.github/
+
+# Documentation
+CLAUDE.md
+TESTING.md
