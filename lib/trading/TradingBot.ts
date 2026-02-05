@@ -364,6 +364,11 @@ export class TradingBot {
       currentDailyPnL: this.dailyController.getCurrentDailyPnLPercent(),
       tradesRemainingToday: this.dailyController.getTradesRemaining(this.config.tradesPerDay),
       tightModePercent,
+      // Pass deprecated fields for backwards compatibility
+      winPnLMin: this.config.winPnLMin,
+      winPnLMax: this.config.winPnLMax,
+      lossPnLMin: this.config.lossPnLMin,
+      lossPnLMax: this.config.lossPnLMax,
     });
 
     // Determine if this trade should win

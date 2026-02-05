@@ -30,6 +30,12 @@ export interface CalibrationParams {
   currentDailyPnL?: number;     // Current P&L% today (for correction)
   tradesRemainingToday?: number; // Trades left today (for correction)
   tightModePercent?: number;    // % of positions in tight mode (0-100), default: 80
+
+  // Deprecated: Manual P&L ranges (fallback for old configs)
+  winPnLMin?: number;           // e.g. 0.3 (deprecated but used as fallback)
+  winPnLMax?: number;           // e.g. 1.2 (deprecated but used as fallback)
+  lossPnLMin?: number;          // e.g. 0.15 (deprecated but used as fallback)
+  lossPnLMax?: number;          // e.g. 0.6 (deprecated but used as fallback)
 }
 
 export class DynamicPnLCalculator {
@@ -53,22 +59,42 @@ export class DynamicPnLCalculator {
       currentDailyPnL = 0,
       tradesRemainingToday = tradesPerDay,
       tightModePercent = 80,
+      winPnLMin,
+      winPnLMax,
+      lossPnLMin,
+      lossPnLMax,
     } = params;
 
     // Step 1: Calculate average leverage
     const avgLeverage = (leverageMin + leverageMax) / 2;
 
-    // Step 2: Base win P&L per trade (without leverage, this would be daily target)
-    // With leverage: divide by avgLeverage to account for amplification
-    // Formula: baseWinPnL = (dailyTarget / #trades / winRate) / avgLeverage
-    const baseWinPnLPercent = (dailyTargetPercent / tradesPerDay / winRate) / avgLeverage;
+    // Step 2: Check for deprecated manual P&L ranges (fallback for old configs)
+    // If winPnLMin/Max exist, use them instead of calculated values
+    let baseWinPnLPercent: number;
+    let baseLossPnLPercent: number;
 
-    // Step 3: Calculate base loss P&L (using risk-reward ratio)
-    // winRate × avgWin = (1 - winRate) × avgLoss
-    // avgLoss = avgWin × (winRate / (1 - winRate)) × asymmetryFactor
-    // asymmetryFactor = 0.7 means wins are slightly bigger than losses on average
-    const asymmetryFactor = 0.7;
-    const baseLossPnLPercent = baseWinPnLPercent * (winRate / (1 - winRate)) * asymmetryFactor;
+    if (winPnLMin !== undefined && winPnLMax !== undefined) {
+      // Use deprecated values (backwards compatibility)
+      baseWinPnLPercent = (winPnLMin + winPnLMax) / 2;
+      baseLossPnLPercent = lossPnLMin !== undefined && lossPnLMax !== undefined
+        ? (lossPnLMin + lossPnLMax) / 2
+        : baseWinPnLPercent * (winRate / (1 - winRate)) * 0.7;
+    } else {
+      // Calculate dynamically
+      // NOTE: We do NOT divide by avgLeverage here because:
+      // 1. targetPnL is already the FINAL P&L% that includes leverage effect
+      // 2. TradingBot calculates price movement as: priceMove = gap / leverage
+      // 3. Dividing here would make wins too small for Market Friction (0.3%)
+      // Formula: baseWinPnL = (dailyTarget / #trades / winRate)
+      baseWinPnLPercent = (dailyTargetPercent / tradesPerDay / winRate);
+
+      // Calculate base loss P&L (using risk-reward ratio)
+      // winRate × avgWin = (1 - winRate) × avgLoss
+      // avgLoss = avgWin × (winRate / (1 - winRate)) × asymmetryFactor
+      // asymmetryFactor = 0.7 means wins are slightly bigger than losses on average
+      const asymmetryFactor = 0.7;
+      baseLossPnLPercent = baseWinPnLPercent * (winRate / (1 - winRate)) * asymmetryFactor;
+    }
 
     // Step 4: Determine variance mode (using configured tight mode percentage)
     const isTightMode = Math.random() < (tightModePercent / 100);

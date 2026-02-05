@@ -16,10 +16,10 @@ import { TrendingUp, TrendingDown, DollarSign, Target } from 'lucide-react';
 interface RiskMetricsPreviewProps {
   config: {
     winRate: number;              // Base win rate (0-100)
-    winPnLMin: number;            // Min win %
-    winPnLMax: number;            // Max win %
-    lossPnLMin: number;           // Min loss %
-    lossPnLMax: number;           // Max loss %
+    winPnLMin?: number;           // Min win % (deprecated, optional for backwards compat)
+    winPnLMax?: number;           // Max win % (deprecated, optional for backwards compat)
+    lossPnLMin?: number;          // Min loss % (deprecated, optional for backwards compat)
+    lossPnLMax?: number;          // Max loss % (deprecated, optional for backwards compat)
     dailyTargetPercent: number;   // Daily target %
     tradesPerDay: number;         // Trades per day
     leverageMin?: number;         // Min leverage
@@ -282,12 +282,26 @@ function calculateMetrics(config: RiskMetricsPreviewProps['config']): Calculated
   }
 
   // STEP 1: Calculate base P&L using DynamicPnLCalculator formula
-  // Formula: baseWinPnL = (dailyTarget / tradesPerDay / winRate) / avgLeverage
-  const baseWinPnLPercent = (config.dailyTargetPercent / config.tradesPerDay / (config.winRate / 100)) / avgLeverage;
+  // Check for deprecated manual P&L ranges (fallback for old configs)
+  let baseWinPnLPercent: number;
+  let baseLossPnLPercent: number;
 
-  // Calculate base loss P&L (using risk-reward ratio)
-  const asymmetryFactor = 0.7;
-  const baseLossPnLPercent = baseWinPnLPercent * ((config.winRate / 100) / (1 - config.winRate / 100)) * asymmetryFactor;
+  if (config.winPnLMin !== undefined && config.winPnLMax !== undefined) {
+    // Use deprecated values (backwards compatibility with old Bybit Market Maker config)
+    baseWinPnLPercent = (config.winPnLMin + config.winPnLMax) / 2;
+    baseLossPnLPercent = config.lossPnLMin !== undefined && config.lossPnLMax !== undefined
+      ? (config.lossPnLMin + config.lossPnLMax) / 2
+      : baseWinPnLPercent * ((config.winRate / 100) / (1 - config.winRate / 100)) * 0.7;
+  } else {
+    // Calculate dynamically
+    // Formula: baseWinPnL = (dailyTarget / tradesPerDay / winRate)
+    // NOTE: NOT dividing by avgLeverage anymore (see DynamicPnLCalculator.ts for explanation)
+    baseWinPnLPercent = (config.dailyTargetPercent / config.tradesPerDay / (config.winRate / 100));
+
+    // Calculate base loss P&L (using risk-reward ratio)
+    const asymmetryFactor = 0.7;
+    baseLossPnLPercent = baseWinPnLPercent * ((config.winRate / 100) / (1 - config.winRate / 100)) * asymmetryFactor;
+  }
 
   // STEP 2: Calculate average P&L using variance ranges
   // This matches DynamicPnLCalculator approach
