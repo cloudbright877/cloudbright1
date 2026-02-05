@@ -155,13 +155,13 @@ export function BotCarousel({ title, bots }: BotCarouselProps) {
                   <div className="flex gap-3">
                     <Link
                       href={`/dashboard-v2/bots/${bot.slug}`}
-                      className="flex-1 px-4 py-2.5 border border-dark-700 rounded-lg text-dark-300 hover:text-white hover:border-dark-600 transition-colors text-center text-sm font-semibold"
+                      className="flex-1 px-4 py-2.5 border border-dark-700 rounded-lg text-dark-300 hover:text-white hover:border-primary-500/50 hover:bg-primary-500/10 transition-all text-center text-sm font-semibold"
                     >
                       Details
                     </Link>
                     <Link
                       href={`/dashboard-v2/bots/${bot.slug}`}
-                      className="px-4 py-2.5 bg-dark-900/50 border border-dark-700 rounded-lg text-white font-semibold hover:bg-dark-800/70 transition-colors text-center text-sm"
+                      className="px-4 py-2.5 bg-dark-900/50 border border-dark-700 rounded-lg text-white font-semibold hover:bg-gradient-to-r hover:from-primary-500/20 hover:to-accent-500/20 hover:border-primary-500/50 transition-all text-center text-sm"
                     >
                       Copy
                     </Link>

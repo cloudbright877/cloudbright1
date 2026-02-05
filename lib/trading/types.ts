@@ -92,6 +92,22 @@ export interface BotConfig {
   // Risk Management
   maxSlippage?: number;                 // Max allowed slippage %. Default: 0.5
   maxTradesHistory?: number;            // Max trades to keep. Default: 100
+
+  // Advanced Risk Management
+  staggeredClosing?: {                  // Prevent simultaneous position closures
+    enabled: boolean;                   // Enable/disable staggered closing
+    maxClosuresInWindow: number;        // Max closures allowed in window (1-5)
+    windowDurationSec: number;          // Window duration in seconds (15-60)
+    minDelayBetweenSec: number;         // Min delay between closures (1-30)
+    maxDelayBetweenSec: number;         // Max delay between closures (5-60)
+  };
+  pnlVariance?: {                       // P&L variance distribution control
+    tightModePercent: number;           // % of positions in tight mode (0-100)
+  };
+  marketFriction?: {                    // Market friction simulation
+    enabled: boolean;                   // Enable/disable market friction
+    forceVolatility?: 'auto' | 'low' | 'medium' | 'high'; // Force specific volatility
+  };
 }
 
 export interface BotStats {

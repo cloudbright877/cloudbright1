@@ -1134,8 +1134,6 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                       VERIFIED
                     </span>
                   )}
-                  <span className="px-2 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-amber-500 to-orange-600 text-white">PRO</span>
-                  <span className="px-2 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-purple-500 to-purple-600 text-white">ELITE</span>
                   <div className="flex items-center gap-2 ml-2">
                     <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                     <span className="text-xs text-green-400 font-semibold font-mono">LIVE • 99.8% UPTIME</span>
@@ -1168,27 +1166,32 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
             </div>
             <button
               onClick={() => setModalOpen(true)}
-              className="px-8 py-4 rounded-xl text-white font-semibold text-lg bg-gradient-to-r from-accent-500 to-primary-600 hover:from-accent-600 hover:to-primary-700 shadow-lg hover:shadow-accent-500/50 transition-all hover:-translate-y-0.5 flex items-center gap-2"
+              className="px-6 py-3 rounded-lg text-white font-semibold text-sm bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 transition-all flex items-center gap-2 shadow-lg shadow-primary-500/30"
             >
-              <Rocket className="w-5 h-5" />
+              <Rocket className="w-4 h-4" />
               Copy This Bot
             </button>
           </div>
         </motion.div>
 
         {/* Tabs */}
-        <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl mb-3 overflow-x-auto">
-          <div className="flex gap-1 min-w-max">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="mb-6"
+        >
+          <div className="flex items-center gap-0.5 rounded-lg bg-dark-900/50 border border-dark-700 p-1 inline-flex overflow-x-auto">
             {tabs.map(tab => {
               const IconComponent = tab.icon;
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`px-5 py-3 border-b-3 transition-all font-semibold text-sm flex items-center gap-2 ${
+                  className={`px-4 py-2.5 font-semibold rounded-lg text-sm transition-all flex items-center gap-2 whitespace-nowrap ${
                     activeTab === tab.id
-                      ? 'text-accent-400 border-accent-500 bg-accent-500/10'
-                      : 'text-slate-400 border-transparent hover:text-accent-400 hover:bg-accent-500/5'
+                      ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white shadow-lg shadow-primary-500/30'
+                      : 'text-dark-300 hover:text-white'
                   }`}
                 >
                   <IconComponent className="w-4 h-4" />
@@ -1197,7 +1200,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
               );
             })}
           </div>
-        </div>
+        </motion.div>
 
         {/* Tab: MAIN - Real Performance Data */}
         <AnimatePresence mode="wait">
@@ -1614,24 +1617,96 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                                 <div>
                                   <div className="text-[10px] text-dark-400 mb-1">Entry Price</div>
                                   <div className="px-1.5 py-0.5 bg-dark-800/50 border border-dark-700 rounded inline-flex items-center">
-                                    <div className="font-mono text-[10px] text-white font-semibold">${trade.entryPrice.toFixed(2)}</div>
+                                    <div className="font-mono text-sm text-white font-semibold">${trade.entryPrice.toFixed(2)}</div>
                                   </div>
                                 </div>
                                 <div>
                                   <div className="text-[10px] text-dark-400 mb-1">Exit Price</div>
                                   <div className="px-1.5 py-0.5 bg-dark-800/50 border border-dark-700 rounded inline-flex items-center">
-                                    <div className="font-mono text-[10px] text-white font-semibold">${trade.exitPrice.toFixed(2)}</div>
+                                    <div className="font-mono text-sm text-white font-semibold">${trade.exitPrice.toFixed(2)}</div>
                                   </div>
                                 </div>
                                 <div>
                                   <div className="text-[10px] text-dark-400 mb-1">Position Size</div>
-                                  <div className="text-sm text-white font-semibold">${trade.positionSize.toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
+                                  <div className="font-mono text-sm text-white font-semibold">${trade.positionSize.toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
                                 </div>
                                 <div>
                                   <div className="text-[10px] text-dark-400 mb-1">Duration</div>
                                   <div className="text-sm text-white font-semibold">{trade.duration}</div>
                                 </div>
                               </div>
+
+                              {/* Fee Breakdown (if Market Friction enabled) */}
+                              {trade.marketFriction && trade.marketFriction.total !== 0 && (
+                                <div className="mt-4 pt-3 border-t border-dark-700/30">
+                                  <div className="text-[10px] text-orange-400 font-semibold uppercase mb-2 flex items-center gap-1">
+                                    <span>💰</span> Fee Breakdown (Market Friction)
+                                  </div>
+                                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                    {/* Gross P&L */}
+                                    <div className="p-2 bg-dark-800/30 rounded border border-dark-700/50">
+                                      <div className="text-[10px] text-dark-400 mb-1">Gross P&L</div>
+                                      <div className="text-sm font-semibold text-dark-200">
+                                        ${(trade.pnl - (trade.positionSize * trade.marketFriction.total / 100)).toFixed(2)}
+                                      </div>
+                                    </div>
+
+                                    {/* Trading Fees */}
+                                    <div className="p-2 bg-orange-500/5 rounded border border-orange-500/20">
+                                      <div className="text-[10px] text-orange-400 mb-1">Trading Fees</div>
+                                      <div className="text-sm font-semibold text-orange-400">
+                                        -${Math.abs(trade.positionSize * trade.marketFriction.total / 100).toFixed(2)}
+                                      </div>
+                                      <div className="text-[10px] text-orange-400/70 mt-0.5">
+                                        ({trade.marketFriction.total.toFixed(3)}%)
+                                      </div>
+                                    </div>
+
+                                    {/* Net P&L */}
+                                    <div className={`p-2 rounded border ${
+                                      trade.pnl >= 0
+                                        ? 'bg-green-500/5 border-green-500/20'
+                                        : 'bg-red-500/5 border-red-500/20'
+                                    }`}>
+                                      <div className="text-[10px] text-dark-400 mb-1">Net P&L</div>
+                                      <div className={`text-sm font-bold ${
+                                        trade.pnl >= 0 ? 'text-green-400' : 'text-red-400'
+                                      }`}>
+                                        {trade.pnl >= 0 ? '+' : ''}${trade.pnl.toFixed(2)}
+                                      </div>
+                                      <div className={`text-[10px] mt-0.5 ${
+                                        trade.pnl >= 0 ? 'text-green-400/70' : 'text-red-400/70'
+                                      }`}>
+                                        ({trade.pnl >= 0 ? '+' : ''}{trade.pnlPercent.toFixed(2)}%)
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  {/* Detailed Fee Components */}
+                                  <div className="mt-2 p-2 bg-dark-800/20 rounded border border-dark-700/30">
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-[10px]">
+                                      <div className="flex justify-between">
+                                        <span className="text-dark-400">Slippage:</span>
+                                        <span className="text-red-400">{trade.marketFriction.slippage.toFixed(3)}%</span>
+                                      </div>
+                                      <div className="flex justify-between">
+                                        <span className="text-dark-400">Spread:</span>
+                                        <span className="text-red-400">{trade.marketFriction.spread.toFixed(3)}%</span>
+                                      </div>
+                                      <div className="flex justify-between">
+                                        <span className="text-dark-400">Funding:</span>
+                                        <span className={trade.marketFriction.fundingRate >= 0 ? 'text-green-400' : 'text-red-400'}>
+                                          {trade.marketFriction.fundingRate >= 0 ? '+' : ''}{trade.marketFriction.fundingRate.toFixed(3)}%
+                                        </span>
+                                      </div>
+                                      <div className="flex justify-between">
+                                        <span className="text-dark-400">Commission:</span>
+                                        <span className="text-red-400">{trade.marketFriction.commission.toFixed(3)}%</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           </motion.div>
                         </div>

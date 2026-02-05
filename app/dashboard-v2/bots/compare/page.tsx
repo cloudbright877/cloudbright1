@@ -281,7 +281,7 @@ export default function BotComparePage() {
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  {bot.icon.startsWith('/') ? (
+                  {typeof bot.icon === 'string' && bot.icon.startsWith('/') ? (
                     <img src={bot.icon} alt={bot.name} className="w-12 h-12 object-contain" />
                   ) : (
                     <div className="text-2xl">{bot.icon}</div>
@@ -390,7 +390,7 @@ export default function BotComparePage() {
                   {selectedBots.map((bot) => (
                     <th key={bot.id} className="text-center py-3 px-4 text-sm font-semibold text-white">
                       <div className="flex items-center justify-center gap-2">
-                        {bot.icon.startsWith('/') ? (
+                        {typeof bot.icon === 'string' && bot.icon.startsWith('/') ? (
                           <img src={bot.icon} alt={bot.name} className="w-6 h-6 object-contain" />
                         ) : (
                           <div className="text-lg">{bot.icon}</div>
@@ -516,7 +516,7 @@ export default function BotComparePage() {
                   {selectedBots.map((bot) => (
                     <th key={bot.id} className="text-center py-3 px-4 text-sm font-semibold text-white">
                       <div className="flex items-center justify-center gap-2">
-                        {bot.icon.startsWith('/') ? (
+                        {typeof bot.icon === 'string' && bot.icon.startsWith('/') ? (
                           <img src={bot.icon} alt={bot.name} className="w-6 h-6 object-contain" />
                         ) : (
                           <div className="text-lg">{bot.icon}</div>
@@ -618,7 +618,7 @@ export default function BotComparePage() {
               >
                 <div className="text-center mb-4">
                   <div className="flex justify-center mb-2">
-                    {bot.icon.startsWith('/') ? (
+                    {typeof bot.icon === 'string' && bot.icon.startsWith('/') ? (
                       <img src={bot.icon} alt={bot.name} className="w-12 h-12 object-contain" />
                     ) : (
                       <div className="text-2xl">{bot.icon}</div>
@@ -689,7 +689,7 @@ export default function BotComparePage() {
                   className="p-4 bg-dark-900/50 border border-dark-700 rounded-xl hover:border-primary-500/50 hover:bg-dark-800/50 transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-2xl"
                 >
                   <div className="flex items-center gap-4">
-                    {bot.icon.startsWith('/') ? (
+                    {typeof bot.icon === 'string' && bot.icon.startsWith('/') ? (
                       <img src={bot.icon} alt={bot.name} className="w-12 h-12 object-contain" />
                     ) : (
                       <div className="text-2xl">{bot.icon}</div>

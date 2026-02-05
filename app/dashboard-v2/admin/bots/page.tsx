@@ -22,6 +22,7 @@ import {
   clearMasterBotConfig,
 } from '@/lib/masterBotsConfig';
 import RangeSlider from '@/components/dashboard-v2/RangeSlider';
+import RiskMetricsPreview from '@/components/dashboard-v2/RiskMetricsPreview';
 
 // Available trading pairs
 const AVAILABLE_PAIRS = ['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'BNB/USDT', 'MATIC/USDT'];
@@ -372,6 +373,9 @@ export default function AdminBotsPage() {
                       </div>
                     </div>
 
+                    {/* Risk Metrics Preview - Live Calculation */}
+                    <RiskMetricsPreview config={config} />
+
                     {/* Compact Configuration Grid */}
                     <div className="grid grid-cols-2 gap-3">
                       {/* Row 1: Basic Settings */}
@@ -519,6 +523,242 @@ export default function AdminBotsPage() {
                               <span className="text-xs text-white">{pair}</span>
                             </label>
                           ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Risk Management Section */}
+                    <div className="pt-3 border-t border-dark-700/50">
+                      <h4 className="text-xs font-bold text-purple-400 uppercase mb-3 flex items-center gap-2">
+                        <Shield className="w-4 h-4" />
+                        Advanced Risk Management
+                      </h4>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        {/* Staggered Closing */}
+                        <div className="col-span-2 p-3 bg-dark-900/50 rounded-lg border border-purple-500/20">
+                          <div className="flex items-center justify-between mb-2">
+                            <div>
+                              <label className="text-xs font-semibold text-white">Staggered Closing</label>
+                              <p className="text-[10px] text-dark-500 mt-0.5">Prevents positions from closing simultaneously</p>
+                            </div>
+                            <label className="flex items-center gap-2 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={config.staggeredClosing?.enabled ?? false}
+                                onChange={(e) => updateField('staggeredClosing', {
+                                  ...config.staggeredClosing,
+                                  enabled: e.target.checked,
+                                  maxClosuresInWindow: config.staggeredClosing?.maxClosuresInWindow ?? 2,
+                                  windowDurationSec: config.staggeredClosing?.windowDurationSec ?? 30,
+                                  minDelayBetweenSec: config.staggeredClosing?.minDelayBetweenSec ?? 5,
+                                  maxDelayBetweenSec: config.staggeredClosing?.maxDelayBetweenSec ?? 15,
+                                })}
+                                className="w-4 h-4 rounded border-dark-600 bg-dark-800 text-purple-500"
+                              />
+                              <span className="text-xs text-dark-400">Enable</span>
+                            </label>
+                          </div>
+
+                          {/* Info box */}
+                          <div className="mb-2 p-2 bg-purple-500/5 border border-purple-500/10 rounded text-[10px] text-purple-300/80">
+                            💡 Creates smoother equity curve by spacing out position closures (cosmetic feature)
+                          </div>
+
+                          {(config.staggeredClosing?.enabled ?? false) && (
+                            <div className="grid grid-cols-2 gap-2 mt-2">
+                              <div>
+                                <label className="text-[10px] text-dark-500 uppercase mb-1 block">Max Closures</label>
+                                <input
+                                  type="number"
+                                  value={config.staggeredClosing?.maxClosuresInWindow ?? 2}
+                                  onChange={(e) => updateField('staggeredClosing', {
+                                    ...config.staggeredClosing,
+                                    enabled: config.staggeredClosing?.enabled ?? true,
+                                    maxClosuresInWindow: parseInt(e.target.value),
+                                    windowDurationSec: config.staggeredClosing?.windowDurationSec ?? 30,
+                                    minDelayBetweenSec: config.staggeredClosing?.minDelayBetweenSec ?? 5,
+                                    maxDelayBetweenSec: config.staggeredClosing?.maxDelayBetweenSec ?? 15,
+                                  })}
+                                  min="1"
+                                  max="5"
+                                  className="w-full px-2 py-1 text-xs bg-dark-800 border border-dark-600 rounded text-white"
+                                />
+                              </div>
+                              <div>
+                                <label className="text-[10px] text-dark-500 uppercase mb-1 block">Window (sec)</label>
+                                <input
+                                  type="number"
+                                  value={config.staggeredClosing?.windowDurationSec ?? 30}
+                                  onChange={(e) => updateField('staggeredClosing', {
+                                    ...config.staggeredClosing,
+                                    enabled: config.staggeredClosing?.enabled ?? true,
+                                    maxClosuresInWindow: config.staggeredClosing?.maxClosuresInWindow ?? 2,
+                                    windowDurationSec: parseInt(e.target.value),
+                                    minDelayBetweenSec: config.staggeredClosing?.minDelayBetweenSec ?? 5,
+                                    maxDelayBetweenSec: config.staggeredClosing?.maxDelayBetweenSec ?? 15,
+                                  })}
+                                  min="15"
+                                  max="60"
+                                  step="5"
+                                  className="w-full px-2 py-1 text-xs bg-dark-800 border border-dark-600 rounded text-white"
+                                />
+                              </div>
+                              <div>
+                                <label className="text-[10px] text-dark-500 uppercase mb-1 block">Min Delay (sec)</label>
+                                <input
+                                  type="number"
+                                  value={config.staggeredClosing?.minDelayBetweenSec ?? 5}
+                                  onChange={(e) => updateField('staggeredClosing', {
+                                    ...config.staggeredClosing,
+                                    enabled: config.staggeredClosing?.enabled ?? true,
+                                    maxClosuresInWindow: config.staggeredClosing?.maxClosuresInWindow ?? 2,
+                                    windowDurationSec: config.staggeredClosing?.windowDurationSec ?? 30,
+                                    minDelayBetweenSec: parseInt(e.target.value),
+                                    maxDelayBetweenSec: config.staggeredClosing?.maxDelayBetweenSec ?? 15,
+                                  })}
+                                  min="1"
+                                  max="30"
+                                  className="w-full px-2 py-1 text-xs bg-dark-800 border border-dark-600 rounded text-white"
+                                />
+                              </div>
+                              <div>
+                                <label className="text-[10px] text-dark-500 uppercase mb-1 block">Max Delay (sec)</label>
+                                <input
+                                  type="number"
+                                  value={config.staggeredClosing?.maxDelayBetweenSec ?? 15}
+                                  onChange={(e) => updateField('staggeredClosing', {
+                                    ...config.staggeredClosing,
+                                    enabled: config.staggeredClosing?.enabled ?? true,
+                                    maxClosuresInWindow: config.staggeredClosing?.maxClosuresInWindow ?? 2,
+                                    windowDurationSec: config.staggeredClosing?.windowDurationSec ?? 30,
+                                    minDelayBetweenSec: config.staggeredClosing?.minDelayBetweenSec ?? 5,
+                                    maxDelayBetweenSec: parseInt(e.target.value),
+                                  })}
+                                  min="5"
+                                  max="60"
+                                  className="w-full px-2 py-1 text-xs bg-dark-800 border border-dark-600 rounded text-white"
+                                />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* P&L Variance Distribution */}
+                        <div className="p-3 bg-dark-900/50 rounded-lg border border-blue-500/20">
+                          <label className="text-xs font-semibold text-white mb-2 block">P&L Variance Distribution</label>
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="text-dark-400">Tight Mode %</span>
+                              <span className="text-blue-400 font-bold">{config.pnlVariance?.tightModePercent ?? 80}%</span>
+                            </div>
+                            <input
+                              type="range"
+                              min="0"
+                              max="100"
+                              step="5"
+                              value={config.pnlVariance?.tightModePercent ?? 80}
+                              onChange={(e) => updateField('pnlVariance', {
+                                tightModePercent: parseInt(e.target.value)
+                              })}
+                              className="w-full"
+                            />
+                            <div className="flex justify-between text-[10px] text-dark-500">
+                              <span>0% (All Wide)</span>
+                              <span>100% (All Tight)</span>
+                            </div>
+                            <p className="text-[10px] text-dark-500">
+                              Target: 80% Tight / 20% Wide for realistic variance
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Market Friction */}
+                        <div className="p-3 bg-dark-900/50 rounded-lg border border-orange-500/20">
+                          <div className="flex items-center justify-between mb-2">
+                            <div>
+                              <label className="text-xs font-semibold text-white">Market Friction</label>
+                              <p className="text-[10px] text-dark-500 mt-0.5">Simulates real trading costs (slippage, spread, fees)</p>
+                            </div>
+                            <label className="flex items-center gap-2 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={config.marketFriction?.enabled ?? false}
+                                onChange={(e) => updateField('marketFriction', {
+                                  enabled: e.target.checked,
+                                  forceVolatility: config.marketFriction?.forceVolatility ?? 'auto'
+                                })}
+                                className="w-4 h-4 rounded border-dark-600 bg-dark-800 text-orange-500"
+                              />
+                              <span className="text-xs text-dark-400">Enable</span>
+                            </label>
+                          </div>
+
+                          {/* Info box */}
+                          <div className="mb-2 p-2 bg-orange-500/5 border border-orange-500/10 rounded text-[10px] text-orange-300/80">
+                            💡 When enabled: shows fee breakdown in closed trades (Gross P&L → Fees → Net P&L)
+                          </div>
+
+                          {/* Warning if P&L ranges too small */}
+                          {config.marketFriction?.enabled && (
+                            <div className="mb-2">
+                              {(() => {
+                                const avgFriction = config.marketFriction?.forceVolatility === 'low' ? 0.15
+                                  : config.marketFriction?.forceVolatility === 'high' ? 0.5
+                                  : 0.3; // medium or auto
+                                const winMin = config.winPnLMin;
+                                const netWinMin = winMin - avgFriction;
+
+                                if (netWinMin < 0.5) {
+                                  return (
+                                    <div className="p-2 bg-red-500/10 border border-red-500/20 rounded space-y-2">
+                                      <div className="text-[10px] text-red-400 font-semibold">
+                                        ⚠️ WARNING: Win P&L too small for Market Friction!
+                                      </div>
+                                      <div className="text-[10px] text-red-300/80">
+                                        Current: {winMin}% - {avgFriction}% friction = {netWinMin.toFixed(2)}% (too low!)
+                                      </div>
+                                      <button
+                                        onClick={() => {
+                                          const multiplier = avgFriction === 0.15 ? 2 : avgFriction === 0.5 ? 4 : 3;
+                                          updateField('winPnLMin', config.winPnLMin * multiplier);
+                                          updateField('winPnLMax', config.winPnLMax * multiplier);
+                                          updateField('dailyTargetPercent', config.dailyTargetPercent * 1.5);
+                                        }}
+                                        className="w-full px-2 py-1 bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 rounded text-[10px] text-green-400 font-semibold transition-all"
+                                      >
+                                        🔧 Auto-Fix: Increase P&L Ranges
+                                      </button>
+                                    </div>
+                                  );
+                                }
+                                return (
+                                  <div className="p-2 bg-green-500/10 border border-green-500/20 rounded text-[10px] text-green-400">
+                                    ✅ P&L ranges OK ({netWinMin.toFixed(2)}% net after friction)
+                                  </div>
+                                );
+                              })()}
+                            </div>
+                          )}
+
+                          {(config.marketFriction?.enabled ?? false) && (
+                            <div>
+                              <label className="text-[10px] text-dark-500 uppercase mb-1 block">Volatility Mode</label>
+                              <select
+                                value={config.marketFriction?.forceVolatility ?? 'auto'}
+                                onChange={(e) => updateField('marketFriction', {
+                                  enabled: config.marketFriction?.enabled ?? false,
+                                  forceVolatility: e.target.value as 'auto' | 'low' | 'medium' | 'high'
+                                })}
+                                className="w-full px-2 py-1 text-xs bg-dark-800 border border-dark-600 rounded text-white"
+                              >
+                                <option value="auto">Auto (Time-based)</option>
+                                <option value="low">Low (~0.15%)</option>
+                                <option value="medium">Medium (~0.3%)</option>
+                                <option value="high">High (~0.5%)</option>
+                              </select>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>

@@ -81,20 +81,68 @@ export function ClosedTradesActivity({ trades }: ClosedTradesActivityProps) {
               </div>
 
               {/* P&L */}
-              <div className="flex items-center justify-between pt-2 border-t border-dark-700/50">
-                <span className="text-xs text-dark-500">P&L</span>
-                <div className="text-right">
-                  <div className={`text-sm font-bold ${
-                    trade.pnl >= 0 ? 'text-green-400' : 'text-red-400'
-                  }`}>
-                    {trade.pnl >= 0 ? '+' : ''}${Math.abs(trade.pnl).toFixed(2)}
+              <div className="pt-2 border-t border-dark-700/50">
+                {/* Show fee breakdown if market friction is present */}
+                {trade.marketFriction && trade.marketFriction.total !== 0 ? (
+                  <div className="space-y-1">
+                    {/* Gross P&L (before fee) */}
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-dark-500">Gross P&L</span>
+                      <div className="text-right">
+                        <span className="text-dark-300">
+                          ${(trade.pnl - (trade.positionSize * trade.marketFriction.total / 100)).toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Fee breakdown */}
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-orange-400">Trading Fees</span>
+                      <div className="text-right">
+                        <span className="text-orange-400">
+                          ${Math.abs(trade.positionSize * trade.marketFriction.total / 100).toFixed(2)}
+                        </span>
+                        <span className="text-orange-400/70 text-[10px] ml-1">
+                          ({trade.marketFriction.total.toFixed(2)}%)
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Net P&L (after fee) */}
+                    <div className="flex items-center justify-between pt-1 border-t border-dark-700/30">
+                      <span className="text-xs font-semibold text-white">Net P&L</span>
+                      <div className="text-right">
+                        <div className={`text-sm font-bold ${
+                          trade.pnl >= 0 ? 'text-green-400' : 'text-red-400'
+                        }`}>
+                          {trade.pnl >= 0 ? '+' : ''}${Math.abs(trade.pnl).toFixed(2)}
+                        </div>
+                        <div className={`text-xs ${
+                          trade.pnl >= 0 ? 'text-green-400/70' : 'text-red-400/70'
+                        }`}>
+                          ({trade.pnl >= 0 ? '+' : ''}{trade.pnlPercent.toFixed(2)}%)
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div className={`text-xs ${
-                    trade.pnl >= 0 ? 'text-green-400/70' : 'text-red-400/70'
-                  }`}>
-                    ({trade.pnl >= 0 ? '+' : ''}{trade.pnlPercent.toFixed(2)}%)
+                ) : (
+                  /* Simple P&L (no fees) */
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-dark-500">P&L</span>
+                    <div className="text-right">
+                      <div className={`text-sm font-bold ${
+                        trade.pnl >= 0 ? 'text-green-400' : 'text-red-400'
+                      }`}>
+                        {trade.pnl >= 0 ? '+' : ''}${Math.abs(trade.pnl).toFixed(2)}
+                      </div>
+                      <div className={`text-xs ${
+                        trade.pnl >= 0 ? 'text-green-400/70' : 'text-red-400/70'
+                      }`}>
+                        ({trade.pnl >= 0 ? '+' : ''}{trade.pnlPercent.toFixed(2)}%)
+                      </div>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </motion.div>
           ))}

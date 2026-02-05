@@ -29,6 +29,7 @@ export interface CalibrationParams {
   leverageMax: number;          // e.g. 15
   currentDailyPnL?: number;     // Current P&L% today (for correction)
   tradesRemainingToday?: number; // Trades left today (for correction)
+  tightModePercent?: number;    // % of positions in tight mode (0-100), default: 80
 }
 
 export class DynamicPnLCalculator {
@@ -51,6 +52,7 @@ export class DynamicPnLCalculator {
       leverageMax,
       currentDailyPnL = 0,
       tradesRemainingToday = tradesPerDay,
+      tightModePercent = 80,
     } = params;
 
     // Step 1: Calculate average leverage
@@ -68,8 +70,8 @@ export class DynamicPnLCalculator {
     const asymmetryFactor = 0.7;
     const baseLossPnLPercent = baseWinPnLPercent * (winRate / (1 - winRate)) * asymmetryFactor;
 
-    // Step 4: Determine variance mode (80% tight, 20% wide for visual realism)
-    const isTightMode = Math.random() < 0.8;
+    // Step 4: Determine variance mode (using configured tight mode percentage)
+    const isTightMode = Math.random() < (tightModePercent / 100);
     const mode: 'tight' | 'wide' = isTightMode ? 'tight' : 'wide';
 
     // Step 5: Apply variance

@@ -36,8 +36,11 @@ export class TradingBot {
       config.investedCapital
     );
 
-    // Create instance of StaggeredClosingManager for this bot
-    this.staggeredClosingManager = new StaggeredClosingManager();
+    // Create instance of StaggeredClosingManager for this bot (with config if provided)
+    const staggeredConfig = this.config.staggeredClosing;
+    this.staggeredClosingManager = new StaggeredClosingManager(
+      staggeredConfig && staggeredConfig.enabled ? staggeredConfig : undefined
+    );
 
     // Generate unique personality for this bot
     this.personality = {
@@ -153,29 +156,36 @@ export class TradingBot {
       }
 
       if (shouldClose && !this.closedPositionIds.has(pos.id)) {
-        // Check staggered closing
-        if (pos.scheduledCloseAt) {
-          // Already scheduled - check if time to close
-          if (now >= pos.scheduledCloseAt) {
-            // Time to close!
-            this.closePosition(pos, needsSlippage, realPnlPercent);
+        // Check staggered closing (if enabled)
+        const staggeredEnabled = this.config.staggeredClosing?.enabled ?? false; // Default: disabled (to avoid delaying TP/SL)
+
+        if (staggeredEnabled) {
+          if (pos.scheduledCloseAt) {
+            // Already scheduled - check if time to close
+            if (now >= pos.scheduledCloseAt) {
+              // Time to close!
+              this.closePosition(pos, needsSlippage, realPnlPercent);
+            } else {
+              // Wait for scheduled time
+              remainingPositions.push(pos);
+            }
           } else {
-            // Wait for scheduled time
-            remainingPositions.push(pos);
+            // First time we want to close - check with StaggeredClosingManager
+            const closingDecision = this.staggeredClosingManager.shouldClosePosition(pos.id);
+
+            if (closingDecision.shouldClose && closingDecision.delayMs < 2000) {
+              // Can close immediately (minimal delay)
+              this.closePosition(pos, needsSlippage, realPnlPercent);
+            } else {
+              // Schedule for later to prevent congestion
+              pos.scheduledCloseAt = now + closingDecision.delayMs;
+              remainingPositions.push(pos);
+              // Position scheduled - logging removed for cleaner console
+            }
           }
         } else {
-          // First time we want to close - check with StaggeredClosingManager
-          const closingDecision = this.staggeredClosingManager.shouldClosePosition(pos.id);
-
-          if (closingDecision.shouldClose && closingDecision.delayMs < 2000) {
-            // Can close immediately (minimal delay)
-            this.closePosition(pos, needsSlippage, realPnlPercent);
-          } else {
-            // Schedule for later to prevent congestion
-            pos.scheduledCloseAt = now + closingDecision.delayMs;
-            remainingPositions.push(pos);
-            // Position scheduled - logging removed for cleaner console
-          }
+          // Staggered closing disabled - close immediately
+          this.closePosition(pos, needsSlippage, realPnlPercent);
         }
       } else if (!shouldClose) {
         remainingPositions.push(pos);
@@ -215,21 +225,36 @@ export class TradingBot {
       finalPnlPercent = (priceChange / pos.entryPrice) * pos.leverage * 100;
     }
 
-    // Apply market friction (realistic trading costs)
-    const volatility = marketFrictionSimulator.estimateCurrentVolatility();
-    const friction = marketFrictionSimulator.calculateFriction({
-      tradingPair: pos.pair,
-      positionSizeUSD: pos.positionSize,
-      leverage: pos.leverage,
-      side: pos.side,
-      volatility,
-    });
+    // Apply market friction (realistic trading costs) if enabled
+    const frictionEnabled = this.config.marketFriction?.enabled ?? false; // Default: disabled (to avoid breaking existing bots)
+    let friction: FrictionComponents;
 
-    // Apply friction to P&L
-    const pnlBeforeFriction = finalPnlPercent;
-    finalPnlPercent = marketFrictionSimulator.applyFrictionToPnL(finalPnlPercent, friction);
+    if (frictionEnabled) {
+      const forceVolatility = this.config.marketFriction?.forceVolatility;
+      const volatility = forceVolatility && forceVolatility !== 'auto'
+        ? forceVolatility
+        : marketFrictionSimulator.estimateCurrentVolatility();
 
-    // Removed verbose logging - friction is stored in trade.marketFriction
+      friction = marketFrictionSimulator.calculateFriction({
+        tradingPair: pos.pair,
+        positionSizeUSD: pos.positionSize,
+        leverage: pos.leverage,
+        side: pos.side,
+        volatility,
+      });
+
+      // Apply friction to P&L
+      finalPnlPercent = marketFrictionSimulator.applyFrictionToPnL(finalPnlPercent, friction);
+    } else {
+      // Market friction disabled - use zero friction
+      friction = {
+        slippage: 0,
+        spread: 0,
+        fundingRate: 0,
+        commission: 0,
+        total: 0,
+      };
+    }
 
     const finalPnl = (pos.positionSize * finalPnlPercent) / 100;
     const isWin = finalPnl >= 0;
@@ -329,6 +354,7 @@ export class TradingBot {
     }
 
     // Calculate optimal P&L range using DynamicPnLCalculator
+    const tightModePercent = this.config.pnlVariance?.tightModePercent ?? 80; // Default: 80%
     const pnlRange = dynamicPnLCalculator.calculatePnLRange({
       dailyTargetPercent: this.config.dailyTargetPercent,
       tradesPerDay: this.config.tradesPerDay,
@@ -337,6 +363,7 @@ export class TradingBot {
       leverageMax,
       currentDailyPnL: this.dailyController.getCurrentDailyPnLPercent(),
       tradesRemainingToday: this.dailyController.getTradesRemaining(this.config.tradesPerDay),
+      tightModePercent,
     });
 
     // Determine if this trade should win

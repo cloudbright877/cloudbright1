@@ -25,11 +25,35 @@ export interface ClosingDecision {
   reason: string;
 }
 
+export interface StaggeredClosingConfig {
+  maxClosuresInWindow: number;        // Max closures allowed in window (1-5)
+  windowDurationSec: number;          // Window duration in seconds (15-60)
+  minDelayBetweenSec: number;         // Min delay between closures (1-30)
+  maxDelayBetweenSec: number;         // Max delay between closures (5-60)
+}
+
 export class StaggeredClosingManager {
   private recentClosures: ClosureEvent[] = [];
   private readonly MAX_HISTORY_MS = 60000; // Track last 60 seconds
-  private readonly CONGESTION_WINDOW_MS = 30000; // Check last 30 seconds for congestion
-  private readonly MAX_CLOSURES_IN_WINDOW = 2; // Max 2 closures in 30s
+  private readonly CONGESTION_WINDOW_MS: number; // Window duration in ms
+  private readonly MAX_CLOSURES_IN_WINDOW: number; // Max closures in window
+  private readonly MIN_DELAY_MS: number; // Min delay between closures
+  private readonly MAX_DELAY_MS: number; // Max delay between closures
+
+  constructor(config?: StaggeredClosingConfig) {
+    // Set defaults or use provided config
+    const finalConfig = config || {
+      maxClosuresInWindow: 2,
+      windowDurationSec: 30,
+      minDelayBetweenSec: 5,
+      maxDelayBetweenSec: 15,
+    };
+
+    this.MAX_CLOSURES_IN_WINDOW = finalConfig.maxClosuresInWindow;
+    this.CONGESTION_WINDOW_MS = finalConfig.windowDurationSec * 1000;
+    this.MIN_DELAY_MS = finalConfig.minDelayBetweenSec * 1000;
+    this.MAX_DELAY_MS = finalConfig.maxDelayBetweenSec * 1000;
+  }
 
   /**
    * Record a position closure
@@ -79,9 +103,9 @@ export class StaggeredClosingManager {
         ? this.CONGESTION_WINDOW_MS - (now - oldestRecentClosure.timestamp)
         : 0;
 
-      // Add random additional delay (5-15s) for natural spacing
-      const randomDelay = 5000 + Math.random() * 10000;
-      const totalDelay = Math.max(timeUntilSlotAvailable + randomDelay, 5000);
+      // Add random additional delay using configured ranges
+      const randomDelay = this.MIN_DELAY_MS + Math.random() * (this.MAX_DELAY_MS - this.MIN_DELAY_MS);
+      const totalDelay = Math.max(timeUntilSlotAvailable + randomDelay, this.MIN_DELAY_MS);
 
       return {
         shouldClose: false,
@@ -92,14 +116,14 @@ export class StaggeredClosingManager {
       };
     }
 
-    // Check if last closure was very recent (< 5 seconds ago)
+    // Check if last closure was very recent (< MIN_DELAY_MS ago)
     const lastClosure = this.recentClosures[this.recentClosures.length - 1];
     if (lastClosure) {
       const timeSinceLastClosure = now - lastClosure.timestamp;
-      if (timeSinceLastClosure < 5000) {
-        // Add small random delay (3-8s) to avoid "burst" closures
-        const minDelay = 3000 - timeSinceLastClosure;
-        const randomDelay = minDelay + Math.random() * 5000;
+      if (timeSinceLastClosure < this.MIN_DELAY_MS) {
+        // Add delay to reach minimum spacing
+        const remainingMinDelay = this.MIN_DELAY_MS - timeSinceLastClosure;
+        const randomDelay = remainingMinDelay + Math.random() * (this.MAX_DELAY_MS - this.MIN_DELAY_MS);
 
         return {
           shouldClose: false,
@@ -110,8 +134,8 @@ export class StaggeredClosingManager {
       }
     }
 
-    // Safe to close, but add small random delay (1-5s) for natural variance
-    const naturalDelay = 1000 + Math.random() * 4000;
+    // Safe to close, but add small random delay for natural variance
+    const naturalDelay = this.MIN_DELAY_MS + Math.random() * (this.MAX_DELAY_MS - this.MIN_DELAY_MS) * 0.5;
 
     return {
       shouldClose: true,
