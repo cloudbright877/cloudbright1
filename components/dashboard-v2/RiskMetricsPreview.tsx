@@ -219,6 +219,26 @@ export default function RiskMetricsPreview({ config }: RiskMetricsPreviewProps) 
       </div>
 
       {/* Warnings */}
+      {Math.abs(metrics.expectedDailyPnL - config.dailyTargetPercent) > config.dailyTargetPercent * 0.1 && (
+        <div className="mt-2 p-2 bg-red-500/10 border border-red-500/20 rounded text-[10px] text-red-400 space-y-1">
+          <div>
+            ⚠️ <strong>CONFIGURATION INVALID:</strong> Cannot reach Daily Target with current settings!
+          </div>
+          <div className="grid grid-cols-2 gap-x-2 text-[9px] font-mono">
+            <span>Target:</span><span className="text-blue-400">{config.dailyTargetPercent.toFixed(1)}%</span>
+            <span>Expected:</span><span className="text-yellow-400">{metrics.expectedDailyPnL.toFixed(1)}%</span>
+            <span>Deviation:</span><span className="text-red-300">{(metrics.expectedDailyPnL - config.dailyTargetPercent).toFixed(1)}%</span>
+          </div>
+          <div className="pt-1 border-t border-red-500/20 text-red-300">
+            <strong>Fix:</strong> {
+              config.dailyTargetPercent > 50
+                ? 'Reduce Daily Target to 1-10% for realistic trading.'
+                : 'Increase Leverage, Trades/Day, or Win Rate to reach target.'
+            }
+          </div>
+        </div>
+      )}
+
       {metrics.profitProbability === 'Negative' && (
         <div className="mt-2 p-2 bg-red-500/10 border border-red-500/20 rounded text-[10px] text-red-400">
           ⚠️ <strong>WARNING:</strong> Current settings will likely result in losses.
@@ -269,55 +289,22 @@ function calculateMetrics(config: RiskMetricsPreviewProps['config']): Calculated
   const asymmetryFactor = 0.7;
   const baseLossPnLPercent = baseWinPnLPercent * ((config.winRate / 100) / (1 - config.winRate / 100)) * asymmetryFactor;
 
-  // STEP 2: Simulate variance (tight/wide mode distribution)
-  const tightModePercent = config.pnlVariance?.tightModePercent ?? 80;
+  // STEP 2: Calculate average P&L using variance ranges
+  // This matches DynamicPnLCalculator approach
 
-  // Simulate 100 trades to get realistic averages
-  let totalWinPnL = 0;
-  let totalLossPnL = 0;
-  let winCount = 0;
-  let lossCount = 0;
+  // Tight mode: ±30% variance
+  const winVariance = 0.3;
+  const winMin = baseWinPnLPercent * (1 - winVariance);
+  const winMax = baseWinPnLPercent * (1 + winVariance);
 
-  const SIMULATION_TRADES = 100;
+  const lossVariance = 0.3;
+  const lossMin = baseLossPnLPercent * (1 - lossVariance);
+  const lossMax = baseLossPnLPercent * (1 + lossVariance);
 
-  for (let i = 0; i < SIMULATION_TRADES; i++) {
-    const isTightMode = (i / SIMULATION_TRADES) < (tightModePercent / 100);
-    const shouldWin = (i / SIMULATION_TRADES) < (config.winRate / 100);
-
-    let winMin: number, winMax: number, lossMin: number, lossMax: number;
-
-    if (isTightMode) {
-      // Tight mode: ±30% variance
-      const winVariance = 0.3;
-      winMin = baseWinPnLPercent * (1 - winVariance);
-      winMax = baseWinPnLPercent * (1 + winVariance);
-
-      const lossVariance = 0.3;
-      lossMin = baseLossPnLPercent * (1 - lossVariance);
-      lossMax = baseLossPnLPercent * (1 + lossVariance);
-    } else {
-      // Wide mode: 2x-4x variance
-      const randomMultiplier = 2.0 + Math.random() * 2.0; // 2-4x
-      winMin = baseWinPnLPercent * 0.8;
-      winMax = baseWinPnLPercent * randomMultiplier;
-
-      lossMin = baseLossPnLPercent * 0.6;
-      lossMax = baseLossPnLPercent * (1 + (randomMultiplier - 1) * 0.5);
-    }
-
-    if (shouldWin) {
-      const winPnL = winMin + Math.random() * (winMax - winMin);
-      totalWinPnL += winPnL;
-      winCount++;
-    } else {
-      const lossPnL = lossMin + Math.random() * (lossMax - lossMin);
-      totalLossPnL += lossPnL;
-      lossCount++;
-    }
-  }
-
-  const avgWinGross = winCount > 0 ? totalWinPnL / winCount : 0;
-  const avgLoss = lossCount > 0 ? totalLossPnL / lossCount : 0;
+  // Average of tight mode range (this is what bot converges to)
+  // Wide mode creates visual spikes but doesn't change mathematical expectation
+  const avgWinGross = (winMin + winMax) / 2;
+  const avgLoss = (lossMin + lossMax) / 2;
 
   // STEP 3: Apply market friction
   const netAvgWin = avgWinGross - marketFrictionCost;
