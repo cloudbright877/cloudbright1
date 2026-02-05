@@ -263,15 +263,19 @@ export default function DashboardPage() {
       const activeBots = userCopyStats.map(stats => {
         // Calculate today's P&L (trades in last 24h)
         const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
-        const todayPnL = stats.trades
+        const rawTodayPnL = stats.trades
           .filter(t => new Date(t.closedAt).getTime() > oneDayAgo)
-          .reduce((sum, t) => sum + t.pnl, 0);
+          .reduce((sum, t) => sum + (isNaN(t.pnl) || !isFinite(t.pnl) ? 0 : t.pnl), 0);
+        const todayPnL = isNaN(rawTodayPnL) || !isFinite(rawTodayPnL) ? 0 : rawTodayPnL;
 
         // Get user copy record to get invested amount
         const copyRecord = getUserCopy(stats.id);
-        const invested = copyRecord?.investedAmount || 0;
-        const currentValue = invested + stats.totalPnL;
-        const profitPercent = invested > 0 ? (stats.totalPnL / invested) * 100 : 0;
+        const rawInvested = copyRecord?.investedAmount || 0;
+        const invested = isNaN(rawInvested) || !isFinite(rawInvested) ? 0 : rawInvested;
+
+        const safeTotalPnL = isNaN(stats.totalPnL) || !isFinite(stats.totalPnL) ? 0 : stats.totalPnL;
+        const currentValue = invested + safeTotalPnL;
+        const profitPercent = invested > 0 ? (safeTotalPnL / invested) * 100 : 0;
 
         // Map positions with real-time duration
         const now = Date.now();
@@ -282,6 +286,10 @@ export default function DashboardPage() {
           const seconds = Math.floor((durationMs % (1000 * 60)) / 1000);
           const duration = hours > 0 ? `${hours}h ${minutes}m` : minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
 
+          // Validate P&L values
+          const safePnl = isNaN(pos.pnl) || !isFinite(pos.pnl) ? 0 : pos.pnl;
+          const safePnlPercent = isNaN(pos.pnlPercent) || !isFinite(pos.pnlPercent) ? 0 : pos.pnlPercent;
+
           return {
             id: pos.id,
             pair: pos.pair,
@@ -290,8 +298,8 @@ export default function DashboardPage() {
             leverage: pos.leverage,
             entryPrice: pos.entryPrice,
             currentPrice: pos.currentPrice,
-            pnl: pos.pnl,
-            pnlPercent: pos.pnlPercent,
+            pnl: safePnl,
+            pnlPercent: safePnlPercent,
             stopLoss: pos.stopLoss,
             takeProfit: pos.takeProfit,
             openedAt: duration,
@@ -306,6 +314,10 @@ export default function DashboardPage() {
         // Determine risk level (low for now, can be enhanced)
         const risk: 'low' | 'medium' | 'high' = 'medium';
 
+        // Validate profit values
+        const safeProfit = isNaN(stats.totalPnL) || !isFinite(stats.totalPnL) ? 0 : stats.totalPnL;
+        const safeProfitPercent = isNaN(profitPercent) || !isFinite(profitPercent) ? 0 : profitPercent;
+
         return {
           id: stats.id,
           name: stats.name,
@@ -313,8 +325,8 @@ export default function DashboardPage() {
           risk,
           invested,
           currentValue,
-          profit: stats.totalPnL,
-          profitPercent,
+          profit: safeProfit,
+          profitPercent: safeProfitPercent,
           status: 'active' as const,
           winRate: stats.winRate,
           trades: stats.tradesCount,
@@ -327,22 +339,29 @@ export default function DashboardPage() {
 
       // Get all closed trades from all user copies with original timestamp for sorting
       const allTrades = userCopyStats.flatMap(stats =>
-        stats.trades.map(trade => ({
-          id: trade.id,
-          botName: stats.name,
-          pair: trade.pair,
-          side: trade.side,
-          amount: trade.amount,
-          entryPrice: trade.entryPrice,
-          exitPrice: trade.exitPrice,
-          pnl: trade.pnl,
-          pnlPercent: trade.pnlPercent,
-          closedAt: formatTimeAgo(new Date(trade.closedAt)),
-          closedAtTimestamp: new Date(trade.closedAt).getTime(), // For sorting
-          leverage: trade.leverage,
-          duration: trade.duration,
-          positionSize: trade.positionSize,
-        }))
+        stats.trades.map(trade => {
+          // Validate P&L values
+          const safePnl = isNaN(trade.pnl) || !isFinite(trade.pnl) ? 0 : trade.pnl;
+          const safePnlPercent = isNaN(trade.pnlPercent) || !isFinite(trade.pnlPercent) ? 0 : trade.pnlPercent;
+          const safePositionSize = isNaN(trade.positionSize) || !isFinite(trade.positionSize) ? 0 : trade.positionSize;
+
+          return {
+            id: trade.id,
+            botName: stats.name,
+            pair: trade.pair,
+            side: trade.side,
+            amount: trade.amount,
+            entryPrice: trade.entryPrice,
+            exitPrice: trade.exitPrice,
+            pnl: safePnl,
+            pnlPercent: safePnlPercent,
+            closedAt: formatTimeAgo(new Date(trade.closedAt)),
+            closedAtTimestamp: new Date(trade.closedAt).getTime(), // For sorting
+            leverage: trade.leverage,
+            duration: trade.duration,
+            positionSize: safePositionSize,
+          };
+        })
       );
 
       // Sort by closed time (newest first) and take first 10
@@ -356,10 +375,16 @@ export default function DashboardPage() {
     };
   }, []);
 
-  // Calculate totals
-  const totalInvested = bots.reduce((sum, bot) => sum + bot.invested, 0);
-  const totalValue = bots.reduce((sum, bot) => sum + bot.currentValue, 0);
-  const totalProfit = totalValue - totalInvested;
+  // Calculate totals with NaN/Infinity protection
+  const rawTotalInvested = bots.reduce((sum, bot) => sum + (bot.invested || 0), 0);
+  const totalInvested = isNaN(rawTotalInvested) || !isFinite(rawTotalInvested) ? 0 : rawTotalInvested;
+
+  const rawTotalValue = bots.reduce((sum, bot) => sum + (bot.currentValue || 0), 0);
+  const totalValue = isNaN(rawTotalValue) || !isFinite(rawTotalValue) ? 0 : rawTotalValue;
+
+  const rawTotalProfit = totalValue - totalInvested;
+  const totalProfit = isNaN(rawTotalProfit) || !isFinite(rawTotalProfit) ? 0 : rawTotalProfit;
+
   const totalProfitPercent = totalInvested > 0 ? (totalProfit / totalInvested) * 100 : 0;
   // Available balance = 0 for now (no wallet functionality yet)
   const availableBalance = 0;

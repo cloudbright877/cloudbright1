@@ -93,26 +93,20 @@ export default function Sidebar() {
         `}
       >
         {/* Logo */}
-        <div className={`flex items-center p-6 border-b border-dark-700 ${isCollapsed ? 'justify-center flex-col gap-3' : 'justify-between'}`}>
-          <Link href="/dashboard" className={`flex items-center group ${isCollapsed ? 'justify-center' : ''}`}>
-            {isCollapsed ? (
-              <motion.div
-                whileHover={{ rotate: 360 }}
-                transition={{ duration: 0.6 }}
-                className="w-10 h-10 rounded-xl bg-gradient-to-r from-primary-500 to-accent-500 flex items-center justify-center text-white font-bold text-xl"
-              >
-                C
-              </motion.div>
-            ) : (
-              <div className="text-xl font-bold bg-gradient-to-r from-primary-500 to-accent-500 bg-clip-text text-transparent">
-                CELESTIAN
-              </div>
-            )}
+        <div className="relative flex items-center justify-center p-6 border-b border-dark-700">
+          <Link href="/dashboard" className="flex items-center justify-center group">
+            <Image
+              src="/logo2.svg"
+              alt="CloudBright"
+              width={40}
+              height={40}
+              className="h-10 w-10"
+            />
           </Link>
 
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="p-2 hover:bg-dark-800 rounded-lg transition-colors"
+            className="absolute right-4 p-2 hover:bg-dark-800 rounded-lg transition-colors"
           >
             <span className="text-dark-400">{isCollapsed ? '→' : '←'}</span>
           </button>

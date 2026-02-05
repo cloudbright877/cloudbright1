@@ -70,8 +70,15 @@ export default function Footer() {
             >
               {/* Logo */}
               <div className="flex items-center gap-3 mb-4">
+                <Image
+                  src="/logo2.svg"
+                  alt="CloudBright"
+                  width={48}
+                  height={48}
+                  className="h-12 w-12"
+                />
                 <span className="text-gradient font-bold tracking-wider" style={{ fontSize: '2rem' }}>
-                  CELESTIAN
+                  CLOUDBRIGHT
                 </span>
               </div>
 

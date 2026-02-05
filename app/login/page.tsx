@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState, Suspense } from 'react';
 
 function LoginForm() {
@@ -67,8 +68,15 @@ function LoginForm() {
           {/* Logo and title */}
           <div className="text-center mb-8">
             <div className="inline-flex items-center gap-3 mb-4">
+              <Image
+                src="/logo2.svg"
+                alt="CloudBright"
+                width={48}
+                height={48}
+                className="h-12 w-12"
+              />
               <span className="text-gradient font-bold tracking-wider" style={{ fontSize: '2rem' }}>
-                CELESTIAN
+                CLOUDBRIGHT
               </span>
             </div>
             <p className="text-gray-600 dark:text-dark-300">

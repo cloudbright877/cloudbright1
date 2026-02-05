@@ -405,7 +405,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
   const [memUsage, setMemUsage] = useState(30);
   const [apiLatency, setApiLatency] = useState(12);
   const [orderBook, setOrderBook] = useState<{ asks: any[], bids: any[] }>({ asks: [], bids: [] });
-  const [equityPeriod, setEquityPeriod] = useState<'1D' | '7D' | '30D' | '90D' | 'ALL'>('1D');
+  const [equityPeriod, setEquityPeriod] = useState<'1D' | '7D' | '30D' | '90D' | 'ALL'>('ALL');
 
   // Convert DemoBot to MasterBotData format
   const convertDemoBotToMasterData = (demoBot: DemoBot): any => {
@@ -658,6 +658,11 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
       ? sortedTrades
       : sortedTrades.filter(t => new Date(t.closedAt).getTime() >= cutoffTime);
 
+    // If no trades after filtering, return empty curve
+    if (filteredTrades.length === 0) {
+      return [];
+    }
+
     // Build aggregate equity curve from ALL copiers' investments
     // Start with total invested by all copiers
     const totalInvested = masterBotData.totalInvestedByAll || 0;
@@ -670,9 +675,10 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
 
     let cumulative = totalInvested;
 
-    // Start with initial total investment
+    // Start from first filtered trade (no empty space on left)
+    const firstTradeTime = new Date(filteredTrades[0].closedAt).getTime();
     const curve: { timestamp: number; value: number }[] = [{
-      timestamp: cutoffTime || (filteredTrades[0] ? new Date(filteredTrades[0].closedAt).getTime() - 60000 : now - 60000),
+      timestamp: firstTradeTime - 60000, // 1 min before first trade
       value: totalInvested
     }];
 

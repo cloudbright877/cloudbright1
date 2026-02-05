@@ -529,7 +529,96 @@ export const DEMO_BOTS: DemoBot[] = [
 ];
 
 /**
- * Generate simulated performance data for charts
+ * Generate REAL performance data from bot's trade history
+ * Like analytics equity curve - only shows data from first trade onwards
+ * @param botId - Bot ID to get trades from
+ * @param maxPoints - Max number of points to generate (default 30)
+ */
+export function generateRealPerformanceData(botId: string, maxPoints: number = 30): number[] {
+  if (typeof window === 'undefined') {
+    // SSR fallback
+    return generatePerformanceData(1.0, maxPoints, 0.3);
+  }
+
+  try {
+    const { botManager } = require('./BotManager');
+    const bot = botManager.getBot(botId);
+
+    if (!bot) {
+      console.warn(`[PerformanceData] Bot ${botId} not found, using mock data`);
+      return generatePerformanceData(1.0, maxPoints, 0.3);
+    }
+
+    const stats = bot.getStats();
+    const config = bot.getConfig();
+    const trades = stats.trades;
+
+    if (trades.length === 0) {
+      // No trades yet, return starting point
+      return [0];
+    }
+
+    // Sort trades by closedAt (oldest first)
+    const sortedTrades = [...trades].sort((a, b) =>
+      new Date(a.closedAt).getTime() - new Date(b.closedAt).getTime()
+    );
+
+    // Get first trade timestamp
+    const firstTradeTime = new Date(sortedTrades[0].closedAt).getTime();
+    const lastTradeTime = new Date(sortedTrades[sortedTrades.length - 1].closedAt).getTime();
+    const now = Date.now();
+
+    // Calculate time span (from first trade to now)
+    const totalSpan = now - firstTradeTime;
+    const pointInterval = totalSpan / maxPoints;
+
+    // Generate points at regular intervals
+    const dataPoints: number[] = [];
+    let cumulativePnL = 0;
+    let tradeIndex = 0;
+
+    // Start from 0 (before first trade)
+    dataPoints.push(0);
+
+    for (let i = 1; i < maxPoints; i++) {
+      const pointTime = firstTradeTime + (i * pointInterval);
+
+      // Add all trades that happened before this point
+      while (tradeIndex < sortedTrades.length &&
+             new Date(sortedTrades[tradeIndex].closedAt).getTime() <= pointTime) {
+        const tradePnL = sortedTrades[tradeIndex].pnl;
+        cumulativePnL += isFinite(tradePnL) && !isNaN(tradePnL) ? tradePnL : 0;
+        tradeIndex++;
+      }
+
+      // Convert to percentage of invested capital
+      const percentReturn = config.investedCapital > 0
+        ? (cumulativePnL / config.investedCapital) * 100
+        : 0;
+
+      dataPoints.push(isFinite(percentReturn) && !isNaN(percentReturn) ? percentReturn : 0);
+    }
+
+    // Add final point with all trades
+    while (tradeIndex < sortedTrades.length) {
+      const tradePnL = sortedTrades[tradeIndex].pnl;
+      cumulativePnL += isFinite(tradePnL) && !isNaN(tradePnL) ? tradePnL : 0;
+      tradeIndex++;
+    }
+    const finalPercent = config.investedCapital > 0
+      ? (cumulativePnL / config.investedCapital) * 100
+      : 0;
+    dataPoints.push(isFinite(finalPercent) && !isNaN(finalPercent) ? finalPercent : 0);
+
+    return dataPoints;
+  } catch (error) {
+    console.error('[PerformanceData] Error generating real data:', error);
+    return generatePerformanceData(1.0, maxPoints, 0.3);
+  }
+}
+
+/**
+ * Generate simulated performance data for charts (fallback)
  * @param dailyTarget - Daily target percentage
  * @param days - Number of days to generate
  * @param volatility - Volatility factor (0-2)
@@ -564,8 +653,49 @@ export function getDemoBotById(id: string): DemoBot | undefined {
 }
 
 /**
- * Get all demo bots
+ * Get all demo bots with real performance data when available
  */
 export function getAllDemoBots(): DemoBot[] {
-  return DEMO_BOTS;
+  if (typeof window === 'undefined') {
+    // SSR - return as is
+    return DEMO_BOTS;
+  }
+
+  try {
+    const { botManager } = require('./BotManager');
+
+    // Map bots and try to get real performance data
+    return DEMO_BOTS.map(demoBot => {
+      const masterBot = botManager.getBot(demoBot.id);
+
+      if (!masterBot) {
+        // Bot not running, use mock data
+        return demoBot;
+      }
+
+      // Bot is running, get real stats and performance data
+      const realStats = masterBot.getStats();
+      const realConfig = masterBot.getConfig();
+      const realPerformanceData = generateRealPerformanceData(demoBot.id, 30);
+
+      // Calculate real returns from performance data
+      const return30d = realPerformanceData.length > 0
+        ? realPerformanceData[realPerformanceData.length - 1]
+        : demoBot.stats.return30d;
+
+      return {
+        ...demoBot,
+        performanceData: realPerformanceData,
+        stats: {
+          ...demoBot.stats,
+          return30d: isFinite(return30d) ? return30d : demoBot.stats.return30d,
+          winRate: realStats.winRate,
+          copiers: demoBot.stats.copiers, // Keep mock copiers count
+        },
+      };
+    });
+  } catch (error) {
+    console.error('[getAllDemoBots] Error loading real data:', error);
+    return DEMO_BOTS;
+  }
 }

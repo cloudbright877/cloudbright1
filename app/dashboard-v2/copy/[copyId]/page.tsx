@@ -214,10 +214,10 @@ export default function UserCopyPage() {
         const equityPoints: EquityPoint[] = [];
         const startValue = investedAmount;
 
-        // Add starting point (invested capital at bot creation)
-        const createdAt = Date.now() - (7 * 24 * 60 * 60 * 1000); // Default to 7 days ago
+        // Add starting point BEFORE first trade (no empty space on left)
+        const firstTradeTime = new Date(sortedTrades[0].closedAt).getTime();
         equityPoints.push({
-          timestamp: createdAt,
+          timestamp: firstTradeTime - 60000, // 1 min before first trade
           value: startValue,
         });
 
@@ -644,12 +644,8 @@ export default function UserCopyPage() {
                   ? equityData
                   : equityData.filter(point => point.timestamp >= cutoffTime);
 
-                // If filtered data is empty but we have data, show starting point
-                const displayData = filteredEquityData.length > 0
-                  ? filteredEquityData
-                  : equityData.length > 0
-                    ? [equityData[equityData.length - 1]]
-                    : equityData;
+                // If filtered data is empty, show all data (like analytics)
+                const displayData = filteredEquityData.length > 0 ? filteredEquityData : equityData;
 
                 // Calculate Y-axis range with padding for better visualization
                 const values = displayData.map(p => p.value);

@@ -2,18 +2,45 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BotCarousel } from '@/components/dashboard-v2/BotCarousel';
 import { Shield, ChevronRight, Bot, Scale, TrendingUp, Target } from 'lucide-react';
 import { getAllDemoBots } from '@/lib/demoMarketplace';
 import type { DemoBot } from '@/lib/demoMarketplace';
+import { priceService } from '@/lib/PriceService';
+import { botManager } from '@/lib/BotManager';
 
 export default function BotsPage() {
   const [activeTab, setActiveTab] = useState<'recommendation' | 'ranklist'>('recommendation');
   const [sortBy, setSortBy] = useState<'rating' | 'return' | 'copiers' | 'winRate' | 'risk'>('rating');
+  const [bots, setBots] = useState<DemoBot[]>([]);
 
-  // Get demo bots directly (no API call needed)
-  const bots = getAllDemoBots();
+  // Load bots and update in real-time
+  useEffect(() => {
+    // Load bots from localStorage
+    botManager.load();
+
+    // Connect to Binance WebSocket
+    priceService.connect();
+
+    // Subscribe to price updates
+    const unsubscribe = priceService.subscribe((prices) => {
+      botManager.tick(prices);
+    });
+
+    // Initial load
+    setBots(getAllDemoBots());
+
+    // Update UI every 2 seconds to refresh performance data
+    const interval = setInterval(() => {
+      setBots(getAllDemoBots());
+    }, 2000);
+
+    return () => {
+      clearInterval(interval);
+      unsubscribe();
+    };
+  }, []);
 
   // Filter and sort bots for Rank List
   const filteredAndSortedBots = [...bots].sort((a, b) => {
