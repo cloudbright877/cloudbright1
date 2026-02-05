@@ -78,7 +78,15 @@ export const botsApi = {
     config: Partial<BotConfig>
   ): Promise<boolean> {
     await new Promise((resolve) => setTimeout(resolve, 100));
-    return botManager.updateBotConfig(id, config);
+
+    // Update runtime bot config if bot exists
+    const success = botManager.updateBotConfig(id, config);
+
+    // Persist to localStorage via masterBotsConfig
+    const { saveMasterBotConfig } = await import('../masterBotsConfig');
+    saveMasterBotConfig(id, config);
+
+    return success;
 
     /* FUTURE:
     const response = await fetch(`/api/marketplace/bots/${id}`, {
@@ -201,7 +209,14 @@ export const botsApi = {
       throw new Error(`Demo bot ${masterBotId} not found`);
     }
 
+    // Load merged config (default + admin overrides from localStorage)
+    const { getMergedBotConfig } = await import('../masterBotsConfig');
+    const mergedConfig = getMergedBotConfig(masterBotId);
+
+    const configToUse = mergedConfig || demoBot.config;
+
     console.log(`[botsApi] Creating Master Bot instance: ${masterBotId}`);
-    botManager.createBot(demoBot.config, demoBot.id);
+    console.log('[botsApi] Using config:', mergedConfig ? 'merged (with admin overrides)' : 'default');
+    botManager.createBot(configToUse, demoBot.id);
   },
 };

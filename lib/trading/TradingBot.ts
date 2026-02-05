@@ -247,8 +247,13 @@ export class TradingBot {
     // Check if DailyTargetController allows opening
     if (!this.dailyController.shouldOpenPosition()) return;
 
-    // Get price for bot's trading pair
-    const symbol = this.config.tradingPair.replace('/', '');
+    // Select trading pair (randomly from tradingPairs if set, otherwise use tradingPair)
+    const availablePairs = this.config.tradingPairs && this.config.tradingPairs.length > 0
+      ? this.config.tradingPairs
+      : [this.config.tradingPair];
+
+    const tradingPair = availablePairs[Math.floor(Math.random() * availablePairs.length)];
+    const symbol = tradingPair.replace('/', '');
     const price = prices[symbol];
 
     if (!price) return;
@@ -285,8 +290,18 @@ export class TradingBot {
     // Adjust based on daily progress
     const adjustedSize = this.dailyController.adjustPositionSize(positionSize);
 
-    // Leverage: use config if set, otherwise random
-    const leverage = this.config.leverage ?? [3, 5, 10][Math.floor(Math.random() * 3)];
+    // Leverage: select from leverages array if set, otherwise use leverage, otherwise default random
+    let leverage: number;
+    if (this.config.leverages && this.config.leverages.length > 0) {
+      // Random from leverages array
+      leverage = this.config.leverages[Math.floor(Math.random() * this.config.leverages.length)];
+    } else if (this.config.leverage) {
+      // Fixed leverage
+      leverage = this.config.leverage;
+    } else {
+      // Default random
+      leverage = [3, 5, 10][Math.floor(Math.random() * 3)];
+    }
 
     // Side: respect config allowedSides
     let side: 'LONG' | 'SHORT';
@@ -316,7 +331,7 @@ export class TradingBot {
 
     const newPosition: Position = {
       id: `pos-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      pair: this.config.tradingPair,
+      pair: tradingPair, // Use selected pair from tradingPairs or tradingPair
       side,
       leverage,
       entryPrice: price,

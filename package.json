@@ -6,7 +6,16 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "npx playwright test",
+    "test:ui": "npx playwright test --ui",
+    "test:headed": "npx playwright test --headed",
+    "test:debug": "npx playwright test --debug",
+    "test:chromium": "npx playwright test --project=chromium",
+    "test:firefox": "npx playwright test --project=firefox",
+    "test:webkit": "npx playwright test --project=webkit",
+    "test:report": "npx playwright show-report",
+    "test:install": "npx playwright install --with-deps"
   },
   "keywords": [],
   "author": "",
@@ -16,8 +25,8 @@
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^7.3.7",
     "@mui/material": "^7.3.7",
+    "@radix-ui/react-slider": "^1.3.6",
     "@token-icons/react": "^2.13.0",
-    "@types/node": "^24.10.1",
     "@types/react": "^19.2.7",
     "apexcharts": "^5.3.6",
     "autoprefixer": "^10.4.22",
@@ -43,7 +52,8 @@
     "zod": "^4.1.13"
   },
   "devDependencies": {
-    "@types/node": "^24.10.1",
+    "@playwright/test": "^1.58.1",
+    "@types/node": "^24.10.10",
     "@types/ws": "^8.18.1",
     "ws": "^8.19.0"
   }

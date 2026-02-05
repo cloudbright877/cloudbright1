@@ -402,28 +402,32 @@ PLACEHOLDER_ROUTES (Not implemented):
 
 ```yaml
 BUG_001:
-  TITLE: "Master bot copy creates independent instance"
-  FILE: lib/userCopies.ts:15-30
+  TITLE: "Master bot copy mechanism"
+  FILE: lib/userCopies.ts, lib/api/botsApi.ts
   SEVERITY: CRITICAL
-  STATUS: BROKEN
+  STATUS: FIXED ✅
+  FIX: Creates lightweight records, not TradingBot instances
 
 BUG_002:
   TITLE: "Real-time updates not working on master bot page"
   FILE: app/dashboard-v2/bots/[slug]/page.tsx:500-600
   SEVERITY: CRITICAL
-  STATUS: ACTIVE
+  STATUS: FIXED ✅
+  FIX: Simplified useEffect dependencies, updates every 2s
 
 BUG_003:
-  TITLE: "Win rate control lost after refactoring"
+  TITLE: "Win rate control"
   FILE: lib/trading/TradingBot.ts:closePosition
   SEVERITY: CRITICAL
-  STATUS: REGRESSION
+  STATUS: VERIFIED WORKING ✅
+  NOTE: Was never broken, just undocumented
 
 BUG_004:
   TITLE: "Bot settings don't apply"
   FILE: app/dashboard-v2/admin/bots/page.tsx
   SEVERITY: HIGH
-  STATUS: NO_PERSISTENCE
+  STATUS: FIXED ✅
+  FIX: Calls botsApi.updateMasterBotConfig(), persists to localStorage
 
 BUG_005:
   TITLE: "Position sizing incorrect"

@@ -44,12 +44,14 @@ export interface Trade {
 export interface BotConfig {
   // Basic Info
   name: string;
-  tradingPair: string;
+  tradingPair: string;                  // Primary trading pair (deprecated, use tradingPairs)
+  tradingPairs?: string[];              // Multiple trading pairs (e.g., ['BTC/USDT', 'ETH/USDT']). Overrides tradingPair if set
   investedCapital: number;
   createdAt?: number;                   // Unix timestamp when bot was created. Optional for backwards compatibility
 
   // Trading Parameters
-  leverage?: number;                    // Fixed leverage (1-125). Optional - defaults to random [3,5,10] if not set
+  leverage?: number;                    // Fixed leverage (1-125). Deprecated, use leverages
+  leverages?: number[];                 // Multiple leverages (e.g., [3, 5, 10]). Bot randomly picks one for each trade
   allowedSides?: 'LONG' | 'SHORT' | 'BOTH'; // Which sides to trade. Default: 'BOTH'
 
   // Performance Targets
