@@ -20,6 +20,11 @@ export interface Position {
   shouldWin: boolean;        // Pre-determined outcome
   targetPnL: number;         // Target P&L percent
   stopLossPnL: number;       // Stop loss P&L percent
+  scheduledCloseAt?: number; // Timestamp when position should close (for staggered closing)
+  pnlRange?: {               // Dynamic P&L range from calculator
+    mode: 'tight' | 'wide';
+    baseExpected: number;
+  };
 }
 
 export interface Trade {
@@ -39,6 +44,13 @@ export interface Trade {
   actualOutcome: 'WIN' | 'LOSS';
   hadSlippage: boolean;
   slippageAmount?: number;
+  marketFriction?: {         // Market friction components
+    slippage: number;
+    spread: number;
+    fundingRate: number;
+    commission: number;
+    total: number;
+  };
 }
 
 export interface BotConfig {

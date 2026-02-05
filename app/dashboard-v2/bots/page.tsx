@@ -66,12 +66,6 @@ export default function BotsPage() {
   const lowRiskBots = bots.filter(b => b.risk === 'low').slice(0, 10);
   const highWinRateBots = [...bots].sort((a, b) => b.stats.winRate - a.stats.winRate).slice(0, 10);
 
-  const getRiskColor = (risk: string) => {
-    if (risk === 'low') return 'text-green-400 border-green-500/30 bg-green-500/10';
-    if (risk === 'medium') return 'text-yellow-400 border-yellow-500/30 bg-yellow-500/10';
-    return 'text-red-400 border-red-500/30 bg-red-500/10';
-  };
-
   const getRiskLabel = (risk: string) => {
     if (risk === 'low') return 'Low Risk';
     if (risk === 'medium') return 'Medium Risk';
@@ -247,7 +241,7 @@ export default function BotsPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.02 }}
-                  className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6 hover:border-primary-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary-500/10"
+                  className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6"
                 >
                   <div className="flex items-center gap-4">
                     {/* Rank */}
@@ -268,14 +262,14 @@ export default function BotsPage() {
                       )}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <h3 className="text-base font-bold text-white truncate">
+                          <h3 className="text-base font-semibold text-white truncate">
                             {bot.name}
                           </h3>
                           {bot.verified && (
                             <Shield className="w-4 h-4 text-accent-400 flex-shrink-0" />
                           )}
                         </div>
-                        <p className="text-sm text-dark-400 truncate">
+                        <p className="text-xs text-dark-400 truncate">
                           {bot.strategy}
                         </p>
                       </div>
@@ -284,32 +278,32 @@ export default function BotsPage() {
                     {/* Stats */}
                     <div className="hidden md:flex items-center gap-8">
                       <div className="text-center">
-                        <div className="text-xs text-dark-400 mb-1">Rating</div>
-                        <div className="text-sm font-bold text-white">
+                        <div className="text-[10px] text-dark-400 mb-1">Rating</div>
+                        <div className="text-sm font-semibold text-white">
                           {bot.stats.rating.toFixed(1)}
                         </div>
                       </div>
                       <div className="text-center">
-                        <div className="text-xs text-dark-400 mb-1">Return</div>
-                        <div className="text-sm font-bold text-green-400">
-                          +{bot.stats.return1y.toFixed(0)}%
+                        <div className="text-[10px] text-dark-400 mb-1">Return</div>
+                        <div className={`text-sm font-semibold ${bot.stats.return1y >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                          {bot.stats.return1y >= 0 ? '+' : ''}{bot.stats.return1y.toFixed(0)}%
                         </div>
                       </div>
                       <div className="text-center">
-                        <div className="text-xs text-dark-400 mb-1">Copiers</div>
-                        <div className="text-sm font-bold text-white">
+                        <div className="text-[10px] text-dark-400 mb-1">Copiers</div>
+                        <div className="text-sm font-semibold text-white">
                           {bot.stats.copiers > 999 ? `${(bot.stats.copiers / 1000).toFixed(1)}k` : bot.stats.copiers}
                         </div>
                       </div>
                       <div className="text-center">
-                        <div className="text-xs text-dark-400 mb-1">Win Rate</div>
-                        <div className="text-sm font-bold text-white">
+                        <div className="text-[10px] text-dark-400 mb-1">Win Rate</div>
+                        <div className="text-sm font-semibold text-white">
                           {bot.stats.winRate.toFixed(0)}%
                         </div>
                       </div>
                       <div className="text-center">
-                        <div className="text-xs text-dark-400 mb-1">Risk</div>
-                        <div className={`text-sm font-bold ${getRiskColor(bot.risk).split(' ')[0]}`}>
+                        <div className="text-[10px] text-dark-400 mb-1">Risk</div>
+                        <div className="text-sm font-semibold text-white">
                           {getRiskLabel(bot.risk)}
                         </div>
                       </div>
@@ -319,13 +313,13 @@ export default function BotsPage() {
                     <div className="flex items-center gap-2 flex-shrink-0">
                       <Link
                         href={`/dashboard-v2/bots/${bot.slug}`}
-                        className="px-4 py-2 border border-dark-700 rounded-lg text-dark-300 hover:text-white hover:border-primary-500/50 hover:bg-primary-500/10 transition-all text-sm font-semibold"
+                        className="px-4 py-2 border border-dark-700 rounded-lg text-dark-300 hover:text-white hover:border-dark-600 transition-colors text-sm font-semibold"
                       >
                         Details
                       </Link>
                       <Link
                         href={`/dashboard-v2/bots/${bot.slug}`}
-                        className="px-4 py-2 bg-gradient-to-r from-primary-500 to-accent-500 rounded-lg text-white font-semibold hover:shadow-lg hover:shadow-primary-500/30 transition-all text-sm"
+                        className="px-4 py-2 bg-dark-900/50 border border-dark-700 rounded-lg text-white font-semibold hover:bg-dark-800/70 transition-colors text-sm"
                       >
                         Copy
                       </Link>

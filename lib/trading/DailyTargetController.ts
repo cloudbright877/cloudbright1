@@ -46,12 +46,7 @@ export class DailyTargetController {
 
     this.todaysTrades.push({ pnl, timestamp: now });
 
-    // Log progress
-    const progress = this.getDailyProgress();
-    console.log(
-      `📊 Trade recorded: ${pnl >= 0 ? '+' : ''}$${pnl.toFixed(2)} | ` +
-      `Today: ${progress.percentTarget.toFixed(1)}% of target (${progress.status})`
-    );
+    // Progress tracking - logging removed for cleaner console
   }
 
   /**
@@ -150,12 +145,9 @@ export class DailyTargetController {
   shouldOpenPosition(): boolean {
     const adjustment = this.getTradeAdjustment();
 
-    if (!adjustment.shouldTrade) {
-      console.log(`⏸️ Skipping trade: ${adjustment.reason}`);
-      return false;
-    }
+    // Trade decision - logging removed for cleaner console
 
-    return true;
+    return adjustment.shouldTrade;
   }
 
   /**
@@ -165,12 +157,7 @@ export class DailyTargetController {
     const adjustment = this.getTradeAdjustment();
     const adjusted = baseSize * adjustment.sizeMultiplier;
 
-    if (adjustment.sizeMultiplier !== 1.0) {
-      console.log(
-        `💰 Position size adjusted: $${baseSize.toFixed(0)} → $${adjusted.toFixed(0)} ` +
-        `(${adjustment.sizeMultiplier}x: ${adjustment.reason})`
-      );
-    }
+    // Size adjustment - logging removed for cleaner console
 
     return adjusted;
   }
@@ -182,14 +169,38 @@ export class DailyTargetController {
     const adjustment = this.getTradeAdjustment();
     const adjusted = baseDelay / adjustment.frequencyMultiplier;
 
-    if (adjustment.frequencyMultiplier !== 1.0) {
-      console.log(
-        `⏱️ Trade frequency adjusted: ${(baseDelay / 1000).toFixed(0)}s → ${(adjusted / 1000).toFixed(0)}s ` +
-        `(${adjustment.frequencyMultiplier}x: ${adjustment.reason})`
-      );
-    }
+    // Frequency adjustment - logging removed for cleaner console
 
     return adjusted;
+  }
+
+  /**
+   * Get current daily P&L as percentage of invested capital
+   * Used by DynamicPnLCalculator for auto-correction
+   */
+  getCurrentDailyPnLPercent(): number {
+    const totalPnL = this.todaysTrades.reduce((sum, t) => sum + t.pnl, 0);
+    return (totalPnL / this.investedCapital) * 100;
+  }
+
+  /**
+   * Get estimated remaining trades today
+   * Used by DynamicPnLCalculator to distribute corrections
+   */
+  getTradesRemaining(tradesPerDay: number = 8): number {
+    const progress = this.getDailyProgress();
+    const percentComplete = progress.percentComplete / 100; // 0-1
+
+    // Expected total trades for the day based on current time
+    const expectedTotalTrades = Math.ceil(tradesPerDay * (percentComplete + 0.5)); // Slightly optimistic
+
+    // Actual trades so far
+    const actualTrades = this.todaysTrades.length;
+
+    // Remaining trades (at least 1 if not end of day)
+    const remaining = Math.max(1, expectedTotalTrades - actualTrades);
+
+    return remaining;
   }
 
   /**
@@ -264,7 +275,6 @@ export class DailyTargetController {
    * Reset for new day
    */
   reset(): void {
-    console.log('🌅 New day started - resetting daily tracker');
     this.startOfDay = this.getStartOfDay();
     this.todaysTrades = [];
   }
@@ -277,10 +287,6 @@ export class DailyTargetController {
     if (newCapital) {
       this.investedCapital = newCapital;
     }
-    console.log(
-      `🎯 Target updated: ${newTargetPercent}% of $${this.investedCapital} = ` +
-      `$${((this.investedCapital * newTargetPercent) / 100).toFixed(2)}/day`
-    );
   }
 
   /**

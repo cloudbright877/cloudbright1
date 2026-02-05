@@ -3,6 +3,9 @@
 // ============================================================================
 
 import { DailyTargetController } from './DailyTargetController';
+import { dynamicPnLCalculator, type PnLRange } from './DynamicPnLCalculator';
+import { marketFrictionSimulator, type FrictionComponents } from './MarketFrictionSimulator';
+import { StaggeredClosingManager } from './StaggeredClosingManager';
 import type { Position, Trade, BotConfig, BotStats, BotPersonality } from './types';
 
 export class TradingBot {
@@ -12,6 +15,7 @@ export class TradingBot {
   private trades: Trade[] = [];
   private closedPositionIds: Set<string> = new Set();
   private dailyController: DailyTargetController;
+  private staggeredClosingManager: StaggeredClosingManager; // Instance per bot
   private personality: BotPersonality;
   private lastOpenTime: number = 0; // Track last position open time for cooldown
 
@@ -31,6 +35,9 @@ export class TradingBot {
       config.dailyTargetPercent,
       config.investedCapital
     );
+
+    // Create instance of StaggeredClosingManager for this bot
+    this.staggeredClosingManager = new StaggeredClosingManager();
 
     // Generate unique personality for this bot
     this.personality = {
@@ -146,7 +153,30 @@ export class TradingBot {
       }
 
       if (shouldClose && !this.closedPositionIds.has(pos.id)) {
-        this.closePosition(pos, needsSlippage, realPnlPercent);
+        // Check staggered closing
+        if (pos.scheduledCloseAt) {
+          // Already scheduled - check if time to close
+          if (now >= pos.scheduledCloseAt) {
+            // Time to close!
+            this.closePosition(pos, needsSlippage, realPnlPercent);
+          } else {
+            // Wait for scheduled time
+            remainingPositions.push(pos);
+          }
+        } else {
+          // First time we want to close - check with StaggeredClosingManager
+          const closingDecision = this.staggeredClosingManager.shouldClosePosition(pos.id);
+
+          if (closingDecision.shouldClose && closingDecision.delayMs < 2000) {
+            // Can close immediately (minimal delay)
+            this.closePosition(pos, needsSlippage, realPnlPercent);
+          } else {
+            // Schedule for later to prevent congestion
+            pos.scheduledCloseAt = now + closingDecision.delayMs;
+            remainingPositions.push(pos);
+            // Position scheduled - logging removed for cleaner console
+          }
+        }
       } else if (!shouldClose) {
         remainingPositions.push(pos);
       }
@@ -185,12 +215,31 @@ export class TradingBot {
       finalPnlPercent = (priceChange / pos.entryPrice) * pos.leverage * 100;
     }
 
+    // Apply market friction (realistic trading costs)
+    const volatility = marketFrictionSimulator.estimateCurrentVolatility();
+    const friction = marketFrictionSimulator.calculateFriction({
+      tradingPair: pos.pair,
+      positionSizeUSD: pos.positionSize,
+      leverage: pos.leverage,
+      side: pos.side,
+      volatility,
+    });
+
+    // Apply friction to P&L
+    const pnlBeforeFriction = finalPnlPercent;
+    finalPnlPercent = marketFrictionSimulator.applyFrictionToPnL(finalPnlPercent, friction);
+
+    // Removed verbose logging - friction is stored in trade.marketFriction
+
     const finalPnl = (pos.positionSize * finalPnlPercent) / 100;
     const isWin = finalPnl >= 0;
     const expectedWin = pos.shouldWin;
 
     // Mark as closed
     this.closedPositionIds.add(pos.id);
+
+    // Record in StaggeredClosingManager
+    this.staggeredClosingManager.recordClosure(pos.id, finalPnl);
 
     // Record in DailyTargetController
     this.dailyController.recordTrade(finalPnl);
@@ -213,6 +262,13 @@ export class TradingBot {
       actualOutcome: isWin ? 'WIN' : 'LOSS',
       hadSlippage,
       slippageAmount: hadSlippage ? slippageAmount : undefined,
+      marketFriction: {
+        slippage: friction.slippage,
+        spread: friction.spread,
+        fundingRate: friction.fundingRate,
+        commission: friction.commission,
+        total: friction.total,
+      },
     };
 
     this.trades.unshift(trade);
@@ -223,9 +279,10 @@ export class TradingBot {
       this.trades = this.trades.slice(0, maxHistory);
     }
 
-    // Save state after trade (including daily controller)
+    // Save state after trade (including daily controller and staggered manager)
     this.save();
     this.dailyController.save(this.id);
+    this.staggeredClosingManager.save(this.id);
   }
 
   // ============================================================================
@@ -258,27 +315,51 @@ export class TradingBot {
 
     if (!price) return;
 
+    // Determine leverage configuration for DynamicPnLCalculator
+    let leverageMin: number, leverageMax: number;
+    if (this.config.leverages && this.config.leverages.length > 0) {
+      leverageMin = Math.min(...this.config.leverages);
+      leverageMax = Math.max(...this.config.leverages);
+    } else if (this.config.leverage) {
+      leverageMin = leverageMax = this.config.leverage;
+    } else {
+      // Default [3, 5, 10]
+      leverageMin = 3;
+      leverageMax = 10;
+    }
+
+    // Calculate optimal P&L range using DynamicPnLCalculator
+    const pnlRange = dynamicPnLCalculator.calculatePnLRange({
+      dailyTargetPercent: this.config.dailyTargetPercent,
+      tradesPerDay: this.config.tradesPerDay,
+      winRate: this.config.winRate,
+      leverageMin,
+      leverageMax,
+      currentDailyPnL: this.dailyController.getCurrentDailyPnLPercent(),
+      tradesRemainingToday: this.dailyController.getTradesRemaining(this.config.tradesPerDay),
+    });
+
     // Determine if this trade should win
     const shouldWin = Math.random() < this.config.winRate;
 
-    // Calculate adaptive SL/TP based on win rate and personality
+    // Calculate adaptive SL/TP based on DynamicPnLCalculator
     let targetPnL: number, stopLossPnL: number;
 
     if (shouldWin) {
-      // Winning trade: TP closer than SL
-      targetPnL = this.config.winPnLMin + Math.random() * (this.config.winPnLMax - this.config.winPnLMin);
+      // Winning trade: Use win range from calculator
+      targetPnL = pnlRange.winMin + Math.random() * (pnlRange.winMax - pnlRange.winMin);
 
       // SL distance based on win rate (higher WR = farther SL)
       const slDistanceMultiplier = 1 + (this.config.winRate * 7); // 1x-8x
       const riskMultiplier = 0.9 + (this.personality.riskTolerance * 0.2); // 0.9-1.1
-      stopLossPnL = -(this.config.lossPnLMax * slDistanceMultiplier * riskMultiplier);
+      stopLossPnL = -(pnlRange.lossMax * slDistanceMultiplier * riskMultiplier);
     } else {
-      // Losing trade: SL closer than TP
-      stopLossPnL = -(this.config.lossPnLMin + Math.random() * (this.config.lossPnLMax - this.config.lossPnLMin));
+      // Losing trade: Use loss range from calculator
+      stopLossPnL = -(pnlRange.lossMin + Math.random() * (pnlRange.lossMax - pnlRange.lossMin));
 
       // TP very far (unlikely to reach)
       const tpDistanceMultiplier = 2 + ((1 - this.config.winRate) * 2); // 2x-4x
-      targetPnL = this.config.winPnLMax * tpDistanceMultiplier + 0.5;
+      targetPnL = pnlRange.winMax * tpDistanceMultiplier + 0.5;
     }
 
     // Position size with personality influence
@@ -347,6 +428,10 @@ export class TradingBot {
       shouldWin,
       targetPnL,
       stopLossPnL,
+      pnlRange: {
+        mode: pnlRange.mode,
+        baseExpected: pnlRange.baseExpected,
+      },
     };
 
     this.positions.push(newPosition);
@@ -494,6 +579,9 @@ export class TradingBot {
 
       // Load daily controller
       this.dailyController.load(this.id);
+
+      // Load staggered closing manager
+      this.staggeredClosingManager.load(this.id);
 
       console.log(
         `[TradingBot ${this.id}] State loaded: ` +

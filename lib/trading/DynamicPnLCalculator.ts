@@ -114,10 +114,7 @@ export class DynamicPnLCalculator {
       lossMin = lossMin + lossCorrection * 0.5;
       lossMax = lossMax + lossCorrection;
 
-      console.log(
-        `🔄 P&L Correction Applied: Daily excess ${targetExcess.toFixed(2)}%, ` +
-        `reducing win range by ${winCorrection.toFixed(2)}%`
-      );
+      // P&L correction applied - logging removed for cleaner console
     }
 
     // Step 7: Ensure non-negative values and reasonable bounds

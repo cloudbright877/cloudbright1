@@ -49,10 +49,7 @@ export class StaggeredClosingManager {
       (closure) => now - closure.timestamp < this.MAX_HISTORY_MS
     );
 
-    console.log(
-      `📝 Staggered Closing: Recorded closure of ${positionId} ` +
-      `(${this.recentClosures.length} closures in last ${this.MAX_HISTORY_MS / 1000}s)`
-    );
+    // Closure recorded - logging removed for cleaner console
   }
 
   /**
@@ -179,7 +176,6 @@ export class StaggeredClosingManager {
    */
   reset(): void {
     this.recentClosures = [];
-    console.log('🔄 Staggered Closing Manager reset');
   }
 
   /**
