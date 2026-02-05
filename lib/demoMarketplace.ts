@@ -61,10 +61,8 @@ export const DEMO_BOTS: DemoBot[] = [
       tradesPerDay: 250,
       minPositionSize: 100,
       maxPositionSize: 250,
-      winPnLMin: 0.3,
-      winPnLMax: 1.2,
-      lossPnLMin: 0.15,
-      lossPnLMax: 0.6,
+      // NOTE: winPnLMin/Max REMOVED - now calculated dynamically based on dailyTarget/trades/winRate
+      // This ensures proper convergence regardless of tradesPerDay changes
       minDuration: 30000, // 30 sec
       maxDuration: 180000, // 3 min
       maxConcurrentPositions: 12,
@@ -111,10 +109,6 @@ export const DEMO_BOTS: DemoBot[] = [
       tradesPerDay: 8,
       minPositionSize: 1200,
       maxPositionSize: 2000,
-      winPnLMin: 3.2,
-      winPnLMax: 12.5,
-      lossPnLMin: 1.0,
-      lossPnLMax: 4.8,
       minDuration: 600000, // 10 min
       maxDuration: 3600000, // 1 hour
       maxConcurrentPositions: 1,
@@ -161,10 +155,6 @@ export const DEMO_BOTS: DemoBot[] = [
       tradesPerDay: 45,
       minPositionSize: 1800,
       maxPositionSize: 2800,
-      winPnLMin: 5.5,
-      winPnLMax: 22.0,
-      lossPnLMin: 1.2,
-      lossPnLMax: 6.5,
       minDuration: 45000, // 45 sec
       maxDuration: 300000, // 5 min
       maxConcurrentPositions: 1,
@@ -211,10 +201,6 @@ export const DEMO_BOTS: DemoBot[] = [
       tradesPerDay: 180,
       minPositionSize: 150,
       maxPositionSize: 320,
-      winPnLMin: 0.4,
-      winPnLMax: 1.8,
-      lossPnLMin: 0.2,
-      lossPnLMax: 0.9,
       minDuration: 60000, // 1 min
       maxDuration: 240000, // 4 min
       maxConcurrentPositions: 10,
@@ -261,10 +247,6 @@ export const DEMO_BOTS: DemoBot[] = [
       tradesPerDay: 320,
       minPositionSize: 80,
       maxPositionSize: 180,
-      winPnLMin: 0.25,
-      winPnLMax: 1.4,
-      lossPnLMin: 0.12,
-      lossPnLMax: 0.65,
       minDuration: 15000, // 15 sec
       maxDuration: 90000, // 1.5 min
       maxConcurrentPositions: 8,
@@ -311,10 +293,6 @@ export const DEMO_BOTS: DemoBot[] = [
       tradesPerDay: 95,
       minPositionSize: 420,
       maxPositionSize: 780,
-      winPnLMin: 1.5,
-      winPnLMax: 7.0,
-      lossPnLMin: 0.6,
-      lossPnLMax: 3.2,
       minDuration: 90000, // 1.5 min
       maxDuration: 420000, // 7 min
       maxConcurrentPositions: 3,
@@ -361,10 +339,6 @@ export const DEMO_BOTS: DemoBot[] = [
       tradesPerDay: 62,
       minPositionSize: 380,
       maxPositionSize: 720,
-      winPnLMin: 1.2,
-      winPnLMax: 6.8,
-      lossPnLMin: 0.5,
-      lossPnLMax: 2.9,
       minDuration: 120000, // 2 min
       maxDuration: 480000, // 8 min
       maxConcurrentPositions: 4,
@@ -411,10 +385,6 @@ export const DEMO_BOTS: DemoBot[] = [
       tradesPerDay: 28,
       minPositionSize: 980,
       maxPositionSize: 1680,
-      winPnLMin: 4.2,
-      winPnLMax: 18.0,
-      lossPnLMin: 1.2,
-      lossPnLMax: 5.8,
       minDuration: 180000, // 3 min
       maxDuration: 600000, // 10 min
       maxConcurrentPositions: 2,
@@ -461,10 +431,6 @@ export const DEMO_BOTS: DemoBot[] = [
       tradesPerDay: 75,
       minPositionSize: 880,
       maxPositionSize: 1520,
-      winPnLMin: 3.5,
-      winPnLMax: 14.0,
-      lossPnLMin: 1.2,
-      lossPnLMax: 5.5,
       minDuration: 30000, // 30 sec
       maxDuration: 150000, // 2.5 min
       maxConcurrentPositions: 2,
@@ -511,10 +477,6 @@ export const DEMO_BOTS: DemoBot[] = [
       tradesPerDay: 52,
       minPositionSize: 480,
       maxPositionSize: 860,
-      winPnLMin: 1.8,
-      winPnLMax: 8.5,
-      lossPnLMin: 0.7,
-      lossPnLMax: 3.8,
       minDuration: 150000, // 2.5 min
       maxDuration: 540000, // 9 min
       maxConcurrentPositions: 3,

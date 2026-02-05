@@ -16,10 +16,6 @@ import { TrendingUp, TrendingDown, DollarSign, Target } from 'lucide-react';
 interface RiskMetricsPreviewProps {
   config: {
     winRate: number;              // Base win rate (0-100)
-    winPnLMin?: number;           // Min win % (deprecated, optional for backwards compat)
-    winPnLMax?: number;           // Max win % (deprecated, optional for backwards compat)
-    lossPnLMin?: number;          // Min loss % (deprecated, optional for backwards compat)
-    lossPnLMax?: number;          // Max loss % (deprecated, optional for backwards compat)
     dailyTargetPercent: number;   // Daily target %
     tradesPerDay: number;         // Trades per day
     leverageMin?: number;         // Min leverage
@@ -250,9 +246,16 @@ export default function RiskMetricsPreview({ config }: RiskMetricsPreviewProps) 
 
       {metrics.profitProbability === 'Low' && (
         <div className="mt-2 p-2 bg-orange-500/10 border border-orange-500/20 rounded text-[10px] text-orange-400">
-          ⚠️ <strong>CAUTION:</strong> Low profit probability. Consider increasing Win Rate or Win P&L ranges.
+          ⚠️ <strong>CAUTION:</strong> Low profit probability. Consider increasing Win Rate or Daily Target.
         </div>
       )}
+
+      {/* Info about non-affecting parameters */}
+      <div className="mt-2 p-2 bg-blue-900/20 rounded border border-blue-500/20 text-[10px] text-blue-300/80">
+        <strong>ℹ️ Note:</strong> Duration Range and Max Positions don't affect Expected Daily P&L.
+        They only control <em>timing</em> (when trades open/close) and <em>exposure</em> (how many positions at once).
+        To change Expected Daily, modify: Daily Target, Trades/Day, Win Rate, or Leverage.
+      </div>
     </div>
   );
 }
@@ -282,26 +285,16 @@ function calculateMetrics(config: RiskMetricsPreviewProps['config']): Calculated
   }
 
   // STEP 1: Calculate base P&L using DynamicPnLCalculator formula
-  // Check for deprecated manual P&L ranges (fallback for old configs)
-  let baseWinPnLPercent: number;
-  let baseLossPnLPercent: number;
+  // NOTE: Deprecated winPnLMin/Max are IGNORED - they were manually tuned
+  // and don't scale with tradesPerDay changes. Always calculate dynamically.
 
-  if (config.winPnLMin !== undefined && config.winPnLMax !== undefined) {
-    // Use deprecated values (backwards compatibility with old Bybit Market Maker config)
-    baseWinPnLPercent = (config.winPnLMin + config.winPnLMax) / 2;
-    baseLossPnLPercent = config.lossPnLMin !== undefined && config.lossPnLMax !== undefined
-      ? (config.lossPnLMin + config.lossPnLMax) / 2
-      : baseWinPnLPercent * ((config.winRate / 100) / (1 - config.winRate / 100)) * 0.7;
-  } else {
-    // Calculate dynamically
-    // Formula: baseWinPnL = (dailyTarget / tradesPerDay / winRate)
-    // NOTE: NOT dividing by avgLeverage anymore (see DynamicPnLCalculator.ts for explanation)
-    baseWinPnLPercent = (config.dailyTargetPercent / config.tradesPerDay / (config.winRate / 100));
+  // Formula: baseWinPnL = (dailyTarget / tradesPerDay / winRate)
+  // This ensures Expected Daily converges to Daily Target
+  const baseWinPnLPercent = (config.dailyTargetPercent / config.tradesPerDay / (config.winRate / 100));
 
-    // Calculate base loss P&L (using risk-reward ratio)
-    const asymmetryFactor = 0.7;
-    baseLossPnLPercent = baseWinPnLPercent * ((config.winRate / 100) / (1 - config.winRate / 100)) * asymmetryFactor;
-  }
+  // Calculate base loss P&L (using risk-reward ratio)
+  const asymmetryFactor = 0.7;
+  const baseLossPnLPercent = baseWinPnLPercent * ((config.winRate / 100) / (1 - config.winRate / 100)) * asymmetryFactor;
 
   // STEP 2: Calculate average P&L using variance ranges
   // This matches DynamicPnLCalculator approach

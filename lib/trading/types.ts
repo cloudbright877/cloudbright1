@@ -75,11 +75,11 @@ export interface BotConfig {
   minPositionSize: number;              // Min position size in $
   maxPositionSize: number;              // Max position size in $
 
-  // P&L Ranges (% per trade)
-  winPnLMin: number;                    // Min win %
-  winPnLMax: number;                    // Max win %
-  lossPnLMin: number;                   // Min loss %
-  lossPnLMax: number;                   // Max loss %
+  // P&L Ranges (% per trade) - DEPRECATED: Now calculated dynamically
+  winPnLMin?: number;                   // Min win % (DEPRECATED - ignored by bot)
+  winPnLMax?: number;                   // Max win % (DEPRECATED - ignored by bot)
+  lossPnLMin?: number;                  // Min loss % (DEPRECATED - ignored by bot)
+  lossPnLMax?: number;                  // Max loss % (DEPRECATED - ignored by bot)
 
   // Duration Control
   minDuration: number;                  // Min position hold time (ms)
