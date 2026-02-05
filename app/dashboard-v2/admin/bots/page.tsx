@@ -425,7 +425,7 @@ export default function AdminBotsPage() {
                         />
                       </div>
 
-                      {/* Row 2: Leverage & Win P&L */}
+                      {/* Row 2: Leverage & Duration */}
                       <div className="p-2 bg-dark-900/30 rounded border border-dark-700/50">
                         <RangeSlider
                           min={1}
@@ -439,39 +439,6 @@ export default function AdminBotsPage() {
                           }}
                           label="Leverage Range"
                           unit="x"
-                        />
-                      </div>
-
-                      <div className="p-2 bg-dark-900/30 rounded border border-dark-700/50">
-                        <RangeSlider
-                          min={0.1}
-                          max={15}
-                          step={0.1}
-                          valueMin={config.winPnLMin}
-                          valueMax={config.winPnLMax}
-                          onChange={(min, max) => {
-                            updateField('winPnLMin', min);
-                            updateField('winPnLMax', max);
-                          }}
-                          label="Win Profit Range (per trade)"
-                          unit="%"
-                        />
-                      </div>
-
-                      {/* Row 3: Max Loss & Duration */}
-                      <div className="p-2 bg-dark-900/30 rounded border border-dark-700/50">
-                        <RangeSlider
-                          min={0.1}
-                          max={15}
-                          step={0.1}
-                          valueMin={config.lossPnLMin}
-                          valueMax={config.lossPnLMax}
-                          onChange={(min, max) => {
-                            updateField('lossPnLMin', min);
-                            updateField('lossPnLMax', max);
-                          }}
-                          label="Max Loss Range (per trade)"
-                          unit="%"
                         />
                       </div>
 
@@ -491,7 +458,7 @@ export default function AdminBotsPage() {
                         />
                       </div>
 
-                      {/* Row 4: Position Size (full width) */}
+                      {/* Row 3: Position Size (full width) */}
                       <div className="col-span-2 p-2 bg-dark-900/30 rounded border border-dark-700/50">
                         <RangeSlider
                           min={100}
@@ -506,6 +473,27 @@ export default function AdminBotsPage() {
                           label="Position Size Range"
                           unit="$"
                         />
+                      </div>
+
+                      {/* Dynamic P&L Info Block */}
+                      <div className="col-span-2 p-3 bg-blue-900/20 rounded-lg border border-blue-500/30">
+                        <div className="flex items-start gap-2">
+                          <div className="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <span className="text-blue-400 text-xs font-bold">i</span>
+                          </div>
+                          <div className="flex-1">
+                            <h5 className="text-xs font-bold text-blue-300 mb-1">Dynamic P&L System</h5>
+                            <p className="text-[10px] text-blue-200/80 leading-relaxed">
+                              <strong>P&L ranges are calculated automatically</strong> based on Daily Target, Trades/Day, Win Rate, and Leverage.
+                              The system uses advanced variance distribution (80% tight convergence + 20% wide spikes) to hit your daily target while maintaining visual realism.
+                            </p>
+                            <div className="mt-2 p-2 bg-blue-900/30 rounded border border-blue-500/20">
+                              <div className="text-[9px] text-blue-300/70 font-mono">
+                                Formula: baseWinPnL = (DailyTarget / TradesPerDay / WinRate) / AvgLeverage
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
 
                       {/* Row 5: Trading Pairs */}
@@ -696,50 +684,8 @@ export default function AdminBotsPage() {
 
                           {/* Info box */}
                           <div className="mb-2 p-2 bg-orange-500/5 border border-orange-500/10 rounded text-[10px] text-orange-300/80">
-                            💡 When enabled: shows fee breakdown in closed trades (Gross P&L → Fees → Net P&L)
+                            💡 Adds realistic trading costs to simulations. Check "Expected Trading Outcomes" above to see impact on win rate.
                           </div>
-
-                          {/* Warning if P&L ranges too small */}
-                          {config.marketFriction?.enabled && (
-                            <div className="mb-2">
-                              {(() => {
-                                const avgFriction = config.marketFriction?.forceVolatility === 'low' ? 0.15
-                                  : config.marketFriction?.forceVolatility === 'high' ? 0.5
-                                  : 0.3; // medium or auto
-                                const winMin = config.winPnLMin;
-                                const netWinMin = winMin - avgFriction;
-
-                                if (netWinMin < 0.5) {
-                                  return (
-                                    <div className="p-2 bg-red-500/10 border border-red-500/20 rounded space-y-2">
-                                      <div className="text-[10px] text-red-400 font-semibold">
-                                        ⚠️ WARNING: Win P&L too small for Market Friction!
-                                      </div>
-                                      <div className="text-[10px] text-red-300/80">
-                                        Current: {winMin}% - {avgFriction}% friction = {netWinMin.toFixed(2)}% (too low!)
-                                      </div>
-                                      <button
-                                        onClick={() => {
-                                          const multiplier = avgFriction === 0.15 ? 2 : avgFriction === 0.5 ? 4 : 3;
-                                          updateField('winPnLMin', config.winPnLMin * multiplier);
-                                          updateField('winPnLMax', config.winPnLMax * multiplier);
-                                          updateField('dailyTargetPercent', config.dailyTargetPercent * 1.5);
-                                        }}
-                                        className="w-full px-2 py-1 bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 rounded text-[10px] text-green-400 font-semibold transition-all"
-                                      >
-                                        🔧 Auto-Fix: Increase P&L Ranges
-                                      </button>
-                                    </div>
-                                  );
-                                }
-                                return (
-                                  <div className="p-2 bg-green-500/10 border border-green-500/20 rounded text-[10px] text-green-400">
-                                    ✅ P&L ranges OK ({netWinMin.toFixed(2)}% net after friction)
-                                  </div>
-                                );
-                              })()}
-                            </div>
-                          )}
 
                           {(config.marketFriction?.enabled ?? false) && (
                             <div>

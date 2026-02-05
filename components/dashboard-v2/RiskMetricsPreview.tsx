@@ -173,7 +173,7 @@ export default function RiskMetricsPreview({ config }: RiskMetricsPreviewProps) 
           <div className="flex justify-between">
             <span className="text-dark-500">Avg Win (gross):</span>
             <span className="text-green-400 font-semibold">
-              +{((config.winPnLMin + config.winPnLMax) / 2).toFixed(2)}%
+              +{(metrics.netAvgWin + metrics.marketFrictionCost).toFixed(2)}%
             </span>
           </div>
           <div className="flex justify-between">
@@ -239,12 +239,20 @@ export default function RiskMetricsPreview({ config }: RiskMetricsPreviewProps) 
 
 /**
  * Calculate all metrics based on current configuration
+ * Uses DynamicPnLCalculator to simulate real bot behavior
  */
 function calculateMetrics(config: RiskMetricsPreviewProps['config']): CalculatedMetrics {
-  // Step 1: Base win rate
+  // Import DynamicPnLCalculator logic inline (simplified)
+  // This matches what TradingBot.ts actually uses!
+
   const baseWinRate = config.winRate; // Already in % (0-100)
 
-  // Step 2: Calculate market friction cost
+  // Calculate leverage range
+  const leverageMin = config.leverageMin ?? 3;
+  const leverageMax = config.leverageMax ?? 10;
+  const avgLeverage = (leverageMin + leverageMax) / 2;
+
+  // Calculate market friction cost
   let marketFrictionCost = 0;
   if (config.marketFriction?.enabled) {
     const volatility = config.marketFriction.forceVolatility ?? 'medium';
@@ -253,44 +261,94 @@ function calculateMetrics(config: RiskMetricsPreviewProps['config']): Calculated
       : 0.3; // medium or auto
   }
 
-  // Step 3: Calculate average win/loss
-  const avgWinGross = (config.winPnLMin + config.winPnLMax) / 2;
-  const avgLoss = (config.lossPnLMin + config.lossPnLMax) / 2;
+  // STEP 1: Calculate base P&L using DynamicPnLCalculator formula
+  // Formula: baseWinPnL = (dailyTarget / tradesPerDay / winRate) / avgLeverage
+  const baseWinPnLPercent = (config.dailyTargetPercent / config.tradesPerDay / (config.winRate / 100)) / avgLeverage;
 
-  // Step 4: Net average win (after friction)
+  // Calculate base loss P&L (using risk-reward ratio)
+  const asymmetryFactor = 0.7;
+  const baseLossPnLPercent = baseWinPnLPercent * ((config.winRate / 100) / (1 - config.winRate / 100)) * asymmetryFactor;
+
+  // STEP 2: Simulate variance (tight/wide mode distribution)
+  const tightModePercent = config.pnlVariance?.tightModePercent ?? 80;
+
+  // Simulate 100 trades to get realistic averages
+  let totalWinPnL = 0;
+  let totalLossPnL = 0;
+  let winCount = 0;
+  let lossCount = 0;
+
+  const SIMULATION_TRADES = 100;
+
+  for (let i = 0; i < SIMULATION_TRADES; i++) {
+    const isTightMode = (i / SIMULATION_TRADES) < (tightModePercent / 100);
+    const shouldWin = (i / SIMULATION_TRADES) < (config.winRate / 100);
+
+    let winMin: number, winMax: number, lossMin: number, lossMax: number;
+
+    if (isTightMode) {
+      // Tight mode: ±30% variance
+      const winVariance = 0.3;
+      winMin = baseWinPnLPercent * (1 - winVariance);
+      winMax = baseWinPnLPercent * (1 + winVariance);
+
+      const lossVariance = 0.3;
+      lossMin = baseLossPnLPercent * (1 - lossVariance);
+      lossMax = baseLossPnLPercent * (1 + lossVariance);
+    } else {
+      // Wide mode: 2x-4x variance
+      const randomMultiplier = 2.0 + Math.random() * 2.0; // 2-4x
+      winMin = baseWinPnLPercent * 0.8;
+      winMax = baseWinPnLPercent * randomMultiplier;
+
+      lossMin = baseLossPnLPercent * 0.6;
+      lossMax = baseLossPnLPercent * (1 + (randomMultiplier - 1) * 0.5);
+    }
+
+    if (shouldWin) {
+      const winPnL = winMin + Math.random() * (winMax - winMin);
+      totalWinPnL += winPnL;
+      winCount++;
+    } else {
+      const lossPnL = lossMin + Math.random() * (lossMax - lossMin);
+      totalLossPnL += lossPnL;
+      lossCount++;
+    }
+  }
+
+  const avgWinGross = winCount > 0 ? totalWinPnL / winCount : 0;
+  const avgLoss = lossCount > 0 ? totalLossPnL / lossCount : 0;
+
+  // STEP 3: Apply market friction
   const netAvgWin = avgWinGross - marketFrictionCost;
-  const netAvgLoss = avgLoss; // Losses don't get worse from friction (already negative)
+  const netAvgLoss = avgLoss;
 
-  // Step 5: Calculate how many wins become losses
-  // If net win < 0.1%, it's effectively a loss
+  // STEP 4: Calculate how many wins become losses due to friction
   let winsBecomingLosses = 0;
   if (config.marketFriction?.enabled && netAvgWin < 0.1) {
-    // Estimate: if average win becomes negative/near-zero, assume 30-70% of wins become losses
-    // depending on how negative
     if (netAvgWin <= 0) {
       winsBecomingLosses = baseWinRate * 0.7; // 70% of wins become losses
     } else {
-      // Partially affected: scale based on how close to 0
-      const affectRatio = 1 - (netAvgWin / 0.1); // 0.1% is threshold
+      const affectRatio = 1 - (netAvgWin / 0.1);
       winsBecomingLosses = baseWinRate * affectRatio * 0.5;
     }
   }
 
-  // Step 6: Final win/loss rate
+  // STEP 5: Final win/loss rate
   const finalWinRate = Math.max(0, baseWinRate - winsBecomingLosses);
   const finalLossRate = 100 - finalWinRate;
 
-  // Step 7: Expected net P&L per trade
+  // STEP 6: Expected net P&L per trade
   const expectedNetPnLPerTrade =
     (finalWinRate / 100 * netAvgWin) - (finalLossRate / 100 * netAvgLoss);
 
-  // Step 8: Risk/Reward ratio
+  // STEP 7: Risk/Reward ratio
   const riskRewardRatio = netAvgWin > 0 ? netAvgWin / netAvgLoss : 0;
 
-  // Step 9: Expected daily P&L
+  // STEP 8: Expected daily P&L
   const expectedDailyPnL = expectedNetPnLPerTrade * config.tradesPerDay;
 
-  // Step 10: Profit probability assessment
+  // STEP 9: Profit probability assessment
   let profitProbability: 'High' | 'Medium' | 'Low' | 'Negative';
   if (expectedNetPnLPerTrade < 0 || expectedDailyPnL < 0) {
     profitProbability = 'Negative';
