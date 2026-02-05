@@ -1102,9 +1102,13 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
         >
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
             <div className="flex items-start gap-4">
-              <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-accent-500 to-primary-600 flex items-center justify-center text-2xl font-bold text-white shadow-lg">
-                {masterBotData.icon}
-              </div>
+              {masterBotData.icon.startsWith('/') ? (
+                <img src={masterBotData.icon} alt={masterBotData.name} className="w-16 h-16 object-contain" />
+              ) : (
+                <div className="w-16 h-16 flex items-center justify-center text-2xl">
+                  {masterBotData.icon}
+                </div>
+              )}
               <div>
                 <div className="flex items-center gap-2 mb-2 flex-wrap">
                   <h1 className="text-3xl font-bold text-white">{masterBotData.name}</h1>

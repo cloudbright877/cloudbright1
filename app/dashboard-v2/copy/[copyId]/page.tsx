@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { botsApi } from '@/lib/api/botsApi';
 import { getUserCopy } from '@/lib/userCopies';
+import { getDemoBotById } from '@/lib/demoMarketplace';
 import {
   TrendingUp,
   TrendingDown,
@@ -288,11 +289,17 @@ export default function UserCopyPage() {
       // Get trading pairs from trades
       const uniquePairs = Array.from(new Set(stats.trades.map(t => t.pair)));
 
+      // Get bot icon from DEMO_BOTS using masterBotId
+      const copyInfo = getUserCopy(copyId);
+      const masterBot = copyInfo ? getDemoBotById(copyInfo.masterBotId) : null;
+      const botIcon = masterBot?.icon;
+
       // Update bot details from stats
       setBotDetails({
         id: copyId,
         name: stats.name || 'User Copy',
         slug: copyId,
+        icon: botIcon,
         status: 'active',
         strategy: '',
         risk,
@@ -459,9 +466,13 @@ export default function UserCopyPage() {
 
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 bg-gradient-to-br from-primary-500/20 to-accent-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
-                <Layers className="w-7 h-7 text-primary-400" />
-              </div>
+              {botDetails.icon && typeof botDetails.icon === 'string' && botDetails.icon.startsWith('/') ? (
+                <img src={botDetails.icon} alt={botDetails.name} className="w-14 h-14 object-contain" />
+              ) : (
+                <div className="w-14 h-14 flex items-center justify-center text-2xl">
+                  <Layers className="w-7 h-7 text-primary-400" />
+                </div>
+              )}
               <div>
                 <div className="flex items-center gap-3">
                   <h1 className="text-3xl lg:text-4xl font-bold text-white">{botDetails.name}</h1>
@@ -1086,44 +1097,60 @@ export default function UserCopyPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-3">
+            <div className="space-y-3">
               {paginatedTrades.map((trade) => (
-                <div key={trade.id} className={`p-4 rounded-xl border ${
-                  trade.pnl >= 0 ? 'bg-green-500/5 border-green-500/20' : 'bg-red-500/5 border-red-500/20'
-                }`}>
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      <span className="text-base font-bold text-white">{trade.pair}</span>
-                      <div className={`px-2 py-1 rounded text-xs font-semibold ${
-                        trade.side === 'LONG' ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'
+                <div key={trade.id} className={`p-3 rounded-lg border ${
+                  trade.pnl >= 0 ? 'bg-green-500/10 border-green-500/30' : 'bg-red-500/10 border-red-500/30'
+                } hover:bg-dark-800/70 transition-colors`}>
+                  <div className="flex items-center justify-between gap-4">
+                    {/* Left: Pair & Side */}
+                    <div className="flex items-center gap-3 flex-shrink-0">
+                      <span className="text-sm font-bold text-white">{trade.pair}</span>
+                      <div className={`px-2 py-0.5 rounded text-[10px] font-bold whitespace-nowrap ${
+                        trade.side === 'LONG' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
                       }`}>
-                        {trade.side === 'LONG' ? <ArrowUpRight className="w-3 h-3 inline mr-1" /> : <ArrowDownRight className="w-3 h-3 inline mr-1" />}
-                        {trade.side}×{trade.leverage}
+                        {trade.side === 'LONG' ? '↑' : '↓'} {trade.side}×{trade.leverage}
                       </div>
                     </div>
-                    <div className="text-xs text-dark-400">
-                      {new Date(trade.closedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                    </div>
-                  </div>
 
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    <div>
-                      <div className="text-xs text-dark-500 mb-1">P&L</div>
-                      <div className={`text-sm font-bold ${trade.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                        {trade.pnl >= 0 ? '+' : ''}${trade.pnl.toFixed(2)} ({trade.pnl >= 0 ? '+' : ''}{trade.pnlPercent.toFixed(2)}%)
+                    {/* Middle: Key Stats */}
+                    <div className="flex items-center gap-4 text-xs text-dark-300 overflow-x-auto">
+                      <div className="text-center">
+                        <div className="text-[10px] text-dark-500 uppercase">P&L</div>
+                        <div className={`font-semibold ${trade.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                          {trade.pnl >= 0 ? '+' : ''}${trade.pnl.toFixed(2)}
+                        </div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-[10px] text-dark-500 uppercase">%</div>
+                        <div className={`font-semibold ${trade.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                          {trade.pnl >= 0 ? '+' : ''}{trade.pnlPercent.toFixed(2)}%
+                        </div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-[10px] text-dark-500 uppercase">Size</div>
+                        <div className="font-semibold text-white">${trade.positionSize.toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-[10px] text-dark-500 uppercase">Duration</div>
+                        <div className="font-semibold text-white">{trade.duration}</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-[10px] text-dark-500 uppercase">Entry</div>
+                        <div className="font-mono font-semibold text-white text-[11px]">${trade.entryPrice.toFixed(2)}</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-[10px] text-dark-500 uppercase">Exit</div>
+                        <div className="font-mono font-semibold text-white text-[11px]">${trade.exitPrice.toFixed(2)}</div>
                       </div>
                     </div>
-                    <div>
-                      <div className="text-xs text-dark-500 mb-1">Position Size</div>
-                      <div className="text-sm text-dark-300 font-mono">${trade.positionSize.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-                    </div>
-                    <div>
-                      <div className="text-xs text-dark-500 mb-1">Duration</div>
-                      <div className="text-sm text-dark-300">{trade.duration}</div>
-                    </div>
-                    <div>
-                      <div className="text-xs text-dark-500 mb-1">Entry → Exit</div>
-                      <div className="text-xs text-dark-300 font-mono">${trade.entryPrice.toFixed(2)} → ${trade.exitPrice.toFixed(2)}</div>
+
+                    {/* Right: Timestamp */}
+                    <div className="flex-shrink-0 text-right">
+                      <div className="text-[10px] text-dark-500 uppercase">Closed</div>
+                      <div className="text-xs text-dark-400 whitespace-nowrap">
+                        {new Date(trade.closedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                      </div>
                     </div>
                   </div>
                 </div>

@@ -267,7 +267,11 @@ export default function AdminBotsPage() {
                   <div className="flex items-center justify-between gap-4">
                     {/* Left: Bot Info */}
                     <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <div className="text-2xl">{bot.icon}</div>
+                      {bot.icon.startsWith('/') ? (
+                        <img src={bot.icon} alt={bot.name} className="w-10 h-10 object-contain" />
+                      ) : (
+                        <div className="text-2xl">{bot.icon}</div>
+                      )}
                       <div className="min-w-0">
                         <h3 className="text-sm font-bold text-white truncate">{bot.name}</h3>
                         <p className="text-xs text-dark-500">{bot.slug}</p>
@@ -330,7 +334,11 @@ export default function AdminBotsPage() {
                     {/* Header Row */}
                     <div className="flex items-center justify-between pb-2 border-b border-dark-700/50">
                       <div className="flex items-center gap-3">
+                        {bot.icon.startsWith('/') ? (
+                        <img src={bot.icon} alt={bot.name} className="w-10 h-10 object-contain" />
+                      ) : (
                         <div className="text-2xl">{bot.icon}</div>
+                      )}
                         <div>
                           <h3 className="text-sm font-bold text-white">{bot.name}</h3>
                           <p className="text-xs text-dark-500">{bot.slug}</p>

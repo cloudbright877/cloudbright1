@@ -259,9 +259,13 @@ export default function BotsPage() {
 
                     {/* Bot Info */}
                     <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-lg font-bold text-white flex-shrink-0 shadow-lg">
-                        {bot.icon}
-                      </div>
+                      {typeof bot.icon === 'string' && bot.icon.startsWith('/') ? (
+                        <img src={bot.icon} alt={bot.name} className="w-12 h-12 object-contain flex-shrink-0" />
+                      ) : (
+                        <div className="w-12 h-12 flex items-center justify-center text-2xl flex-shrink-0">
+                          {bot.icon}
+                        </div>
+                      )}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <h3 className="text-base font-bold text-white truncate">

@@ -53,6 +53,7 @@ export interface BotDetails {
   id: string;
   name: string;
   slug: string;
+  icon?: string;              // Bot icon path (e.g., "/bots/BybitMarketMakerBot.png")
   status: BotStatus;
   strategy: string;           // e.g., "Grid Trading", "DCA", "Scalping"
   risk: BotRisk;

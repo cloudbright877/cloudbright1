@@ -67,10 +67,13 @@ export function BotCarousel({ title, bots }: BotCarouselProps) {
                 <div className="relative p-6">
                   {/* Header */}
                   <div className="flex items-center gap-4 mb-5">
-                    <div className="relative w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-lg font-bold text-white shadow-xl transition-all duration-300">
-                      {bot.icon}
-                      <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-black/20 to-transparent" />
-                    </div>
+                    {typeof bot.icon === 'string' && bot.icon.startsWith('/') ? (
+                      <img src={bot.icon} alt={bot.name} className="w-12 h-12 object-contain" />
+                    ) : (
+                      <div className="w-12 h-12 flex items-center justify-center text-2xl">
+                        {bot.icon}
+                      </div>
+                    )}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <h3 className="text-lg font-bold text-white truncate">
