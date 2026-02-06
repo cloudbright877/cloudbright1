@@ -41,12 +41,6 @@ export interface CalibrationParams {
   tradesRemainingToday?: number; // Trades left today (for correction)
   tightModePercent?: number;    // % of positions in tight mode (0-100), default: 80
 
-  // Market friction configuration
-  marketFriction?: {
-    enabled: boolean;
-    forceVolatility?: 'low' | 'medium' | 'high' | 'auto';
-  };
-
   // NOTE: winPnLMin/Max, lossPnLMin/Max are DEPRECATED and IGNORED
   // They were manually tuned and don't scale with tradesPerDay
   // Kept here only for interface compatibility with old code
@@ -58,42 +52,13 @@ export interface CalibrationParams {
 
 export class DynamicPnLCalculator {
   /**
-   * Calculate average market friction per trade AS % OF POSITION SIZE
-   * This needs to be converted to % of capital for formula
-   *
-   * Returns friction % of POSITION that will cost per trade
-   */
-  private calculateAvgFrictionPercent(params: CalibrationParams): number {
-    if (!params.marketFriction?.enabled) {
-      return 0; // Friction disabled
-    }
-
-    const volatility = params.marketFriction.forceVolatility ?? 'medium';
-
-    // Realistic friction values based on volatility
-    // Components: slippage (0.05-0.3%) + spread (0.01-0.1%) + funding (0-0.03%) + commission (0.04%)
-    // These are % of POSITION SIZE, not capital
-    switch (volatility) {
-      case 'low':
-        return 0.15; // Total: ~0.15% of position size
-      case 'high':
-        return 0.5; // Total: ~0.5% of position size
-      case 'medium':
-      case 'auto':
-      default:
-        return 0.3; // Total: ~0.3% of position size
-    }
-  }
-
-  /**
    * Calculate optimal P&L range for next trade
    *
-   * Formula breakdown (v2.0 - Simplified):
-   * 1. friction = calculateAvgFriction()
-   * 2. baseWinGross = (dailyTarget / (winRate × trades) + friction) / (1 - asymmetry)
-   * 3. baseLoss = baseWinGross × (winRate / (1-winRate)) × asymmetry
-   * 4. Apply variance based on mode (80% tight, 20% wide)
-   * 5. Apply correction if currentDailyPnL exceeds target
+   * Formula breakdown (v2.1 - Simplified):
+   * 1. baseWin = dailyTarget / (winRate × trades × (1 - asymmetry))
+   * 2. baseLoss = baseWin × (winRate / (1-winRate)) × asymmetry
+   * 3. Apply variance based on mode (80% tight, 20% wide)
+   * 4. Apply correction if currentDailyPnL exceeds target
    */
   calculatePnLRange(params: CalibrationParams): PnLRange {
     const {
@@ -111,13 +76,7 @@ export class DynamicPnLCalculator {
       lossPnLMax,
     } = params;
 
-    // Step 1: Calculate average friction per trade (if enabled)
-    // Friction is % of POSITION SIZE, not capital
-    // NOTE: This is NOT used in formula anymore - TradingBot compensates for friction
-    // by multiplying pnlRange by capitalToPositionRatio which accounts for it
-    const frictionPercentOfPosition = this.calculateAvgFrictionPercent(params);
-
-    // Step 2: Calculate base P&L with SIMPLIFIED FORMULA (v2.1.1)
+    // Step 1: Calculate base P&L with SIMPLIFIED FORMULA (v2.1.1)
     // NOTE: Deprecated winPnLMin/Max are IGNORED because they were manually tuned
     // and don't account for tradesPerDay changes. Always calculate dynamically.
 
@@ -143,11 +102,11 @@ export class DynamicPnLCalculator {
 
     const baseWinPnLPercent = baseWinPnLGross;
 
-    // Step 4: Determine variance mode (using configured tight mode percentage)
+    // Step 2: Determine variance mode (using configured tight mode percentage)
     const isTightMode = Math.random() < (tightModePercent / 100);
     const mode: 'tight' | 'wide' = isTightMode ? 'tight' : 'wide';
 
-    // Step 5: Apply variance
+    // Step 3: Apply variance
     let winMin: number, winMax: number, lossMin: number, lossMax: number;
 
     if (mode === 'tight') {
@@ -172,7 +131,7 @@ export class DynamicPnLCalculator {
       lossMax = baseLossPnLPercent * (1 + (randomMultiplier - 1) * 0.5); // Less extreme on loss side
     }
 
-    // Step 6: Apply correction if daily P&L exceeds target (user's idea!)
+    // Step 4: Apply correction if daily P&L exceeds target (user's idea!)
     // Correction strength: 40-60% (chosen by user)
     const targetExcess = currentDailyPnL - dailyTargetPercent;
     if (targetExcess > dailyTargetPercent * 0.2 && tradesRemainingToday > 0) {
@@ -192,7 +151,7 @@ export class DynamicPnLCalculator {
       // P&L correction applied - logging removed for cleaner console
     }
 
-    // Step 7: Ensure non-negative values and reasonable bounds
+    // Step 5: Ensure non-negative values and reasonable bounds
     // Minimum based on formula output, not hardcoded
     winMin = Math.max(baseWinPnLPercent * 0.1, winMin); // At least 10% of base
     winMax = Math.max(winMin * 1.2, winMax);

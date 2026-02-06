@@ -188,10 +188,6 @@ export function mapPresetToConfig(
     pnlVariance: {
       tightModePercent: realism.tightModePercent
     },
-    marketFriction: {
-      enabled: true,
-      forceVolatility: realism.volatility
-    },
 
     // Preset System (ADAPTIVE_CONVERGENCE_SYSTEM)
     character: input.character,

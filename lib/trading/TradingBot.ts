@@ -4,7 +4,6 @@
 
 import { DailyTargetController } from './DailyTargetController';
 import { dynamicPnLCalculator, type PnLRange } from './DynamicPnLCalculator';
-import { marketFrictionSimulator, type FrictionComponents } from './MarketFrictionSimulator';
 import { StaggeredClosingManager } from './StaggeredClosingManager';
 import { trendDetector } from './SimpleTrendDetector';
 import { ConvergenceController } from './convergence/ConvergenceController';
@@ -305,29 +304,11 @@ export class TradingBot {
 
       slippageAmount = Math.abs((slippage / pos.currentPrice) * 100);
 
-      // SLIPPAGE LIMITS (v2.0): Check if slippage is realistic
-      // Based on market volatility (from config or estimated)
-      const frictionConfig = this.config.marketFriction;
-      const volatility = frictionConfig?.forceVolatility ?? 'medium';
-
-      // Realistic slippage thresholds
-      const maxRealisticSlippage =
-        volatility === 'low' ? 0.15 :
-        volatility === 'high' ? 0.5 :
-        0.3; // medium
-
-      if (slippageAmount > maxRealisticSlippage) {
-        // Slippage exceeds realistic threshold - cap it
-        const cappedSlippage = Math.sign(slippage) * (pos.currentPrice * maxRealisticSlippage / 100);
-        exitPrice = pos.currentPrice + cappedSlippage;
-        slippageAmount = maxRealisticSlippage;
-
-        console.warn(
-          `[${this.config.name}] Slippage capped: required ${(Math.abs(slippage / pos.currentPrice) * 100).toFixed(2)}% ` +
-          `→ applied ${maxRealisticSlippage}% (${volatility} volatility limit)`
-        );
+      // SLIPPAGE LIMITS: Check against maxSlippage config
+      if (slippageAmount > this.config.maxSlippage!) {
+        exitPrice = pos.currentPrice + Math.sign(slippage) * (pos.currentPrice * this.config.maxSlippage! / 100);
+        slippageAmount = this.config.maxSlippage!;
       } else {
-        // Realistic slippage - apply fully
         exitPrice = pos.currentPrice + slippage;
       }
 
@@ -338,37 +319,6 @@ export class TradingBot {
         ? exitPrice - pos.entryPrice
         : pos.entryPrice - exitPrice;
       finalPnlPercent = (priceChange / pos.entryPrice) * pos.leverage * 100;
-    }
-
-    // Apply market friction (realistic trading costs) if enabled
-    const frictionEnabled = this.config.marketFriction?.enabled ?? false; // Default: disabled (to avoid breaking existing bots)
-    let friction: FrictionComponents;
-
-    if (frictionEnabled) {
-      const forceVolatility = this.config.marketFriction?.forceVolatility;
-      const volatility = forceVolatility && forceVolatility !== 'auto'
-        ? forceVolatility
-        : marketFrictionSimulator.estimateCurrentVolatility();
-
-      friction = marketFrictionSimulator.calculateFriction({
-        tradingPair: pos.pair,
-        positionSizeUSD: pos.positionSize,
-        leverage: pos.leverage,
-        side: pos.side,
-        volatility,
-      });
-
-      // Apply friction to P&L
-      finalPnlPercent = marketFrictionSimulator.applyFrictionToPnL(finalPnlPercent, friction);
-    } else {
-      // Market friction disabled - use zero friction
-      friction = {
-        slippage: 0,
-        spread: 0,
-        fundingRate: 0,
-        commission: 0,
-        total: 0,
-      };
     }
 
     // Layer 6: Micro-steering (final 10 trades)
@@ -448,13 +398,6 @@ export class TradingBot {
       actualOutcome: isWin ? 'WIN' : 'LOSS',
       hadSlippage,
       slippageAmount: hadSlippage ? slippageAmount : undefined,
-      marketFriction: {
-        slippage: friction.slippage,
-        spread: friction.spread,
-        fundingRate: friction.fundingRate,
-        commission: friction.commission,
-        total: friction.total,
-      },
       technicalIndicators: {
         trend, // Just the trend, not full TA
         // Other fields undefined (not needed for Layer 2)
@@ -538,7 +481,6 @@ export class TradingBot {
       currentDailyPnL: this.dailyController.getCurrentDailyPnLPercent(),
       tradesRemainingToday: this.dailyController.getTradesRemaining(this.config.tradesPerDay),
       tightModePercent,
-      marketFriction: this.config.marketFriction, // Pass friction config
       // NOTE: winPnLMin/Max are IGNORED by calculator (deprecated)
     });
 

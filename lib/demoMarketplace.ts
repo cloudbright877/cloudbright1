@@ -68,11 +68,6 @@ export const DEMO_BOTS: DemoBot[] = [
       maxConcurrentPositions: 12,
       openFrequency: 0.65,
       allowedSides: 'BOTH',
-      // Market friction enabled (v2.0)
-      marketFriction: {
-        enabled: true,
-        forceVolatility: 'medium' as const,
-      },
     },
     stats: {
       rating: 4.9,

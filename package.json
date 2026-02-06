@@ -16,7 +16,14 @@
     "test:webkit": "npx playwright test --project=webkit",
     "test:report": "npx playwright show-report",
     "test:install": "npx playwright install --with-deps",
-    "test:unit": "npx tsx tests/unit/convergence/PresetMapper.test.ts && npx tsx tests/unit/convergence/BotValidator.test.ts"
+    "test:unit": "npx tsx tests/unit/convergence/PresetMapper.test.ts && npx tsx tests/unit/convergence/BotValidator.test.ts && npx tsx tests/unit/convergence/ConvergenceController.test.ts && npx tsx tests/unit/DynamicPnLCalculator.test.ts && npx tsx tests/unit/convergence/migration.test.ts && npx tsx tests/unit/TradingBot-convergence.test.ts && npx tsx tests/unit/DailyTargetController.test.ts",
+    "test:unit:convergence": "npx tsx tests/unit/convergence/ConvergenceController.test.ts && npx tsx tests/unit/DynamicPnLCalculator.test.ts && npx tsx tests/unit/convergence/migration.test.ts && npx tsx tests/unit/convergence/PresetMapper.test.ts && npx tsx tests/unit/convergence/BotValidator.test.ts",
+    "test:integration": "npx playwright test tests/integration/",
+    "test:e2e": "npx playwright test tests/specs/e2e/",
+    "test:all": "npm run test:unit && npm run test:integration && npm run test:e2e",
+    "test:day8": "npx tsx tests/unit/convergence/ConvergenceController.test.ts && npx tsx tests/unit/DynamicPnLCalculator.test.ts",
+    "test:day9": "npx tsx tests/unit/convergence/migration.test.ts && npm run test:unit",
+    "test:day10": "npm run test:all"
   },
   "keywords": [],
   "author": "",

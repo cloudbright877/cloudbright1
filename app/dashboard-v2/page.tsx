@@ -86,13 +86,6 @@ interface ClosedPosition {
   leverage: number;
   duration: string;
   positionSize: number;
-  marketFriction?: {
-    slippage: number;
-    spread: number;
-    fundingRate: number;
-    commission: number;
-    total: number;
-  };
 }
 
 // Icon mapping by risk level
@@ -381,7 +374,6 @@ export default function DashboardPage() {
             leverage: trade.leverage,
             duration: trade.duration,
             positionSize: safePositionSize,
-            marketFriction: trade.marketFriction, // Include market friction data
           };
         })
       );
@@ -709,44 +701,18 @@ export default function DashboardPage() {
                             </div>
                           </td>
                           <td className="py-4 px-4 text-center">
-                            {/* Show fee breakdown if market friction present */}
-                            {position.marketFriction && position.marketFriction.total !== 0 ? (
-                              <div className="space-y-0.5">
-                                {/* Gross P&L */}
-                                <div className="text-[10px] text-dark-500">
-                                  Gross: ${(position.pnl - (position.positionSize * position.marketFriction.total / 100)).toFixed(2)}
-                                </div>
-                                {/* Fees */}
-                                <div className="text-[10px] text-orange-400">
-                                  Fees: -${Math.abs(position.positionSize * position.marketFriction.total / 100).toFixed(2)}
-                                </div>
-                                {/* Net P&L */}
-                                <div className={`text-sm font-bold ${
-                                  position.pnl >= 0 ? 'text-green-400' : 'text-red-400'
-                                }`}>
-                                  {position.pnl >= 0 ? '+' : ''}${position.pnl.toFixed(2)}
-                                </div>
-                                <div className={`text-xs ${
-                                  position.pnl >= 0 ? 'text-green-400/70' : 'text-red-400/70'
-                                }`}>
-                                  ({position.pnl >= 0 ? '+' : ''}{position.pnlPercent.toFixed(2)}%)
-                                </div>
+                            <div>
+                              <div className={`text-sm font-bold ${
+                                position.pnl >= 0 ? 'text-green-400' : 'text-red-400'
+                              }`}>
+                                {position.pnl >= 0 ? '+' : ''}${position.pnl.toFixed(2)}
                               </div>
-                            ) : (
-                              /* Simple P&L (no fees) */
-                              <div>
-                                <div className={`text-sm font-bold ${
-                                  position.pnl >= 0 ? 'text-green-400' : 'text-red-400'
-                                }`}>
-                                  {position.pnl >= 0 ? '+' : ''}${position.pnl.toFixed(2)}
-                                </div>
-                                <div className={`text-xs ${
-                                  position.pnl >= 0 ? 'text-green-400/70' : 'text-red-400/70'
-                                }`}>
-                                  ({position.pnl >= 0 ? '+' : ''}{position.pnlPercent.toFixed(2)}%)
-                                </div>
+                              <div className={`text-xs ${
+                                position.pnl >= 0 ? 'text-green-400/70' : 'text-red-400/70'
+                              }`}>
+                                ({position.pnl >= 0 ? '+' : ''}{position.pnlPercent.toFixed(2)}%)
                               </div>
-                            )}
+                            </div>
                           </td>
                           <td className="py-4 px-4 text-center text-sm text-dark-300">
                             ${position.positionSize.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}

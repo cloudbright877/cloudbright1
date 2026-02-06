@@ -2,7 +2,7 @@
  * Risk Metrics Preview Component
  *
  * Shows real-time prediction of trading outcomes based on bot configuration:
- * - Expected Win Rate (after Market Friction impact)
+ * - Expected Win Rate
  * - Expected Loss Rate
  * - Expected Net P&L per trade
  * - Risk/Reward Ratio
@@ -20,10 +20,6 @@ interface RiskMetricsPreviewProps {
     tradesPerDay: number;         // Trades per day
     leverageMin?: number;         // Min leverage
     leverageMax?: number;         // Max leverage
-    marketFriction?: {
-      enabled: boolean;
-      forceVolatility?: 'auto' | 'low' | 'medium' | 'high';
-    };
     pnlVariance?: {
       tightModePercent: number;   // % of trades in tight mode
     };
@@ -32,8 +28,7 @@ interface RiskMetricsPreviewProps {
 
 interface CalculatedMetrics {
   baseWinRate: number;           // Original win rate (%)
-  marketFrictionCost: number;    // Avg friction cost per trade (%)
-  netAvgWin: number;             // Avg win after friction (%)
+  netAvgWin: number;             // Avg win (%)
   netAvgLoss: number;            // Avg loss (%)
   winsBecomingLosses: number;    // % of wins that become losses due to friction
   finalWinRate: number;          // Actual win rate after friction (%)
@@ -136,11 +131,6 @@ export default function RiskMetricsPreview({ config }: RiskMetricsPreviewProps) 
                 {metrics.expectedNetPnLPerTrade > 0 ? '+' : ''}{metrics.expectedNetPnLPerTrade.toFixed(2)}%
               </span>
             </div>
-            {config.marketFriction?.enabled && (
-              <div className="text-[9px] text-orange-400">
-                Friction: -{metrics.marketFrictionCost.toFixed(2)}%
-              </div>
-            )}
           </div>
         </div>
 
@@ -238,9 +228,6 @@ export default function RiskMetricsPreview({ config }: RiskMetricsPreviewProps) 
       {metrics.profitProbability === 'Negative' && (
         <div className="mt-2 p-2 bg-red-500/10 border border-red-500/20 rounded text-[10px] text-red-400">
           ⚠️ <strong>WARNING:</strong> Current settings will likely result in losses.
-          {config.marketFriction?.enabled && metrics.netAvgWin < 0.1 && (
-            <> Market Friction is too high for your P&L ranges. Increase Win P&L or disable Market Friction.</>
-          )}
         </div>
       )}
 
@@ -274,15 +261,6 @@ function calculateMetrics(config: RiskMetricsPreviewProps['config']): Calculated
   const leverageMin = config.leverageMin ?? 3;
   const leverageMax = config.leverageMax ?? 10;
   const avgLeverage = (leverageMin + leverageMax) / 2;
-
-  // Calculate market friction cost (% of position size, not capital)
-  let marketFrictionCost = 0;
-  if (config.marketFriction?.enabled) {
-    const volatility = config.marketFriction.forceVolatility ?? 'medium';
-    marketFrictionCost = volatility === 'low' ? 0.15
-      : volatility === 'high' ? 0.5
-      : 0.3; // medium or auto (% of position)
-  }
 
   // STEP 1: Calculate base P&L using SIMPLIFIED FORMULA (v2.1.1)
   // NOTE: Deprecated winPnLMin/Max are IGNORED - they were manually tuned
@@ -333,10 +311,7 @@ function calculateMetrics(config: RiskMetricsPreviewProps['config']): Calculated
   const avgLoss = (lossMin + lossMax) / 2;
 
   // STEP 3: Net values
-  // Friction is % of POSITION SIZE and applied during trade execution
-  // DO NOT subtract it from avgWinGross here - that would be double-counting!
-  // marketFrictionCost is just for display purposes
-  const netAvgWin = avgWinGross; // Gross value - friction applied per trade, not per capital
+  const netAvgWin = avgWinGross;
   const netAvgLoss = avgLoss;
 
   // DEBUG LOGGING
@@ -348,10 +323,8 @@ function calculateMetrics(config: RiskMetricsPreviewProps['config']): Calculated
     avgLoss,
   });
 
-  // STEP 4: No "wins becoming losses" logic needed
-  // Friction is already accounted for in trade execution (TradingBot.ts)
-  // Win Rate remains constant at configured value
-  const winsBecomingLosses = 0; // No adjustment needed
+  // STEP 4: Win Rate remains constant at configured value
+  const winsBecomingLosses = 0;
   const finalWinRate = baseWinRate;
   const finalLossRate = 100 - finalWinRate;
 
@@ -379,7 +352,6 @@ function calculateMetrics(config: RiskMetricsPreviewProps['config']): Calculated
 
   return {
     baseWinRate,
-    marketFrictionCost,
     netAvgWin,
     netAvgLoss,
     winsBecomingLosses,

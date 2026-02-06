@@ -79,14 +79,15 @@ export const botsApi = {
   ): Promise<boolean> {
     await new Promise((resolve) => setTimeout(resolve, 100));
 
-    // Update runtime bot config if bot exists
-    const success = botManager.updateBotConfig(id, config);
-
     // Persist to localStorage via masterBotsConfig
+    // Note: Master Bots are not instantiated until user creates a copy
+    // So we only save to localStorage here (source of truth for Master Bot configs)
     const { saveMasterBotConfig } = await import('../masterBotsConfig');
     saveMasterBotConfig(id, config);
 
-    return success;
+    // When user creates a copy, ensureMasterBot() will load the merged config
+    // (default + localStorage override) automatically
+    return true; // Config saved successfully
 
     /* FUTURE:
     const response = await fetch(`/api/marketplace/bots/${id}`, {

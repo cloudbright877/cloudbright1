@@ -32,13 +32,13 @@ export function BotSettingsModal({ isOpen, onClose, bot }: BotSettingsModalProps
   const [openFrequency, setOpenFrequency] = useState((config.openFrequency || 0.7) * 100); // Convert to %
 
   // Risk Management
-  const [winPnLMin, setWinPnLMin] = useState(config.winPnLMin);
-  const [winPnLMax, setWinPnLMax] = useState(config.winPnLMax);
-  const [lossPnLMin, setLossPnLMin] = useState(config.lossPnLMin);
-  const [lossPnLMax, setLossPnLMax] = useState(config.lossPnLMax);
-  const [minDuration, setMinDuration] = useState(config.minDuration / 1000); // Convert to seconds
-  const [maxDuration, setMaxDuration] = useState(config.maxDuration / 1000); // Convert to seconds
-  const [maxSlippage, setMaxSlippage] = useState((config.maxSlippage || 0.5) * 100); // Convert to %
+  const [winPnLMin, setWinPnLMin] = useState(config.winPnLMin ?? 0.5);
+  const [winPnLMax, setWinPnLMax] = useState(config.winPnLMax ?? 5);
+  const [lossPnLMin, setLossPnLMin] = useState(config.lossPnLMin ?? -3);
+  const [lossPnLMax, setLossPnLMax] = useState(config.lossPnLMax ?? -0.5);
+  const [minDuration, setMinDuration] = useState((config.minDuration ?? 60000) / 1000); // Convert to seconds
+  const [maxDuration, setMaxDuration] = useState((config.maxDuration ?? 300000) / 1000); // Convert to seconds
+  const [maxSlippage, setMaxSlippage] = useState((config.maxSlippage ?? 0.005) * 100); // Convert to %
 
   const handleSave = () => {
     const updates: Partial<BotConfig> = {

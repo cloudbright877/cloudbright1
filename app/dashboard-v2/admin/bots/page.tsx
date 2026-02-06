@@ -13,7 +13,9 @@ import {
   Shield,
   Edit2,
   Check,
-  X
+  X,
+  AlertCircle,
+  CheckCircle
 } from 'lucide-react';
 import { DEMO_BOTS, type DemoBot } from '@/lib/demoMarketplace';
 import {
@@ -21,19 +23,26 @@ import {
   saveMasterBotConfig,
   clearMasterBotConfig,
 } from '@/lib/masterBotsConfig';
-import RangeSlider from '@/components/dashboard-v2/RangeSlider';
-import RiskMetricsPreview from '@/components/dashboard-v2/RiskMetricsPreview';
+import {
+  mapPresetToConfig,
+  validatePresetInput,
+  type PresetInput
+} from '@/lib/trading/convergence/PresetMapper';
+import {
+  validateBotConfig,
+  getValidationSummary,
+  type ValidationResult
+} from '@/lib/trading/convergence/BotValidator';
 
 // Available trading pairs
 const AVAILABLE_PAIRS = ['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'BNB/USDT', 'MATIC/USDT'];
 
-// Possible leverage values for array generation
-const LEVERAGE_OPTIONS = [1, 2, 3, 5, 10, 20, 25, 50, 75, 100, 125];
-
 export default function AdminBotsPage() {
   const [bots, setBots] = useState<DemoBot[]>(DEMO_BOTS);
   const [editingBot, setEditingBot] = useState<string | null>(null);
-  const [editedConfig, setEditedConfig] = useState<any>(null);
+  const [presetInput, setPresetInput] = useState<PresetInput | null>(null);
+  const [selectedPairs, setSelectedPairs] = useState<string[]>(AVAILABLE_PAIRS.slice(0, 3));
+  const [validation, setValidation] = useState<ValidationResult | null>(null);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
 
   // Load saved configs on mount
@@ -59,60 +68,71 @@ export default function AdminBotsPage() {
     }
   }, []);
 
+  // Validate preset input whenever it changes
+  useEffect(() => {
+    if (presetInput) {
+      const inputErrors = validatePresetInput(presetInput);
+      if (inputErrors.length > 0) {
+        setValidation({
+          valid: false,
+          issues: inputErrors,
+          warnings: [],
+          maxCorrectionPercent: 0
+        });
+      } else {
+        // Generate config and validate it
+        const generatedConfig = mapPresetToConfig(presetInput, {
+          tradingPairs: selectedPairs,
+          tradingPair: selectedPairs[0]
+        });
+        const result = validateBotConfig(generatedConfig);
+        setValidation(result);
+      }
+    }
+  }, [presetInput, selectedPairs]);
+
   const handleEdit = (bot: DemoBot) => {
     setEditingBot(bot.id);
 
-    // Prepare config with proper format for editing
     const config = bot.config;
 
-    // Convert leverages array to min/max or use single leverage
-    let leverageMin = 3;
-    let leverageMax = 10;
-    if (config.leverages && config.leverages.length > 0) {
-      leverageMin = Math.min(...config.leverages);
-      leverageMax = Math.max(...config.leverages);
-    } else if (config.leverage) {
-      leverageMin = config.leverage;
-      leverageMax = config.leverage;
-    }
+    // Extract preset input from config (or use defaults)
+    const preset: PresetInput = {
+      dailyTarget: (config.dailyTargetPercent || 0.025) * 100, // Convert to percentage
+      tradesPerDay: config.tradesPerDay || 250,
+      character: config.character || 'moderate',
+      convergenceMode: config.convergenceMode || 'guaranteed',
+      realismMode: config.realismMode
+    };
 
-    // Get trading pairs (array or single)
-    const selectedPairs = config.tradingPairs && config.tradingPairs.length > 0
+    // Get trading pairs
+    const pairs = config.tradingPairs && config.tradingPairs.length > 0
       ? config.tradingPairs
-      : [config.tradingPair];
+      : [config.tradingPair || 'BTC/USDT'];
 
-    setEditedConfig({
-      ...config,
-      winRate: config.winRate * 100, // Convert to percentage
-      leverageMin,
-      leverageMax,
-      selectedPairs,
-    });
+    setPresetInput(preset);
+    setSelectedPairs(pairs);
   };
 
   const handleSave = async (botId: string) => {
-    if (!editedConfig) return;
+    if (!presetInput || !validation || !validation.valid) {
+      setSavedMessage(`Cannot save: configuration has errors`);
+      setTimeout(() => setSavedMessage(null), 3000);
+      return;
+    }
 
     try {
-      // Generate leverages array from min/max
-      const leveragesArray = LEVERAGE_OPTIONS.filter(
-        lev => lev >= editedConfig.leverageMin && lev <= editedConfig.leverageMax
-      );
+      // Get the bot for name/capital
+      const bot = bots.find(b => b.id === botId);
+      if (!bot) return;
 
-      // Convert config back to proper format
-      const configToSave = {
-        ...editedConfig,
-        winRate: editedConfig.winRate / 100, // Convert percentage back to decimal
-        leverages: leveragesArray.length > 1 ? leveragesArray : undefined,
-        leverage: leveragesArray.length === 1 ? leveragesArray[0] : undefined,
-        tradingPairs: editedConfig.selectedPairs.length > 1 ? editedConfig.selectedPairs : undefined,
-        tradingPair: editedConfig.selectedPairs[0], // Keep primary pair for backward compat
-      };
-
-      // Remove temp fields
-      delete configToSave.leverageMin;
-      delete configToSave.leverageMax;
-      delete configToSave.selectedPairs;
+      // Generate full config from preset
+      const configToSave = mapPresetToConfig(presetInput, {
+        name: bot.name,
+        tradingPairs: selectedPairs,
+        tradingPair: selectedPairs[0],
+        investedCapital: bot.config.investedCapital || 10000
+      });
 
       // Save to localStorage for persistence
       saveMasterBotConfig(botId, configToSave);
@@ -123,26 +143,24 @@ export default function AdminBotsPage() {
 
       // Update local state to reflect changes
       setBots(prevBots =>
-        prevBots.map(bot => {
-          if (bot.id === botId) {
+        prevBots.map(b => {
+          if (b.id === botId) {
             return {
-              ...bot,
+              ...b,
               config: configToSave
             };
           }
-          return bot;
+          return b;
         })
       );
 
       setEditingBot(null);
-      setEditedConfig(null);
+      setPresetInput(null);
+      setValidation(null);
       setSavedMessage(`Bot ${botId} updated & saved!`);
       setTimeout(() => setSavedMessage(null), 3000);
 
-      console.log(`[AdminBots] Bot ${botId} config saved:`, {
-        leverages: leveragesArray,
-        pairs: editedConfig.selectedPairs,
-      });
+      console.log(`[AdminBots] Bot ${botId} config saved:`, configToSave);
     } catch (error) {
       console.error('[AdminBots] Error saving bot config:', error);
       setSavedMessage(`Error updating bot ${botId}`);
@@ -152,7 +170,8 @@ export default function AdminBotsPage() {
 
   const handleCancel = () => {
     setEditingBot(null);
-    setEditedConfig(null);
+    setPresetInput(null);
+    setValidation(null);
   };
 
   const handleReset = async (bot: DemoBot) => {
@@ -176,25 +195,24 @@ export default function AdminBotsPage() {
     }
   };
 
-  const updateField = (field: string, value: any) => {
-    setEditedConfig((prev: any) => ({
-      ...prev,
-      [field]: value
-    }));
+  const updatePresetField = (field: keyof PresetInput, value: any) => {
+    setPresetInput(prev => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        [field]: value
+      };
+    });
   };
 
   const togglePair = (pair: string) => {
-    setEditedConfig((prev: any) => {
-      const currentPairs = prev.selectedPairs || [];
-      const newPairs = currentPairs.includes(pair)
-        ? currentPairs.filter((p: string) => p !== pair)
-        : [...currentPairs, pair];
+    setSelectedPairs(prevPairs => {
+      const newPairs = prevPairs.includes(pair)
+        ? prevPairs.filter(p => p !== pair)
+        : [...prevPairs, pair];
 
       // Ensure at least one pair is selected
-      return {
-        ...prev,
-        selectedPairs: newPairs.length > 0 ? newPairs : [pair]
-      };
+      return newPairs.length > 0 ? newPairs : [pair];
     });
   };
 
@@ -229,13 +247,10 @@ export default function AdminBotsPage() {
         <div className="space-y-3">
           {bots.map((bot) => {
             const isEditing = editingBot === bot.id;
-            const config = isEditing ? editedConfig : bot.config;
+            const config = bot.config;
 
             // Display leverage info
             const leverageDisplay = (() => {
-              if (isEditing) {
-                return `${config.leverageMin}x - ${config.leverageMax}x`;
-              }
               if (config.leverages && config.leverages.length > 0) {
                 return `${Math.min(...config.leverages)}x - ${Math.max(...config.leverages)}x`;
               }
@@ -244,8 +259,8 @@ export default function AdminBotsPage() {
 
             // Display trading pairs
             const pairsDisplay = (() => {
-              if (isEditing) {
-                return config.selectedPairs.join(', ');
+              if (isEditing && selectedPairs.length > 0) {
+                return selectedPairs.join(', ');
               }
               if (config.tradingPairs && config.tradingPairs.length > 0) {
                 return config.tradingPairs.join(', ');
@@ -358,7 +373,12 @@ export default function AdminBotsPage() {
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => handleSave(bot.id)}
-                          className="px-3 py-1.5 bg-green-500/20 hover:bg-green-500 text-green-300 hover:text-white rounded text-xs font-semibold transition-colors flex items-center gap-1.5"
+                          disabled={!validation || !validation.valid}
+                          className={`px-3 py-1.5 rounded text-xs font-semibold transition-colors flex items-center gap-1.5 ${
+                            validation && validation.valid
+                              ? 'bg-green-500/20 hover:bg-green-500 text-green-300 hover:text-white'
+                              : 'bg-dark-700/50 text-dark-500 cursor-not-allowed'
+                          }`}
                         >
                           <Check className="w-3 h-3" />
                           Save
@@ -373,341 +393,166 @@ export default function AdminBotsPage() {
                       </div>
                     </div>
 
-                    {/* Risk Metrics Preview - Live Calculation */}
-                    <RiskMetricsPreview config={config} />
-
-                    {/* Compact Configuration Grid */}
-                    <div className="grid grid-cols-2 gap-3">
-                      {/* Row 1: Basic Settings */}
-                      <div className="p-2 bg-dark-900/30 rounded border border-dark-700/50">
-                        <label className="text-[10px] text-dark-500 uppercase mb-1 block">Win Rate (%)</label>
-                        <input
-                          type="number"
-                          value={config.winRate}
-                          onChange={(e) => updateField('winRate', parseFloat(e.target.value))}
-                          step="0.1"
-                          min="0"
-                          max="100"
-                          className="w-full px-2 py-1 text-sm bg-dark-800 border border-dark-600 rounded text-white focus:border-primary-500 outline-none"
-                        />
-                      </div>
-
-                      <div className="p-2 bg-dark-900/30 rounded border border-dark-700/50">
-                        <label className="text-[10px] text-dark-500 uppercase mb-1 block">Daily Target (%)</label>
-                        <input
-                          type="number"
-                          value={config.dailyTargetPercent}
-                          onChange={(e) => updateField('dailyTargetPercent', parseFloat(e.target.value))}
-                          step="0.1"
-                          className="w-full px-2 py-1 text-sm bg-dark-800 border border-dark-600 rounded text-white focus:border-primary-500 outline-none"
-                        />
-                      </div>
-
-                      <div className="p-2 bg-dark-900/30 rounded border border-dark-700/50">
-                        <label className="text-[10px] text-dark-500 uppercase mb-1 block">Trades Per Day</label>
-                        <input
-                          type="number"
-                          value={config.tradesPerDay}
-                          onChange={(e) => updateField('tradesPerDay', parseInt(e.target.value))}
-                          className="w-full px-2 py-1 text-sm bg-dark-800 border border-dark-600 rounded text-white focus:border-primary-500 outline-none"
-                        />
-                      </div>
-
-                      <div className="p-2 bg-dark-900/30 rounded border border-dark-700/50">
-                        <label className="text-[10px] text-dark-500 uppercase mb-1 block">Max Positions</label>
-                        <input
-                          type="number"
-                          value={config.maxConcurrentPositions}
-                          onChange={(e) => updateField('maxConcurrentPositions', parseInt(e.target.value))}
-                          min="1"
-                          max="10"
-                          className="w-full px-2 py-1 text-sm bg-dark-800 border border-dark-600 rounded text-white focus:border-primary-500 outline-none"
-                        />
-                      </div>
-
-                      {/* Row 2: Leverage & Duration */}
-                      <div className="p-2 bg-dark-900/30 rounded border border-dark-700/50">
-                        <RangeSlider
-                          min={1}
-                          max={125}
-                          step={1}
-                          valueMin={config.leverageMin}
-                          valueMax={config.leverageMax}
-                          onChange={(min, max) => {
-                            updateField('leverageMin', min);
-                            updateField('leverageMax', max);
-                          }}
-                          label="Leverage Range"
-                          unit="x"
-                        />
-                      </div>
-
-                      <div className="p-2 bg-dark-900/30 rounded border border-dark-700/50">
-                        <RangeSlider
-                          min={5}
-                          max={300}
-                          step={5}
-                          valueMin={config.minDuration / 1000}
-                          valueMax={config.maxDuration / 1000}
-                          onChange={(min, max) => {
-                            updateField('minDuration', min * 1000);
-                            updateField('maxDuration', max * 1000);
-                          }}
-                          label="Duration Range"
-                          unit="s"
-                        />
-                      </div>
-
-                      {/* Row 3: Position Size (full width) */}
-                      <div className="col-span-2 p-2 bg-dark-900/30 rounded border border-dark-700/50">
-                        <RangeSlider
-                          min={100}
-                          max={2000}
-                          step={50}
-                          valueMin={config.minPositionSize}
-                          valueMax={config.maxPositionSize}
-                          onChange={(min, max) => {
-                            updateField('minPositionSize', min);
-                            updateField('maxPositionSize', max);
-                          }}
-                          label="Position Size Range"
-                          unit="$"
-                        />
-                      </div>
-
-                      {/* Dynamic P&L Info Block */}
-                      <div className="col-span-2 p-3 bg-blue-900/20 rounded-lg border border-blue-500/30">
+                    {/* Validation Status */}
+                    {validation && (
+                      <div className={`p-3 rounded-lg border ${
+                        validation.valid
+                          ? 'bg-green-900/20 border-green-500/30'
+                          : 'bg-red-900/20 border-red-500/30'
+                      }`}>
                         <div className="flex items-start gap-2">
-                          <div className="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <span className="text-blue-400 text-xs font-bold">i</span>
-                          </div>
+                          {validation.valid ? (
+                            <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
+                          ) : (
+                            <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
+                          )}
                           <div className="flex-1">
-                            <h5 className="text-xs font-bold text-blue-300 mb-1">Dynamic P&L System</h5>
-                            <p className="text-[10px] text-blue-200/80 leading-relaxed">
-                              <strong>P&L ranges are calculated automatically</strong> based on Daily Target, Trades/Day, Win Rate, and Leverage.
-                              The system uses advanced variance distribution (80% tight convergence + 20% wide spikes) to hit your daily target while maintaining visual realism.
-                            </p>
-                            <div className="mt-2 p-2 bg-blue-900/30 rounded border border-blue-500/20">
-                              <div className="text-[9px] text-blue-300/70 font-mono">
-                                Formula: baseWinPnL = (DailyTarget / TradesPerDay / WinRate) / AvgLeverage
+                            <h5 className={`text-xs font-bold mb-1 ${
+                              validation.valid ? 'text-green-300' : 'text-red-300'
+                            }`}>
+                              {validation.valid ? 'Configuration Valid' : 'Configuration Invalid'}
+                            </h5>
+                            {validation.issues.length > 0 && (
+                              <div className="space-y-1 mb-2">
+                                {validation.issues.map((issue, i) => (
+                                  <p key={i} className="text-[10px] text-red-200/80">✗ {issue}</p>
+                                ))}
                               </div>
-                            </div>
+                            )}
+                            {validation.warnings.length > 0 && (
+                              <div className="space-y-1">
+                                {validation.warnings.map((warning, i) => (
+                                  <p key={i} className="text-[10px] text-yellow-200/80">⚠ {warning}</p>
+                                ))}
+                              </div>
+                            )}
+                            {validation.valid && (
+                              <p className="text-[10px] text-green-200/80">
+                                Max correction: {(validation.maxCorrectionPercent * 100).toFixed(2)}% (within acceptable range)
+                              </p>
+                            )}
                           </div>
                         </div>
                       </div>
+                    )}
 
-                      {/* Row 5: Trading Pairs */}
-                      <div className="col-span-2 p-2 bg-dark-900/30 rounded border border-dark-700/50">
-                        <label className="text-[10px] text-dark-500 uppercase mb-2 block">Trading Pairs</label>
-                        <div className="flex flex-wrap gap-2">
-                          {AVAILABLE_PAIRS.map(pair => (
-                            <label key={pair} className="flex items-center gap-1.5 cursor-pointer">
-                              <input
-                                type="checkbox"
-                                checked={config.selectedPairs.includes(pair)}
-                                onChange={() => togglePair(pair)}
-                                className="w-3 h-3 rounded border-dark-600 bg-dark-800 text-primary-500 focus:ring-primary-500"
-                              />
-                              <span className="text-xs text-white">{pair}</span>
-                            </label>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Risk Management Section */}
-                    <div className="pt-3 border-t border-dark-700/50">
-                      <h4 className="text-xs font-bold text-purple-400 uppercase mb-3 flex items-center gap-2">
-                        <Shield className="w-4 h-4" />
-                        Advanced Risk Management
-                      </h4>
-
+                    {/* Preset Configuration Form */}
+                    {presetInput && (
                       <div className="grid grid-cols-2 gap-3">
-                        {/* Staggered Closing */}
-                        <div className="col-span-2 p-3 bg-dark-900/50 rounded-lg border border-purple-500/20">
-                          <div className="flex items-center justify-between mb-2">
-                            <div>
-                              <label className="text-xs font-semibold text-white">Staggered Closing</label>
-                              <p className="text-[10px] text-dark-500 mt-0.5">Prevents positions from closing simultaneously</p>
-                            </div>
-                            <label className="flex items-center gap-2 cursor-pointer">
-                              <input
-                                type="checkbox"
-                                checked={config.staggeredClosing?.enabled ?? false}
-                                onChange={(e) => updateField('staggeredClosing', {
-                                  ...config.staggeredClosing,
-                                  enabled: e.target.checked,
-                                  maxClosuresInWindow: config.staggeredClosing?.maxClosuresInWindow ?? 2,
-                                  windowDurationSec: config.staggeredClosing?.windowDurationSec ?? 30,
-                                  minDelayBetweenSec: config.staggeredClosing?.minDelayBetweenSec ?? 5,
-                                  maxDelayBetweenSec: config.staggeredClosing?.maxDelayBetweenSec ?? 15,
-                                })}
-                                className="w-4 h-4 rounded border-dark-600 bg-dark-800 text-purple-500"
-                              />
-                              <span className="text-xs text-dark-400">Enable</span>
-                            </label>
-                          </div>
-
-                          {/* Info box */}
-                          <div className="mb-2 p-2 bg-purple-500/5 border border-purple-500/10 rounded text-[10px] text-purple-300/80">
-                            💡 Creates smoother equity curve by spacing out position closures (cosmetic feature)
-                          </div>
-
-                          {(config.staggeredClosing?.enabled ?? false) && (
-                            <div className="grid grid-cols-2 gap-2 mt-2">
-                              <div>
-                                <label className="text-[10px] text-dark-500 uppercase mb-1 block">Max Closures</label>
-                                <input
-                                  type="number"
-                                  value={config.staggeredClosing?.maxClosuresInWindow ?? 2}
-                                  onChange={(e) => updateField('staggeredClosing', {
-                                    ...config.staggeredClosing,
-                                    enabled: config.staggeredClosing?.enabled ?? true,
-                                    maxClosuresInWindow: parseInt(e.target.value),
-                                    windowDurationSec: config.staggeredClosing?.windowDurationSec ?? 30,
-                                    minDelayBetweenSec: config.staggeredClosing?.minDelayBetweenSec ?? 5,
-                                    maxDelayBetweenSec: config.staggeredClosing?.maxDelayBetweenSec ?? 15,
-                                  })}
-                                  min="1"
-                                  max="5"
-                                  className="w-full px-2 py-1 text-xs bg-dark-800 border border-dark-600 rounded text-white"
-                                />
-                              </div>
-                              <div>
-                                <label className="text-[10px] text-dark-500 uppercase mb-1 block">Window (sec)</label>
-                                <input
-                                  type="number"
-                                  value={config.staggeredClosing?.windowDurationSec ?? 30}
-                                  onChange={(e) => updateField('staggeredClosing', {
-                                    ...config.staggeredClosing,
-                                    enabled: config.staggeredClosing?.enabled ?? true,
-                                    maxClosuresInWindow: config.staggeredClosing?.maxClosuresInWindow ?? 2,
-                                    windowDurationSec: parseInt(e.target.value),
-                                    minDelayBetweenSec: config.staggeredClosing?.minDelayBetweenSec ?? 5,
-                                    maxDelayBetweenSec: config.staggeredClosing?.maxDelayBetweenSec ?? 15,
-                                  })}
-                                  min="15"
-                                  max="60"
-                                  step="5"
-                                  className="w-full px-2 py-1 text-xs bg-dark-800 border border-dark-600 rounded text-white"
-                                />
-                              </div>
-                              <div>
-                                <label className="text-[10px] text-dark-500 uppercase mb-1 block">Min Delay (sec)</label>
-                                <input
-                                  type="number"
-                                  value={config.staggeredClosing?.minDelayBetweenSec ?? 5}
-                                  onChange={(e) => updateField('staggeredClosing', {
-                                    ...config.staggeredClosing,
-                                    enabled: config.staggeredClosing?.enabled ?? true,
-                                    maxClosuresInWindow: config.staggeredClosing?.maxClosuresInWindow ?? 2,
-                                    windowDurationSec: config.staggeredClosing?.windowDurationSec ?? 30,
-                                    minDelayBetweenSec: parseInt(e.target.value),
-                                    maxDelayBetweenSec: config.staggeredClosing?.maxDelayBetweenSec ?? 15,
-                                  })}
-                                  min="1"
-                                  max="30"
-                                  className="w-full px-2 py-1 text-xs bg-dark-800 border border-dark-600 rounded text-white"
-                                />
-                              </div>
-                              <div>
-                                <label className="text-[10px] text-dark-500 uppercase mb-1 block">Max Delay (sec)</label>
-                                <input
-                                  type="number"
-                                  value={config.staggeredClosing?.maxDelayBetweenSec ?? 15}
-                                  onChange={(e) => updateField('staggeredClosing', {
-                                    ...config.staggeredClosing,
-                                    enabled: config.staggeredClosing?.enabled ?? true,
-                                    maxClosuresInWindow: config.staggeredClosing?.maxClosuresInWindow ?? 2,
-                                    windowDurationSec: config.staggeredClosing?.windowDurationSec ?? 30,
-                                    minDelayBetweenSec: config.staggeredClosing?.minDelayBetweenSec ?? 5,
-                                    maxDelayBetweenSec: parseInt(e.target.value),
-                                  })}
-                                  min="5"
-                                  max="60"
-                                  className="w-full px-2 py-1 text-xs bg-dark-800 border border-dark-600 rounded text-white"
-                                />
-                              </div>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* P&L Variance Distribution */}
-                        <div className="p-3 bg-dark-900/50 rounded-lg border border-blue-500/20">
-                          <label className="text-xs font-semibold text-white mb-2 block">P&L Variance Distribution</label>
-                          <div className="space-y-2">
-                            <div className="flex items-center justify-between text-xs">
-                              <span className="text-dark-400">Tight Mode %</span>
-                              <span className="text-blue-400 font-bold">{config.pnlVariance?.tightModePercent ?? 80}%</span>
-                            </div>
-                            <input
-                              type="range"
-                              min="0"
-                              max="100"
-                              step="5"
-                              value={config.pnlVariance?.tightModePercent ?? 80}
-                              onChange={(e) => updateField('pnlVariance', {
-                                tightModePercent: parseInt(e.target.value)
-                              })}
-                              className="w-full"
-                            />
-                            <div className="flex justify-between text-[10px] text-dark-500">
-                              <span>0% (All Wide)</span>
-                              <span>100% (All Tight)</span>
-                            </div>
-                            <p className="text-[10px] text-dark-500">
-                              Target: 80% Tight / 20% Wide for realistic variance
-                            </p>
+                        {/* Daily Target */}
+                        <div className="col-span-2 p-3 bg-dark-900/30 rounded border border-dark-700/50">
+                          <label className="text-xs text-dark-400 uppercase mb-2 block flex items-center justify-between">
+                            <span>Daily Target</span>
+                            <span className="text-primary-400 font-bold">{presetInput.dailyTarget.toFixed(1)}%</span>
+                          </label>
+                          <input
+                            type="range"
+                            min="0"
+                            max="10"
+                            step="0.1"
+                            value={presetInput.dailyTarget}
+                            onChange={(e) => updatePresetField('dailyTarget', parseFloat(e.target.value))}
+                            className="w-full"
+                          />
+                          <div className="flex justify-between text-[10px] text-dark-500 mt-1">
+                            <span>0%</span>
+                            <span>10%</span>
                           </div>
                         </div>
 
-                        {/* Market Friction */}
-                        <div className="p-3 bg-dark-900/50 rounded-lg border border-orange-500/20">
-                          <div className="flex items-center justify-between mb-2">
-                            <div>
-                              <label className="text-xs font-semibold text-white">Market Friction</label>
-                              <p className="text-[10px] text-dark-500 mt-0.5">Simulates real trading costs (slippage, spread, fees)</p>
-                            </div>
-                            <label className="flex items-center gap-2 cursor-pointer">
-                              <input
-                                type="checkbox"
-                                checked={config.marketFriction?.enabled ?? false}
-                                onChange={(e) => updateField('marketFriction', {
-                                  enabled: e.target.checked,
-                                  forceVolatility: config.marketFriction?.forceVolatility ?? 'auto'
-                                })}
-                                className="w-4 h-4 rounded border-dark-600 bg-dark-800 text-orange-500"
-                              />
-                              <span className="text-xs text-dark-400">Enable</span>
-                            </label>
-                          </div>
+                        {/* Trades Per Day */}
+                        <div className="p-3 bg-dark-900/30 rounded border border-dark-700/50">
+                          <label className="text-[10px] text-dark-500 uppercase mb-1 block">Trades Per Day</label>
+                          <input
+                            type="number"
+                            value={presetInput.tradesPerDay}
+                            onChange={(e) => updatePresetField('tradesPerDay', parseInt(e.target.value))}
+                            min="50"
+                            max="500"
+                            step="10"
+                            className="w-full px-2 py-1 text-sm bg-dark-800 border border-dark-600 rounded text-white focus:border-primary-500 outline-none"
+                          />
+                          <p className="text-[9px] text-dark-500 mt-1">Range: 50-500</p>
+                        </div>
 
-                          {/* Info box */}
-                          <div className="mb-2 p-2 bg-orange-500/5 border border-orange-500/10 rounded text-[10px] text-orange-300/80">
-                            💡 Adds realistic trading costs to simulations. Check "Expected Trading Outcomes" above to see impact on win rate.
-                          </div>
+                        {/* Character */}
+                        <div className="p-3 bg-dark-900/30 rounded border border-dark-700/50">
+                          <label className="text-[10px] text-dark-500 uppercase mb-1 block">Character</label>
+                          <select
+                            value={presetInput.character}
+                            onChange={(e) => updatePresetField('character', e.target.value as PresetInput['character'])}
+                            className="w-full px-2 py-1 text-sm bg-dark-800 border border-dark-600 rounded text-white focus:border-primary-500 outline-none"
+                          >
+                            <option value="conservative">Conservative (55% WR, 5-10x)</option>
+                            <option value="moderate">Moderate (60% WR, 10-20x)</option>
+                            <option value="aggressive">Aggressive (75% WR, 20-50x)</option>
+                          </select>
+                        </div>
 
-                          {(config.marketFriction?.enabled ?? false) && (
-                            <div>
-                              <label className="text-[10px] text-dark-500 uppercase mb-1 block">Volatility Mode</label>
-                              <select
-                                value={config.marketFriction?.forceVolatility ?? 'auto'}
-                                onChange={(e) => updateField('marketFriction', {
-                                  enabled: config.marketFriction?.enabled ?? false,
-                                  forceVolatility: e.target.value as 'auto' | 'low' | 'medium' | 'high'
-                                })}
-                                className="w-full px-2 py-1 text-xs bg-dark-800 border border-dark-600 rounded text-white"
-                              >
-                                <option value="auto">Auto (Time-based)</option>
-                                <option value="low">Low (~0.15%)</option>
-                                <option value="medium">Medium (~0.3%)</option>
-                                <option value="high">High (~0.5%)</option>
-                              </select>
+                        {/* Convergence Mode */}
+                        <div className="p-3 bg-dark-900/30 rounded border border-dark-700/50">
+                          <label className="text-[10px] text-dark-500 uppercase mb-1 block">Convergence Mode</label>
+                          <select
+                            value={presetInput.convergenceMode}
+                            onChange={(e) => updatePresetField('convergenceMode', e.target.value as PresetInput['convergenceMode'])}
+                            className="w-full px-2 py-1 text-sm bg-dark-800 border border-dark-600 rounded text-white focus:border-primary-500 outline-none"
+                          >
+                            <option value="natural">Natural (~80% target)</option>
+                            <option value="assisted">Assisted (~90% target)</option>
+                            <option value="guaranteed">Guaranteed (~95% target)</option>
+                          </select>
+                        </div>
+
+                        {/* Realism Mode (Optional) */}
+                        <div className="p-3 bg-dark-900/30 rounded border border-dark-700/50">
+                          <label className="text-[10px] text-dark-500 uppercase mb-1 block">Realism Mode (Optional)</label>
+                          <select
+                            value={presetInput.realismMode || 'auto'}
+                            onChange={(e) => updatePresetField('realismMode', e.target.value === 'auto' ? undefined : e.target.value as PresetInput['realismMode'])}
+                            className="w-full px-2 py-1 text-sm bg-dark-800 border border-dark-600 rounded text-white focus:border-primary-500 outline-none"
+                          >
+                            <option value="auto">Auto (from character)</option>
+                            <option value="smooth">Smooth (90% tight, low volatility)</option>
+                            <option value="realistic">Realistic (80% tight, medium volatility)</option>
+                            <option value="volatile">Volatile (60% tight, high volatility)</option>
+                          </select>
+                        </div>
+
+                        {/* Info Block */}
+                        <div className="col-span-2 p-3 bg-blue-900/20 rounded-lg border border-blue-500/30">
+                          <div className="flex items-start gap-2">
+                            <div className="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                              <span className="text-blue-400 text-xs font-bold">i</span>
                             </div>
-                          )}
+                            <div className="flex-1">
+                              <h5 className="text-xs font-bold text-blue-300 mb-1">Adaptive Convergence System</h5>
+                              <p className="text-[10px] text-blue-200/80 leading-relaxed">
+                                All other parameters (win rate, leverage, position size, TP/SL, variance) are automatically calculated
+                                from these 4 preset inputs. The system uses 6-layer convergence logic to minimize corrections and maintain realism.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Trading Pairs */}
+                        <div className="col-span-2 p-3 bg-dark-900/30 rounded border border-dark-700/50">
+                          <label className="text-[10px] text-dark-500 uppercase mb-2 block">Trading Pairs</label>
+                          <div className="flex flex-wrap gap-2">
+                            {AVAILABLE_PAIRS.map(pair => (
+                              <label key={pair} className="flex items-center gap-1.5 cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  checked={selectedPairs.includes(pair)}
+                                  onChange={() => togglePair(pair)}
+                                  className="w-3 h-3 rounded border-dark-600 bg-dark-800 text-primary-500 focus:ring-primary-500"
+                                />
+                                <span className="text-xs text-white">{pair}</span>
+                              </label>
+                            ))}
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                 )}
               </motion.div>

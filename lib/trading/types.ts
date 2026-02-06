@@ -51,13 +51,6 @@ export interface Trade {
   actualOutcome: 'WIN' | 'LOSS';
   hadSlippage: boolean;
   slippageAmount?: number;
-  marketFriction?: {         // Market friction components
-    slippage: number;
-    spread: number;
-    fundingRate: number;
-    commission: number;
-    total: number;
-  };
 
   // NEW FIELDS (ADAPTIVE_CONVERGENCE_SYSTEM):
   priceSource?: 'simulated' | 'binance' | 'coingecko';  // Price source used
@@ -120,10 +113,6 @@ export interface BotConfig {
   };
   pnlVariance?: {                       // P&L variance distribution control
     tightModePercent: number;           // % of positions in tight mode (0-100)
-  };
-  marketFriction?: {                    // Market friction simulation
-    enabled: boolean;                   // Enable/disable market friction
-    forceVolatility?: 'auto' | 'low' | 'medium' | 'high'; // Force specific volatility
   };
 
   // Preset System (ADAPTIVE_CONVERGENCE_SYSTEM)

@@ -140,13 +140,6 @@ export interface Trade {
   pnlPercent: number;       // ROE percentage
   duration: string;         // Hold time (e.g., "4h 20m")
   closedAt: string;         // ISO date string or human-readable
-  marketFriction?: {        // Market friction breakdown (optional, for realism)
-    slippage: number;       // % (usually negative)
-    spread: number;         // % (always negative)
-    fundingRate: number;    // % (can be ±)
-    commission: number;     // % (always negative)
-    total: number;          // Sum of all components
-  };
 }
 
 // ============================================================================

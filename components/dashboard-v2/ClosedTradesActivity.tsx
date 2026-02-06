@@ -82,67 +82,26 @@ export function ClosedTradesActivity({ trades }: ClosedTradesActivityProps) {
 
               {/* P&L */}
               <div className="pt-2 border-t border-dark-700/50">
-                {/* Show fee breakdown if market friction is present */}
-                {trade.marketFriction && trade.marketFriction.total !== 0 ? (
-                  <div className="space-y-1">
-                    {/* Gross P&L (before fee) */}
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-dark-500">Gross P&L</span>
-                      <div className="text-right">
-                        <span className="text-dark-300">
-                          ${(trade.pnl - (trade.positionSize * trade.marketFriction.total / 100)).toFixed(2)}
-                        </span>
-                      </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-dark-500">P&L</span>
+                  <div className="text-right">
+                    <div className={`text-sm font-bold ${
+                      trade.pnl >= 0 ? 'text-green-400' : 'text-red-400'
+                    }`}>
+                      {trade.pnl >= 0 ? '+' : ''}${Math.abs(trade.pnl).toFixed(2)}
                     </div>
-
-                    {/* Fee breakdown */}
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-orange-400">Trading Fees</span>
-                      <div className="text-right">
-                        <span className="text-orange-400">
-                          ${Math.abs(trade.positionSize * trade.marketFriction.total / 100).toFixed(2)}
-                        </span>
-                        <span className="text-orange-400/70 text-[10px] ml-1">
-                          ({trade.marketFriction.total.toFixed(2)}%)
-                        </span>
-                      </div>
+                    <div className={`text-xs ${
+                      trade.pnl >= 0 ? 'text-green-400/70' : 'text-red-400/70'
+                    }`}>
+                      ({trade.pnl >= 0 ? '+' : ''}{trade.pnlPercent.toFixed(2)}%)
                     </div>
-
-                    {/* Net P&L (after fee) */}
-                    <div className="flex items-center justify-between pt-1 border-t border-dark-700/30">
-                      <span className="text-xs font-semibold text-white">Net P&L</span>
-                      <div className="text-right">
-                        <div className={`text-sm font-bold ${
-                          trade.pnl >= 0 ? 'text-green-400' : 'text-red-400'
-                        }`}>
-                          {trade.pnl >= 0 ? '+' : ''}${Math.abs(trade.pnl).toFixed(2)}
-                        </div>
-                        <div className={`text-xs ${
-                          trade.pnl >= 0 ? 'text-green-400/70' : 'text-red-400/70'
-                        }`}>
-                          ({trade.pnl >= 0 ? '+' : ''}{trade.pnlPercent.toFixed(2)}%)
-                        </div>
+                    {trade.hadSlippage && trade.slippageAmount !== undefined && (
+                      <div className="text-[10px] text-orange-400 mt-0.5">
+                        Slippage: {trade.slippageAmount.toFixed(3)}%
                       </div>
-                    </div>
+                    )}
                   </div>
-                ) : (
-                  /* Simple P&L (no fees) */
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-dark-500">P&L</span>
-                    <div className="text-right">
-                      <div className={`text-sm font-bold ${
-                        trade.pnl >= 0 ? 'text-green-400' : 'text-red-400'
-                      }`}>
-                        {trade.pnl >= 0 ? '+' : ''}${Math.abs(trade.pnl).toFixed(2)}
-                      </div>
-                      <div className={`text-xs ${
-                        trade.pnl >= 0 ? 'text-green-400/70' : 'text-red-400/70'
-                      }`}>
-                        ({trade.pnl >= 0 ? '+' : ''}{trade.pnlPercent.toFixed(2)}%)
-                      </div>
-                    </div>
-                  </div>
-                )}
+                </div>
               </div>
             </motion.div>
           ))}

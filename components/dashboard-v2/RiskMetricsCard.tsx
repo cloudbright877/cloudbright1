@@ -9,12 +9,6 @@ interface RiskMetricsCardProps {
 }
 
 export function RiskMetricsCard({ trades, positions }: RiskMetricsCardProps) {
-  // Calculate average market friction from last 10 trades
-  const recentTrades = trades.slice(0, 10);
-  const avgFriction = recentTrades.length > 0
-    ? recentTrades.reduce((sum, t) => sum + (t.marketFriction?.total || 0), 0) / recentTrades.length
-    : 0;
-
   // Count P&L variance modes
   const tightCount = positions.filter(p => p.pnlRange?.mode === 'tight').length;
   const wideCount = positions.filter(p => p.pnlRange?.mode === 'wide').length;
@@ -22,10 +16,6 @@ export function RiskMetricsCard({ trades, positions }: RiskMetricsCardProps) {
 
   // Count scheduled closures
   const scheduledCount = positions.filter(p => p.scheduledCloseAt).length;
-
-  // Get friction breakdown from last trade
-  const lastTrade = trades[0];
-  const friction = lastTrade?.marketFriction;
 
   return (
     <div className="bg-gradient-to-br from-purple-500/10 via-pink-500/10 to-orange-500/10 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
@@ -35,48 +25,6 @@ export function RiskMetricsCard({ trades, positions }: RiskMetricsCardProps) {
       </div>
 
       <div className="space-y-6">
-        {/* Market Friction */}
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-gray-400">Market Friction (Avg Last 10)</span>
-            <span className={`text-sm font-semibold ${avgFriction < 0 ? 'text-red-400' : 'text-green-400'}`}>
-              {avgFriction >= 0 ? '+' : ''}{avgFriction.toFixed(3)}%
-            </span>
-          </div>
-
-          {/* Friction Bar */}
-          <div className="h-2 bg-black/30 rounded-full overflow-hidden mb-3">
-            <div
-              className="h-full bg-gradient-to-r from-red-500 to-orange-500 transition-all duration-500"
-              style={{ width: `${Math.min(Math.abs(avgFriction) * 100, 100)}%` }}
-            />
-          </div>
-
-          {/* Friction Breakdown */}
-          {friction && (
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <div className="flex items-center justify-between bg-black/20 rounded px-2 py-1">
-                <span className="text-gray-400">Slippage</span>
-                <span className="text-red-400">{friction.slippage.toFixed(3)}%</span>
-              </div>
-              <div className="flex items-center justify-between bg-black/20 rounded px-2 py-1">
-                <span className="text-gray-400">Spread</span>
-                <span className="text-red-400">{friction.spread.toFixed(3)}%</span>
-              </div>
-              <div className="flex items-center justify-between bg-black/20 rounded px-2 py-1">
-                <span className="text-gray-400">Funding</span>
-                <span className={friction.fundingRate >= 0 ? 'text-green-400' : 'text-red-400'}>
-                  {friction.fundingRate >= 0 ? '+' : ''}{friction.fundingRate.toFixed(3)}%
-                </span>
-              </div>
-              <div className="flex items-center justify-between bg-black/20 rounded px-2 py-1">
-                <span className="text-gray-400">Commission</span>
-                <span className="text-red-400">{friction.commission.toFixed(3)}%</span>
-              </div>
-            </div>
-          )}
-        </div>
-
         {/* P&L Variance Mode */}
         {totalModes > 0 && (
           <div>
