@@ -27,9 +27,9 @@
 ```
 lib/trading/convergence/          <- NEW directory
   PresetMapper.ts                 <- 4 inputs -> full BotConfig
-  BotValidator.ts                 <- Monte Carlo validation
+  BotValidator.ts                 <- Simple math validation (formula convergence, max correction)
   TechnicalAnalysis.ts            <- MA/RSI/ATR + favorability
-  ConvergenceController.ts        <- Layers 1-6
+  ConvergenceController.ts        <- Layers 1-6 (progress tracking + adaptive parameters)
   migration.ts                    <- migratePosition(), migrateTrade(), migrateRunningBot()
 
 workers/
@@ -111,12 +111,13 @@ git revert <merge-commit>  # or merge backup branch
 - Fixed defaults: tradingPairs, positionSize, duration, maxConcurrent
 
 **BotValidator.ts:**
-- `validate(config): ValidationResult` - run 1000-day Monte Carlo
-- Reject if convergence score < 90%
-- Reject if deviation > 10% of target
+- `validate(config): ValidationResult` - instant math validation
+- Check formula converges (WR > 42%, denominator > 0)
+- Check max correction < 0.3% (visibility threshold)
 - Reject unrealistic targets (> 10% daily)
+- `calculatePnLDistribution()` - debug helper for P&L values
 
-**Tests:** 8 unit tests (determinism, all 9 presets valid, validation rejects bad configs)
+**Tests:** 15 unit tests (formula convergence, max correction calc, all 9 presets valid, P&L distribution)
 
 ---
 
@@ -239,8 +240,8 @@ git revert <merge-commit>  # or merge backup branch
 - Character select (Conservative/Moderate/Aggressive)
 - Convergence Mode select (Natural/Assisted/Guaranteed)
 - Optional: Realism Mode select
-- Preview: 30-day simulation with convergence score
-- Validation before save
+- Preview: instant validation with max correction display
+- Real-time validation feedback (issues/warnings)
 - Remove/replace useBinancePrices hook references (use priceService.subscribe())
 
 ---
@@ -259,9 +260,9 @@ git revert <merge-commit>  # or merge backup branch
 - Preset system: 9 tests (all combinations valid)
 - Edge cases: 8 tests (flash crash, sideways, mixed data, quota, target unreachable, daily reset, price sync, CoinGecko fallback)
 - Persistence: 5 tests (TA history, convergence metrics, load/restore, daily reset clears state)
-- Performance: 4 tests (debounce frequency, indicators calc time, localStorage size, 30-day simulation)
+- Performance: 3 tests (debounce frequency, indicators calc time, localStorage size)
 
-**Target: 76 tests total** (42 updated + 35 new - 5 removed + 4 performance)
+**Target: 75 tests total** (42 updated + 35 new - 5 removed + 3 performance)
 
 ---
 
@@ -340,10 +341,10 @@ npm run test:integration   # 20 tests: Binance, TradingBot+Convergence, Persiste
 npm run test:e2e           # 32 tests: updated existing + new
 
 # Phase 4: Performance tests
-npm run test:performance   # 4 tests: debounce, calc time, storage, simulation
+npm run test:performance   # 3 tests: debounce, calc time, storage
 
 # All tests
-npm test                   # 76 total
+npm test                   # 75 total
 ```
 
 ---
@@ -363,8 +364,8 @@ npm test                   # 76 total
 ## Checklist Before Merge
 
 ```
-[ ] All 76 tests pass
-[ ] 9 preset combinations validated
+[ ] All 75 tests pass
+[ ] 9 preset combinations validated (max correction < 0.3%)
 [ ] Binance WebSocket connects and falls back correctly
 [ ] Daily reset works (no carry-over)
 [ ] Performance: < 20% CPU with 50 positions + WebSocket
@@ -377,4 +378,5 @@ npm test                   # 76 total
 [ ] Running bots migrate gracefully (convergence resets)
 [ ] Layer thresholds have smooth transitions (no visual jumps)
 [ ] Stale price guard prevents false TP/SL triggers
+[ ] Validation instant (< 1ms, no Monte Carlo delay)
 ```

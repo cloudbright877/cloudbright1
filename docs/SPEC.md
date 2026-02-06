@@ -30,7 +30,7 @@ Admin UI (4 parameters)
 PresetMapper (deterministic: input -> full config)
   |
   v
-BotValidator (Monte Carlo 1000-day simulation, reject if convergence < 90%)
+BotValidator (Math formula validation, reject if corrections > 0.3%)
   |
   v
 Binance WebSocket (real-time prices, 3-tier fallback)
@@ -484,10 +484,10 @@ New: derived from character preset in PresetMapper
 
 ### Functional
 - Admin creates bot in 30 seconds (4 parameters)
-- All 9 preset combinations pass validation (convergence > 90%)
+- All 9 preset combinations pass validation (max correction < 0.3%)
 - Binance WebSocket provides real prices (< 200ms latency)
 - Technical indicators calculate correctly
-- 6-layer convergence achieves 94%+ target probability (Guaranteed mode)
+- 6-layer convergence minimizes corrections to < 0.1% (95%+ of trades)
 - Existing UI components work without modification
 
 ### Testing
@@ -497,10 +497,10 @@ New: derived from character preset in PresetMapper
 - Edge cases covered
 
 ### Performance
-- Config time < 60 seconds
+- Config validation < 1ms (instant math checks)
 - Binance uptime > 99%
 - Position update latency < 500ms
-- UI preview simulation < 3 seconds
+- UI preview renders instantly (no simulation needed)
 
 ---
 
