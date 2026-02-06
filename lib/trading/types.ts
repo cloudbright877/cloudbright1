@@ -128,6 +128,12 @@ export interface BotConfig {
     enabled: boolean;                   // Enable/disable market friction
     forceVolatility?: 'auto' | 'low' | 'medium' | 'high'; // Force specific volatility
   };
+
+  // Preset System (ADAPTIVE_CONVERGENCE_SYSTEM)
+  character?: 'conservative' | 'moderate' | 'aggressive';  // Bot personality profile
+  realismMode?: 'smooth' | 'realistic' | 'volatile';      // Visual realism level
+  convergenceMode?: 'natural' | 'assisted' | 'guaranteed'; // Target guarantee level
+  volatility?: 'low' | 'medium' | 'high';                  // Market volatility override
 }
 
 export interface BotStats {

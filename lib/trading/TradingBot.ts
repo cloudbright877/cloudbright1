@@ -18,6 +18,7 @@ export class TradingBot {
   private staggeredClosingManager: StaggeredClosingManager; // Instance per bot
   private personality: BotPersonality;
   private lastOpenTime: number = 0; // Track last position open time for cooldown
+  private lastResetDate: string = ''; // Tracks last daily reset (YYYY-MM-DD UTC)
 
   constructor(id: string, config: BotConfig) {
     this.id = id;
@@ -58,8 +59,58 @@ export class TradingBot {
   // ============================================================================
 
   tick(prices: Record<string, number>): void {
+    // Check for daily reset first (before any trading logic)
+    this.checkDailyReset();
+
     this.managePositions(prices);
     this.tryOpenNewPosition(prices);
+  }
+
+  // ============================================================================
+  // Daily Reset Logic
+  // ============================================================================
+
+  /**
+   * Check if a new day has started (UTC) and reset daily metrics
+   * - Open positions stay open (their P&L doesn't count toward new day)
+   * - Daily progress resets to 0
+   * - Convergence metrics reset (will be implemented with ConvergenceController)
+   * - No carry-over: missed target on Day 1 doesn't affect Day 2
+   */
+  private checkDailyReset(): void {
+    // Get current UTC date as YYYY-MM-DD string
+    const now = new Date();
+    const currentDate = now.toISOString().split('T')[0]; // "2026-02-06"
+
+    // If no reset date stored yet, initialize with current date
+    if (!this.lastResetDate) {
+      this.lastResetDate = currentDate;
+      this.save();
+      return;
+    }
+
+    // Check if date has changed
+    if (currentDate !== this.lastResetDate) {
+      console.log(`[TradingBot ${this.id}] Daily reset detected: ${this.lastResetDate} -> ${currentDate}`);
+
+      // Reset daily controller (progress, trades count, realized P&L)
+      this.dailyController = new DailyTargetController(
+        this.config.dailyTargetPercent,
+        this.config.investedCapital
+      );
+      this.dailyController.save(this.id);
+
+      // TODO (Day 4-5): Reset ConvergenceController when implemented
+      // this.convergenceController.resetDaily();
+
+      // Update reset date
+      this.lastResetDate = currentDate;
+
+      // Persist changes
+      this.save();
+
+      console.log(`[TradingBot ${this.id}] Daily reset complete. Open positions: ${this.positions.length} (stay open)`);
+    }
   }
 
   // ============================================================================
@@ -595,6 +646,9 @@ export class TradingBot {
 
       // Save daily controller
       this.dailyController.save(this.id);
+
+      // Save last reset date
+      localStorage.setItem(`bot_reset_date_${this.id}`, this.lastResetDate);
     } catch (error) {
       console.error(`[TradingBot ${this.id}] Error saving state:`, error);
     }
@@ -634,6 +688,12 @@ export class TradingBot {
 
       // Load daily controller
       this.dailyController.load(this.id);
+
+      // Load last reset date
+      const resetDateData = localStorage.getItem(`bot_reset_date_${this.id}`);
+      if (resetDateData) {
+        this.lastResetDate = resetDateData;
+      }
 
       // Load staggered closing manager
       this.staggeredClosingManager.load(this.id);
