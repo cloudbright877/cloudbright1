@@ -7,6 +7,7 @@ import { dynamicPnLCalculator, type PnLRange } from './DynamicPnLCalculator';
 import { marketFrictionSimulator, type FrictionComponents } from './MarketFrictionSimulator';
 import { StaggeredClosingManager } from './StaggeredClosingManager';
 import type { Position, Trade, BotConfig, BotStats, BotPersonality } from './types';
+import { migrateRunningBot, migrateTrades } from './convergence/migration';
 
 export class TradingBot {
   public id: string;
@@ -665,13 +666,33 @@ export class TradingBot {
       // Load positions
       const positionsData = localStorage.getItem(`bot_positions_${this.id}`);
       if (positionsData) {
-        this.positions = JSON.parse(positionsData);
+        const loadedPositions = JSON.parse(positionsData) as Position[];
+
+        // Check if migration is needed (v1 -> v2)
+        const needsMigration = loadedPositions.some(
+          pos => !pos._version || pos._version !== 'v2'
+        );
+
+        if (needsMigration && loadedPositions.length > 0) {
+          // Migrate running bot (has open positions from v1)
+          const { positions: migratedPositions, warning } = migrateRunningBot(
+            this.id,
+            loadedPositions
+          );
+          this.positions = migratedPositions;
+          // Warning is already logged by migrateRunningBot()
+        } else {
+          // No migration needed (already v2 or no positions)
+          this.positions = loadedPositions;
+        }
       }
 
       // Load trades
       const tradesData = localStorage.getItem(`bot_trades_${this.id}`);
       if (tradesData) {
-        this.trades = JSON.parse(tradesData);
+        const loadedTrades = JSON.parse(tradesData) as Trade[];
+        // Migrate trades if needed (adds default values for missing fields)
+        this.trades = migrateTrades(loadedTrades);
       }
 
       // Load closed position IDs

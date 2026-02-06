@@ -290,12 +290,14 @@ export class DailyTargetController {
   }
 
   /**
-   * Get start of current day (00:00:00)
+   * Get start of current day (00:00:00 UTC)
+   * CRITICAL: Must use UTC to match TradingBot.checkDailyReset() timezone
    */
   private getStartOfDay(): number {
     const now = new Date();
-    now.setHours(0, 0, 0, 0);
-    return now.getTime();
+    // Use UTC date string, not local time (prevents timezone desync with TradingBot)
+    const utcDateStr = now.toISOString().split('T')[0]; // "2026-02-06"
+    return new Date(utcDateStr).getTime();
   }
 
   /**
