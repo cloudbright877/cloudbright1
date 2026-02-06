@@ -214,8 +214,34 @@ export class TradingBot {
         ? -pos.currentPrice * priceChangePercent
         : pos.currentPrice * priceChangePercent;
 
-      exitPrice = pos.currentPrice + slippage;
       slippageAmount = Math.abs((slippage / pos.currentPrice) * 100);
+
+      // SLIPPAGE LIMITS (v2.0): Check if slippage is realistic
+      // Based on market volatility (from config or estimated)
+      const frictionConfig = this.config.marketFriction;
+      const volatility = frictionConfig?.forceVolatility ?? 'medium';
+
+      // Realistic slippage thresholds
+      const maxRealisticSlippage =
+        volatility === 'low' ? 0.15 :
+        volatility === 'high' ? 0.5 :
+        0.3; // medium
+
+      if (slippageAmount > maxRealisticSlippage) {
+        // Slippage exceeds realistic threshold - cap it
+        const cappedSlippage = Math.sign(slippage) * (pos.currentPrice * maxRealisticSlippage / 100);
+        exitPrice = pos.currentPrice + cappedSlippage;
+        slippageAmount = maxRealisticSlippage;
+
+        console.warn(
+          `[${this.config.name}] Slippage capped: required ${(Math.abs(slippage / pos.currentPrice) * 100).toFixed(2)}% ` +
+          `→ applied ${maxRealisticSlippage}% (${volatility} volatility limit)`
+        );
+      } else {
+        // Realistic slippage - apply fully
+        exitPrice = pos.currentPrice + slippage;
+      }
+
       hadSlippage = true;
 
       // Recalculate final P&L
@@ -364,6 +390,7 @@ export class TradingBot {
       currentDailyPnL: this.dailyController.getCurrentDailyPnLPercent(),
       tradesRemainingToday: this.dailyController.getTradesRemaining(this.config.tradesPerDay),
       tightModePercent,
+      marketFriction: this.config.marketFriction, // Pass friction config
       // NOTE: winPnLMin/Max are IGNORED by calculator (deprecated)
     });
 

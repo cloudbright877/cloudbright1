@@ -25,6 +25,13 @@ export interface Position {
     mode: 'tight' | 'wide';
     baseExpected: number;
   };
+
+  // NEW FIELDS (ADAPTIVE_CONVERGENCE_SYSTEM):
+  binancePrice?: number;              // Last known Binance price (cached, for reference)
+  priceSource?: 'simulated' | 'binance' | 'coingecko';  // Indicates which source currentPrice came from
+  favorabilityScore?: number;         // 0-1 range (from Technical Analysis)
+  convergenceLayer?: number;          // 0-6 (dominant layer for UI display)
+  _version?: 'v1' | 'v2';            // Data version (v1: old, v2: ADAPTIVE_CONVERGENCE_SYSTEM)
 }
 
 export interface Trade {
@@ -50,6 +57,19 @@ export interface Trade {
     fundingRate: number;
     commission: number;
     total: number;
+  };
+
+  // NEW FIELDS (ADAPTIVE_CONVERGENCE_SYSTEM):
+  priceSource?: 'simulated' | 'binance' | 'coingecko';  // Price source used
+  favorabilityScore?: number;                            // Entry favorability (0-1)
+  technicalIndicators?: {                                // Technical analysis snapshot
+    ma20: number;
+    ma50: number;
+    rsi: number;
+    atr: number;
+    trend: 'up' | 'down' | 'sideways';
+    momentum: number;
+    volatility: 'low' | 'medium' | 'high';
   };
 }
 

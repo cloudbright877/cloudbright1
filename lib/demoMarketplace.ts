@@ -56,7 +56,7 @@ export const DEMO_BOTS: DemoBot[] = [
       tradingPairs: ['BTC/USDT', 'ETH/USDT', 'BNB/USDT'],
       leverages: [2, 2, 3], // Floating leverage: mostly 2x, occasionally 3x
       winRate: 0.58,
-      dailyTargetPercent: 0.9,
+      dailyTargetPercent: 2.5, // Increased from 0.9% for realistic trade sizes
       investedCapital: 5000,
       tradesPerDay: 250,
       minPositionSize: 100,
@@ -68,6 +68,11 @@ export const DEMO_BOTS: DemoBot[] = [
       maxConcurrentPositions: 12,
       openFrequency: 0.65,
       allowedSides: 'BOTH',
+      // Market friction enabled (v2.0)
+      marketFriction: {
+        enabled: true,
+        forceVolatility: 'medium' as const,
+      },
     },
     stats: {
       rating: 4.9,

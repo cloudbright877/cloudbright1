@@ -4,8 +4,18 @@
  * Calculates mathematically correct P&L ranges that converge to daily target
  * while maintaining visual realism through controlled variance injection.
  *
- * Key formula with leverage:
- * Base P&L% = (dailyTarget / tradesPerDay / winRate) / avgLeverage
+ * SIMPLIFIED FORMULA (v2.1.1):
+ * perTradeTarget = dailyTarget / trades
+ * denominator = winRate - (lossRate² / winRate) × asymmetry
+ * baseWin = perTradeTarget / denominator
+ * baseLoss = baseWin × (lossRate / winRate) × asymmetry
+ *
+ * This ensures:
+ * - Convergence to daily target ✓
+ * - Win Rate directly affects Expected Daily ✓
+ * - Friction applied during execution (% of position) ✓
+ * - Losses SMALLER than wins (asymmetry = 0.7) ✓
+ * - Simple, predictable, manageable ✓
  *
  * Variance modes:
  * - Tight (80%): ±30% variance from base → smooth convergence
@@ -31,6 +41,12 @@ export interface CalibrationParams {
   tradesRemainingToday?: number; // Trades left today (for correction)
   tightModePercent?: number;    // % of positions in tight mode (0-100), default: 80
 
+  // Market friction configuration
+  marketFriction?: {
+    enabled: boolean;
+    forceVolatility?: 'low' | 'medium' | 'high' | 'auto';
+  };
+
   // NOTE: winPnLMin/Max, lossPnLMin/Max are DEPRECATED and IGNORED
   // They were manually tuned and don't scale with tradesPerDay
   // Kept here only for interface compatibility with old code
@@ -42,12 +58,40 @@ export interface CalibrationParams {
 
 export class DynamicPnLCalculator {
   /**
+   * Calculate average market friction per trade AS % OF POSITION SIZE
+   * This needs to be converted to % of capital for formula
+   *
+   * Returns friction % of POSITION that will cost per trade
+   */
+  private calculateAvgFrictionPercent(params: CalibrationParams): number {
+    if (!params.marketFriction?.enabled) {
+      return 0; // Friction disabled
+    }
+
+    const volatility = params.marketFriction.forceVolatility ?? 'medium';
+
+    // Realistic friction values based on volatility
+    // Components: slippage (0.05-0.3%) + spread (0.01-0.1%) + funding (0-0.03%) + commission (0.04%)
+    // These are % of POSITION SIZE, not capital
+    switch (volatility) {
+      case 'low':
+        return 0.15; // Total: ~0.15% of position size
+      case 'high':
+        return 0.5; // Total: ~0.5% of position size
+      case 'medium':
+      case 'auto':
+      default:
+        return 0.3; // Total: ~0.3% of position size
+    }
+  }
+
+  /**
    * Calculate optimal P&L range for next trade
    *
-   * Formula breakdown:
-   * 1. avgLeverage = (leverageMin + leverageMax) / 2
-   * 2. baseWinPnL = (dailyTarget / tradesPerDay / winRate) / avgLeverage
-   * 3. baseLossPnL = baseWinPnL * (winRate / (1 - winRate)) × 0.7 (asymmetric R:R)
+   * Formula breakdown (v2.0 - Simplified):
+   * 1. friction = calculateAvgFriction()
+   * 2. baseWinGross = (dailyTarget / (winRate × trades) + friction) / (1 - asymmetry)
+   * 3. baseLoss = baseWinGross × (winRate / (1-winRate)) × asymmetry
    * 4. Apply variance based on mode (80% tight, 20% wide)
    * 5. Apply correction if currentDailyPnL exceeds target
    */
@@ -67,23 +111,35 @@ export class DynamicPnLCalculator {
       lossPnLMax,
     } = params;
 
-    // Step 1: Calculate average leverage
-    const avgLeverage = (leverageMin + leverageMax) / 2;
+    // Step 1: Calculate average friction per trade (if enabled)
+    // Friction is % of POSITION SIZE, not capital
+    const frictionPercentOfPosition = this.calculateAvgFrictionPercent(params);
 
-    // Step 2: Calculate base P&L dynamically
+    // Step 2: Calculate base P&L with SIMPLIFIED FORMULA (v2.1.1)
     // NOTE: Deprecated winPnLMin/Max are IGNORED because they were manually tuned
     // and don't account for tradesPerDay changes. Always calculate dynamically.
 
-    // Formula: baseWinPnL = (dailyTarget / #trades / winRate)
-    // This ensures Expected Daily converges to Daily Target
-    const baseWinPnLPercent = (dailyTargetPercent / tradesPerDay / winRate);
+    // SIMPLE APPROACH: Start with per-trade target, then apply risk-reward ratio
+    // This ensures convergence to daily target
+    const perTradeTarget = dailyTargetPercent / tradesPerDay;
 
-    // Calculate base loss P&L (using risk-reward ratio)
-    // winRate × avgWin = (1 - winRate) × avgLoss
-    // avgLoss = avgWin × (winRate / (1 - winRate)) × asymmetryFactor
-    // asymmetryFactor = 0.7 means wins are slightly bigger than losses on average
+    // Apply risk-reward asymmetry: wins are bigger than losses
+    // With WR=75% and asymmetry=0.7, we need:
+    // Expected = WR × Win - LR × Loss = perTradeTarget
+    // Loss = Win × (LR/WR) × asymmetry
+    // Solving: perTradeTarget = WR × Win - LR × Win × (LR/WR) × asymmetry
+    //          perTradeTarget = Win × (WR - LR × LR / WR × asymmetry)
+    //          Win = perTradeTarget / (WR - LR² / WR × asymmetry)
     const asymmetryFactor = 0.7;
-    const baseLossPnLPercent = baseWinPnLPercent * (winRate / (1 - winRate)) * asymmetryFactor;
+    const lossRate = 1 - winRate;
+
+    const denominator = winRate - (lossRate * lossRate / winRate) * asymmetryFactor;
+    const baseWinPnLGross = perTradeTarget / denominator;
+
+    // Calculate base loss P&L
+    const baseLossPnLPercent = baseWinPnLGross * (lossRate / winRate) * asymmetryFactor;
+
+    const baseWinPnLPercent = baseWinPnLGross;
 
     // Step 4: Determine variance mode (using configured tight mode percentage)
     const isTightMode = Math.random() < (tightModePercent / 100);

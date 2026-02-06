@@ -169,7 +169,7 @@ export default function RiskMetricsPreview({ config }: RiskMetricsPreviewProps) 
           <div className="flex justify-between">
             <span className="text-dark-500">Avg Win (gross):</span>
             <span className="text-green-400 font-semibold">
-              +{(metrics.netAvgWin + metrics.marketFrictionCost).toFixed(2)}%
+              +{metrics.netAvgWin.toFixed(3)}%
             </span>
           </div>
           <div className="flex justify-between">
@@ -185,7 +185,7 @@ export default function RiskMetricsPreview({ config }: RiskMetricsPreviewProps) 
             <span className={`font-semibold ${
               metrics.netAvgWin > 0 ? 'text-green-400' : 'text-red-400'
             }`}>
-              {metrics.netAvgWin > 0 ? '+' : ''}{metrics.netAvgWin.toFixed(2)}%
+              {metrics.netAvgWin > 0 ? '+' : ''}{metrics.netAvgWin.toFixed(3)}%
             </span>
           </div>
           <div className="flex justify-between">
@@ -275,26 +275,45 @@ function calculateMetrics(config: RiskMetricsPreviewProps['config']): Calculated
   const leverageMax = config.leverageMax ?? 10;
   const avgLeverage = (leverageMin + leverageMax) / 2;
 
-  // Calculate market friction cost
+  // Calculate market friction cost (% of position size, not capital)
   let marketFrictionCost = 0;
   if (config.marketFriction?.enabled) {
     const volatility = config.marketFriction.forceVolatility ?? 'medium';
     marketFrictionCost = volatility === 'low' ? 0.15
       : volatility === 'high' ? 0.5
-      : 0.3; // medium or auto
+      : 0.3; // medium or auto (% of position)
   }
 
-  // STEP 1: Calculate base P&L using DynamicPnLCalculator formula
+  // STEP 1: Calculate base P&L using SIMPLIFIED FORMULA (v2.1.1)
   // NOTE: Deprecated winPnLMin/Max are IGNORED - they were manually tuned
   // and don't scale with tradesPerDay changes. Always calculate dynamically.
 
-  // Formula: baseWinPnL = (dailyTarget / tradesPerDay / winRate)
-  // This ensures Expected Daily converges to Daily Target
-  const baseWinPnLPercent = (config.dailyTargetPercent / config.tradesPerDay / (config.winRate / 100));
-
-  // Calculate base loss P&L (using risk-reward ratio)
+  // SIMPLE APPROACH: Start with per-trade target, then apply risk-reward ratio
+  const perTradeTarget = config.dailyTargetPercent / config.tradesPerDay;
   const asymmetryFactor = 0.7;
-  const baseLossPnLPercent = baseWinPnLPercent * ((config.winRate / 100) / (1 - config.winRate / 100)) * asymmetryFactor;
+  const winRateDecimal = config.winRate / 100;
+  const lossRate = 1 - winRateDecimal;
+
+  // Solve: perTradeTarget = WR × Win - LR × Win × (LR/WR) × asymmetry
+  // Win = perTradeTarget / (WR - LR² / WR × asymmetry)
+  const denominator = winRateDecimal - (lossRate * lossRate / winRateDecimal) * asymmetryFactor;
+  const baseWinPnLGross = perTradeTarget / denominator;
+
+  // Calculate base loss P&L
+  const baseLossPnLPercent = baseWinPnLGross * (lossRate / winRateDecimal) * asymmetryFactor;
+
+  const baseWinPnLPercent = baseWinPnLGross;
+
+  // DEBUG LOGGING
+  console.log('[RiskMetrics] Calculation:', {
+    dailyTarget: config.dailyTargetPercent,
+    tradesPerDay: config.tradesPerDay,
+    winRate: config.winRate,
+    perTradeTarget,
+    denominator,
+    baseWinPnLGross,
+    baseLossPnLPercent,
+  });
 
   // STEP 2: Calculate average P&L using variance ranges
   // This matches DynamicPnLCalculator approach
@@ -313,23 +332,27 @@ function calculateMetrics(config: RiskMetricsPreviewProps['config']): Calculated
   const avgWinGross = (winMin + winMax) / 2;
   const avgLoss = (lossMin + lossMax) / 2;
 
-  // STEP 3: Apply market friction
-  const netAvgWin = avgWinGross - marketFrictionCost;
+  // STEP 3: Net values
+  // Friction is % of POSITION SIZE and applied during trade execution
+  // DO NOT subtract it from avgWinGross here - that would be double-counting!
+  // marketFrictionCost is just for display purposes
+  const netAvgWin = avgWinGross; // Gross value - friction applied per trade, not per capital
   const netAvgLoss = avgLoss;
 
-  // STEP 4: Calculate how many wins become losses due to friction
-  let winsBecomingLosses = 0;
-  if (config.marketFriction?.enabled && netAvgWin < 0.1) {
-    if (netAvgWin <= 0) {
-      winsBecomingLosses = baseWinRate * 0.7; // 70% of wins become losses
-    } else {
-      const affectRatio = 1 - (netAvgWin / 0.1);
-      winsBecomingLosses = baseWinRate * affectRatio * 0.5;
-    }
-  }
+  // DEBUG LOGGING
+  console.log('[RiskMetrics] After variance:', {
+    winMin,
+    winMax,
+    avgWinGross,
+    netAvgWin,
+    avgLoss,
+  });
 
-  // STEP 5: Final win/loss rate
-  const finalWinRate = Math.max(0, baseWinRate - winsBecomingLosses);
+  // STEP 4: No "wins becoming losses" logic needed
+  // Friction is already accounted for in trade execution (TradingBot.ts)
+  // Win Rate remains constant at configured value
+  const winsBecomingLosses = 0; // No adjustment needed
+  const finalWinRate = baseWinRate;
   const finalLossRate = 100 - finalWinRate;
 
   // STEP 6: Expected net P&L per trade
