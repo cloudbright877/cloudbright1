@@ -1,6 +1,6 @@
 # Implementation Plan - Adaptive Convergence System
 
-**Version:** 3.0 (Consolidated)
+**Version:** 4.0 (Post-audit)
 **Date:** 2026-02-06
 **Strategy:** Clean Slate (replace, don't integrate)
 
@@ -12,6 +12,8 @@
 - Gap-based slippage logic (TradingBot.ts:208-252)
 - Fake price simulation (replaced by Binance WebSocket)
 - Old Admin UI form (15+ fields)
+- useBinancePrices.ts hook (duplicate WebSocket, replaced by PriceService)
+- DailyTargetController local time logic (replaced with UTC)
 
 ### What We Keep
 - DynamicPnLCalculator.ts (formula is correct, layers apply AFTER)
@@ -26,10 +28,9 @@
 lib/trading/convergence/          <- NEW directory
   PresetMapper.ts                 <- 4 inputs -> full BotConfig
   BotValidator.ts                 <- Monte Carlo validation
-  BinanceWebSocket.ts             <- 3-tier fallback price source
   TechnicalAnalysis.ts            <- MA/RSI/ATR + favorability
   ConvergenceController.ts        <- Layers 1-6
-  migration.ts                    <- migratePosition(), migrateTrade()
+  migration.ts                    <- migratePosition(), migrateTrade(), migrateRunningBot()
 
 workers/
   technicalAnalysis.worker.ts     <- Offload calculations from main thread
@@ -43,6 +44,9 @@ app/dashboard-v2/admin/bots/new/
 ```
 lib/trading/types.ts              <- ADD optional fields (Position, Trade, BotConfig)
 lib/trading/TradingBot.ts         <- REWRITE: constructor, tick, tryOpenNewPosition, closePosition
+lib/PriceService.ts               <- REFACTOR: add 3-tier fallback, stale detection, validation
+lib/trading/DailyTargetController.ts <- FIX: UTC timezone for daily reset
+hooks/useBinancePrices.ts           <- DELETE: replaced by PriceService
 ```
 
 ---
@@ -77,6 +81,18 @@ git revert <merge-commit>  # or merge backup branch
 **migration.ts:**
 - `migratePosition(pos)`: add defaults for old positions (_version='v2', priceSource='simulated')
 - `migrateTrade(trade)`: add defaults for old trades
+- `migrateRunningBot(botId)`: reset convergence state for running bots
+  - Open positions get migrated with defaults
+  - ConvergenceController resets to fresh state (partial day accepted as loss)
+  - Console warning: "Today's target may be missed (day partially completed before migration)"
+  - BotManager.load() calls migrateRunningBot() if _version !== 'v2'
+
+**DailyTargetController timezone fix:**
+- Fix getStartOfDay() to use UTC instead of local time
+- Current: now.setHours(0,0,0,0) → LOCAL TIME
+- Fix: Use new Date(now.toISOString().split('T')[0]).getTime() → UTC
+- File: lib/trading/DailyTargetController.ts, line 295-298
+- Ensures TradingBot.checkDailyReset() and DailyTargetController reset at same time
 
 **Daily reset logic in TradingBot.ts:**
 - `checkDailyReset()`: compare date strings (UTC), reset dailyController + convergenceController
@@ -104,19 +120,28 @@ git revert <merge-commit>  # or merge backup branch
 
 ---
 
-### Day 2: BinanceWebSocket (8 hours)
+### Day 2: PriceService Refactor (8 hours)
 
-**BinanceWebSocket.ts:**
-- WSS connection to `wss://stream.binance.com:9443/stream`
-- Subscribe to btcusdt@ticker, ethusdt@ticker, solusdt@ticker
-- Price validation (> 0, < 1M)
-- Stale price detection (> 10s old)
-- Debounced price notifications (500ms)
-- Reconnect: exponential backoff (5s base, max 10 attempts)
-- Fallback to CoinGecko API (30s polling) after max reconnects
-- Fallback to simulation after 3 CoinGecko failures
-- Auto-resume when real source recovers
-- `getPriceSource()`: 'binance' | 'coingecko' | 'simulated'
+**Refactor PriceService.ts (NOT create new BinanceWebSocket.ts):**
+- Existing PriceService.ts already connects to Binance WebSocket
+- Existing useBinancePrices.ts ALSO connects (duplicate!)
+- Creating a THIRD WebSocket = Binance rate limit (5 connections/IP)
+
+**Changes to PriceService.ts:**
+- Add price validation (> 0, < 1M)
+- Add stale price detection (> 10s old) with isPriceStale(symbol) method
+- Add 3-tier fallback chain:
+  - Priority 1: Binance WebSocket (existing, add reconnect with exponential backoff)
+  - Priority 2: CoinGecko API (30s polling, new)
+  - Priority 3: Simulation fallback (random walk from last known price)
+  - Auto-resume when real source recovers
+- Add getPriceSource(): 'binance' | 'coingecko' | 'simulated'
+- Add debounce for price notifications (500ms)
+
+**Remove useBinancePrices.ts:**
+- Duplicate WebSocket connection
+- Replace all usages with priceService.subscribe()
+- Update components that use useBinancePrices hook
 
 **Tests:** 5 integration tests (connect, validate, reconnect, fallback chain, stale prices)
 
@@ -154,6 +179,16 @@ git revert <merge-commit>  # or merge backup branch
 - `resetDaily()` -> clear micro-steering state
 - `save()` / `load()` -> persist convergence metrics to localStorage
 
+**Threshold smoothing (prevent visual jumps):**
+- Use linear interpolation between progress brackets instead of step functions
+- Example: progress 29% → 31%, Layer 1 smoothly transitions 3.0x → 2.8x → 1.8x
+- Avoids sudden behavior change on threshold boundaries
+
+**StaggeredClosing integration:**
+- ConvergenceController.shouldForceStagger(activeLayer, tradesRemaining): boolean
+- When Layer 4 (early exit) or Layer 6 (micro-steering) active AND tradesRemaining <= 10:
+  force staggered closing to prevent batch closure with identical corrections
+
 **Tests:** 7 unit tests (each layer + emergency threshold + micro-steering cap + deviation check)
 
 ---
@@ -171,6 +206,9 @@ git revert <merge-commit>  # or merge backup branch
 - Call `checkDailyReset()` first
 - Merge Binance prices into prices object (if connected)
 - Update technical indicators
+- Check price staleness before TP/SL evaluation (priceService.isPriceStale())
+- Skip tick for symbols with stale prices (> 10s old)
+- Prevents false TP/SL triggers on frozen WebSocket connection
 
 **tryOpenNewPosition() rewrite:**
 - Layer 5: frequency check (random vs getOpenFrequency)
@@ -203,6 +241,7 @@ git revert <merge-commit>  # or merge backup branch
 - Optional: Realism Mode select
 - Preview: 30-day simulation with convergence score
 - Validation before save
+- Remove/replace useBinancePrices hook references (use priceService.subscribe())
 
 ---
 
@@ -236,6 +275,25 @@ git revert <merge-commit>  # or merge backup branch
 
 ---
 
+## Audit Findings (2026-02-06)
+
+Issues found during architect + auditor review:
+
+| # | Issue | Severity | Resolution |
+|---|-------|----------|------------|
+| 1 | Timezone bug: DailyTargetController uses local time, TradingBot uses UTC | BLOCKER | Fix in Day 0 |
+| 2 | Triple WebSocket to Binance (PriceService + useBinancePrices + new BinanceWebSocket) | BLOCKER | Refactor PriceService instead of creating new file |
+| 3 | Running bot migration not covered | BLOCKER | Add migrateRunningBot() in Day 0 |
+| 4 | Layer threshold jumps (step function at 30%/60%/110%) | HIGH | Add linear interpolation in Day 4-5 |
+| 5 | Convergence Layer 4+6 batch closure | HIGH | Integrate with StaggeredClosing in Day 4-5 |
+| 6 | Stale price (9.9s) passes threshold but data outdated | HIGH | Add guard in TradingBot.tick() Day 6-7 |
+| 7 | BotPersonality random vs PresetMapper deterministic | MEDIUM | PresetMapper generates personality from character |
+| 8 | Double daily reset (TradingBot + DailyTargetController) | MEDIUM | Remove DailyTargetController self-reset |
+| 9 | CoinGecko rate limit at scale | MEDIUM | Add request pooling, shared cache |
+| 10 | TA save debounce missing | MEDIUM | Throttle localStorage saves to 1/5s |
+
+---
+
 ## Timeline Summary
 
 | Week | Days | Deliverable |
@@ -258,6 +316,8 @@ git revert <merge-commit>  # or merge backup branch
 | Slippage | Gap-based -> random | P&L results will differ |
 | BotConfig | New preset fields required | Old configs need reconfigure |
 | Price source | Fake -> Binance | Positions track real prices |
+| useBinancePrices hook | Deleted | Components using hook need update |
+| DailyTargetController | UTC fix | Reset time changes for non-UTC users |
 
 **Existing bots:** Will NOT work automatically. Require reconfigure through new preset form.
 
@@ -312,4 +372,9 @@ npm test                   # 76 total
 [ ] Old trades render with "N/A" for missing fields
 [ ] No console errors
 [ ] Git backup branch exists
+[ ] DailyTargetController and TradingBot reset at same UTC time
+[ ] Only ONE WebSocket connection to Binance per tab
+[ ] Running bots migrate gracefully (convergence resets)
+[ ] Layer thresholds have smooth transitions (no visual jumps)
+[ ] Stale price guard prevents false TP/SL triggers
 ```

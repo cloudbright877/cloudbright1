@@ -1,6 +1,6 @@
 # Adaptive Convergence System - Specification
 
-**Version:** 6.0 (Post-review)
+**Version:** 7.0 (Post-audit)
 **Date:** 2026-02-06
 **Status:** Ready for implementation
 
@@ -213,22 +213,63 @@ Tiny P&L adjustment on final trades to hit daily target exactly. Constraints:
 - Max 0.08% per trade (hard limit, within market noise)
 - If needed > 1.0%: log "Target unreachable", accept miss
 
+### Threshold Smoothing
+
+All layers use step functions for progress brackets (e.g., < 30%, 30-60%, etc.).
+Step functions create visual jumps when progress crosses boundaries.
+
+**Solution:** Linear interpolation in transition zones (±5% around each boundary).
+
+Example for Layer 1 (Position Sizing):
+- Progress 25%: multiplier = 3.0x (full "behind" mode)
+- Progress 28%: multiplier = 2.64x (interpolating toward 1.8x)
+- Progress 30%: multiplier = 1.8x (transition complete)
+- Progress 32%: multiplier = 1.8x (full "slightly behind" mode)
+
+Formula: `smoothMultiplier = lerp(prevMultiplier, nextMultiplier, (progress - boundary + 5) / 10)`
+
+Apply to: Layer 1 (sizing), Layer 3 (TP/SL), Layer 5 (frequency).
+Do NOT apply to: Layer 2 (binary threshold), Layer 4 (binary chance), Layer 6 (only active in final 10 trades).
+
+### Convergence + Staggered Closing Integration
+
+When Layer 4 (early exit) or Layer 6 (micro-steering) closes positions in final 10 trades,
+StaggeredClosingManager MUST be force-enabled to prevent batch closure with identical corrections.
+
+```
+ConvergenceController.shouldForceStagger(layer, tradesRemaining):
+  if (layer === 4 || layer === 6) AND tradesRemaining <= 10:
+    return true  // Force staggered closing
+  return false   // Use bot config setting
+```
+
+Without this: 3 positions closing simultaneously with same micro-steering correction = visually suspicious.
+
 ---
 
 ## Binance Integration
 
-### 3-Tier Fallback Chain
+### 3-Tier Fallback Chain (via PriceService refactor)
+
+**IMPORTANT: Do NOT create new BinanceWebSocket.ts. Refactor existing PriceService.ts.**
+
+Existing PriceService.ts already connects to Binance WebSocket.
+useBinancePrices.ts hook also creates a separate connection (duplicate).
+Creating a third WebSocket = Binance rate limit (5 connections/IP).
+
+Solution: Single PriceService as the ONLY price source for ALL consumers.
 
 ```
-Priority 1: Binance WebSocket (real-time ~100ms)
-  URL: wss://stream.binance.com:9443/stream
-  Streams: btcusdt@ticker, ethusdt@ticker, solusdt@ticker
-  On disconnect: exponential backoff (5s, 10s, 20s... max 10 attempts)
+Priority 1: Binance WebSocket (existing PriceService connection)
+  Add: exponential backoff reconnect (5s base, max 10 attempts)
+  Add: price validation (> 0, < 1M)
+  Add: stale detection (> 10s old)
     |
     v (10 failed reconnects)
 Priority 2: CoinGecko API (polling every 30s)
   URL: https://api.coingecko.com/api/v3/simple/price
   Free tier, no auth required
+  Request pooling: batch all symbols in one request
     |
     v (3 consecutive failures)
 Priority 3: Price Simulation (fallback)
@@ -238,6 +279,15 @@ Priority 3: Price Simulation (fallback)
     v (Binance/CoinGecko recovers)
 Auto-resume real prices
 ```
+
+**Consumers:**
+- TradingBot.tick() → priceService.getPrices()
+- UI components → priceService.subscribe() (replaces useBinancePrices hook)
+- All use same price data, no desync
+
+**Deleted:**
+- useBinancePrices.ts hook (replaced by priceService.subscribe())
+- BinanceWebSocket.ts NOT created (PriceService handles everything)
 
 Bot NEVER stops trading. `priceSource` field tracks active source: `'binance' | 'coingecko' | 'simulated'`.
 
@@ -260,6 +310,10 @@ Price source -> Update technical indicators -> Calculate favorability
 
 ### Critical Requirements
 
+- **Single WebSocket** — PriceService is the ONLY Binance connection (no useBinancePrices.ts, no BinanceWebSocket.ts)
+- **UTC everywhere** — all daily reset logic uses UTC, never local time
+- **Stale guard** — TradingBot.tick() skips symbols with prices older than 10 seconds
+- **TA save throttle** — localStorage writes for price history throttled to 1 per 5 seconds
 - **Debounce** WebSocket updates: max 1 UI re-render per 500ms
 - **Web Worker** for technical indicator calculations (3360 ops/sec on main thread = lag)
 - **Price validation:** price > 0 AND price < 1,000,000
@@ -314,6 +368,12 @@ With layers: E[X] = target, Var[X] reduced by factor k -> P(within 10%) ~ 94-97%
 
 ## Daily Reset
 
+**CRITICAL: All reset logic MUST use UTC.**
+- TradingBot.checkDailyReset(): `new Date().toISOString().split('T')[0]` (UTC)
+- DailyTargetController.getStartOfDay(): `new Date(now.toISOString().split('T')[0]).getTime()` (UTC)
+- ConvergenceController.resetDaily(): triggered by TradingBot.checkDailyReset() only
+- DailyTargetController self-reset in recordTrade() MUST be removed (single reset source)
+
 - Reset daily progress at 00:00 UTC (`.toISOString()` comparison)
 - Open positions stay open (their P&L does NOT count toward new day's progress)
 - Convergence metrics reset (micro-steering counter, layer states)
@@ -335,6 +395,12 @@ With layers: E[X] = target, Var[X] reduced by factor k -> P(within 10%) ~ 94-97%
 | binancePrice vs currentPrice confusion | Medium | Medium | currentPrice = authoritative (for TP/SL), binancePrice = reference only |
 | Performance with 1000+ positions | Low | High | React virtualization + debounce + React.memo |
 | localStorage quota exceeded | Low | Medium | Cleanup (keep last 500-1000 trades), retry after cleanup |
+| Stale price (< 10s threshold) | Medium | High | Skip tick for stale symbols, log warning |
+| Concurrent Layer 4+6 closure | Medium | High | Force staggered closing in final 10 trades |
+| Emergency threshold stuck (favorability always < 0.2) | Medium | Medium | Lower emergency threshold to 0.1 if 0 trades opened in 30 min |
+| Running bot migration (v1 → v2 with open positions) | High | High | Reset convergence state, accept partial day loss |
+| TA save blocking UI thread | Medium | Medium | Throttle localStorage saves to 1 per 5 seconds |
+| CoinGecko rate limit at scale (10+ bots) | Medium | Medium | Batch all symbols in single request, shared cache |
 
 ### Fallback Strategy for Unreachable Target
 
@@ -382,6 +448,18 @@ convergenceMode?: 'natural' | 'assisted' | 'guaranteed';
 volatility?: 'low' | 'medium' | 'high';
 ```
 
+### BotPersonality (CHANGE: deterministic from character)
+
+Old: generated randomly in TradingBot constructor (Math.random())
+New: derived from character preset in PresetMapper
+
+```typescript
+// Conservative: low aggression, high patience, low risk
+// Moderate: balanced
+// Aggressive: high aggression, low patience, high risk
+// Personality generated deterministically from character + bot ID hash
+```
+
 ---
 
 ## Performance Requirements
@@ -423,3 +501,22 @@ volatility?: 'low' | 'medium' | 'high';
 - Binance uptime > 99%
 - Position update latency < 500ms
 - UI preview simulation < 3 seconds
+
+---
+
+## Audit Changelog
+
+### v7.0 (Post-audit) — 2026-02-06
+
+Changes based on architect + auditor review:
+
+1. **Binance Integration**: Refactor PriceService.ts instead of creating new BinanceWebSocket.ts (prevents triple WebSocket)
+2. **Daily Reset**: Enforce UTC everywhere (timezone bug found in DailyTargetController)
+3. **Threshold Smoothing**: Added linear interpolation for layer progress brackets
+4. **Staggered Closing**: Integrated with Convergence Layer 4+6 for final 10 trades
+5. **BotPersonality**: Changed from random to deterministic (derived from character preset)
+6. **Stale Price Guard**: Added to TradingBot.tick() to prevent false TP/SL on frozen WebSocket
+7. **Running Bot Migration**: Added strategy for v1→v2 upgrade with open positions
+8. **Edge Cases**: Added 6 new edge cases from audit findings
+9. **TA Save Throttle**: Added throttle for localStorage writes (price history)
+10. **CoinGecko Pooling**: Batch all symbols in single API request
