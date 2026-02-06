@@ -15,7 +15,8 @@
     "test:firefox": "npx playwright test --project=firefox",
     "test:webkit": "npx playwright test --project=webkit",
     "test:report": "npx playwright show-report",
-    "test:install": "npx playwright install --with-deps"
+    "test:install": "npx playwright install --with-deps",
+    "test:unit": "npx tsx tests/unit/convergence/PresetMapper.test.ts && npx tsx tests/unit/convergence/BotValidator.test.ts"
   },
   "keywords": [],
   "author": "",
@@ -55,6 +56,7 @@
     "@playwright/test": "^1.58.1",
     "@types/node": "^24.10.10",
     "@types/ws": "^8.18.1",
+    "tsx": "^4.21.0",
     "ws": "^8.19.0"
   }
 }

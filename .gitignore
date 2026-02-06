@@ -99,6 +99,7 @@ data-backup/
 
 # E2E Testing
 /tests/
+!/tests/unit/  # Allow unit tests (core logic validation)
 /e2e/
 playwright.config.ts
 playwright-report/
