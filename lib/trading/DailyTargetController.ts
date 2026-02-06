@@ -97,13 +97,14 @@ export class DailyTargetController {
   getTradeAdjustment(): TradeAdjustment {
     const progress = this.getDailyProgress();
 
-    // Completed target: slow down significantly
+    // Completed target: continue trading to reach tradesPerDay
+    // Let Convergence Layers control frequency/sizing (Layer 3 TP/SL, Layer 5 frequency)
     if (progress.status === 'completed') {
       return {
-        shouldTrade: Math.random() < 0.3, // 30% chance to trade
-        frequencyMultiplier: 0.3,
-        sizeMultiplier: 0.5,
-        reason: 'Daily target reached - reducing activity',
+        shouldTrade: true, // Keep trading - layers will make micro-trades
+        frequencyMultiplier: 1.0, // Layers control frequency
+        sizeMultiplier: 1.0, // Layers control sizing
+        reason: 'Daily target reached - layers controlling micro-trades',
       };
     }
 
@@ -127,15 +128,16 @@ export class DailyTargetController {
       };
     }
 
-    // Behind: speed up (but realistically)
+    // Behind: keep normal size (formula is calibrated for this)
+    // Only frequency can increase slightly, but NOT position size
     const gap = progress.percentComplete - progress.percentTarget;
     const urgency = Math.min(gap / 30, 1); // 0-1 based on how far behind
 
     return {
       shouldTrade: true,
-      frequencyMultiplier: 1 + urgency * 0.5, // Up to 1.5x speed
-      sizeMultiplier: 1 + urgency * 0.3,      // Up to 1.3x size
-      reason: `Behind schedule - increasing activity (urgency: ${(urgency * 100).toFixed(0)}%)`,
+      frequencyMultiplier: 1 + urgency * 0.5, // Up to 1.5x speed (OK for frequency)
+      sizeMultiplier: 1.0,                    // NEVER increase size (cap at 1.0x)
+      reason: `Behind schedule - maintaining normal size (urgency: ${(urgency * 100).toFixed(0)}%)`,
     };
   }
 

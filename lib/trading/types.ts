@@ -61,15 +61,11 @@ export interface Trade {
 
   // NEW FIELDS (ADAPTIVE_CONVERGENCE_SYSTEM):
   priceSource?: 'simulated' | 'binance' | 'coingecko';  // Price source used
-  favorabilityScore?: number;                            // Entry favorability (0-1)
-  technicalIndicators?: {                                // Technical analysis snapshot
-    ma20: number;
-    ma50: number;
-    rsi: number;
-    atr: number;
-    trend: 'up' | 'down' | 'sideways';
-    momentum: number;
-    volatility: 'low' | 'medium' | 'high';
+  favorabilityScore?: number;                            // Entry favorability (0-1, binary for SimpleTrendDetector)
+  technicalIndicators?: {                                // SimpleTrendDetector snapshot (Day 3)
+    trend: 'up' | 'down' | 'flat';                       // Only trend (ma20, ma50, rsi, atr removed - not needed)
+    // NOTE: Full TA engine (MA/RSI/ATR) was replaced with SimpleTrendDetector
+    // These fields are optional and undefined when not calculated
   };
 }
 
@@ -108,6 +104,7 @@ export interface BotConfig {
   // Position Management
   maxConcurrentPositions: number;       // Max open positions (1-10)
   openFrequency: number;                // Chance to open position (0-1). Default: 0.7
+  cooldownMs?: number;                  // Cooldown between position opens (ms). Default: 5000 (5 sec)
 
   // Risk Management
   maxSlippage?: number;                 // Max allowed slippage %. Default: 0.5

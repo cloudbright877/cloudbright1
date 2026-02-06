@@ -113,6 +113,8 @@ export class DynamicPnLCalculator {
 
     // Step 1: Calculate average friction per trade (if enabled)
     // Friction is % of POSITION SIZE, not capital
+    // NOTE: This is NOT used in formula anymore - TradingBot compensates for friction
+    // by multiplying pnlRange by capitalToPositionRatio which accounts for it
     const frictionPercentOfPosition = this.calculateAvgFrictionPercent(params);
 
     // Step 2: Calculate base P&L with SIMPLIFIED FORMULA (v2.1.1)
@@ -191,9 +193,10 @@ export class DynamicPnLCalculator {
     }
 
     // Step 7: Ensure non-negative values and reasonable bounds
-    winMin = Math.max(0.1, winMin);
+    // Minimum based on formula output, not hardcoded
+    winMin = Math.max(baseWinPnLPercent * 0.1, winMin); // At least 10% of base
     winMax = Math.max(winMin * 1.2, winMax);
-    lossMin = Math.max(0.05, lossMin);
+    lossMin = Math.max(baseLossPnLPercent * 0.1, lossMin); // At least 10% of base
     lossMax = Math.max(lossMin * 1.2, lossMax);
 
     return {

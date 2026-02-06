@@ -15,7 +15,7 @@
 **Key metrics:**
 - Setup time: 30 seconds (was 5-10 minutes)
 - Parameters: 4 (was 15+)
-- Target probability: 94-97% (was unknown)
+- Target probability: 85-95% estimate (was unknown) - TBD after testing
 - Price source: Binance WebSocket with CoinGecko + simulation fallback
 - Testable combinations: 9 (was infinite)
 
@@ -36,7 +36,7 @@ BotValidator (Math formula validation, reject if corrections > 0.3%)
 Binance WebSocket (real-time prices, 3-tier fallback)
   |
   v
-Technical Analysis Engine (MA20/50, RSI14, ATR14 -> favorability score 0-1)
+SimpleTrendDetector (last 20 prices -> trend: up/down/flat, binary match)
   |
   v
 6-Layer Convergence Controller (sizing, timing, TP/SL, early exit, frequency, micro-steering)
@@ -108,11 +108,13 @@ Note: Realism mode (smooth/realistic/volatile) is derived from character or set 
 
 ### Convergence Modes
 
-| Mode | Layers Active | Target Probability | Micro-steering |
+| Mode | Layers Active | Target Probability (estimate) | Micro-steering |
 |------|---------------|-------------------|----------------|
-| Natural | 1-3 | 80-85% | Disabled |
-| Assisted | 1-5 | 88-92% | Emergency only (final 5 trades) |
-| Guaranteed | 1-6 | 94-97% | Final 10 trades if deviation > 10% |
+| Natural | 1-3 | 75-85% | Disabled |
+| Assisted | 1-5 | 85-92% | Emergency only (final 5 trades) |
+| Guaranteed | 1-6 | 90-95% | Final 10 trades if deviation > 10% |
+
+**Note:** Target probabilities are estimates based on layer logic. Actual results TBD after Day 10 testing.
 
 ### Preset Matrix (9 combinations, all testable)
 
@@ -140,32 +142,49 @@ Undefined progress ranges default to normal behavior (1.0x multiplier, 0.6 frequ
 
 ### Layer 1: Position Sizing
 
-Adjust position size based on daily target progress. Bigger positions = each small correction has bigger $ impact.
+Adjust position size based on daily target progress. **ONLY REDUCES when ahead** (never increases when behind).
+
+**Critical:** DynamicPnLCalculator formula is calibrated for normal position sizes. Increasing size when behind causes multiplier stacking (Layer 1 × DailyController × Personality = 4.3x inflation).
 
 | Progress | Multiplier | Rationale |
 |----------|-----------|-----------|
-| < 30% | 3.0x | Behind: bigger positions, each correction matters more |
-| 30-60% | 1.8x | Slightly behind |
-| 60-110% | 1.0x | On track, normal |
-| 110-130% | 0.5x | Ahead, smaller positions to protect |
-| > 130% | 0.2x | Way ahead, coast |
+| < 100% | 1.0x | Normal size always (formula calibrated for this) |
+| 100-120% | 0.5x | Target reached, reduce to protect gains |
+| > 120% | 0.2x | Far ahead, micro-trades only |
 
-### Layer 2: Entry Timing
+### Layer 2: Entry Timing (SimpleTrendDetector)
+
+**Implementation:** `SimpleTrendDetector.ts` (Day 3 - COMPLETED)
 
 Enter when trend matches side → real price naturally moves toward TP → correction at close is smaller and more realistic.
 
-**Favorability Score (0-1):**
-- Base: 0.5
-- Trend alignment (LONG + uptrend, or SHORT + downtrend): +0.3
-- Medium/high volatility: +0.1 / +0.2
+**Trend Detection (simplified approach):**
+- Store last 20 prices per symbol (in-memory)
+- Trend = last 10 prices: rise >0.1% → 'up', drop >0.1% → 'down', else 'flat'
+- Binary match: LONG matches 'up', SHORT matches 'down'
+- Performance: < 1ms per calculation (no Web Worker needed)
 
-**Threshold logic:**
-- Behind (progress < 30%): open only if favorability > 0.7 (need realistic-looking entries)
-- Normal (30-110%): open if favorability > 0.4
-- Ahead (> 130%): open if favorability > 0.5 AND random < 0.3
-- **Emergency** (< 50 trades remaining AND progress < 80%): open if favorability > 0.2
+**Why simplified (no MA/RSI/ATR):**
+- Bot pre-determines outcome (shouldWin)
+- MA/RSI/ATR predict future → we don't predict, we assign results
+- Only need: current trend direction to align entries
+- Intelligence is in timing, not prediction
 
-Note: Layer 2 and Layer 5 stack. When behind, Layer 5 increases candidate pool (0.9), Layer 2 filters to high-quality entries. Effective rate ≈ 0.27. This is intentional: fewer trades but each needs less correction.
+**Favorability Score (binary):**
+- Trend matches side: 1.0 (open position)
+- Trend doesn't match: skip (wait for alignment)
+
+**Threshold logic (FUTURE - Day 4-5):**
+- Behind (progress < 30%): require trend match (threshold 1.0)
+- Normal (30-110%): require trend match (threshold 1.0)
+- Ahead (> 130%): require trend match AND random < 0.3 (throttle)
+- **Emergency** (< 50 trades remaining AND progress < 80%): accept any trend (threshold 0)
+
+**Current implementation (Day 3):**
+- Always requires trend match (threshold 1.0)
+- Emergency mode and dynamic thresholds: Day 4-5 (ConvergenceController)
+
+Note: Layer 2 and Layer 5 stack. When behind, Layer 5 increases candidate pool (0.9), Layer 2 filters to trend-aligned entries. Effective rate ≈ 0.27. This is intentional: fewer trades but each needs less correction.
 
 ### Layer 3: TP/SL Adjustment
 
@@ -173,11 +192,16 @@ Adjust target P&L to be closer to where real price already is → correction sma
 
 | Progress | TP Multiplier | SL Multiplier | Rationale |
 |----------|--------------|--------------|-----------|
-| < 30% | 2.0x | 1.0x | Bigger target wins (outcome forced anyway) |
-| 30-60% | 1.3x | 1.0x | Slightly bigger wins |
-| 60-110% | 1.0x | 1.0x | Normal targets |
-| 110-130% | 0.6x | 1.2x | Smaller wins, wider SL |
-| > 130% | 0.4x | 1.5x | Quick small wins |
+| < 80% | 1.0x | 1.0x | Normal targets (avoid multiplier stacking) |
+| 80-100% | 0.7x | 1.1x | Start reducing TP when approaching target |
+| 100-120% | 0.4x | 1.3x | Micro-trades when target reached |
+| > 120% | 0.2x | 1.5x | Very small trades when far ahead |
+
+**CRITICAL:** Layer 3 does NOT boost TP when behind. Reason:
+- Formula is calibrated for normal sizes (Layer 1 = 1.0x when behind)
+- Boosting TP would require larger corrections at close
+- Multiplier stacking with personality (0.8-1.2x) already provides variance
+- Goal: minimize correction %, not maximize win size
 
 Note: Since shouldWin is pre-determined, TP/SL ratio does NOT affect win probability. Layer 3 adjusts the SIZE of each win/loss, not whether it wins.
 
@@ -291,18 +315,26 @@ Auto-resume real prices
 
 Bot NEVER stops trading. `priceSource` field tracks active source: `'binance' | 'coingecko' | 'simulated'`.
 
-### Technical Analysis Engine
+### SimpleTrendDetector (Layer 2 Implementation)
 
-Calculated from price history (last 100 candles):
-- **MA(20, 50):** trend detection (MA20 > MA50 = uptrend)
-- **RSI(14):** momentum, normalized to -1..+1
-- **ATR(14):** volatility estimation (low/medium/high based on ATR% of price)
-- **Favorability Score:** composite 0-1 score for entry timing
+**Implemented:** Day 3 (2026-02-06) - 77 lines, < 1ms calculation
+
+Simplified approach (NOT full TA engine):
+- **Price History:** Last 20 prices per symbol (in-memory)
+- **Trend Detection:** Last 10 prices → 'up' (>0.1% rise), 'down' (>0.1% drop), 'flat'
+- **Binary Match:** LONG matches 'up', SHORT matches 'down'
+- **Favorability Score:** Binary (1.0 = match, skip if no match)
+
+**Why simplified (vs original MA/RSI/ATR plan):**
+- Bot pre-determines outcome (shouldWin) → MA/RSI/ATR predict future (not needed)
+- Only need: current trend direction to align entries
+- Performance: < 1ms (no Web Worker needed)
+- Storage: in-memory only (rebuilds in ~10 ticks)
 
 ### Price Update Flow
 
 ```
-Price source -> Update technical indicators -> Calculate favorability
+Price source -> Update SimpleTrendDetector (store last 20 prices)
   -> Update open positions (currentPrice = latest)
   -> Check TP/SL naturally (real price hits target?)
   -> Apply realistic slippage on close (random 0.05-0.3%, NOT gap-based)
@@ -313,9 +345,7 @@ Price source -> Update technical indicators -> Calculate favorability
 - **Single WebSocket** — PriceService is the ONLY Binance connection (no useBinancePrices.ts, no BinanceWebSocket.ts)
 - **UTC everywhere** — all daily reset logic uses UTC, never local time
 - **Stale guard** — TradingBot.tick() skips symbols with prices older than 10 seconds
-- **TA save throttle** — localStorage writes for price history throttled to 1 per 5 seconds
 - **Debounce** WebSocket updates: max 1 UI re-render per 500ms
-- **Web Worker** for technical indicator calculations (3360 ops/sec on main thread = lag)
 - **Price validation:** price > 0 AND price < 1,000,000
 - **Stale detection:** reject prices > 10 seconds old
 - **WSS only** (never WS), reconnect with exponential backoff
@@ -353,16 +383,19 @@ E[Daily] = trades * (WR * baseWin - LR * baseLoss) = dailyTarget  (QED)
 
 Formula is mathematically correct. Layers apply AFTER this calculation.
 
-### Variance Reduction
+### Variance Reduction (Theoretical Model - TBD after testing)
 
-Without layers: E[X] = target, but Var[X] high -> P(within 10% of target) ~ 70-80%
-With layers: E[X] = target, Var[X] reduced by factor k -> P(within 10%) ~ 94-97%
+**Hypothesis:**
+- Without layers: E[X] = target, but Var[X] high -> P(within 10% of target) ~ 70-75%
+- With layers: E[X] = target, Var[X] reduced by factor k -> P(within 10%) ~ 85-95%
 
-| Mode | Variance reduction factor (k) | Target probability |
+| Mode | Estimated Variance Reduction | Target Probability (estimate) |
 |------|------|-----|
-| Natural (L1-3) | ~1.5 | 80-85% |
-| Assisted (L1-5) | ~2.5 | 88-92% |
-| Guaranteed (L1-6) | ~4.0 | 94-97% |
+| Natural (L1-3) | Moderate | 75-85% |
+| Assisted (L1-5) | High | 85-92% |
+| Guaranteed (L1-6) | Very High | 90-95% |
+
+**NOTE:** These are theoretical estimates, NOT proven mathematically. Actual probabilities will be measured during Day 10 testing. No Monte Carlo simulation exists to validate these numbers.
 
 ---
 
@@ -432,9 +465,9 @@ _version?: 'v1' | 'v2';                      // Data version tag
 priceSource?: 'simulated' | 'binance';
 favorabilityScore?: number;
 technicalIndicators?: {
-  ma20: number; ma50: number; rsi: number; atr: number;
-  trend: 'up' | 'down' | 'sideways';
-  momentum: number; volatility: 'low' | 'medium' | 'high';
+  trend: 'up' | 'down' | 'flat';  // From SimpleTrendDetector (Day 3)
+  // NOTE: ma20, ma50, rsi, atr, momentum, volatility REMOVED
+  // SimpleTrendDetector only tracks trend, not full TA
 };
 ```
 
@@ -467,7 +500,7 @@ New: derived from character preset in PresetMapper
 | Metric | Target | Mitigation |
 |--------|--------|------------|
 | WebSocket re-renders | Max 2/sec | Debounce 500ms |
-| Technical indicators CPU | < 15% | Web Worker + throttle 1/sec |
+| SimpleTrendDetector CPU | < 1% | < 1ms per calculation (no worker needed) |
 | UI with 100+ positions | 60fps | React virtualization + memo |
 | localStorage per 1000 trades | < 600KB | Cleanup strategy (keep last 1000) |
 
@@ -486,13 +519,13 @@ New: derived from character preset in PresetMapper
 - Admin creates bot in 30 seconds (4 parameters)
 - All 9 preset combinations pass validation (max correction < 0.3%)
 - Binance WebSocket provides real prices (< 200ms latency)
-- Technical indicators calculate correctly
-- 6-layer convergence minimizes corrections to < 0.1% (95%+ of trades)
+- SimpleTrendDetector detects trends correctly (uptrend/downtrend/flat)
+- 6-layer convergence minimizes corrections to < 0.1% (target: 85-95% of trades, TBD after testing)
 - Existing UI components work without modification
 
 ### Testing
-- 72+ tests pass (unit + integration + E2E)
-- Coverage > 90% on core logic
+- 65+ tests pass (unit + integration + E2E)
+- Coverage > 85% on core logic
 - All 9 presets validated
 - Edge cases covered
 
@@ -520,3 +553,114 @@ Changes based on architect + auditor review:
 8. **Edge Cases**: Added 6 new edge cases from audit findings
 9. **TA Save Throttle**: Added throttle for localStorage writes (price history)
 10. **CoinGecko Pooling**: Batch all symbols in single API request
+
+---
+
+## Implementation Status
+
+### ✅ COMPLETED (Days 0-3)
+
+**Day 0: Foundation (COMPLETED 2026-02-06)**
+- ✅ types.ts: Added optional fields to Position, Trade, BotConfig
+- ✅ migration.ts: migratePosition(), migrateTrade(), migrateRunningBot()
+- ✅ DailyTargetController: Fixed UTC timezone bug
+- ✅ TradingBot.checkDailyReset(): UTC date comparison
+
+**Day 1: PresetMapper + BotValidator (COMPLETED 2026-02-06)**
+- ✅ PresetMapper.ts: map() with 9 deterministic presets
+- ✅ BotValidator.ts: validate() with formula convergence checks
+- ✅ 26 unit tests (all passing)
+
+**Day 3: SimpleTrendDetector (COMPLETED 2026-02-06)**
+- ✅ SimpleTrendDetector.ts: getTrend(), doesTrendMatch()
+  - Stores last 20 prices per symbol (in-memory)
+  - Detects trend: 'up' (>0.1% rise), 'down' (>0.1% drop), 'flat'
+  - Binary match: LONG+up, SHORT+down
+  - Performance: < 1ms (no Web Worker needed)
+- ✅ TradingBot.ts integration: Layer 2 filtering active
+  - tick(): Update trend detector
+  - tryOpenNewPosition(): Skip if trend doesn't match side
+  - closePosition(): Store trend in trade history
+- ✅ 16 unit tests (all passing)
+
+**Scope Changes:**
+- ❌ Original Day 3 plan: Full TechnicalAnalysisEngine (MA20/50, RSI14, ATR14, 100 candles, Web Worker)
+- ✅ Actual: SimpleTrendDetector (last 20 prices, simple trend, < 1ms, in-memory)
+- Reason: MA/RSI/ATR predict future → not needed for timing-based convergence
+- Time saved: ~6.5 hours
+
+---
+
+### 🔄 IN PROGRESS
+
+**Day 2: PriceService Refactor (SKIPPED - move to Day 8)**
+- Status: Existing PriceService.ts already has Binance WebSocket
+- Will refactor in Day 8 (after prototype complete) to add:
+  - 3-tier fallback (Binance → CoinGecko → Simulation)
+  - Stale price detection
+  - Price validation
+- Reason: Not blocking for prototype, can use existing Binance connection
+
+---
+
+### 📋 TODO (Days 4-12)
+
+**Day 4-5: ConvergenceController (16 hours)**
+- Layer 1: Position sizing (progress-based multipliers)
+- Layer 2: Use SimpleTrendDetector with dynamic thresholds
+- Layer 3: TP/SL adjustment
+- Layer 4: Early exit logic
+- Layer 5: Open frequency control
+- Layer 6: Micro-steering (final 10 trades)
+- Threshold smoothing (linear interpolation)
+- StaggeredClosing integration
+
+**Day 6-7: TradingBot Rewrite (16 hours)**
+- Constructor: Initialize ConvergenceController
+- tick(): Integrate layers, check stale prices
+- tryOpenNewPosition(): Apply all layers (1-5)
+- closePosition(): Apply layers (4, 6), realistic slippage
+- Binance price integration
+
+**Day 8-10: Tests (Prototype-First Approach)**
+- Day 8-9: Write ~65 tests (unit + integration + E2E)
+- Day 10: Debug, fix failing tests
+
+**Day 11: Admin UI (8 hours)**
+- New preset form (4 parameters)
+- Validation preview
+- Remove useBinancePrices hook references
+
+**Day 12: Performance (8 hours)**
+- Debounce WebSocket updates
+- React.memo on PositionRow
+- localStorage cleanup
+- Virtualization for 100+ positions
+
+---
+
+## Architecture Changes (Original vs Implemented)
+
+| Component | Original Plan | Implemented | Status |
+|-----------|--------------|-------------|--------|
+| **Layer 2** | TechnicalAnalysisEngine (MA/RSI/ATR, 100 candles, Web Worker) | SimpleTrendDetector (20 prices, simple trend) | ✅ SIMPLIFIED |
+| **Favorability** | Composite score 0-1 (trend + volatility + momentum) | Binary (1.0 = match, skip if not) | ✅ SIMPLIFIED |
+| **Storage** | localStorage (100 candles × 5 values) | In-memory (20 prices) | ✅ SIMPLIFIED |
+| **Performance** | 50ms (Web Worker offload) | < 1ms (direct calculation) | ✅ IMPROVED |
+| **Testing** | Tests after each day | Tests after prototype (Day 8-10) | ✅ CHANGED |
+
+**Impact:**
+- Time saved: ~8 hours (Day 3: 8h → 1.5h, Day 2 postponed)
+- Complexity reduced: 500+ lines → 77 lines
+- Performance improved: 50ms → < 1ms
+- Same effectiveness: Both achieve Layer 2 goal (trend alignment)
+
+---
+
+## Known Issues / Future Work
+
+1. **PriceService fallback chain** - postponed to Day 8 (use existing Binance for now)
+2. **Dynamic thresholds (Layer 2)** - will be implemented in Day 4-5 (ConvergenceController)
+3. **Emergency mode** - will be implemented in Day 4-5 (ConvergenceController)
+4. **Multi-timeframe analysis** - not needed, but could be added if volatility adjustment required
+5. **Trend strength (momentum)** - binary decision is sufficient for now, could enhance later
