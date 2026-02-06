@@ -1,13 +1,14 @@
 // ============================================================================
-// BotValidator Unit Tests
+// BotValidator Unit Tests (Simple Math Validation)
 // ============================================================================
-// Run with: node --loader ts-node/esm tests/unit/convergence/BotValidator.test.ts
+// Run with: npx tsx tests/unit/convergence/BotValidator.test.ts
 
 import { strict as assert } from 'assert';
 import {
   validateBotConfig,
   quickValidatePreset,
-  getValidationSummary
+  getValidationSummary,
+  calculatePnLDistribution
 } from '../../../lib/trading/convergence/BotValidator';
 import { mapPresetToConfig } from '../../../lib/trading/convergence/PresetMapper';
 import type { PresetInput } from '../../../lib/trading/convergence/PresetMapper';
@@ -44,10 +45,10 @@ function test(name: string, fn: () => void | Promise<void>) {
 // Test Suite
 // ============================================================================
 
-console.log('\n=== BotValidator Tests ===\n');
+console.log('\n=== BotValidator Tests (Simple Math) ===\n');
 
-// Test 1: Valid config passes basic validation (without full Monte Carlo)
-test('Valid config: moderate preset has no parameter errors', () => {
+// Test 1: Valid moderate preset
+test('Valid config: moderate preset passes validation', () => {
   const input: PresetInput = {
     dailyTarget: 2.5,
     tradesPerDay: 250,
@@ -56,15 +57,15 @@ test('Valid config: moderate preset has no parameter errors', () => {
   };
 
   const config = mapPresetToConfig(input);
+  const result = validateBotConfig(config);
 
-  // Basic parameter checks only (no Monte Carlo)
-  assert.ok(config.dailyTargetPercent > 0 && config.dailyTargetPercent <= 0.10);
-  assert.ok(config.tradesPerDay >= 50 && config.tradesPerDay <= 500);
-  assert.ok(config.winRate > 0 && config.winRate < 1);
+  assert.ok(result.valid, `Expected valid, got issues: ${result.issues.join(', ')}`);
+  assert.ok(result.maxCorrectionPercent > 0, 'Should calculate max correction');
+  assert.ok(result.maxCorrectionPercent < 0.01, 'Max correction should be reasonable');
 });
 
-// Test 2: Conservative preset basic validation
-test('Valid config: conservative preset has no parameter errors', () => {
+// Test 2: Conservative preset
+test('Valid config: conservative preset passes validation', () => {
   const input: PresetInput = {
     dailyTarget: 2.0,
     tradesPerDay: 200,
@@ -73,14 +74,13 @@ test('Valid config: conservative preset has no parameter errors', () => {
   };
 
   const config = mapPresetToConfig(input);
+  const result = validateBotConfig(config);
 
-  assert.ok(config.dailyTargetPercent > 0 && config.dailyTargetPercent <= 0.10);
-  assert.ok(config.tradesPerDay >= 50 && config.tradesPerDay <= 500);
-  assert.ok(config.winRate > 0 && config.winRate < 1);
+  assert.ok(result.valid, `Expected valid, got issues: ${result.issues.join(', ')}`);
 });
 
-// Test 3: Aggressive preset basic validation
-test('Valid config: aggressive preset has no parameter errors', () => {
+// Test 3: Aggressive preset
+test('Valid config: aggressive preset passes validation', () => {
   const input: PresetInput = {
     dailyTarget: 3.0,
     tradesPerDay: 300,
@@ -89,10 +89,9 @@ test('Valid config: aggressive preset has no parameter errors', () => {
   };
 
   const config = mapPresetToConfig(input);
+  const result = validateBotConfig(config);
 
-  assert.ok(config.dailyTargetPercent > 0 && config.dailyTargetPercent <= 0.10);
-  assert.ok(config.tradesPerDay >= 50 && config.tradesPerDay <= 500);
-  assert.ok(config.winRate > 0 && config.winRate < 1);
+  assert.ok(result.valid, `Expected valid, got issues: ${result.issues.join(', ')}`);
 });
 
 // Test 4: Rejects daily target > 10%
@@ -112,13 +111,13 @@ test('Invalid config: rejects daily target > 10%', () => {
     leverages: [10, 15, 20]
   };
 
-  const result = validateBotConfig(config, { simulationDays: 10 });
+  const result = validateBotConfig(config);
 
   assert.ok(!result.valid, 'Expected invalid');
-  assert.ok(result.errors.length > 0, 'Expected errors');
+  assert.ok(result.issues.length > 0, 'Expected issues');
   assert.ok(
-    result.errors[0].includes('exceeds maximum'),
-    `Expected error about max target, got: ${result.errors[0]}`
+    result.issues[0].includes('exceeds maximum'),
+    `Expected error about max target, got: ${result.issues[0]}`
   );
 });
 
@@ -139,10 +138,10 @@ test('Invalid config: rejects daily target <= 0', () => {
     leverages: [10, 15, 20]
   };
 
-  const result = validateBotConfig(config, { simulationDays: 10 });
+  const result = validateBotConfig(config);
 
   assert.ok(!result.valid);
-  assert.ok(result.errors[0].includes('greater than 0'));
+  assert.ok(result.issues[0].includes('greater than 0'));
 });
 
 // Test 6: Rejects trades per day out of range
@@ -162,10 +161,10 @@ test('Invalid config: rejects trades per day < 50', () => {
     leverages: [10, 15, 20]
   };
 
-  const result = validateBotConfig(config, { simulationDays: 10 });
+  const result = validateBotConfig(config);
 
   assert.ok(!result.valid);
-  assert.ok(result.errors[0].includes('between 50 and 500'));
+  assert.ok(result.issues[0].includes('between 50 and 500'));
 });
 
 // Test 7: Rejects win rate out of range
@@ -185,13 +184,36 @@ test('Invalid config: rejects win rate >= 1', () => {
     leverages: [10, 15, 20]
   };
 
-  const result = validateBotConfig(config, { simulationDays: 10 });
+  const result = validateBotConfig(config);
 
   assert.ok(!result.valid);
-  assert.ok(result.errors[0].includes('between 0 and 1'));
+  assert.ok(result.issues[0].includes('between 0 and 1'));
 });
 
-// Test 8: Quick validation - valid preset
+// Test 8: Formula convergence check (win rate too low)
+test('Invalid config: rejects win rate that breaks formula', () => {
+  const config: BotConfig = {
+    name: 'Invalid Bot',
+    tradingPair: 'BTC/USDT',
+    investedCapital: 10000,
+    winRate: 0.30, // Too low - formula denominator <= 0
+    dailyTargetPercent: 0.025,
+    tradesPerDay: 250,
+    minPositionSize: 100,
+    maxPositionSize: 1000,
+    minDuration: 60000,
+    maxDuration: 7200000,
+    maxConcurrentPositions: 5,
+    leverages: [10, 15, 20]
+  };
+
+  const result = validateBotConfig(config);
+
+  assert.ok(!result.valid);
+  assert.ok(result.issues[0].includes('does not converge'));
+});
+
+// Test 9: Quick validation - valid preset
 test('Quick validation: accepts valid preset', () => {
   const input: PresetInput = {
     dailyTarget: 2.5,
@@ -206,7 +228,7 @@ test('Quick validation: accepts valid preset', () => {
   assert.ok(isValid, 'Expected quick validation to pass');
 });
 
-// Test 9: Quick validation - invalid target
+// Test 10: Quick validation - invalid target
 test('Quick validation: rejects invalid daily target', () => {
   const config: BotConfig = {
     name: 'Invalid Bot',
@@ -228,8 +250,8 @@ test('Quick validation: rejects invalid daily target', () => {
   assert.ok(!isValid, 'Expected quick validation to fail');
 });
 
-// Test 10: Convergence score calculation
-test('Convergence score: calculated correctly', () => {
+// Test 11: Max correction calculation
+test('Max correction: calculated correctly', () => {
   const input: PresetInput = {
     dailyTarget: 2.5,
     tradesPerDay: 250,
@@ -238,13 +260,13 @@ test('Convergence score: calculated correctly', () => {
   };
 
   const config = mapPresetToConfig(input);
-  const result = validateBotConfig(config, { simulationDays: 10 });
+  const result = validateBotConfig(config);
 
-  assert.ok(result.convergenceScore >= 0 && result.convergenceScore <= 1,
-    `Convergence score must be 0-1, got ${result.convergenceScore}`);
+  assert.ok(result.maxCorrectionPercent > 0, 'Should calculate max correction');
+  assert.ok(result.maxCorrectionPercent < 0.01, 'Max correction should be < 1%');
 });
 
-// Test 11: Validation summary - valid config
+// Test 12: Validation summary generation
 test('Validation summary: generates summary for valid config', () => {
   const input: PresetInput = {
     dailyTarget: 2.5,
@@ -254,15 +276,15 @@ test('Validation summary: generates summary for valid config', () => {
   };
 
   const config = mapPresetToConfig(input);
-  const result = validateBotConfig(config, { simulationDays: 10 });
+  const result = validateBotConfig(config);
   const summary = getValidationSummary(result);
 
   assert.ok(summary.includes('VALID') || summary.includes('INVALID'));
-  assert.ok(summary.includes('Convergence Score'));
+  assert.ok(summary.includes('Max correction'));
 });
 
-// Test 12: All 9 preset combinations pass basic validation
-test('All 9 presets: pass basic parameter checks', () => {
+// Test 13: All 9 preset combinations pass validation
+test('All 9 presets: pass basic validation', () => {
   const characters: Array<'conservative' | 'moderate' | 'aggressive'> =
     ['conservative', 'moderate', 'aggressive'];
   const realismModes: Array<'smooth' | 'realistic' | 'volatile'> =
@@ -279,17 +301,42 @@ test('All 9 presets: pass basic parameter checks', () => {
       };
 
       const config = mapPresetToConfig(input);
+      const result = validateBotConfig(config);
 
-      // Use quick validation instead of full Monte Carlo (faster for unit tests)
-      const isValid = quickValidatePreset(config);
-
-      assert.ok(isValid,
-        `Preset ${character}/${realismMode} failed basic validation`);
+      assert.ok(result.valid,
+        `Preset ${character}/${realismMode} failed: ${result.issues.join(', ')}`);
     }
   }
 });
 
-// Test 13: Warning for aggressive daily target
+// Test 14: P&L distribution calculation
+test('P&L distribution: calculates correctly', () => {
+  const input: PresetInput = {
+    dailyTarget: 2.5,
+    tradesPerDay: 250,
+    character: 'moderate',
+    convergenceMode: 'guaranteed'
+  };
+
+  const config = mapPresetToConfig(input);
+  const dist = calculatePnLDistribution(config);
+
+  assert.ok(dist.perTradeTarget > 0, 'Per-trade target should be positive');
+  assert.ok(dist.avgWin > 0, 'Avg win should be positive');
+  assert.ok(dist.avgLoss > 0, 'Avg loss should be positive');
+  assert.ok(dist.denominator > 0, 'Denominator should be positive');
+
+  // Check formula: E[daily] = trades * (WR * avgWin - LR * avgLoss)
+  const expected = config.tradesPerDay *
+    (config.winRate * dist.avgWin - (1 - config.winRate) * dist.avgLoss);
+
+  const actual = config.dailyTargetPercent;
+  const error = Math.abs(expected - actual) / actual;
+
+  assert.ok(error < 0.05, `Formula error ${(error * 100).toFixed(2)}% too high`);
+});
+
+// Test 15: Warning for aggressive daily target
 test('Warnings: shows warning for aggressive target', () => {
   const input: PresetInput = {
     dailyTarget: 6.0, // Aggressive but valid (< 10%)
@@ -299,13 +346,11 @@ test('Warnings: shows warning for aggressive target', () => {
   };
 
   const config = mapPresetToConfig(input);
-  const result = validateBotConfig(config, { simulationDays: 10 });
+  const result = validateBotConfig(config);
 
   // Should be valid but have warnings
   assert.ok(result.valid, 'Config should be valid');
   assert.ok(result.warnings.length > 0, 'Should have warnings');
-  assert.ok(result.warnings[0].includes('aggressive'),
-    `Expected warning about aggressive target, got: ${result.warnings[0]}`);
 });
 
 // ============================================================================

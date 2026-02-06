@@ -1,8 +1,8 @@
 // ============================================================================
-// BotValidator - Monte Carlo validation for bot configurations
+// BotValidator - Simple mathematical validation for bot configurations
 // ============================================================================
-// Validates bot configs using 1000-day simulation
-// Rejects configs with convergence score < 90% or unrealistic targets
+// NO Monte Carlo - we control outcomes (shouldWin), no uncertainty
+// Validates: math formula converges, corrections within realistic limits
 
 import type { BotConfig } from '../types';
 
@@ -11,233 +11,179 @@ import type { BotConfig } from '../types';
  */
 export interface ValidationResult {
   valid: boolean;
-  convergenceScore: number;    // 0-1, % of days hitting target ±10%
-  avgDeviation: number;         // Average deviation from target (%)
-  errors: string[];
+  issues: string[];
   warnings: string[];
+  maxCorrectionPercent: number; // Max expected correction per trade
 }
 
 /**
  * Validation configuration
  */
 interface ValidationConfig {
-  simulationDays: number;       // Number of days to simulate (default: 1000)
-  convergenceThreshold: number; // Min convergence score (default: 0.90)
-  maxDeviation: number;         // Max avg deviation % (default: 0.10)
-  maxDailyTarget: number;       // Max daily target % (default: 0.10 = 10%)
+  maxCorrectionPercent: number;  // Max correction before visible (default: 0.3%)
+  maxDailyTarget: number;         // Max daily target % (default: 0.10 = 10%)
 }
 
 const DEFAULT_VALIDATION_CONFIG: ValidationConfig = {
-  simulationDays: 1000,
-  convergenceThreshold: 0.90,
-  maxDeviation: 0.10,
-  maxDailyTarget: 0.10
+  maxCorrectionPercent: 0.003,  // 0.3% - within volatile slippage range
+  maxDailyTarget: 0.10          // 10% daily max
 };
 
 /**
- * Validates a bot configuration using Monte Carlo simulation
+ * Validates a bot configuration using simple math
  *
- * Runs 1000-day simulation without convergence layers (worst case).
- * Convergence layers will IMPROVE this score in production.
+ * Checks:
+ * 1. Math formula converges (DynamicPnLCalculator formula)
+ * 2. Per-trade P&L is within realistic bounds
+ * 3. Max correction stays below visibility threshold
+ * 4. Parameters are within safe ranges
  *
  * @param config BotConfig to validate
  * @param validationConfig Optional validation parameters
- * @returns ValidationResult with convergence score and errors
+ * @returns ValidationResult with issues and warnings
  */
 export function validateBotConfig(
   config: BotConfig,
   validationConfig: Partial<ValidationConfig> = {}
 ): ValidationResult {
   const vConfig = { ...DEFAULT_VALIDATION_CONFIG, ...validationConfig };
-  const errors: string[] = [];
+  const issues: string[] = [];
   const warnings: string[] = [];
 
-  // Basic parameter validation
+  // === Basic parameter validation ===
+
   if (config.dailyTargetPercent > vConfig.maxDailyTarget) {
-    errors.push(
+    issues.push(
       `Daily target ${(config.dailyTargetPercent * 100).toFixed(1)}% exceeds maximum ` +
       `${(vConfig.maxDailyTarget * 100).toFixed(0)}% (unrealistic)`
     );
   }
 
   if (config.dailyTargetPercent <= 0) {
-    errors.push('Daily target must be greater than 0');
+    issues.push('Daily target must be greater than 0');
   }
 
   if (config.tradesPerDay < 50 || config.tradesPerDay > 500) {
-    errors.push('Trades per day must be between 50 and 500');
+    issues.push('Trades per day must be between 50 and 500');
   }
 
   if (config.winRate <= 0 || config.winRate >= 1) {
-    errors.push('Win rate must be between 0 and 1 (exclusive)');
+    issues.push('Win rate must be between 0 and 1 (exclusive)');
   }
 
-  // If basic validation fails, return early (no point running simulation)
-  if (errors.length > 0) {
-    return {
-      valid: false,
-      convergenceScore: 0,
-      avgDeviation: 0,
-      errors,
-      warnings
-    };
+  // If basic validation fails, return early
+  if (issues.length > 0) {
+    return { valid: false, issues, warnings, maxCorrectionPercent: 0 };
   }
 
-  // Run Monte Carlo simulation
-  const simulation = runMonteCarloSimulation(config, vConfig.simulationDays);
+  // === Mathematical formula validation ===
 
-  // Check convergence score
-  if (simulation.convergenceScore < vConfig.convergenceThreshold) {
-    errors.push(
-      `Convergence score ${(simulation.convergenceScore * 100).toFixed(1)}% ` +
-      `is below threshold ${(vConfig.convergenceThreshold * 100).toFixed(0)}%`
+  const WR = config.winRate;
+  const LR = 1 - WR;
+
+  // Check formula denominator (from DynamicPnLCalculator)
+  const denominator = WR - (LR * LR / WR) * 0.7;
+
+  if (denominator <= 0) {
+    issues.push(
+      `Win rate ${(WR * 100).toFixed(0)}% is too low - formula does not converge. ` +
+      `Minimum win rate for this system: ~42%`
     );
   }
 
-  // Check average deviation
-  if (simulation.avgDeviation > vConfig.maxDeviation) {
-    errors.push(
-      `Average deviation ${(simulation.avgDeviation * 100).toFixed(1)}% ` +
-      `exceeds maximum ${(vConfig.maxDeviation * 100).toFixed(0)}%`
-    );
-  }
+  // Calculate per-trade P&L values
+  const perTradeTarget = config.dailyTargetPercent / config.tradesPerDay;
+  const baseWin = perTradeTarget / denominator;
+  const baseLoss = Math.abs(baseWin * (LR / WR) * 0.7);
 
-  // Warnings (don't fail validation, but inform user)
-  if (simulation.convergenceScore >= 0.90 && simulation.convergenceScore < 0.95) {
+  // === Per-trade P&L checks ===
+
+  // Check if per-trade target is too small (< 0.001% = invisible)
+  if (perTradeTarget < 0.00001) {
     warnings.push(
-      'Convergence score is acceptable but on the lower end. ' +
-      'Consider using "assisted" or "guaranteed" convergence mode.'
+      `Per-trade target ${(perTradeTarget * 100).toFixed(4)}% is extremely small. ` +
+      `Consider fewer trades or higher daily target.`
     );
   }
+
+  // Check if per-trade target is too large (> 0.05% = visible patterns)
+  if (perTradeTarget > 0.0005) {
+    warnings.push(
+      `Per-trade target ${(perTradeTarget * 100).toFixed(3)}% is large. ` +
+      `Consider more trades to distribute target better.`
+    );
+  }
+
+  // === Max correction calculation ===
+
+  // Worst case: price moves against position by typical volatility (0.2% per 5min for BTC)
+  const typicalPriceMove = 0.002; // 0.2%
+  const maxCorrectionNeeded = Math.abs(baseWin) + typicalPriceMove;
+
+  if (maxCorrectionNeeded > vConfig.maxCorrectionPercent) {
+    issues.push(
+      `Max correction ${(maxCorrectionNeeded * 100).toFixed(2)}% exceeds visibility threshold ` +
+      `${(vConfig.maxCorrectionPercent * 100).toFixed(1)}%. Corrections will be noticeable. ` +
+      `Increase trades/day or decrease daily target.`
+    );
+  }
+
+  // === Time between trades ===
+
+  const minutesPerTrade = (24 * 60) / config.tradesPerDay;
+
+  if (minutesPerTrade < 2) {
+    warnings.push(
+      `Only ${minutesPerTrade.toFixed(1)} minutes between trades. ` +
+      `High frequency may trigger burst protection.`
+    );
+  }
+
+  if (minutesPerTrade > 30) {
+    warnings.push(
+      `${minutesPerTrade.toFixed(0)} minutes between trades. ` +
+      `Low frequency may cause progress tracking issues at end of day.`
+    );
+  }
+
+  // === Daily target realism ===
 
   if (config.dailyTargetPercent > 0.05) {
     warnings.push(
       `Daily target ${(config.dailyTargetPercent * 100).toFixed(1)}% is aggressive. ` +
-      'Monitor performance closely.'
+      `Monitor performance closely during high volatility.`
+    );
+  }
+
+  // === Win rate vs target ===
+
+  // With high win rate, avg win can be small (good for hiding corrections)
+  if (WR > 0.70 && baseWin < 0.0002) {
+    warnings.push(
+      `Win rate ${(WR * 100).toFixed(0)}% with small avg win ${(baseWin * 100).toFixed(3)}%. ` +
+      `Excellent for hiding corrections, but requires many small wins.`
+    );
+  }
+
+  // With low win rate, avg win must be large (harder to hide)
+  if (WR < 0.55 && baseWin > 0.0005) {
+    warnings.push(
+      `Win rate ${(WR * 100).toFixed(0)}% requires large avg win ${(baseWin * 100).toFixed(3)}%. ` +
+      `Corrections may be more visible. Consider increasing win rate.`
     );
   }
 
   return {
-    valid: errors.length === 0,
-    convergenceScore: simulation.convergenceScore,
-    avgDeviation: simulation.avgDeviation,
-    errors,
-    warnings
+    valid: issues.length === 0,
+    issues,
+    warnings,
+    maxCorrectionPercent: maxCorrectionNeeded
   };
 }
 
 /**
- * Monte Carlo simulation result
- */
-interface SimulationResult {
-  convergenceScore: number;  // % of days hitting target ±10%
-  avgDeviation: number;      // Average absolute deviation from target
-  dailyResults: number[];    // Daily P&L for each simulated day
-}
-
-/**
- * Runs Monte Carlo simulation for N days
- * Simulates trading WITHOUT convergence layers (worst case baseline)
- *
- * @param config BotConfig to simulate
- * @param days Number of days to simulate
- * @returns SimulationResult with convergence metrics
- */
-function runMonteCarloSimulation(config: BotConfig, days: number): SimulationResult {
-  const dailyResults: number[] = [];
-  let daysWithinTarget = 0;
-  let totalDeviation = 0;
-
-  // Calculate base P&L values using DynamicPnLCalculator formula
-  const { baseWin, baseLoss } = calculateBasePnL(config);
-
-  for (let day = 0; day < days; day++) {
-    let dailyPnL = 0;
-
-    // Simulate trades for this day
-    for (let trade = 0; trade < config.tradesPerDay; trade++) {
-      const isWin = Math.random() < config.winRate;
-
-      if (isWin) {
-        // Add variance to make it realistic (tight vs wide mode)
-        const variance = getRandomVariance(config);
-        dailyPnL += baseWin * variance;
-      } else {
-        const variance = getRandomVariance(config);
-        dailyPnL += baseLoss * variance; // baseLoss is negative
-      }
-    }
-
-    dailyResults.push(dailyPnL);
-
-    // Check if within target ±10%
-    const target = config.dailyTargetPercent;
-    const deviation = Math.abs(dailyPnL - target);
-    const relativeDeviation = deviation / target;
-
-    if (relativeDeviation <= 0.10) {
-      daysWithinTarget++;
-    }
-
-    totalDeviation += relativeDeviation;
-  }
-
-  return {
-    convergenceScore: daysWithinTarget / days,
-    avgDeviation: totalDeviation / days,
-    dailyResults
-  };
-}
-
-/**
- * Calculate base P&L values from config using DynamicPnLCalculator formula
- * Formula from SPEC.md:
- * ```
- * perTradeTarget = dailyTarget / trades
- * denominator = WR - (LR^2 / WR) * 0.7
- * baseWin = perTradeTarget / denominator
- * baseLoss = baseWin * (LR / WR) * 0.7
- * ```
- */
-function calculateBasePnL(config: BotConfig): { baseWin: number; baseLoss: number } {
-  const WR = config.winRate;
-  const LR = 1 - WR;
-
-  const perTradeTarget = config.dailyTargetPercent / config.tradesPerDay;
-  const denominator = WR - (LR * LR / WR) * 0.7;
-  const baseWin = perTradeTarget / denominator;
-  const baseLoss = baseWin * (LR / WR) * 0.7;
-
-  return {
-    baseWin,
-    baseLoss: -Math.abs(baseLoss) // Ensure loss is negative
-  };
-}
-
-/**
- * Get random variance multiplier based on tight mode percentage
- * Simulates P&L variance distribution
- *
- * @param config BotConfig with pnlVariance settings
- * @returns Variance multiplier (0.8 - 1.2)
- */
-function getRandomVariance(config: BotConfig): number {
-  const tightModePercent = config.pnlVariance?.tightModePercent ?? 80;
-  const isTightMode = Math.random() * 100 < tightModePercent;
-
-  if (isTightMode) {
-    // Tight mode: 0.95 - 1.05 (5% variance)
-    return 0.95 + Math.random() * 0.10;
-  } else {
-    // Wide mode: 0.80 - 1.20 (20% variance)
-    return 0.80 + Math.random() * 0.40;
-  }
-}
-
-/**
- * Quick validation for preset configurations (used in PresetMapper)
- * Does NOT run full Monte Carlo (too slow for UI preview)
- * Only checks basic constraints
+ * Quick validation for preset configurations (used in UI preview)
+ * Only checks basic constraints, no math validation
  *
  * @param config BotConfig to validate
  * @returns True if config passes basic checks
@@ -266,18 +212,42 @@ export function getValidationSummary(result: ValidationResult): string {
   if (result.valid) {
     return `
 ✓ Configuration VALID
-- Convergence Score: ${(result.convergenceScore * 100).toFixed(1)}%
-- Avg Deviation: ${(result.avgDeviation * 100).toFixed(1)}%
+- Max correction: ${(result.maxCorrectionPercent * 100).toFixed(2)}%
 ${result.warnings.length > 0 ? '\nWarnings:\n' + result.warnings.map(w => `  ⚠ ${w}`).join('\n') : ''}
     `.trim();
   } else {
     return `
 ✗ Configuration INVALID
-- Convergence Score: ${(result.convergenceScore * 100).toFixed(1)}%
-- Avg Deviation: ${(result.avgDeviation * 100).toFixed(1)}%
 
 Errors:
-${result.errors.map(e => `  ✗ ${e}`).join('\n')}
+${result.issues.map(e => `  ✗ ${e}`).join('\n')}
+${result.warnings.length > 0 ? '\nWarnings:\n' + result.warnings.map(w => `  ⚠ ${w}`).join('\n') : ''}
     `.trim();
   }
+}
+
+/**
+ * Calculate expected P&L distribution for debugging
+ * Shows what avg win/loss will be for given config
+ */
+export function calculatePnLDistribution(config: BotConfig): {
+  perTradeTarget: number;
+  avgWin: number;
+  avgLoss: number;
+  denominator: number;
+} {
+  const WR = config.winRate;
+  const LR = 1 - WR;
+
+  const perTradeTarget = config.dailyTargetPercent / config.tradesPerDay;
+  const denominator = WR - (LR * LR / WR) * 0.7;
+  const avgWin = perTradeTarget / denominator;
+  const avgLoss = Math.abs(avgWin * (LR / WR) * 0.7);
+
+  return {
+    perTradeTarget,
+    avgWin,
+    avgLoss,
+    denominator
+  };
 }
