@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { botsApi } from '@/lib/api/botsApi';
 import { getUserCopy } from '@/lib/userCopies';
+import { getDemoBotById } from '@/lib/demoMarketplace';
 import {
   TrendingUp,
   TrendingDown,
@@ -100,6 +101,21 @@ export default function UserCopyPage() {
   // Equity Curve period filter
   const [equityPeriod, setEquityPeriod] = useState<'all' | 'day' | 'week' | 'month'>('all');
 
+  // Expanded trades for accordion
+  const [expandedTrades, setExpandedTrades] = useState<Set<string>>(new Set());
+
+  const toggleTradeExpanded = (tradeId: string) => {
+    setExpandedTrades(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(tradeId)) {
+        newSet.delete(tradeId);
+      } else {
+        newSet.add(tradeId);
+      }
+      return newSet;
+    });
+  };
+
   // 🔗 Load copy info
   useEffect(() => {
     const loadCopy = async () => {
@@ -165,22 +181,48 @@ export default function UserCopyPage() {
         stopLossPnL: 0,
       }));
 
-      const convertedTrades: Trade[] = stats.trades.slice(0, 50).map((trade: any) => ({
-        id: trade.id,
-        botName: stats.name || 'User Copy',
-        pair: trade.pair,
-        side: trade.side,
-        leverage: trade.leverage,
-        entryPrice: trade.entryPrice,
-        exitPrice: trade.exitPrice,
-        amount: trade.amount,
-        positionSize: trade.positionSize,
-        pnl: trade.pnl,
-        pnlPercent: trade.pnlPercent,
-        duration: trade.duration || '0s',
-        closedAt: trade.closedAt,
-        tradeType: 'scalp' as const,
-      }));
+      const convertedTrades: Trade[] = stats.trades.slice(0, 50).map((trade: any) => {
+        // Calculate realistic metrics if not present
+        const feeRate = 0.04;
+        const posSize = trade.positionSize || 0;
+        const openFee = trade.openFee ?? (posSize * feeRate / 100);
+        const closeFee = trade.closeFee ?? (posSize * feeRate / 100);
+        const totalFees = trade.totalFees ?? (openFee + closeFee);
+        const netPnl = trade.netPnl ?? (trade.pnl - totalFees);
+        const slippage = trade.slippage ?? 0;
+
+        return {
+          id: trade.id,
+          botName: stats.name || 'User Copy',
+          pair: trade.pair,
+          side: trade.side,
+          leverage: trade.leverage,
+          entryPrice: trade.entryPrice,
+          exitPrice: trade.exitPrice,
+          amount: trade.amount,
+          positionSize: trade.positionSize,
+          pnl: trade.pnl,
+          pnlPercent: trade.pnlPercent,
+          duration: trade.duration || '0s',
+          closedAt: trade.closedAt,
+
+          // Realistic Trading Metrics
+          openFee,
+          closeFee,
+          totalFees,
+          netPnl,
+          slippage,
+
+          // Internal System Fields (optional)
+          expectedOutcome: trade.expectedOutcome || (trade.pnl >= 0 ? 'WIN' : 'LOSS'),
+          actualOutcome: trade.actualOutcome || (trade.pnl >= 0 ? 'WIN' : 'LOSS'),
+          hadSlippage: trade.hadSlippage || false,
+          slippageAmount: trade.slippageAmount,
+          convergenceLayer: trade.convergenceLayer,
+          favorabilityScore: trade.favorabilityScore,
+          technicalIndicators: trade.technicalIndicators,
+        };
+      });
 
       setLivePositions(convertedPositions);
       setTradeHistory(convertedTrades);
@@ -288,11 +330,17 @@ export default function UserCopyPage() {
       // Get trading pairs from trades
       const uniquePairs = Array.from(new Set(stats.trades.map(t => t.pair)));
 
+      // Get bot icon from DEMO_BOTS using masterBotId
+      const copyInfo = getUserCopy(copyId);
+      const masterBot = copyInfo ? getDemoBotById(copyInfo.masterBotId) : null;
+      const botIcon = masterBot?.icon;
+
       // Update bot details from stats
       setBotDetails({
         id: copyId,
         name: stats.name || 'User Copy',
         slug: copyId,
+        icon: botIcon,
         status: 'active',
         strategy: '',
         risk,
@@ -459,9 +507,13 @@ export default function UserCopyPage() {
 
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 bg-gradient-to-br from-primary-500/20 to-accent-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
-                <Layers className="w-7 h-7 text-primary-400" />
-              </div>
+              {botDetails.icon && typeof botDetails.icon === 'string' && botDetails.icon.startsWith('/') ? (
+                <img src={botDetails.icon} alt={botDetails.name} className="w-14 h-14 object-contain" />
+              ) : (
+                <div className="w-14 h-14 flex items-center justify-center text-2xl">
+                  <Layers className="w-7 h-7 text-primary-400" />
+                </div>
+              )}
               <div>
                 <div className="flex items-center gap-3">
                   <h1 className="text-3xl lg:text-4xl font-bold text-white">{botDetails.name}</h1>
@@ -930,68 +982,68 @@ export default function UserCopyPage() {
                 <p className="text-xs text-dark-500 mt-1">Bot is analyzing markets...</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-4">
+              <div className="grid grid-cols-1 gap-3">
                 {livePositions.map((position) => (
                   <motion.div
                     key={position.id}
                     layout
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="relative p-5 rounded-xl border border-dark-700 bg-dark-900/30 overflow-hidden"
+                    className="relative p-3 rounded-lg border border-dark-700 bg-dark-900/30 overflow-hidden"
                   >
                     <div className="relative">
                     {/* Header Row */}
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <div className={`px-3 py-1.5 rounded-lg text-sm font-bold ${
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <div className={`px-2 py-0.5 rounded text-xs font-bold ${
                           position.side === 'LONG'
                             ? 'bg-green-500/20 text-green-400 border border-green-500/30'
                             : 'bg-red-500/20 text-red-400 border border-red-500/30'
                         }`}>
                           {position.side} ×{position.leverage}
                         </div>
-                        <span className="text-lg font-bold text-white">{position.pair}</span>
+                        <span className="text-base font-semibold text-white">{position.pair}</span>
                         {/* SL/TP after pair */}
-                        <div className="flex items-center gap-2 ml-2">
+                        <div className="flex items-center gap-1.5 ml-2">
                           {/* Stop Loss */}
-                          <div className="px-2 py-1 bg-dark-800/50 border border-dark-700 rounded flex items-center gap-2">
-                            <div className="text-[10px] text-dark-400">Stop Loss</div>
-                            <div className="font-mono text-xs text-red-400 font-semibold">
+                          <div className="px-1.5 py-0.5 bg-dark-800/50 border border-dark-700 rounded flex items-center gap-1.5">
+                            <div className="text-[9px] text-dark-400">SL</div>
+                            <div className="font-mono text-[10px] text-red-400 font-semibold">
                               ${position.stopLoss.toFixed(0)}
                             </div>
                           </div>
                           {/* Take Profit */}
-                          <div className="px-2 py-1 bg-dark-800/50 border border-dark-700 rounded flex items-center gap-2">
-                            <div className="text-[10px] text-dark-400">Take Profit</div>
-                            <div className="font-mono text-xs text-green-400 font-semibold">
+                          <div className="px-1.5 py-0.5 bg-dark-800/50 border border-dark-700 rounded flex items-center gap-1.5">
+                            <div className="text-[9px] text-dark-400">TP</div>
+                            <div className="font-mono text-[10px] text-green-400 font-semibold">
                               ${position.takeProfit.toFixed(0)}
                             </div>
                           </div>
                         </div>
                       </div>
                       {/* Timer stays on the right */}
-                      <div className="flex items-center gap-2 text-sm text-dark-400">
-                        <Clock className="w-4 h-4" />
+                      <div className="flex items-center gap-1.5 text-xs text-dark-400">
+                        <Clock className="w-3 h-3" />
                         {position.duration}
                       </div>
                     </div>
 
                     {/* Price Grid */}
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                       <div>
-                        <div className="text-xs text-dark-400 mb-1">Entry Price</div>
-                        <div className="font-mono text-base text-white font-semibold">
+                        <div className="text-[10px] text-dark-400 mb-0.5">Entry Price</div>
+                        <div className="font-mono text-sm text-white font-semibold">
                           ${position.entryPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </div>
                       </div>
                       <div>
-                        <div className="text-xs text-dark-400 mb-1 flex items-center gap-1">
+                        <div className="text-[10px] text-dark-400 mb-0.5 flex items-center gap-1">
                           Current Price
-                          {position.pnl >= 0 ? <ArrowUpRight className="w-3 h-3 text-green-400" /> : <ArrowDownRight className="w-3 h-3 text-red-400" />}
+                          {position.pnl >= 0 ? <ArrowUpRight className="w-2.5 h-2.5 text-green-400" /> : <ArrowDownRight className="w-2.5 h-2.5 text-red-400" />}
                         </div>
                         <motion.div
                           key={`price-${position.id}-${position.currentPrice}`}
-                          className="font-mono text-base font-semibold"
+                          className="font-mono text-sm font-semibold"
                           initial={{ color: 'rgb(255, 255, 255)' }}
                           animate={{ color: [
                             'rgb(255, 255, 255)',
@@ -1005,22 +1057,22 @@ export default function UserCopyPage() {
                         </motion.div>
                       </div>
                       <div>
-                        <div className="text-xs text-dark-400 mb-1">Position Size</div>
-                        <div className="font-mono text-base text-white font-semibold">
+                        <div className="text-[10px] text-dark-400 mb-0.5">Position Size</div>
+                        <div className="font-mono text-sm text-white font-semibold">
                           ${position.positionSize.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </div>
                       </div>
                       <div>
-                        <div className="text-xs text-dark-400 mb-1">Amount</div>
-                        <div className="font-mono text-base text-white font-semibold">
+                        <div className="text-[10px] text-dark-400 mb-0.5">Amount</div>
+                        <div className="font-mono text-sm text-white font-semibold">
                           {position.amount.toFixed(8)}
                         </div>
                       </div>
                       <div>
-                        <div className="text-xs text-dark-400 mb-1">P&L</div>
+                        <div className="text-[10px] text-dark-400 mb-0.5">P&L</div>
                         <motion.div
                           key={`pnl-${position.id}-${position.pnl}`}
-                          className="font-mono text-base font-semibold"
+                          className="font-mono text-sm font-semibold"
                           initial={{ color: position.pnl >= 0 ? 'rgb(74, 222, 128)' : 'rgb(248, 113, 113)' }}
                           animate={{ color: [
                             'rgb(255, 255, 255)',
@@ -1030,15 +1082,15 @@ export default function UserCopyPage() {
                           ]}}
                           transition={{ duration: 1.5, times: [0, 0.2, 0.8, 1], ease: 'easeInOut' }}
                         >
-                          {position.pnl >= 0 ? '+' : ''}${Math.abs(position.pnl).toFixed(2)} <span className="text-xs opacity-70">({position.pnl >= 0 ? '+' : ''}{position.pnlPercent.toFixed(2)}%)</span>
+                          {position.pnl >= 0 ? '+' : ''}${Math.abs(position.pnl).toFixed(2)} <span className="text-[10px] opacity-70">({position.pnl >= 0 ? '+' : ''}{position.pnlPercent.toFixed(2)}%)</span>
                         </motion.div>
                       </div>
                     </div>
 
                     {/* Type Badge */}
                     {position.type === 'instant' && (
-                      <div className="mt-3 flex items-center gap-1.5 text-xs text-amber-400 bg-amber-500/10 px-2 py-1 rounded border border-amber-500/30">
-                        <Target className="w-3 h-3" />
+                      <div className="mt-2 flex items-center gap-1 text-[10px] text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30">
+                        <Target className="w-2.5 h-2.5" />
                         <span className="font-semibold">Closing soon...</span>
                       </div>
                     )}
@@ -1086,48 +1138,112 @@ export default function UserCopyPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-3">
-              {paginatedTrades.map((trade) => (
-                <div key={trade.id} className={`p-4 rounded-xl border ${
-                  trade.pnl >= 0 ? 'bg-green-500/5 border-green-500/20' : 'bg-red-500/5 border-red-500/20'
-                }`}>
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      <span className="text-base font-bold text-white">{trade.pair}</span>
-                      <div className={`px-2 py-1 rounded text-xs font-semibold ${
-                        trade.side === 'LONG' ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'
-                      }`}>
-                        {trade.side === 'LONG' ? <ArrowUpRight className="w-3 h-3 inline mr-1" /> : <ArrowDownRight className="w-3 h-3 inline mr-1" />}
-                        {trade.side}×{trade.leverage}
+            <div className="space-y-2">
+              {paginatedTrades.map((trade) => {
+                const isExpanded = expandedTrades.has(trade.id);
+                return (
+                  <div key={trade.id} className="rounded-lg border border-dark-700 bg-dark-900/30 overflow-hidden">
+                    {/* Compact Header - Always Visible */}
+                    <div
+                      className="p-3 flex items-center justify-between gap-4 cursor-pointer hover:bg-dark-800/70 transition-colors"
+                      onClick={() => toggleTradeExpanded(trade.id)}
+                    >
+                      {/* Left: Pair & Side */}
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <span className="text-base font-semibold text-white">{trade.pair}</span>
+                        <div className={`px-2 py-0.5 rounded text-xs font-bold whitespace-nowrap ${
+                          trade.side === 'LONG' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
+                        }`}>
+                          {trade.side === 'LONG' ? '↑' : '↓'} {trade.side}×{trade.leverage}
+                        </div>
                       </div>
-                    </div>
-                    <div className="text-xs text-dark-400">
-                      {new Date(trade.closedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                    </div>
-                  </div>
 
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    <div>
-                      <div className="text-xs text-dark-500 mb-1">P&L</div>
-                      <div className={`text-sm font-bold ${trade.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                        {trade.pnl >= 0 ? '+' : ''}${trade.pnl.toFixed(2)} ({trade.pnl >= 0 ? '+' : ''}{trade.pnlPercent.toFixed(2)}%)
+                      {/* Middle: P&L (Main Focus) */}
+                      <div className="flex items-center gap-4">
+                        <div className="text-right">
+                          <div className={`text-sm font-semibold ${trade.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                            {trade.pnl >= 0 ? '+' : ''}${trade.pnl.toFixed(2)}
+                          </div>
+                          <div className={`text-[10px] font-semibold opacity-70 ${trade.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                            {trade.pnl >= 0 ? '+' : ''}{trade.pnlPercent.toFixed(2)}%
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Right: Timestamp & Arrow */}
+                      <div className="flex items-center gap-3 flex-shrink-0">
+                        <div className="text-right">
+                          <div className="text-[10px] text-dark-400 whitespace-nowrap">
+                            {new Date(trade.closedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                          </div>
+                        </div>
+                        <motion.div
+                          animate={{ rotate: isExpanded ? 180 : 0 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <ChevronRight className="w-3 h-3 text-dark-400" />
+                        </motion.div>
                       </div>
                     </div>
-                    <div>
-                      <div className="text-xs text-dark-500 mb-1">Position Size</div>
-                      <div className="text-sm text-dark-300 font-mono">${trade.positionSize.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-                    </div>
-                    <div>
-                      <div className="text-xs text-dark-500 mb-1">Duration</div>
-                      <div className="text-sm text-dark-300">{trade.duration}</div>
-                    </div>
-                    <div>
-                      <div className="text-xs text-dark-500 mb-1">Entry → Exit</div>
-                      <div className="text-xs text-dark-300 font-mono">${trade.entryPrice.toFixed(2)} → ${trade.exitPrice.toFixed(2)}</div>
-                    </div>
+
+                    {/* Expandable Details */}
+                    <motion.div
+                      initial={false}
+                      animate={{ height: isExpanded ? 'auto' : 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="px-3 pb-3 pt-0 border-t border-dark-700/50">
+                        {/* Row 1: Basic Details */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
+                          <div>
+                            <div className="text-[10px] text-dark-400 mb-1">Entry Price</div>
+                            <div className="px-1.5 py-0.5 bg-dark-800/50 border border-dark-700 rounded inline-flex items-center">
+                              <div className="font-mono text-sm text-white font-semibold">${trade.entryPrice.toFixed(2)}</div>
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-[10px] text-dark-400 mb-1">Exit Price</div>
+                            <div className="px-1.5 py-0.5 bg-dark-800/50 border border-dark-700 rounded inline-flex items-center">
+                              <div className="font-mono text-sm text-white font-semibold">${trade.exitPrice.toFixed(2)}</div>
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-[10px] text-dark-400 mb-1">Position Size</div>
+                            <div className="font-mono text-sm text-white font-semibold">${trade.positionSize.toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
+                          </div>
+                          <div>
+                            <div className="text-[10px] text-dark-400 mb-1">Duration</div>
+                            <div className="text-sm text-white font-semibold">{trade.duration}</div>
+                          </div>
+                        </div>
+
+                        {/* Row 2: Trading Costs */}
+                        <div className="grid grid-cols-2 gap-3 mt-3">
+                          <div>
+                            <div className="text-[10px] text-dark-400 mb-1">Total Fees</div>
+                            <div className="font-mono text-sm text-red-400 font-semibold">
+                              -${trade.totalFees.toFixed(2)}
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-[10px] text-dark-400 mb-1">Slippage</div>
+                            {trade.slippage > 0 ? (
+                              <div className="font-mono text-sm text-amber-400 font-semibold">
+                                {trade.slippage.toFixed(3)}%
+                              </div>
+                            ) : (
+                              <div className="font-mono text-sm text-dark-500 font-semibold">
+                                0%
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {totalPages > 1 && (

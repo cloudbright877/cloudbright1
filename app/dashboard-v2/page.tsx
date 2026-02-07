@@ -10,6 +10,7 @@ import { botManager } from '@/lib/BotManager';
 import { priceService } from '@/lib/PriceService';
 import { botsApi } from '@/lib/api/botsApi';
 import { getUserCopy } from '@/lib/userCopies';
+import { getDemoBotById } from '@/lib/demoMarketplace';
 import type { BotStats } from '@/lib/trading/types';
 import {
   Bot,
@@ -40,6 +41,7 @@ interface ActiveBot {
   id: string;
   name: string;
   slug: string;
+  icon: string;
   risk: 'low' | 'medium' | 'high';
   invested: number;
   currentValue: number;
@@ -146,10 +148,15 @@ const mapBotStatsToActiveBot = (stats: BotStats, config: any): ActiveBot => {
   // Get last trade time
   const lastTrade = stats.trades[0]?.closedAt || 'No trades yet';
 
+  // Get icon from master bot (if exists)
+  const masterBot = getDemoBotById(stats.id);
+  const icon = masterBot?.icon || '🤖';
+
   return {
     id: stats.id,
     name: stats.name,
     slug: stats.id, // Use bot ID as slug
+    icon,
     risk,
     invested: config.investedCapital,
     currentValue: config.investedCapital + stats.totalPnL,
@@ -169,6 +176,7 @@ const mockActiveBots: ActiveBot[] = [
     id: '1',
     name: 'Conservative Scalper',
     slug: 'alphabot',
+    icon: '🤖',
     risk: 'low',
     invested: 1000,
     currentValue: 1042,
@@ -196,6 +204,7 @@ const mockActiveBots: ActiveBot[] = [
     id: '2',
     name: 'Grid Trading Bot',
     slug: 'protrader',
+    icon: '📊',
     risk: 'medium',
     invested: 1500,
     currentValue: 1623,
@@ -268,10 +277,14 @@ export default function DashboardPage() {
           .reduce((sum, t) => sum + (isNaN(t.pnl) || !isFinite(t.pnl) ? 0 : t.pnl), 0);
         const todayPnL = isNaN(rawTodayPnL) || !isFinite(rawTodayPnL) ? 0 : rawTodayPnL;
 
-        // Get user copy record to get invested amount
+        // Get user copy record to get invested amount and bot data
         const copyRecord = getUserCopy(stats.id);
         const rawInvested = copyRecord?.investedAmount || 0;
         const invested = isNaN(rawInvested) || !isFinite(rawInvested) ? 0 : rawInvested;
+
+        // Get bot icon from DEMO_BOTS
+        const masterBot = getDemoBotById(copyRecord?.masterBotId || stats.id);
+        const botIcon = masterBot?.icon || '';
 
         const safeTotalPnL = isNaN(stats.totalPnL) || !isFinite(stats.totalPnL) ? 0 : stats.totalPnL;
         const currentValue = invested + safeTotalPnL;
@@ -322,6 +335,7 @@ export default function DashboardPage() {
           id: stats.id,
           name: stats.name,
           slug: stats.id,
+          icon: botIcon,
           risk,
           invested,
           currentValue,
@@ -687,15 +701,17 @@ export default function DashboardPage() {
                             </div>
                           </td>
                           <td className="py-4 px-4 text-center">
-                            <div className={`text-sm font-bold ${
-                              position.pnl >= 0 ? 'text-green-400' : 'text-red-400'
-                            }`}>
-                              {position.pnl >= 0 ? '+' : ''}${position.pnl.toFixed(2)}
-                            </div>
-                            <div className={`text-xs ${
-                              position.pnl >= 0 ? 'text-green-400/70' : 'text-red-400/70'
-                            }`}>
-                              ({position.pnl >= 0 ? '+' : ''}{position.pnlPercent.toFixed(2)}%)
+                            <div>
+                              <div className={`text-sm font-bold ${
+                                position.pnl >= 0 ? 'text-green-400' : 'text-red-400'
+                              }`}>
+                                {position.pnl >= 0 ? '+' : ''}${position.pnl.toFixed(2)}
+                              </div>
+                              <div className={`text-xs ${
+                                position.pnl >= 0 ? 'text-green-400/70' : 'text-red-400/70'
+                              }`}>
+                                ({position.pnl >= 0 ? '+' : ''}{position.pnlPercent.toFixed(2)}%)
+                              </div>
                             </div>
                           </td>
                           <td className="py-4 px-4 text-center text-sm text-dark-300">
@@ -733,9 +749,13 @@ export default function DashboardPage() {
                   {/* Bot Header */}
                   <div className="flex items-start justify-between mb-5">
                     <div className="flex items-center gap-3 flex-1">
-                      <div className="w-14 h-14 bg-gradient-to-br from-dark-700 to-dark-800 rounded-xl flex items-center justify-center border border-dark-700 shadow-lg">
-                        {getBotIcon(bot.risk)}
-                      </div>
+                      {typeof bot.icon === 'string' && bot.icon.startsWith('/') ? (
+                        <img src={bot.icon} alt={bot.name} className="w-14 h-14 object-contain" />
+                      ) : (
+                        <div className="w-14 h-14 flex items-center justify-center text-2xl">
+                          {bot.icon}
+                        </div>
+                      )}
                       <div className="flex-1">
                         <h3 className="text-lg font-bold text-white mb-2">{bot.name}</h3>
                         <div className="flex items-center gap-2 flex-wrap text-xs">

@@ -81,18 +81,20 @@ export function ClosedTradesActivity({ trades }: ClosedTradesActivityProps) {
               </div>
 
               {/* P&L */}
-              <div className="flex items-center justify-between pt-2 border-t border-dark-700/50">
-                <span className="text-xs text-dark-500">P&L</span>
-                <div className="text-right">
-                  <div className={`text-sm font-bold ${
-                    trade.pnl >= 0 ? 'text-green-400' : 'text-red-400'
-                  }`}>
-                    {trade.pnl >= 0 ? '+' : ''}${Math.abs(trade.pnl).toFixed(2)}
-                  </div>
-                  <div className={`text-xs ${
-                    trade.pnl >= 0 ? 'text-green-400/70' : 'text-red-400/70'
-                  }`}>
-                    ({trade.pnl >= 0 ? '+' : ''}{trade.pnlPercent.toFixed(2)}%)
+              <div className="pt-2 border-t border-dark-700/50">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-dark-500">P&L</span>
+                  <div className="text-right">
+                    <div className={`text-sm font-bold ${
+                      trade.pnl >= 0 ? 'text-green-400' : 'text-red-400'
+                    }`}>
+                      {trade.pnl >= 0 ? '+' : ''}${Math.abs(trade.pnl).toFixed(2)}
+                    </div>
+                    <div className={`text-xs ${
+                      trade.pnl >= 0 ? 'text-green-400/70' : 'text-red-400/70'
+                    }`}>
+                      ({trade.pnl >= 0 ? '+' : ''}{trade.pnlPercent.toFixed(2)}%)
+                    </div>
                   </div>
                 </div>
               </div>

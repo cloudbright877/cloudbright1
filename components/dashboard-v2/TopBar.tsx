@@ -241,7 +241,7 @@ export default function TopBar() {
                   <div className="flex items-center justify-between p-4 border-b border-dark-700">
                     <h3 className="text-lg font-bold text-white">Notifications</h3>
                     <Link
-                      href="/notifications"
+                      href="/dashboard-v2/notifications"
                       className="text-xs text-primary-400 hover:text-primary-300 transition-colors"
                       onClick={() => setShowNotifications(false)}
                     >

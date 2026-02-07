@@ -281,12 +281,11 @@ export default function BotComparePage() {
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <motion.div
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                    className="p-2 bg-gradient-to-br from-dark-700 to-dark-800 rounded-xl shadow-md"
-                  >
-                    {bot.icon}
-                  </motion.div>
+                  {typeof bot.icon === 'string' && bot.icon.startsWith('/') ? (
+                    <img src={bot.icon} alt={bot.name} className="w-12 h-12 object-contain" />
+                  ) : (
+                    <div className="text-2xl">{bot.icon}</div>
+                  )}
                   <div>
                     <div className="font-bold text-white flex items-center gap-2">
                       {bot.name}
@@ -391,7 +390,11 @@ export default function BotComparePage() {
                   {selectedBots.map((bot) => (
                     <th key={bot.id} className="text-center py-3 px-4 text-sm font-semibold text-white">
                       <div className="flex items-center justify-center gap-2">
-                        <div className="scale-75">{bot.icon}</div>
+                        {typeof bot.icon === 'string' && bot.icon.startsWith('/') ? (
+                          <img src={bot.icon} alt={bot.name} className="w-6 h-6 object-contain" />
+                        ) : (
+                          <div className="text-lg">{bot.icon}</div>
+                        )}
                         {bot.name}
                       </div>
                     </th>
@@ -513,7 +516,11 @@ export default function BotComparePage() {
                   {selectedBots.map((bot) => (
                     <th key={bot.id} className="text-center py-3 px-4 text-sm font-semibold text-white">
                       <div className="flex items-center justify-center gap-2">
-                        <div className="scale-75">{bot.icon}</div>
+                        {typeof bot.icon === 'string' && bot.icon.startsWith('/') ? (
+                          <img src={bot.icon} alt={bot.name} className="w-6 h-6 object-contain" />
+                        ) : (
+                          <div className="text-lg">{bot.icon}</div>
+                        )}
                         {bot.name}
                       </div>
                     </th>
@@ -610,12 +617,13 @@ export default function BotComparePage() {
                 className="p-4 bg-dark-900/50 rounded-xl border border-dark-700 hover:border-primary-500/50 transition-all shadow-lg hover:shadow-2xl"
               >
                 <div className="text-center mb-4">
-                  <motion.div
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                    className="flex justify-center mb-2"
-                  >
-                    {bot.icon}
-                  </motion.div>
+                  <div className="flex justify-center mb-2">
+                    {typeof bot.icon === 'string' && bot.icon.startsWith('/') ? (
+                      <img src={bot.icon} alt={bot.name} className="w-12 h-12 object-contain" />
+                    ) : (
+                      <div className="text-2xl">{bot.icon}</div>
+                    )}
+                  </div>
                   <div className="font-bold text-white">{bot.name}</div>
                 </div>
                 <div className="space-y-2 text-sm">
@@ -681,12 +689,11 @@ export default function BotComparePage() {
                   className="p-4 bg-dark-900/50 border border-dark-700 rounded-xl hover:border-primary-500/50 hover:bg-dark-800/50 transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-2xl"
                 >
                   <div className="flex items-center gap-4">
-                    <motion.div
-                      whileHover={{ scale: 1.1, rotate: 5 }}
-                      className="p-2 bg-gradient-to-br from-dark-700 to-dark-800 rounded-xl shadow-md"
-                    >
-                      {bot.icon}
-                    </motion.div>
+                    {typeof bot.icon === 'string' && bot.icon.startsWith('/') ? (
+                      <img src={bot.icon} alt={bot.name} className="w-12 h-12 object-contain" />
+                    ) : (
+                      <div className="text-2xl">{bot.icon}</div>
+                    )}
                     <div className="flex-1">
                       <div className="font-bold text-white flex items-center gap-2">
                         {bot.name}

@@ -50,6 +50,17 @@ function generateRecentTrades(botName: string, count: number = 30): Trade[] {
     const durationHours = Math.floor(Math.random() * 48) + 1;
     const durationMinutes = Math.floor(Math.random() * 60);
 
+    // Calculate realistic trading fees (0.04% per side)
+    const feeRate = 0.04;
+    const openFee = Math.round((positionSize * feeRate / 100) * 100) / 100;
+    const closeFee = Math.round((positionSize * feeRate / 100) * 100) / 100;
+    const totalFees = openFee + closeFee;
+    const netPnl = Math.round((pnl - totalFees) * 100) / 100;
+
+    // Slippage percentage (if applied)
+    const hadSlippage = Math.random() > 0.5;
+    const slippagePercent = hadSlippage ? Math.random() * 0.15 : 0; // 0-0.15%
+
     trades.push({
       id: `trade-${botName}-${i}`,
       botName,
@@ -64,6 +75,24 @@ function generateRecentTrades(botName: string, count: number = 30): Trade[] {
       pnlPercent: Math.round(pnlPercent * 100) / 100,
       duration: `${durationHours}h ${durationMinutes}m`,
       closedAt: new Date(now - i * 3600000).toISOString(),
+
+      // Realistic Trading Metrics
+      openFee,
+      closeFee,
+      totalFees,
+      netPnl,
+      slippage: slippagePercent,
+
+      // Internal System Fields (optional, for debugging)
+      expectedOutcome: isWin ? 'WIN' : 'LOSS',
+      actualOutcome: isWin ? 'WIN' : 'LOSS',
+      hadSlippage,
+      slippageAmount: hadSlippage ? slippagePercent : undefined,
+      convergenceLayer: Math.floor(Math.random() * 7), // 0-6
+      favorabilityScore: Math.random(),
+      technicalIndicators: {
+        trend: ['up', 'down', 'flat'][Math.floor(Math.random() * 3)] as 'up' | 'down' | 'flat',
+      },
     });
   }
 

@@ -46,12 +46,7 @@ export class DailyTargetController {
 
     this.todaysTrades.push({ pnl, timestamp: now });
 
-    // Log progress
-    const progress = this.getDailyProgress();
-    console.log(
-      `📊 Trade recorded: ${pnl >= 0 ? '+' : ''}$${pnl.toFixed(2)} | ` +
-      `Today: ${progress.percentTarget.toFixed(1)}% of target (${progress.status})`
-    );
+    // Progress tracking - logging removed for cleaner console
   }
 
   /**
@@ -102,13 +97,14 @@ export class DailyTargetController {
   getTradeAdjustment(): TradeAdjustment {
     const progress = this.getDailyProgress();
 
-    // Completed target: slow down significantly
+    // Completed target: continue trading to reach tradesPerDay
+    // Let Convergence Layers control frequency/sizing (Layer 3 TP/SL, Layer 5 frequency)
     if (progress.status === 'completed') {
       return {
-        shouldTrade: Math.random() < 0.3, // 30% chance to trade
-        frequencyMultiplier: 0.3,
-        sizeMultiplier: 0.5,
-        reason: 'Daily target reached - reducing activity',
+        shouldTrade: true, // Keep trading - layers will make micro-trades
+        frequencyMultiplier: 1.0, // Layers control frequency
+        sizeMultiplier: 1.0, // Layers control sizing
+        reason: 'Daily target reached - layers controlling micro-trades',
       };
     }
 
@@ -132,15 +128,16 @@ export class DailyTargetController {
       };
     }
 
-    // Behind: speed up (but realistically)
+    // Behind: keep normal size (formula is calibrated for this)
+    // Only frequency can increase slightly, but NOT position size
     const gap = progress.percentComplete - progress.percentTarget;
     const urgency = Math.min(gap / 30, 1); // 0-1 based on how far behind
 
     return {
       shouldTrade: true,
-      frequencyMultiplier: 1 + urgency * 0.5, // Up to 1.5x speed
-      sizeMultiplier: 1 + urgency * 0.3,      // Up to 1.3x size
-      reason: `Behind schedule - increasing activity (urgency: ${(urgency * 100).toFixed(0)}%)`,
+      frequencyMultiplier: 1 + urgency * 0.5, // Up to 1.5x speed (OK for frequency)
+      sizeMultiplier: 1.0,                    // NEVER increase size (cap at 1.0x)
+      reason: `Behind schedule - maintaining normal size (urgency: ${(urgency * 100).toFixed(0)}%)`,
     };
   }
 
@@ -150,12 +147,9 @@ export class DailyTargetController {
   shouldOpenPosition(): boolean {
     const adjustment = this.getTradeAdjustment();
 
-    if (!adjustment.shouldTrade) {
-      console.log(`⏸️ Skipping trade: ${adjustment.reason}`);
-      return false;
-    }
+    // Trade decision - logging removed for cleaner console
 
-    return true;
+    return adjustment.shouldTrade;
   }
 
   /**
@@ -165,12 +159,7 @@ export class DailyTargetController {
     const adjustment = this.getTradeAdjustment();
     const adjusted = baseSize * adjustment.sizeMultiplier;
 
-    if (adjustment.sizeMultiplier !== 1.0) {
-      console.log(
-        `💰 Position size adjusted: $${baseSize.toFixed(0)} → $${adjusted.toFixed(0)} ` +
-        `(${adjustment.sizeMultiplier}x: ${adjustment.reason})`
-      );
-    }
+    // Size adjustment - logging removed for cleaner console
 
     return adjusted;
   }
@@ -182,14 +171,38 @@ export class DailyTargetController {
     const adjustment = this.getTradeAdjustment();
     const adjusted = baseDelay / adjustment.frequencyMultiplier;
 
-    if (adjustment.frequencyMultiplier !== 1.0) {
-      console.log(
-        `⏱️ Trade frequency adjusted: ${(baseDelay / 1000).toFixed(0)}s → ${(adjusted / 1000).toFixed(0)}s ` +
-        `(${adjustment.frequencyMultiplier}x: ${adjustment.reason})`
-      );
-    }
+    // Frequency adjustment - logging removed for cleaner console
 
     return adjusted;
+  }
+
+  /**
+   * Get current daily P&L as percentage of invested capital
+   * Used by DynamicPnLCalculator for auto-correction
+   */
+  getCurrentDailyPnLPercent(): number {
+    const totalPnL = this.todaysTrades.reduce((sum, t) => sum + t.pnl, 0);
+    return (totalPnL / this.investedCapital) * 100;
+  }
+
+  /**
+   * Get estimated remaining trades today
+   * Used by DynamicPnLCalculator to distribute corrections
+   */
+  getTradesRemaining(tradesPerDay: number = 8): number {
+    const progress = this.getDailyProgress();
+    const percentComplete = progress.percentComplete / 100; // 0-1
+
+    // Expected total trades for the day based on current time
+    const expectedTotalTrades = Math.ceil(tradesPerDay * (percentComplete + 0.5)); // Slightly optimistic
+
+    // Actual trades so far
+    const actualTrades = this.todaysTrades.length;
+
+    // Remaining trades (at least 1 if not end of day)
+    const remaining = Math.max(1, expectedTotalTrades - actualTrades);
+
+    return remaining;
   }
 
   /**
@@ -264,7 +277,6 @@ export class DailyTargetController {
    * Reset for new day
    */
   reset(): void {
-    console.log('🌅 New day started - resetting daily tracker');
     this.startOfDay = this.getStartOfDay();
     this.todaysTrades = [];
   }
@@ -277,19 +289,17 @@ export class DailyTargetController {
     if (newCapital) {
       this.investedCapital = newCapital;
     }
-    console.log(
-      `🎯 Target updated: ${newTargetPercent}% of $${this.investedCapital} = ` +
-      `$${((this.investedCapital * newTargetPercent) / 100).toFixed(2)}/day`
-    );
   }
 
   /**
-   * Get start of current day (00:00:00)
+   * Get start of current day (00:00:00 UTC)
+   * CRITICAL: Must use UTC to match TradingBot.checkDailyReset() timezone
    */
   private getStartOfDay(): number {
     const now = new Date();
-    now.setHours(0, 0, 0, 0);
-    return now.getTime();
+    // Use UTC date string, not local time (prevents timezone desync with TradingBot)
+    const utcDateStr = now.toISOString().split('T')[0]; // "2026-02-06"
+    return new Date(utcDateStr).getTime();
   }
 
   /**

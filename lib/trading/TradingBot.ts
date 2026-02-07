@@ -3,7 +3,12 @@
 // ============================================================================
 
 import { DailyTargetController } from './DailyTargetController';
+import { dynamicPnLCalculator, type PnLRange } from './DynamicPnLCalculator';
+import { StaggeredClosingManager } from './StaggeredClosingManager';
+import { trendDetector } from './SimpleTrendDetector';
+import { ConvergenceController } from './convergence/ConvergenceController';
 import type { Position, Trade, BotConfig, BotStats, BotPersonality } from './types';
+import { migrateRunningBot, migrateTrades } from './convergence/migration';
 
 export class TradingBot {
   public id: string;
@@ -12,8 +17,11 @@ export class TradingBot {
   private trades: Trade[] = [];
   private closedPositionIds: Set<string> = new Set();
   private dailyController: DailyTargetController;
+  private convergenceController: ConvergenceController; // 6-layer convergence system
+  private staggeredClosingManager: StaggeredClosingManager; // Instance per bot
   private personality: BotPersonality;
   private lastOpenTime: number = 0; // Track last position open time for cooldown
+  private lastResetDate: string = ''; // Tracks last daily reset (YYYY-MM-DD UTC)
 
   constructor(id: string, config: BotConfig) {
     this.id = id;
@@ -32,6 +40,19 @@ export class TradingBot {
       config.investedCapital
     );
 
+    // Create ConvergenceController (6-layer system)
+    this.convergenceController = new ConvergenceController(
+      config.dailyTargetPercent,
+      config.investedCapital,
+      config.tradesPerDay
+    );
+
+    // Create instance of StaggeredClosingManager for this bot (with config if provided)
+    const staggeredConfig = this.config.staggeredClosing;
+    this.staggeredClosingManager = new StaggeredClosingManager(
+      staggeredConfig && staggeredConfig.enabled ? staggeredConfig : undefined
+    );
+
     // Generate unique personality for this bot
     this.personality = {
       aggression: Math.random(),
@@ -48,8 +69,64 @@ export class TradingBot {
   // ============================================================================
 
   tick(prices: Record<string, number>): void {
+    // Check for daily reset first (before any trading logic)
+    this.checkDailyReset();
+
+    // Update trend detector with latest prices
+    Object.entries(prices).forEach(([symbol, price]) => {
+      trendDetector.updatePrice(symbol, price);
+    });
+
     this.managePositions(prices);
     this.tryOpenNewPosition(prices);
+  }
+
+  // ============================================================================
+  // Daily Reset Logic
+  // ============================================================================
+
+  /**
+   * Check if a new day has started (UTC) and reset daily metrics
+   * - Open positions stay open (their P&L doesn't count toward new day)
+   * - Daily progress resets to 0
+   * - Convergence metrics reset (will be implemented with ConvergenceController)
+   * - No carry-over: missed target on Day 1 doesn't affect Day 2
+   */
+  private checkDailyReset(): void {
+    // Get current UTC date as YYYY-MM-DD string
+    const now = new Date();
+    const currentDate = now.toISOString().split('T')[0]; // "2026-02-06"
+
+    // If no reset date stored yet, initialize with current date
+    if (!this.lastResetDate) {
+      this.lastResetDate = currentDate;
+      this.save();
+      return;
+    }
+
+    // Check if date has changed
+    if (currentDate !== this.lastResetDate) {
+      console.log(`[TradingBot ${this.id}] Daily reset detected: ${this.lastResetDate} -> ${currentDate}`);
+
+      // Reset daily controller (progress, trades count, realized P&L)
+      this.dailyController = new DailyTargetController(
+        this.config.dailyTargetPercent,
+        this.config.investedCapital
+      );
+      this.dailyController.save(this.id);
+
+      // Reset ConvergenceController (micro-steering history)
+      this.convergenceController.resetDaily();
+      this.convergenceController.save(this.id);
+
+      // Update reset date
+      this.lastResetDate = currentDate;
+
+      // Persist changes
+      this.save();
+
+      console.log(`[TradingBot ${this.id}] Daily reset complete. Open positions: ${this.positions.length} (stay open)`);
+    }
   }
 
   // ============================================================================
@@ -98,28 +175,56 @@ export class TradingBot {
 
       // PRIORITY 1: Check if TP or SL reached
       if (realPnlPercent >= pos.targetPnL) {
-        shouldClose = true;
-        slippageReason = pos.shouldWin
-          ? 'Natural win (TP reached)'
-          : 'Unexpected win (TP reached)';
+        // ✅ Enforce minDuration even for TP
+        if (duration >= minDuration) {
+          shouldClose = true;
+          slippageReason = pos.shouldWin
+            ? 'Natural win (TP reached)'
+            : 'Unexpected win (TP reached)';
+        } else {
+          // Wait for minDuration
+          remainingPositions.push(pos);
+          return;
+        }
       } else if (realPnlPercent <= pos.stopLossPnL) {
-        shouldClose = true;
-        slippageReason = !pos.shouldWin
-          ? 'Natural loss (SL reached)'
-          : 'Unexpected loss (SL reached)';
+        // ✅ Enforce minDuration even for SL
+        if (duration >= minDuration) {
+          shouldClose = true;
+          slippageReason = !pos.shouldWin
+            ? 'Natural loss (SL reached)'
+            : 'Unexpected loss (SL reached)';
+        } else {
+          // Wait for minDuration
+          remainingPositions.push(pos);
+          return;
+        }
       }
-      // PRIORITY 2: Check minimum duration
+      // PRIORITY 2: Check minimum duration (for other closures)
       else if (duration < minDuration) {
         remainingPositions.push(pos);
         return;
       }
-      // PRIORITY 3: MAX DURATION - Force close (must check before minDuration checks)
+
+      // Get convergence metrics for layer checks
+      const dailyStats = this.dailyController.getTodayStats();
+      const convergenceMetrics = this.convergenceController.getMetrics(
+        dailyStats.totalPnL,
+        dailyStats.trades
+      );
+
+      // PRIORITY 3: Layer 4 - Early Exit (when ahead + real P&L positive)
+      if (this.convergenceController.shouldExitEarly(pos.shouldWin, realPnlPercent, convergenceMetrics)) {
+        shouldClose = true;
+        needsSlippage = false; // Natural close, no correction needed
+        slippageReason = 'Layer 4: Early exit (natural close)';
+      }
+      // PRIORITY 4: MAX DURATION - Force close
       else if (duration >= maxDuration) {
         shouldClose = true;
         needsSlippage = true;
         slippageReason = 'Max duration reached';
       }
-      // PRIORITY 4: Early intervention if wrong direction or mid duration
+      // PRIORITY 5: Early intervention if wrong direction or mid duration
       else if (duration >= minDuration) {
         const wrongDirection = pos.shouldWin ? realPnlPercent < 0 : realPnlPercent > 0;
 
@@ -146,7 +251,44 @@ export class TradingBot {
       }
 
       if (shouldClose && !this.closedPositionIds.has(pos.id)) {
-        this.closePosition(pos, needsSlippage, realPnlPercent);
+        // Check if staggered closing should be forced (Layer 4 + 6)
+        const activeLayer = this.convergenceController.getActiveLayer(convergenceMetrics);
+        const forceStagger = this.convergenceController.shouldForceStagger(
+          activeLayer,
+          convergenceMetrics.tradesRemaining
+        );
+
+        // Check staggered closing (forced or enabled)
+        const staggeredEnabled = forceStagger || (this.config.staggeredClosing?.enabled ?? false);
+
+        if (staggeredEnabled) {
+          if (pos.scheduledCloseAt) {
+            // Already scheduled - check if time to close
+            if (now >= pos.scheduledCloseAt) {
+              // Time to close!
+              this.closePosition(pos, needsSlippage, realPnlPercent);
+            } else {
+              // Wait for scheduled time
+              remainingPositions.push(pos);
+            }
+          } else {
+            // First time we want to close - check with StaggeredClosingManager
+            const closingDecision = this.staggeredClosingManager.shouldClosePosition(pos.id);
+
+            if (closingDecision.shouldClose && closingDecision.delayMs < 2000) {
+              // Can close immediately (minimal delay)
+              this.closePosition(pos, needsSlippage, realPnlPercent);
+            } else {
+              // Schedule for later to prevent congestion
+              pos.scheduledCloseAt = now + closingDecision.delayMs;
+              remainingPositions.push(pos);
+              // Position scheduled - logging removed for cleaner console
+            }
+          }
+        } else {
+          // Staggered closing disabled - close immediately
+          this.closePosition(pos, needsSlippage, realPnlPercent);
+        }
       } else if (!shouldClose) {
         remainingPositions.push(pos);
       }
@@ -159,11 +301,46 @@ export class TradingBot {
   // Close Position with Slippage
   // ============================================================================
 
+  /**
+   * Recalculate exitPrice from finalPnlPercent to ensure mathematical consistency
+   */
+  private recalculateExitPrice(
+    entryPrice: number,
+    pnlPercent: number,
+    leverage: number,
+    side: 'LONG' | 'SHORT'
+  ): number {
+    // Calculate required price change to achieve pnlPercent
+    // Formula: pnlPercent = (priceChange / entryPrice) * leverage * 100 * (side === 'LONG' ? 1 : -1)
+    // Solving for priceChange:
+    const priceChangePercent = pnlPercent / (leverage * 100);
+    const priceChange = entryPrice * priceChangePercent;
+
+    return side === 'LONG'
+      ? entryPrice + priceChange
+      : entryPrice - priceChange;
+  }
+
   private closePosition(pos: Position, needsSlippage: boolean, realPnlPercent: number): void {
     let exitPrice = pos.currentPrice;
     let finalPnlPercent = realPnlPercent;
     let hadSlippage = false;
     let slippageAmount = 0;
+
+    // DEBUG LOGGING: Before slippage - log all input variables
+    console.log(`[${this.config.name}] === Close Position Debug ===`);
+    console.log(`[${this.config.name}] 1. BEFORE SLIPPAGE:`);
+    console.log(`[${this.config.name}]    entryPrice: ${pos.entryPrice.toFixed(2)}`);
+    console.log(`[${this.config.name}]    currentPrice: ${pos.currentPrice.toFixed(2)}`);
+    console.log(`[${this.config.name}]    exitPrice (initial): ${exitPrice.toFixed(2)}`);
+    console.log(`[${this.config.name}]    realPnlPercent: ${realPnlPercent.toFixed(4)}%`);
+    console.log(`[${this.config.name}]    targetPnL: ${pos.targetPnL.toFixed(4)}%`);
+    console.log(`[${this.config.name}]    stopLossPnL: ${pos.stopLossPnL.toFixed(4)}%`);
+    console.log(`[${this.config.name}]    shouldWin: ${pos.shouldWin}`);
+    console.log(`[${this.config.name}]    positionSize: $${pos.positionSize.toFixed(2)}`);
+    console.log(`[${this.config.name}]    leverage: ${pos.leverage}x`);
+    console.log(`[${this.config.name}]    side: ${pos.side}`);
+    console.log(`[${this.config.name}]    needsSlippage: ${needsSlippage}`);
 
     if (needsSlippage) {
       const targetPnl = pos.shouldWin ? pos.targetPnL : pos.stopLossPnL;
@@ -174,8 +351,16 @@ export class TradingBot {
         ? -pos.currentPrice * priceChangePercent
         : pos.currentPrice * priceChangePercent;
 
-      exitPrice = pos.currentPrice + slippage;
       slippageAmount = Math.abs((slippage / pos.currentPrice) * 100);
+
+      // SLIPPAGE LIMITS: Check against maxSlippage config
+      if (slippageAmount > this.config.maxSlippage!) {
+        exitPrice = pos.currentPrice + Math.sign(slippage) * (pos.currentPrice * this.config.maxSlippage! / 100);
+        slippageAmount = this.config.maxSlippage!;
+      } else {
+        exitPrice = pos.currentPrice + slippage;
+      }
+
       hadSlippage = true;
 
       // Recalculate final P&L
@@ -183,21 +368,139 @@ export class TradingBot {
         ? exitPrice - pos.entryPrice
         : pos.entryPrice - exitPrice;
       finalPnlPercent = (priceChange / pos.entryPrice) * pos.leverage * 100;
+
+      // DEBUG LOGGING: After slippage
+      console.log(`[${this.config.name}] 2. AFTER SLIPPAGE:`);
+      console.log(`[${this.config.name}]    gap (target - real): ${(pos.shouldWin ? pos.targetPnL : pos.stopLossPnL - realPnlPercent).toFixed(4)}%`);
+      console.log(`[${this.config.name}]    slippageAmount: ${slippageAmount.toFixed(4)}%`);
+      console.log(`[${this.config.name}]    exitPriceAfterSlippage: ${exitPrice.toFixed(2)}`);
+      console.log(`[${this.config.name}]    finalPnlPercentAfterSlippage: ${finalPnlPercent.toFixed(4)}%`);
+    }
+
+    // Layer 6: Micro-steering (final 10 trades)
+    const dailyStats = this.dailyController.getTodayStats();
+    const convergenceMetrics = this.convergenceController.getMetrics(
+      dailyStats.totalPnL,
+      dailyStats.trades
+    );
+    const microSteering = this.convergenceController.getMicroSteering(convergenceMetrics);
+
+    if (microSteering !== 0) {
+      const beforeSteering = finalPnlPercent;
+      finalPnlPercent += microSteering;
+
+      // ✅ RECALCULATE exitPrice to match new finalPnlPercent
+      exitPrice = this.recalculateExitPrice(
+        pos.entryPrice,
+        finalPnlPercent,
+        pos.leverage,
+        pos.side
+      );
+
+      // DEBUG LOGGING: After Layer 6 micro-steering
+      console.log(`[${this.config.name}] 3. AFTER LAYER 6 MICRO-STEERING:`);
+      console.log(`[${this.config.name}]    beforeSteering: ${beforeSteering.toFixed(4)}%`);
+      console.log(`[${this.config.name}]    steeringAmount: ${microSteering.toFixed(4)}%`);
+      console.log(`[${this.config.name}]    afterSteering: ${finalPnlPercent.toFixed(4)}%`);
+      console.log(`[${this.config.name}]    exitPrice recalculated: ${exitPrice.toFixed(2)}`);
+    }
+
+    // CRITICAL: Prevent ANY source (slippage, friction, Layer 6) from flipping shouldWin outcome
+    // This applies to ALL trades, not just Layer 6
+    const expectedPositive = pos.shouldWin;
+    const resultNegative = finalPnlPercent < 0;
+    const flipped = (expectedPositive && resultNegative) || (!expectedPositive && !resultNegative && finalPnlPercent > 0);
+
+    if (flipped) {
+      const beforeFlipCheck = finalPnlPercent;
+
+      if (expectedPositive && resultNegative) {
+        // shouldWin=true but got negative result → make it small win
+        finalPnlPercent = 0.001;
+      } else {
+        // shouldWin=false but got positive result → make it typical loss from SL range
+        // Use average of SL range instead of near-zero
+        const avgStopLoss = Math.abs(pos.stopLossPnL) * 0.6; // 60% of SL (middle-low of range)
+        finalPnlPercent = -avgStopLoss;
+      }
+
+      // ✅ RECALCULATE exitPrice to match new finalPnlPercent
+      exitPrice = this.recalculateExitPrice(
+        pos.entryPrice,
+        finalPnlPercent,
+        pos.leverage,
+        pos.side
+      );
+
+      // DEBUG LOGGING: After flip prevention
+      console.log(`[${this.config.name}] 4. AFTER FLIP PREVENTION:`);
+      console.log(`[${this.config.name}]    beforeFlip: ${beforeFlipCheck.toFixed(4)}%`);
+      console.log(`[${this.config.name}]    afterFlip: ${finalPnlPercent.toFixed(4)}%`);
+      console.log(`[${this.config.name}]    shouldWin: ${pos.shouldWin}`);
+      console.log(`[${this.config.name}]    resultNegative: ${resultNegative}`);
+      console.log(`[${this.config.name}]    exitPrice recalculated: ${exitPrice.toFixed(2)}`);
     }
 
     const finalPnl = (pos.positionSize * finalPnlPercent) / 100;
     const isWin = finalPnl >= 0;
     const expectedWin = pos.shouldWin;
 
+    // DEBUG LOGGING: Final trade summary
+    console.log(`[${this.config.name}] 5. FINAL TRADE SUMMARY:`);
+    console.log(`[${this.config.name}]    entryPrice: ${pos.entryPrice.toFixed(2)}`);
+    console.log(`[${this.config.name}]    exitPrice: ${exitPrice.toFixed(2)}`);
+    console.log(`[${this.config.name}]    finalPnl: $${finalPnl.toFixed(4)}`);
+    console.log(`[${this.config.name}]    finalPnlPercent: ${finalPnlPercent.toFixed(4)}%`);
+
+    // Calculate expected P&L from prices
+    const priceChangeFromPrices = pos.side === 'LONG'
+      ? exitPrice - pos.entryPrice
+      : pos.entryPrice - exitPrice;
+    const expectedPnlFromPrices = (priceChangeFromPrices / pos.entryPrice) * pos.leverage * pos.positionSize;
+    console.log(`[${this.config.name}]    expectedPnlFromPrices: $${expectedPnlFromPrices.toFixed(4)}`);
+
+    // Validation check
+    const deviation = Math.abs(finalPnl - expectedPnlFromPrices);
+    if (deviation > 0.01) {
+      console.error(`[${this.config.name}] ❌ P&L MISMATCH: calculated=$${expectedPnlFromPrices.toFixed(4)}, stored=$${finalPnl.toFixed(4)}, deviation=$${deviation.toFixed(4)}`);
+    } else {
+      console.log(`[${this.config.name}] ✅ P&L MATCH: deviation=$${deviation.toFixed(4)}`);
+    }
+    console.log(`[${this.config.name}] === End Debug ===\n`);
+
     // Mark as closed
     this.closedPositionIds.add(pos.id);
+
+    // Record in StaggeredClosingManager
+    this.staggeredClosingManager.recordClosure(pos.id, finalPnl);
 
     // Record in DailyTargetController
     this.dailyController.recordTrade(finalPnl);
 
+    // Store trend at close time (optional, for analysis)
+    const symbol = pos.pair.replace('/', '');
+    const trend = trendDetector.getTrend(symbol);
+
+    // ============================================================================
+    // REALISTIC TRADING METRICS - Calculate fees and net P&L
+    // ============================================================================
+
+    // Trading fees (typical: 0.04% per side for maker/taker average)
+    const feeRate = 0.04; // 0.04% per trade side
+    const openFee = (pos.positionSize * feeRate) / 100;
+    const closeFee = (pos.positionSize * feeRate) / 100;
+    const totalFees = openFee + closeFee;
+
+    // Net P&L after fees
+    const netPnl = finalPnl - totalFees;
+
+    // Slippage percentage (from earlier calculation)
+    const slippagePercent = hadSlippage && slippageAmount !== undefined ? slippageAmount : 0;
+
     // Add to trade history
     const trade: Trade = {
       id: `trade-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      botName: this.config.name,
       pair: pos.pair,
       side: pos.side,
       leverage: pos.leverage,
@@ -209,10 +512,25 @@ export class TradingBot {
       pnlPercent: finalPnlPercent,
       duration: pos.duration,
       closedAt: new Date().toISOString(),
+
+      // Realistic Trading Metrics
+      openFee,
+      closeFee,
+      totalFees,
+      netPnl,
+      slippage: slippagePercent,
+
+      // Internal System Fields (optional)
       expectedOutcome: expectedWin ? 'WIN' : 'LOSS',
       actualOutcome: isWin ? 'WIN' : 'LOSS',
       hadSlippage,
       slippageAmount: hadSlippage ? slippageAmount : undefined,
+      convergenceLayer: pos.convergenceLayer,  // Dominant layer at close
+      favorabilityScore: pos.favorabilityScore, // Entry favorability
+      technicalIndicators: {
+        trend, // Just the trend, not full TA
+        // Other fields undefined (not needed for Layer 2)
+      } as any, // Cast to avoid TypeScript errors for missing fields
     };
 
     this.trades.unshift(trade);
@@ -223,9 +541,11 @@ export class TradingBot {
       this.trades = this.trades.slice(0, maxHistory);
     }
 
-    // Save state after trade (including daily controller)
+    // Save state after trade (including daily controller, convergence controller, and staggered manager)
     this.save();
     this.dailyController.save(this.id);
+    this.convergenceController.save(this.id);
+    this.staggeredClosingManager.save(this.id);
   }
 
   // ============================================================================
@@ -236,13 +556,21 @@ export class TradingBot {
     // Limit concurrent positions (from config)
     if (this.positions.length >= this.config.maxConcurrentPositions) return;
 
-    // Cooldown check: minimum 5 seconds between opens to prevent burst opening
+    // Cooldown check: prevent burst opening
     const now = Date.now();
-    const cooldownMs = 5000; // 5 seconds
+    const cooldownMs = this.config.cooldownMs ?? 5000; // Default: 5 seconds
     if (now - this.lastOpenTime < cooldownMs) return;
 
-    // Control frequency (from config)
-    if (Math.random() > this.config.openFrequency) return;
+    // Get convergence metrics (used by multiple layers)
+    const dailyStats = this.dailyController.getTodayStats();
+    const convergenceMetrics = this.convergenceController.getMetrics(
+      dailyStats.totalPnL,
+      dailyStats.trades
+    );
+
+    // Layer 5: Frequency control
+    const frequency = this.convergenceController.getOpenFrequency(convergenceMetrics);
+    if (Math.random() > frequency) return;
 
     // Check if DailyTargetController allows opening
     if (!this.dailyController.shouldOpenPosition()) return;
@@ -258,28 +586,74 @@ export class TradingBot {
 
     if (!price) return;
 
+    // Determine leverage configuration for DynamicPnLCalculator
+    let leverageMin: number, leverageMax: number;
+    if (this.config.leverages && this.config.leverages.length > 0) {
+      leverageMin = Math.min(...this.config.leverages);
+      leverageMax = Math.max(...this.config.leverages);
+    } else if (this.config.leverage) {
+      leverageMin = leverageMax = this.config.leverage;
+    } else {
+      // Default [3, 5, 10]
+      leverageMin = 3;
+      leverageMax = 10;
+    }
+
+    // Calculate optimal P&L range using DynamicPnLCalculator
+    const tightModePercent = this.config.pnlVariance?.tightModePercent ?? 80; // Default: 80%
+    const pnlRangeRaw = dynamicPnLCalculator.calculatePnLRange({
+      dailyTargetPercent: this.config.dailyTargetPercent,
+      tradesPerDay: this.config.tradesPerDay,
+      winRate: this.config.winRate,
+      leverageMin,
+      leverageMax,
+      currentDailyPnL: this.dailyController.getCurrentDailyPnLPercent(),
+      tradesRemainingToday: this.dailyController.getTradesRemaining(this.config.tradesPerDay),
+      tightModePercent,
+      // NOTE: winPnLMin/Max are IGNORED by calculator (deprecated)
+    });
+
+    // CRITICAL FIX: DynamicPnLCalculator returns % of CAPITAL, but we need % of POSITION
+    // Convert using capital/positionSize ratio
+    const avgPositionSize = (this.config.minPositionSize + this.config.maxPositionSize) / 2;
+    const capitalToPositionRatio = this.config.investedCapital / avgPositionSize;
+
+    const pnlRange = {
+      winMin: pnlRangeRaw.winMin * capitalToPositionRatio,
+      winMax: pnlRangeRaw.winMax * capitalToPositionRatio,
+      lossMin: pnlRangeRaw.lossMin * capitalToPositionRatio,
+      lossMax: pnlRangeRaw.lossMax * capitalToPositionRatio,
+      mode: pnlRangeRaw.mode,
+      baseExpected: pnlRangeRaw.baseExpected * capitalToPositionRatio,
+    };
+
     // Determine if this trade should win
     const shouldWin = Math.random() < this.config.winRate;
 
-    // Calculate adaptive SL/TP based on win rate and personality
-    let targetPnL: number, stopLossPnL: number;
+    // Calculate base SL/TP from DynamicPnLCalculator
+    let baseTargetPnL: number, baseStopLossPnL: number;
 
     if (shouldWin) {
-      // Winning trade: TP closer than SL
-      targetPnL = this.config.winPnLMin + Math.random() * (this.config.winPnLMax - this.config.winPnLMin);
+      // Winning trade: Use win range from calculator
+      baseTargetPnL = pnlRange.winMin + Math.random() * (pnlRange.winMax - pnlRange.winMin);
 
       // SL distance based on win rate (higher WR = farther SL)
       const slDistanceMultiplier = 1 + (this.config.winRate * 7); // 1x-8x
       const riskMultiplier = 0.9 + (this.personality.riskTolerance * 0.2); // 0.9-1.1
-      stopLossPnL = -(this.config.lossPnLMax * slDistanceMultiplier * riskMultiplier);
+      baseStopLossPnL = -(pnlRange.lossMax * slDistanceMultiplier * riskMultiplier);
     } else {
-      // Losing trade: SL closer than TP
-      stopLossPnL = -(this.config.lossPnLMin + Math.random() * (this.config.lossPnLMax - this.config.lossPnLMin));
+      // Losing trade: Use loss range from calculator
+      baseStopLossPnL = -(pnlRange.lossMin + Math.random() * (pnlRange.lossMax - pnlRange.lossMin));
 
       // TP very far (unlikely to reach)
       const tpDistanceMultiplier = 2 + ((1 - this.config.winRate) * 2); // 2x-4x
-      targetPnL = this.config.winPnLMax * tpDistanceMultiplier + 0.5;
+      baseTargetPnL = pnlRange.winMax * tpDistanceMultiplier + 0.5;
     }
+
+    // Layer 3: TP/SL adjustment based on progress
+    const adjustedTPSL = this.convergenceController.adjustTPSL(baseTargetPnL, baseStopLossPnL, convergenceMetrics);
+    const targetPnL = adjustedTPSL.tp;
+    const stopLossPnL = adjustedTPSL.sl;
 
     // Position size with personality influence
     const baseSize = this.config.minPositionSize +
@@ -287,8 +661,11 @@ export class TradingBot {
     const personalityMultiplier = 0.8 + (this.personality.aggression * 0.4); // 0.8-1.2
     const positionSize = baseSize * personalityMultiplier;
 
-    // Adjust based on daily progress
-    const adjustedSize = this.dailyController.adjustPositionSize(positionSize);
+    // Adjust based on daily progress (DailyTargetController)
+    const dailyAdjusted = this.dailyController.adjustPositionSize(positionSize);
+
+    // Layer 1: Position sizing based on convergence progress
+    const adjustedSize = this.convergenceController.adjustPositionSize(dailyAdjusted, convergenceMetrics);
 
     // Leverage: select from leverages array if set, otherwise use leverage, otherwise default random
     let leverage: number;
@@ -311,6 +688,23 @@ export class TradingBot {
       side = 'SHORT';
     } else {
       side = Math.random() > 0.5 ? 'LONG' : 'SHORT';
+    }
+
+    // Layer 2: Entry Timing (favorability threshold)
+    const favorabilityThreshold = this.convergenceController.getFavorabilityThreshold(convergenceMetrics);
+
+    if (favorabilityThreshold > 0) {
+      // Normal/behind: require trend match (SimpleTrendDetector)
+      if (!trendDetector.doesTrendMatch(symbol, side)) {
+        return; // Skip, wait for trend alignment
+      }
+    }
+    // Emergency mode (threshold = 0): accept any trend
+
+    // Layer 2: Additional throttle when ahead
+    const throttleProbability = this.convergenceController.getThrottleProbability(convergenceMetrics);
+    if (Math.random() < throttleProbability) {
+      return; // Skip, reduce frequency when ahead
     }
 
     const amount = adjustedSize / price;
@@ -347,6 +741,12 @@ export class TradingBot {
       shouldWin,
       targetPnL,
       stopLossPnL,
+      pnlRange: {
+        mode: pnlRange.mode,
+        baseExpected: pnlRange.baseExpected,
+      },
+      favorabilityScore: 1.0, // Trend matched (binary: 1.0 or position not opened)
+      convergenceLayer: this.convergenceController.getActiveLayer(convergenceMetrics), // Dominant layer at open
     };
 
     this.positions.push(newPosition);
@@ -427,11 +827,25 @@ export class TradingBot {
     this.trades = [];
     this.closedPositionIds.clear();
     this.dailyController.reset();
+    this.convergenceController.resetDaily();
   }
 
   // ============================================================================
   // Persistence - Save/Load Runtime State
   // ============================================================================
+
+  /**
+   * Cleanup old trades to prevent localStorage quota exceeded
+   * Keeps last 1000 trades only
+   */
+  private cleanupOldTrades(): void {
+    const maxTrades = 1000;
+    if (this.trades.length > maxTrades) {
+      const removed = this.trades.length - maxTrades;
+      this.trades = this.trades.slice(-maxTrades);
+      console.log(`[TradingBot ${this.id}] Cleaned up ${removed} old trades (kept last ${maxTrades})`);
+    }
+  }
 
   /**
    * Save runtime state to localStorage
@@ -441,6 +855,9 @@ export class TradingBot {
     if (typeof window === 'undefined') return;
 
     try {
+      // Cleanup old trades before saving
+      this.cleanupOldTrades();
+
       // Save positions
       localStorage.setItem(`bot_positions_${this.id}`, JSON.stringify(this.positions));
 
@@ -455,8 +872,32 @@ export class TradingBot {
 
       // Save daily controller
       this.dailyController.save(this.id);
+
+      // Save convergence controller
+      this.convergenceController.save(this.id);
+
+      // Save last reset date
+      localStorage.setItem(`bot_reset_date_${this.id}`, this.lastResetDate);
     } catch (error) {
-      console.error(`[TradingBot ${this.id}] Error saving state:`, error);
+      // Handle QuotaExceededError
+      if (error instanceof DOMException && error.name === 'QuotaExceededError') {
+        console.warn(`[TradingBot ${this.id}] localStorage quota exceeded, attempting cleanup...`);
+
+        // Aggressive cleanup: keep only last 500 trades
+        const oldLength = this.trades.length;
+        this.trades = this.trades.slice(-500);
+        console.log(`[TradingBot ${this.id}] Emergency cleanup: ${oldLength} → ${this.trades.length} trades`);
+
+        // Retry save after cleanup
+        try {
+          localStorage.setItem(`bot_trades_${this.id}`, JSON.stringify(this.trades));
+          console.log(`[TradingBot ${this.id}] Save succeeded after cleanup`);
+        } catch (retryError) {
+          console.error(`[TradingBot ${this.id}] Save failed even after cleanup:`, retryError);
+        }
+      } else {
+        console.error(`[TradingBot ${this.id}] Error saving state:`, error);
+      }
     }
   }
 
@@ -471,13 +912,33 @@ export class TradingBot {
       // Load positions
       const positionsData = localStorage.getItem(`bot_positions_${this.id}`);
       if (positionsData) {
-        this.positions = JSON.parse(positionsData);
+        const loadedPositions = JSON.parse(positionsData) as Position[];
+
+        // Check if migration is needed (v1 -> v2)
+        const needsMigration = loadedPositions.some(
+          pos => !pos._version || pos._version !== 'v2'
+        );
+
+        if (needsMigration && loadedPositions.length > 0) {
+          // Migrate running bot (has open positions from v1)
+          const { positions: migratedPositions, warning } = migrateRunningBot(
+            this.id,
+            loadedPositions
+          );
+          this.positions = migratedPositions;
+          // Warning is already logged by migrateRunningBot()
+        } else {
+          // No migration needed (already v2 or no positions)
+          this.positions = loadedPositions;
+        }
       }
 
       // Load trades
       const tradesData = localStorage.getItem(`bot_trades_${this.id}`);
       if (tradesData) {
-        this.trades = JSON.parse(tradesData);
+        const loadedTrades = JSON.parse(tradesData) as Trade[];
+        // Migrate trades if needed (adds default values for missing fields)
+        this.trades = migrateTrades(loadedTrades);
       }
 
       // Load closed position IDs
@@ -494,6 +955,18 @@ export class TradingBot {
 
       // Load daily controller
       this.dailyController.load(this.id);
+
+      // Load convergence controller
+      this.convergenceController.load(this.id);
+
+      // Load last reset date
+      const resetDateData = localStorage.getItem(`bot_reset_date_${this.id}`);
+      if (resetDateData) {
+        this.lastResetDate = resetDateData;
+      }
+
+      // Load staggered closing manager
+      this.staggeredClosingManager.load(this.id);
 
       console.log(
         `[TradingBot ${this.id}] State loaded: ` +

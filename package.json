@@ -15,7 +15,15 @@
     "test:firefox": "npx playwright test --project=firefox",
     "test:webkit": "npx playwright test --project=webkit",
     "test:report": "npx playwright show-report",
-    "test:install": "npx playwright install --with-deps"
+    "test:install": "npx playwright install --with-deps",
+    "test:unit": "npx tsx tests/unit/convergence/PresetMapper.test.ts && npx tsx tests/unit/convergence/BotValidator.test.ts && npx tsx tests/unit/convergence/ConvergenceController.test.ts && npx tsx tests/unit/DynamicPnLCalculator.test.ts && npx tsx tests/unit/convergence/migration.test.ts && npx tsx tests/unit/TradingBot-convergence.test.ts && npx tsx tests/unit/DailyTargetController.test.ts",
+    "test:unit:convergence": "npx tsx tests/unit/convergence/ConvergenceController.test.ts && npx tsx tests/unit/DynamicPnLCalculator.test.ts && npx tsx tests/unit/convergence/migration.test.ts && npx tsx tests/unit/convergence/PresetMapper.test.ts && npx tsx tests/unit/convergence/BotValidator.test.ts",
+    "test:integration": "npx playwright test tests/integration/",
+    "test:e2e": "npx playwright test tests/specs/e2e/",
+    "test:all": "npm run test:unit && npm run test:integration && npm run test:e2e",
+    "test:day8": "npx tsx tests/unit/convergence/ConvergenceController.test.ts && npx tsx tests/unit/DynamicPnLCalculator.test.ts",
+    "test:day9": "npx tsx tests/unit/convergence/migration.test.ts && npm run test:unit",
+    "test:day10": "npm run test:all"
   },
   "keywords": [],
   "author": "",
@@ -26,6 +34,7 @@
     "@mui/icons-material": "^7.3.7",
     "@mui/material": "^7.3.7",
     "@radix-ui/react-slider": "^1.3.6",
+    "@tanstack/react-virtual": "^3.13.18",
     "@token-icons/react": "^2.13.0",
     "@types/react": "^19.2.7",
     "apexcharts": "^5.3.6",
@@ -55,6 +64,7 @@
     "@playwright/test": "^1.58.1",
     "@types/node": "^24.10.10",
     "@types/ws": "^8.18.1",
+    "tsx": "^4.21.0",
     "ws": "^8.19.0"
   }
 }
