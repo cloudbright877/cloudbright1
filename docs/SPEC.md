@@ -659,8 +659,12 @@ Changes based on architect + auditor review:
 
 ## Known Issues / Future Work
 
-1. **PriceService fallback chain** - postponed to Day 8 (use existing Binance for now)
-2. **Dynamic thresholds (Layer 2)** - will be implemented in Day 4-5 (ConvergenceController)
-3. **Emergency mode** - will be implemented in Day 4-5 (ConvergenceController)
-4. **Multi-timeframe analysis** - not needed, but could be added if volatility adjustment required
-5. **Trend strength (momentum)** - binary decision is sufficient for now, could enhance later
+1. ~~**Wide Mode Deviation Bug**~~ - **FIXED** (2026-02-07, commit `c021b77`)
+   - Was: 23.4% positive bias due to asymmetric distribution
+   - Now: 0.7% deviation with symmetric distribution
+2. **PriceService fallback chain** - postponed to Task #11 (use existing Binance for now)
+3. ~~**Dynamic thresholds (Layer 2)**~~ - **IMPLEMENTED** in Day 4-5 (ConvergenceController)
+4. ~~**Emergency mode**~~ - **IMPLEMENTED** in Day 4-5 (ConvergenceController)
+5. **Performance optimization** - Task #10 (debounce, React.memo, virtualization)
+6. **Multi-timeframe analysis** - not needed, but could be added if volatility adjustment required
+7. **Trend strength (momentum)** - binary decision is sufficient for now, could enhance later

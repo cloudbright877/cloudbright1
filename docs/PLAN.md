@@ -330,6 +330,28 @@ git revert <merge-commit>  # or merge backup branch
 - **Fix:** Added fallback: `if (trend === 'flat') return true;` (allow any side)
 - **Result:** Flat markets no longer block trading ✓
 
+**Bug #6: Wide Mode Positive Bias (Day 10 - 2026-02-07)** ✅ FIXED
+- **Symptom:** Wide mode created +23.4% systematic deviation, actual wins/losses 30%+ larger than predicted
+- **Cause:** Asymmetric distribution in DynamicPnLCalculator lines 122-132
+  ```typescript
+  winMin = base * 0.8
+  winMax = base * (2.0-4.0)  // random multiplier
+  // Average = base * 1.9 (90% too high!)
+  ```
+- **Fix:** Symmetric distribution around base value
+  ```typescript
+  wideVariance = 0.3 * (2.0-4.0)  // ±60% to ±120%
+  winMin = base * (1 - wideVariance)
+  winMax = base * (1 + wideVariance)
+  // Average = base * 1.0 ✓
+  ```
+- **Result:**
+  - Wide mode deviation: 117.2% → 3.5% ✓
+  - Overall deviation: 23.4% → 0.7% ✓
+  - Win/Loss deviation: +1-2% (was +30%+) ✓
+- **Files:** `lib/trading/DynamicPnLCalculator.ts:122-142`
+- **Commit:** `c021b77`
+
 **Final Test Results (tradesPerDay=100):**
 ```
 ✅ Progress:      99.2% (target: 100%)
@@ -424,12 +446,20 @@ Mathematical verification:
 
 ---
 
-### Day 10: Test Debugging & Fixes (8 hours)
+### Day 10: Test Debugging & Fixes ⚠️ PARTIALLY COMPLETED
 
-- Fix failing tests
-- Add missing edge cases discovered during testing
-- Ensure all 65 tests pass
-- Performance check: tests should complete in < 2 minutes
+**Status:** Bug Fix DONE (2026-02-07, ~2 hours), Full Test Suite PENDING
+
+**Completed:**
+- ✅ Fixed Bug #6: Wide mode positive bias (23.4% deviation → 0.7%)
+- ✅ Unit tests: 37/38 passing
+- ✅ Integration test: 98.7% convergence (100 trades)
+- ✅ Committed: `c021b77`
+
+**Pending:**
+- ⏳ Full E2E test suite (Days 8-9 tests not written yet)
+- ⏳ Performance benchmark (< 2 minutes target)
+- ⏳ Edge case coverage expansion
 
 ---
 
