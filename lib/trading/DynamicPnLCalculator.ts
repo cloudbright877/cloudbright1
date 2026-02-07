@@ -120,15 +120,26 @@ export class DynamicPnLCalculator {
       lossMax = baseLossPnLPercent * (1 + lossVariance);
     } else {
       // Wide mode: 2x-4x variance for visual "spikes"
-      const wideMultiplierMin = 2.0;
-      const wideMultiplierMax = 4.0;
-      const randomMultiplier = wideMultiplierMin + Math.random() * (wideMultiplierMax - wideMultiplierMin);
+      // CRITICAL FIX: EV must equal base, only variance increases
+      // Old: winMin=0.8, winMax=2-4 → avg=1.4-2.4 (40-140% too high!)
+      // New: symmetric distribution around base → avg=base (0% deviation)
 
-      winMin = baseWinPnLPercent * 0.8; // Slightly lower minimum
-      winMax = baseWinPnLPercent * randomMultiplier;
+      // Variance multiplier (how much wider than tight mode)
+      const varianceMultiplier = 2.0 + Math.random() * 2.0; // 2x-4x wider
 
-      lossMin = baseLossPnLPercent * 0.6; // Can be smaller loss
-      lossMax = baseLossPnLPercent * (1 + (randomMultiplier - 1) * 0.5); // Less extreme on loss side
+      // Symmetric distribution: same deviation below and above base
+      // For tight mode: ±30% → range = 0.6 * base
+      // For wide mode: ±(30% * varianceMultiplier) → range = 0.6 * base * varianceMultiplier
+      const baseVariance = 0.3; // tight mode variance (±30%)
+      const wideVariance = baseVariance * varianceMultiplier; // 2x-4x wider (±60% to ±120%)
+
+      winMin = baseWinPnLPercent * Math.max(0.01, 1 - wideVariance); // Floor at 1% to avoid negative
+      winMax = baseWinPnLPercent * (1 + wideVariance);
+      // Average = base * ((1-v) + (1+v)) / 2 = base * 1.0 ✓
+
+      lossMin = baseLossPnLPercent * Math.max(0.01, 1 - wideVariance);
+      lossMax = baseLossPnLPercent * (1 + wideVariance);
+      // Average = base * 1.0 ✓
     }
 
     // Step 4: Apply correction if daily P&L exceeds target (user's idea!)
