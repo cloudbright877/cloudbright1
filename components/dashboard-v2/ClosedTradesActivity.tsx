@@ -95,11 +95,6 @@ export function ClosedTradesActivity({ trades }: ClosedTradesActivityProps) {
                     }`}>
                       ({trade.pnl >= 0 ? '+' : ''}{trade.pnlPercent.toFixed(2)}%)
                     </div>
-                    {trade.hadSlippage && trade.slippageAmount !== undefined && (
-                      <div className="text-[10px] text-orange-400 mt-0.5">
-                        Slippage: {trade.slippageAmount.toFixed(3)}%
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>

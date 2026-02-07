@@ -706,6 +706,19 @@ export class TradingBot {
   // ============================================================================
 
   /**
+   * Cleanup old trades to prevent localStorage quota exceeded
+   * Keeps last 1000 trades only
+   */
+  private cleanupOldTrades(): void {
+    const maxTrades = 1000;
+    if (this.trades.length > maxTrades) {
+      const removed = this.trades.length - maxTrades;
+      this.trades = this.trades.slice(-maxTrades);
+      console.log(`[TradingBot ${this.id}] Cleaned up ${removed} old trades (kept last ${maxTrades})`);
+    }
+  }
+
+  /**
    * Save runtime state to localStorage
    * Saves positions, trades, and closed position IDs
    */
@@ -713,6 +726,9 @@ export class TradingBot {
     if (typeof window === 'undefined') return;
 
     try {
+      // Cleanup old trades before saving
+      this.cleanupOldTrades();
+
       // Save positions
       localStorage.setItem(`bot_positions_${this.id}`, JSON.stringify(this.positions));
 
@@ -734,7 +750,25 @@ export class TradingBot {
       // Save last reset date
       localStorage.setItem(`bot_reset_date_${this.id}`, this.lastResetDate);
     } catch (error) {
-      console.error(`[TradingBot ${this.id}] Error saving state:`, error);
+      // Handle QuotaExceededError
+      if (error instanceof DOMException && error.name === 'QuotaExceededError') {
+        console.warn(`[TradingBot ${this.id}] localStorage quota exceeded, attempting cleanup...`);
+
+        // Aggressive cleanup: keep only last 500 trades
+        const oldLength = this.trades.length;
+        this.trades = this.trades.slice(-500);
+        console.log(`[TradingBot ${this.id}] Emergency cleanup: ${oldLength} → ${this.trades.length} trades`);
+
+        // Retry save after cleanup
+        try {
+          localStorage.setItem(`bot_trades_${this.id}`, JSON.stringify(this.trades));
+          console.log(`[TradingBot ${this.id}] Save succeeded after cleanup`);
+        } catch (retryError) {
+          console.error(`[TradingBot ${this.id}] Save failed even after cleanup:`, retryError);
+        }
+      } else {
+        console.error(`[TradingBot ${this.id}] Error saving state:`, error);
+      }
     }
   }
 
