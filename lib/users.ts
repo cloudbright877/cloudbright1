@@ -21,6 +21,13 @@ export interface User {
   referredBy: string | null; // userId of referrer (null for root users)
   referralPath: string; // '/user_1/user_5' (path to this user's parent)
   createdAt: number; // Unix timestamp
+
+  // Social fields
+  displayName: string; // Display name (different from username)
+  avatar: string | null; // Avatar URL or null for default
+  bio: string; // Multi-line bio text
+  verified: boolean; // Admin-set verification flag
+  // NOTE: tier and isWhale are NOT stored - they are CALCULATED from stats
 }
 
 /**
@@ -86,6 +93,11 @@ export async function createUser(data: {
     referredBy: referrer?.id || null,
     referralPath,
     createdAt: Date.now(),
+    // Social defaults
+    displayName: data.username, // Default to username
+    avatar: null,
+    bio: '',
+    verified: false,
   };
 
   await storage.create(USERS_KEY, user);
@@ -216,6 +228,10 @@ export async function getOrCreateDefaultUser(): Promise<User> {
       referredBy: null,
       referralPath: '',
       createdAt: Date.now(),
+      displayName: 'Demo User',
+      avatar: null,
+      bio: 'Default demo user account',
+      verified: false,
     };
     await storage.create(USERS_KEY, user);
   }

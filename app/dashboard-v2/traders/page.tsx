@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import {
   Users,
@@ -17,186 +17,53 @@ import {
   Star,
   Rocket,
   ArrowRight,
-  Bot
+  Bot,
+  UserPlus,
+  UserCheck
 } from 'lucide-react';
 
-interface Trader {
-  username: string;
-  displayName: string;
-  avatar: string | null;
-  tier: string;
-  verified: boolean;
-  stats: {
-    totalProfit: number;
-    monthlyReturn: number;
-    winRate: number;
-    rank: number;
-    followers: number;
-    copiers: number;
-    copiersAUM: number;
-  };
-  activeBots: number;
-  joinedDate: string;
-}
+// Social system imports
+import type { TraderProfile } from '@/lib/social/types';
+import { getSocialTraders, seedSocialData } from '@/lib/social/mock-seed';
+import { getTierGradient, getTierIconName } from '@/lib/social/tier-utils';
+import { toggleFollow, isFollowing } from '@/lib/social/follow-system';
 
-const mockTraders: Trader[] = [
-  {
-    username: 'john_pro',
-    displayName: 'John "The Pro" Davis',
-    avatar: null,
-    tier: 'Diamond',
-    verified: true,
-    stats: {
-      totalProfit: 284750.00,
-      monthlyReturn: 18.4,
-      winRate: 73.2,
-      rank: 47,
-      followers: 12847,
-      copiers: 3421,
-      copiersAUM: 847293.50,
-    },
-    activeBots: 3,
-    joinedDate: '2023-03-15',
-  },
-  {
-    username: 'crypto_queen',
-    displayName: 'Sarah "Crypto Queen" Miller',
-    avatar: null,
-    tier: 'Diamond',
-    verified: true,
-    stats: {
-      totalProfit: 567240.00,
-      monthlyReturn: 24.8,
-      winRate: 81.5,
-      rank: 12,
-      followers: 28493,
-      copiers: 8742,
-      copiersAUM: 2847293.50,
-    },
-    activeBots: 5,
-    joinedDate: '2022-11-20',
-  },
-  {
-    username: 'algo_master',
-    displayName: 'Alex "Algo Master" Chen',
-    avatar: null,
-    tier: 'Platinum',
-    verified: true,
-    stats: {
-      totalProfit: 192847.00,
-      monthlyReturn: 15.2,
-      winRate: 68.9,
-      rank: 89,
-      followers: 8492,
-      copiers: 2156,
-      copiersAUM: 542847.20,
-    },
-    activeBots: 4,
-    joinedDate: '2023-05-10',
-  },
-  {
-    username: 'whale_watcher',
-    displayName: 'Michael "Whale Watcher" Torres',
-    avatar: null,
-    tier: 'Platinum',
-    verified: true,
-    stats: {
-      totalProfit: 158293.00,
-      monthlyReturn: 12.8,
-      winRate: 65.4,
-      rank: 124,
-      followers: 6247,
-      copiers: 1847,
-      copiersAUM: 384729.00,
-    },
-    activeBots: 2,
-    joinedDate: '2023-07-01',
-  },
-  {
-    username: 'defi_ninja',
-    displayName: 'Emma "DeFi Ninja" Rodriguez',
-    avatar: null,
-    tier: 'Gold',
-    verified: false,
-    stats: {
-      totalProfit: 94820.00,
-      monthlyReturn: 9.7,
-      winRate: 61.2,
-      rank: 287,
-      followers: 3492,
-      copiers: 892,
-      copiersAUM: 184729.00,
-    },
-    activeBots: 3,
-    joinedDate: '2023-09-15',
-  },
-  {
-    username: 'bot_hunter',
-    displayName: 'David "Bot Hunter" Kim',
-    avatar: null,
-    tier: 'Gold',
-    verified: false,
-    stats: {
-      totalProfit: 76240.00,
-      monthlyReturn: 8.4,
-      winRate: 58.7,
-      rank: 342,
-      followers: 2847,
-      copiers: 647,
-      copiersAUM: 142847.00,
-    },
-    activeBots: 2,
-    joinedDate: '2023-10-20',
-  },
-  {
-    username: 'smart_trader',
-    displayName: 'Lisa "Smart Trader" Anderson',
-    avatar: null,
-    tier: 'Silver',
-    verified: false,
-    stats: {
-      totalProfit: 48293.00,
-      monthlyReturn: 6.8,
-      winRate: 55.3,
-      rank: 487,
-      followers: 1847,
-      copiers: 342,
-      copiersAUM: 84729.00,
-    },
-    activeBots: 2,
-    joinedDate: '2024-01-05',
-  },
-  {
-    username: 'risk_manager',
-    displayName: 'Tom "Risk Manager" Wilson',
-    avatar: null,
-    tier: 'Silver',
-    verified: false,
-    stats: {
-      totalProfit: 34820.00,
-      monthlyReturn: 5.2,
-      winRate: 52.8,
-      rank: 592,
-      followers: 1247,
-      copiers: 218,
-      copiersAUM: 54729.00,
-    },
-    activeBots: 1,
-    joinedDate: '2024-02-12',
-  },
-];
 
 type SortOption = 'rank' | 'profit' | 'return' | 'copiers' | 'winRate';
 type TierFilter = 'all' | 'diamond' | 'platinum' | 'gold' | 'silver';
 
 export default function TradersPage() {
+  const [traders, setTraders] = useState<TraderProfile[]>([]);
+  const [followStates, setFollowStates] = useState<Record<string, boolean>>({});
   const [sortBy, setSortBy] = useState<SortOption>('rank');
   const [tierFilter, setTierFilter] = useState<TierFilter>('all');
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Initialize data on mount
+  useEffect(() => {
+    seedSocialData();
+    const loadedTraders = getSocialTraders();
+    setTraders(loadedTraders);
+
+    // Load follow states
+    const states: Record<string, boolean> = {};
+    loadedTraders.forEach(trader => {
+      states[trader.userId] = isFollowing(trader.userId);
+    });
+    setFollowStates(states);
+  }, []);
+
+  // Handle follow toggle
+  const handleFollowToggle = (traderId: string, e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent navigation
+    e.stopPropagation();
+    const newState = toggleFollow(traderId);
+    setFollowStates(prev => ({ ...prev, [traderId]: newState }));
+  };
+
   // Filter and sort traders
-  const filteredTraders = mockTraders
+  const filteredTraders = traders
     .filter(trader => {
       // Tier filter
       if (tierFilter !== 'all') {
@@ -235,18 +102,12 @@ export default function TradersPage() {
       }
     });
 
-  const getTierColor = (tier: string) => {
-    if (tier.includes('Diamond')) return 'from-cyan-500 to-blue-500';
-    if (tier.includes('Platinum')) return 'from-purple-500 to-pink-500';
-    if (tier.includes('Gold')) return 'from-yellow-500 to-orange-500';
-    return 'from-gray-500 to-gray-400';
-  };
-
+  // Get tier icon component
   const getTierIcon = (tier: string) => {
-    if (tier.includes('Diamond')) return <Gem className="w-3 h-3" />;
-    if (tier.includes('Platinum')) return <Trophy className="w-3 h-3" />;
-    if (tier.includes('Gold')) return <Award className="w-3 h-3" />;
-    return <Medal className="w-3 h-3" />;
+    const iconName = getTierIconName(tier);
+    const iconMap = { Gem, Trophy, Award, Medal };
+    const IconComponent = iconMap[iconName];
+    return <IconComponent className="w-3 h-3" />;
   };
 
   return (
@@ -427,7 +288,7 @@ export default function TradersPage() {
 
         {/* Results count */}
         <div className="mb-4 text-sm text-dark-400">
-          Showing {filteredTraders.length} of {mockTraders.length} traders
+          Showing {filteredTraders.length} of {traders.length} traders
         </div>
 
         {/* Traders Grid */}
@@ -458,7 +319,7 @@ export default function TradersPage() {
                       {/* Header */}
                       <div className="flex items-start gap-4 mb-4">
                         {/* Avatar */}
-                        <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${getTierColor(trader.tier)} flex items-center justify-center text-white font-bold text-2xl overflow-hidden flex-shrink-0 shadow-md`}>
+                        <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${getTierGradient(trader.tier)} flex items-center justify-center text-white font-bold text-2xl overflow-hidden flex-shrink-0 shadow-md`}>
                         {trader.avatar ? (
                           <Image
                             src={trader.avatar}
@@ -505,7 +366,7 @@ export default function TradersPage() {
                             Active Bots
                           </div>
                           <div className="text-lg font-bold text-primary-400">
-                            {trader.activeBots}
+                            {trader.activeBotIds.length}
                           </div>
                         </div>
                       </div>
@@ -534,7 +395,7 @@ export default function TradersPage() {
                       </div>
                     </div>
 
-                      {/* Social Stats */}
+                      {/* Social Stats & Actions */}
                       <div className="mt-4 pt-4 border-t border-dark-700 flex items-center justify-between text-sm">
                         <div className="flex items-center gap-4">
                           <div className="flex items-center gap-1 text-dark-400">
@@ -546,9 +407,31 @@ export default function TradersPage() {
                             <span>{trader.stats.copiers.toLocaleString()} copiers</span>
                           </div>
                         </div>
-                        <div className="text-primary-400 font-medium group-hover:text-primary-300 flex items-center gap-1">
-                          View Profile
-                          <ArrowRight className="w-4 h-4" />
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={(e) => handleFollowToggle(trader.userId, e)}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
+                              followStates[trader.userId]
+                                ? 'bg-dark-700 text-dark-300 hover:bg-dark-600'
+                                : 'bg-primary-500 text-white hover:bg-primary-600'
+                            }`}
+                          >
+                            {followStates[trader.userId] ? (
+                              <>
+                                <UserCheck className="w-3.5 h-3.5" />
+                                Following
+                              </>
+                            ) : (
+                              <>
+                                <UserPlus className="w-3.5 h-3.5" />
+                                Follow
+                              </>
+                            )}
+                          </button>
+                          <div className="text-primary-400 font-medium group-hover:text-primary-300 flex items-center gap-1">
+                            View
+                            <ArrowRight className="w-4 h-4" />
+                          </div>
                         </div>
                       </div>
                     </div>

@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import {
   Fish,
@@ -16,159 +16,65 @@ import {
   Gem,
   Award,
   Medal,
-  Copy
+  Copy,
+  UserPlus,
+  UserCheck
 } from 'lucide-react';
 
-interface WhaleActivity {
-  id: string;
-  username: string;
-  displayName: string;
-  avatar: string | null;
-  tier: string;
-  verified: boolean;
-  action: 'invested' | 'withdrew' | 'profit';
-  amount: number;
-  botName: string;
-  botSlug: string;
-  timestamp: number;
-  totalInvested: number;
-  totalProfit: number;
-}
+// Social system imports
+import type { WhaleAlert } from '@/lib/social/types';
+import { getFilteredWhaleAlerts, getTopWhales } from '@/lib/social/whale-detector';
+import { getTierGradient, getTierIconName } from '@/lib/social/tier-utils';
+import { toggleFollow, isFollowing } from '@/lib/social/follow-system';
+import { seedSocialData } from '@/lib/social/mock-seed';
 
-const mockWhaleActivities: WhaleActivity[] = [
-  {
-    id: '1',
-    username: 'crypto_whale_47',
-    displayName: 'Anonymous Whale',
-    avatar: null,
-    tier: 'Diamond',
-    verified: true,
-    action: 'invested',
-    amount: 50000,
-    botName: 'ProTrader Elite',
-    botSlug: 'protrader',
-    timestamp: Date.now() - 1200000, // 20 min ago
-    totalInvested: 847293,
-    totalProfit: 284729,
-  },
-  {
-    id: '2',
-    username: 'whale_master',
-    displayName: 'Marcus Zhang',
-    avatar: null,
-    tier: 'Diamond',
-    verified: true,
-    action: 'profit',
-    amount: 12847,
-    botName: 'AlphaBot Pro',
-    botSlug: 'alphabot',
-    timestamp: Date.now() - 2400000, // 40 min ago
-    totalInvested: 524893,
-    totalProfit: 157468,
-  },
-  {
-    id: '3',
-    username: 'mega_investor',
-    displayName: 'Sarah Thompson',
-    avatar: null,
-    tier: 'Diamond',
-    verified: true,
-    action: 'invested',
-    amount: 75000,
-    botName: 'SafeGrowth Bot',
-    botSlug: 'safegrowth',
-    timestamp: Date.now() - 3600000, // 1 hour ago
-    totalInvested: 692847,
-    totalProfit: 184729,
-  },
-  {
-    id: '4',
-    username: 'crypto_king_88',
-    displayName: 'Anonymous Whale',
-    avatar: null,
-    tier: 'Diamond',
-    verified: false,
-    action: 'invested',
-    amount: 38500,
-    botName: 'AlphaBot Pro',
-    botSlug: 'alphabot',
-    timestamp: Date.now() - 5400000, // 1.5 hours ago
-    totalInvested: 384729,
-    totalProfit: 92847,
-  },
-  {
-    id: '5',
-    username: 'defi_whale',
-    displayName: 'Alex Rodriguez',
-    avatar: null,
-    tier: 'Platinum',
-    verified: true,
-    action: 'profit',
-    amount: 8492,
-    botName: 'ProTrader Elite',
-    botSlug: 'protrader',
-    timestamp: Date.now() - 7200000, // 2 hours ago
-    totalInvested: 284729,
-    totalProfit: 67293,
-  },
-  {
-    id: '6',
-    username: 'smart_whale',
-    displayName: 'Emily Chen',
-    avatar: null,
-    tier: 'Diamond',
-    verified: true,
-    action: 'withdrew',
-    amount: 42000,
-    botName: 'TrendFollower',
-    botSlug: 'trendfollower',
-    timestamp: Date.now() - 9000000, // 2.5 hours ago
-    totalInvested: 542847,
-    totalProfit: 142847,
-  },
-  {
-    id: '7',
-    username: 'whale_watcher',
-    displayName: 'Michael Torres',
-    avatar: null,
-    tier: 'Platinum',
-    verified: true,
-    action: 'invested',
-    amount: 62500,
-    botName: 'AlphaBot Pro',
-    botSlug: 'alphabot',
-    timestamp: Date.now() - 10800000, // 3 hours ago
-    totalInvested: 384729,
-    totalProfit: 94729,
-  },
-  {
-    id: '8',
-    username: 'anonymous_shark',
-    displayName: 'Anonymous Whale',
-    avatar: null,
-    tier: 'Diamond',
-    verified: false,
-    action: 'profit',
-    amount: 18247,
-    botName: 'SafeGrowth Bot',
-    botSlug: 'safegrowth',
-    timestamp: Date.now() - 12600000, // 3.5 hours ago
-    totalInvested: 642847,
-    totalProfit: 184729,
-  },
-];
 
 type FilterType = 'all' | 'invested' | 'profit' | 'withdrew';
 
 export default function WhalesPage() {
+  const [activities, setActivities] = useState<WhaleAlert[]>([]);
+  const [topWhales, setTopWhales] = useState<WhaleAlert[]>([]);
+  const [followStates, setFollowStates] = useState<Record<string, boolean>>({});
   const [filter, setFilter] = useState<FilterType>('all');
   const [minAmount, setMinAmount] = useState(10000);
 
-  const filteredActivities = mockWhaleActivities.filter(activity => {
-    if (filter !== 'all' && activity.action !== filter) return false;
-    if (activity.amount < minAmount) return false;
-    return true;
-  });
+  // Initialize data on mount
+  useEffect(() => {
+    seedSocialData();
+    loadActivities();
+    loadTopWhales();
+  }, []);
+
+  // Reload when filters change
+  useEffect(() => {
+    loadActivities();
+  }, [filter, minAmount]);
+
+  const loadActivities = () => {
+    const loaded = getFilteredWhaleAlerts(filter, minAmount);
+    setActivities(loaded);
+
+    // Load follow states
+    const states: Record<string, boolean> = {};
+    loaded.forEach(activity => {
+      states[activity.traderId] = isFollowing(activity.traderId);
+    });
+    setFollowStates(states);
+  };
+
+  const loadTopWhales = () => {
+    const loaded = getTopWhales(5);
+    setTopWhales(loaded);
+  };
+
+  const handleFollowToggle = (traderId: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const newState = toggleFollow(traderId);
+    setFollowStates(prev => ({ ...prev, [traderId]: newState }));
+  };
+
+  const filteredActivities = activities;
 
   const timeAgo = (timestamp: number) => {
     const seconds = Math.floor((Date.now() - timestamp) / 1000);
@@ -205,24 +111,12 @@ export default function WhalesPage() {
     }
   };
 
-  const getTierColor = (tier: string) => {
-    if (tier.includes('Diamond')) return 'from-cyan-500 to-blue-500';
-    if (tier.includes('Platinum')) return 'from-purple-500 to-pink-500';
-    if (tier.includes('Gold')) return 'from-yellow-500 to-orange-500';
-    return 'from-gray-500 to-gray-400';
-  };
-
   const getTierIcon = (tier: string) => {
-    if (tier.includes('Diamond')) return <Gem className="w-3 h-3" />;
-    if (tier.includes('Platinum')) return <Trophy className="w-3 h-3" />;
-    if (tier.includes('Gold')) return <Award className="w-3 h-3" />;
-    return <Medal className="w-3 h-3" />;
+    const iconName = getTierIconName(tier);
+    const iconMap = { Gem, Trophy, Award, Medal };
+    const IconComponent = iconMap[iconName];
+    return <IconComponent className="w-3 h-3" />;
   };
-
-  // Get unique whales
-  const uniqueWhales = Array.from(
-    new Map(mockWhaleActivities.map(activity => [activity.username, activity])).values()
-  ).sort((a, b) => b.totalInvested - a.totalInvested);
 
   return (
     <div className="min-h-screen p-4 lg:p-8">
@@ -348,20 +242,20 @@ export default function WhalesPage() {
                     <div className="flex items-start gap-4">
                       {/* Avatar */}
                       <Link
-                        href={`/dashboard-v2/traders/${activity.username}`}
+                        href={`/dashboard-v2/traders/${activity.traderUsername}`}
                         className="group"
                       >
-                        <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${getTierColor(activity.tier)} flex items-center justify-center text-white font-bold text-lg overflow-hidden flex-shrink-0 group-hover:scale-110 transition-transform`}>
-                          {activity.avatar ? (
+                        <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${getTierGradient(activity.traderTier)} flex items-center justify-center text-white font-bold text-lg overflow-hidden flex-shrink-0 group-hover:scale-110 transition-transform`}>
+                          {activity.traderAvatar ? (
                             <Image
-                              src={activity.avatar}
-                              alt={activity.username}
+                              src={activity.traderAvatar}
+                              alt={activity.traderUsername}
                               width={48}
                               height={48}
                               className="w-full h-full object-cover"
                             />
                           ) : (
-                            <span>{activity.username[0].toUpperCase()}</span>
+                            <span>{activity.traderUsername[0].toUpperCase()}</span>
                           )}
                         </div>
                       </Link>
@@ -372,17 +266,17 @@ export default function WhalesPage() {
                           <div>
                             <div className="flex items-center gap-2 mb-1">
                               <Link
-                                href={`/dashboard-v2/traders/${activity.username}`}
+                                href={`/dashboard-v2/traders/${activity.traderUsername}`}
                                 className="font-semibold text-white hover:text-primary-400 transition-colors"
                               >
-                                {activity.displayName}
+                                {activity.traderDisplayName}
                               </Link>
-                              {activity.verified && (
+                              {activity.traderVerified && (
                                 <Shield className="w-4 h-4 text-accent-400" />
                               )}
                               <span className="text-xs text-dark-400 flex items-center gap-1">
-                                {getTierIcon(activity.tier)}
-                                {activity.tier}
+                                {getTierIcon(activity.traderTier)}
+                                {activity.traderTier}
                               </span>
                             </div>
                             <div className="text-sm text-dark-300">
@@ -421,13 +315,33 @@ export default function WhalesPage() {
                               +${activity.totalProfit.toLocaleString()}
                             </div>
                           </div>
-                          <div className="ml-auto">
+                          <div className="ml-auto flex items-center gap-2">
+                            <button
+                              onClick={(e) => handleFollowToggle(activity.traderId, e)}
+                              className={`px-3 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 ${
+                                followStates[activity.traderId]
+                                  ? 'bg-dark-700 text-dark-300 hover:bg-dark-600'
+                                  : 'bg-dark-900/50 border border-primary-500/30 text-primary-400 hover:bg-primary-500/10'
+                              }`}
+                            >
+                              {followStates[activity.traderId] ? (
+                                <>
+                                  <UserCheck className="w-4 h-4" />
+                                  Following
+                                </>
+                              ) : (
+                                <>
+                                  <UserPlus className="w-4 h-4" />
+                                  Follow
+                                </>
+                              )}
+                            </button>
                             <Link
-                              href={`/dashboard-v2/traders/${activity.username}`}
+                              href={`/dashboard-v2/traders/${activity.traderUsername}`}
                               className="px-4 py-2 bg-gradient-to-r from-primary-500 to-accent-500 rounded-lg text-sm font-semibold text-white hover:shadow-lg hover:shadow-primary-500/50 transition-all flex items-center gap-2"
                             >
                               <Copy className="w-4 h-4" />
-                              Copy Strategy
+                              Copy
                             </Link>
                           </div>
                         </div>
@@ -467,40 +381,40 @@ export default function WhalesPage() {
                 Top Whales
               </h2>
               <div className="space-y-4">
-                {uniqueWhales.slice(0, 5).map((whale, index) => (
+                {topWhales.map((whale, index) => (
                   <motion.div
-                    key={whale.username}
+                    key={whale.traderId}
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.3 + index * 0.05 }}
                   >
                     <Link
-                      href={`/dashboard-v2/traders/${whale.username}`}
+                      href={`/dashboard-v2/traders/${whale.traderUsername}`}
                       className="block group"
                     >
                       <div className="flex items-center gap-3 p-3 bg-dark-900/50 rounded-xl hover:bg-dark-900 transition-all">
                         <div className="text-lg font-bold text-dark-500 w-6">
                           #{index + 1}
                         </div>
-                        <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${getTierColor(whale.tier)} flex items-center justify-center text-white font-bold overflow-hidden flex-shrink-0`}>
-                          {whale.avatar ? (
+                        <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${getTierGradient(whale.traderTier)} flex items-center justify-center text-white font-bold overflow-hidden flex-shrink-0`}>
+                          {whale.traderAvatar ? (
                             <Image
-                              src={whale.avatar}
-                              alt={whale.username}
+                              src={whale.traderAvatar}
+                              alt={whale.traderUsername}
                               width={40}
                               height={40}
                               className="w-full h-full object-cover"
                             />
                           ) : (
-                            <span>{whale.username[0].toUpperCase()}</span>
+                            <span>{whale.traderUsername[0].toUpperCase()}</span>
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1 mb-0.5">
                             <span className="text-sm font-semibold text-white truncate group-hover:text-primary-400 transition-colors">
-                              {whale.displayName}
+                              {whale.traderDisplayName}
                             </span>
-                            {whale.verified && <Shield className="w-3 h-3 text-accent-400" />}
+                            {whale.traderVerified && <Shield className="w-3 h-3 text-accent-400" />}
                           </div>
                           <div className="text-xs text-dark-400">
                             ${whale.totalInvested.toLocaleString()} invested

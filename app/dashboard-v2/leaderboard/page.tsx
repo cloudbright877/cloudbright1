@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import {
   Trophy,
@@ -15,150 +15,46 @@ import {
   Star,
   Shield,
   Gem,
-  Award
+  Award,
+  Search
 } from 'lucide-react';
 
-interface LeaderboardEntry {
-  rank: number;
-  previousRank: number | null;
-  username: string;
-  displayName: string;
-  avatar: string | null;
-  tier: string;
-  verified: boolean;
-  stats: {
-    profit: number;
-    return: number;
-    winRate: number;
-    trades: number;
-    copiers: number;
-  };
-  isCurrentUser?: boolean;
-}
+// Social system imports
+import type { LeaderboardEntry, LeaderboardCategory, LeaderboardTimeFrame } from '@/lib/social/types';
+import { calculateLeaderboard, getRankChange } from '@/lib/social/leaderboard';
+import { getTierGradient, getTierIconName } from '@/lib/social/tier-utils';
+import { getSocialTraders, seedSocialData } from '@/lib/social/mock-seed';
 
-const mockLeaderboard: LeaderboardEntry[] = [
-  {
-    rank: 1,
-    previousRank: 2,
-    username: 'crypto_queen',
-    displayName: 'Sarah Miller',
-    avatar: null,
-    tier: 'Diamond',
-    verified: true,
-    stats: {
-      profit: 567240.00,
-      return: 124.8,
-      winRate: 81.5,
-      trades: 1847,
-      copiers: 8742,
-    },
-  },
-  {
-    rank: 2,
-    previousRank: 1,
-    username: 'whale_master',
-    displayName: 'Marcus Zhang',
-    avatar: null,
-    tier: 'Diamond',
-    verified: true,
-    stats: {
-      profit: 524893.00,
-      return: 118.4,
-      winRate: 79.3,
-      trades: 1624,
-      copiers: 7293,
-    },
-  },
-  {
-    rank: 3,
-    previousRank: 3,
-    username: 'algo_king',
-    displayName: 'Alexander Petrov',
-    avatar: null,
-    tier: 'Diamond',
-    verified: true,
-    stats: {
-      profit: 492847.00,
-      return: 112.7,
-      winRate: 77.8,
-      trades: 1539,
-      copiers: 6847,
-    },
-  },
-  {
-    rank: 4,
-    previousRank: 6,
-    username: 'defi_master',
-    displayName: 'Emily Chen',
-    avatar: null,
-    tier: 'Diamond',
-    verified: true,
-    stats: {
-      profit: 428472.00,
-      return: 98.4,
-      winRate: 75.2,
-      trades: 1342,
-      copiers: 5923,
-    },
-  },
-  {
-    rank: 5,
-    previousRank: 4,
-    username: 'smart_trader',
-    displayName: 'David Rodriguez',
-    avatar: null,
-    tier: 'Diamond',
-    verified: true,
-    stats: {
-      profit: 384729.00,
-      return: 89.7,
-      winRate: 73.9,
-      trades: 1247,
-      copiers: 5284,
-    },
-  },
-  // Add more entries...
-  {
-    rank: 47,
-    previousRank: 52,
-    username: 'john_pro',
-    displayName: 'John Davis',
-    avatar: null,
-    tier: 'Platinum',
-    verified: true,
-    stats: {
-      profit: 284750.00,
-      return: 18.4,
-      winRate: 73.2,
-      trades: 842,
-      copiers: 3421,
-    },
-    isCurrentUser: true,
-  },
-];
-
-type TimeFrame = 'weekly' | 'monthly' | 'all-time';
 
 export default function LeaderboardPage() {
-  const [timeFrame, setTimeFrame] = useState<TimeFrame>('monthly');
-  const [category, setCategory] = useState<'profit' | 'return' | 'winRate'>('profit');
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [timeFrame, setTimeFrame] = useState<LeaderboardTimeFrame>('monthly');
+  const [category, setCategory] = useState<LeaderboardCategory>('profit');
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const currentUserEntry = mockLeaderboard.find(entry => entry.isCurrentUser);
+  // Initialize data and recalculate when filters change
+  useEffect(() => {
+    seedSocialData();
+    loadLeaderboard();
+  }, [timeFrame, category]);
 
-  const getRankChange = (rank: number, previousRank: number | null) => {
-    if (previousRank === null) return { text: 'NEW', color: 'text-accent-400' };
-    const change = previousRank - rank;
-    if (change > 0) return { text: `+${change}`, color: 'text-green-400' };
-    if (change < 0) return { text: `${change}`, color: 'text-red-400' };
-    return { text: '—', color: 'text-dark-500' };
+  const loadLeaderboard = () => {
+    const traders = getSocialTraders();
+    const calculated = calculateLeaderboard(traders, category, timeFrame, 'user_default');
+    setLeaderboard(calculated);
   };
 
-  const getTierColor = (tier: string) => {
-    if (tier.includes('Diamond')) return 'from-cyan-500 to-blue-500';
-    if (tier.includes('Platinum')) return 'from-purple-500 to-pink-500';
-    if (tier.includes('Gold')) return 'from-yellow-500 to-orange-500';
-    return 'from-gray-500 to-gray-400';
-  };
+  // Filter by search query
+  const filteredLeaderboard = leaderboard.filter(entry => {
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
+    return (
+      entry.username.toLowerCase().includes(query) ||
+      entry.displayName.toLowerCase().includes(query)
+    );
+  });
+
+  const currentUserEntry = filteredLeaderboard.find(entry => entry.isCurrentUser);
 
   const getRankBadge = (rank: number) => {
     if (rank === 1) return <div className="text-yellow-400 font-bold flex items-center justify-center"><Medal className="w-12 h-12" /></div>;
@@ -168,10 +64,10 @@ export default function LeaderboardPage() {
   };
 
   const getTierIcon = (tier: string) => {
-    if (tier.includes('Diamond')) return <Gem className="w-3 h-3" />;
-    if (tier.includes('Platinum')) return <Trophy className="w-3 h-3" />;
-    if (tier.includes('Gold')) return <Award className="w-3 h-3" />;
-    return <Medal className="w-3 h-3" />;
+    const iconName = getTierIconName(tier);
+    const iconMap = { Gem, Trophy, Award, Medal };
+    const IconComponent = iconMap[iconName];
+    return <IconComponent className="w-3 h-3" />;
   };
 
   return (
@@ -336,6 +232,23 @@ export default function LeaderboardPage() {
           </div>
         </motion.div>
 
+        {/* Search */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.18 }}
+          className="mb-8 relative"
+        >
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-500" />
+          <input
+            type="text"
+            placeholder="Search traders by name or username..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-12 pr-4 py-3 bg-dark-800 border border-dark-700 rounded-xl text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none transition-colors"
+          />
+        </motion.div>
+
         {/* Top 3 Podium */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -343,7 +256,7 @@ export default function LeaderboardPage() {
           transition={{ delay: 0.2 }}
           className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
         >
-          {mockLeaderboard.slice(0, 3).map((entry, index) => (
+          {filteredLeaderboard.slice(0, 3).map((entry, index) => (
             <motion.div
               key={entry.username}
               initial={{ opacity: 0, scale: 0.9 }}
@@ -374,7 +287,7 @@ export default function LeaderboardPage() {
 
                   {/* Avatar */}
                   <div className="flex justify-center mb-4">
-                    <div className={`w-20 h-20 rounded-xl bg-gradient-to-br ${getTierColor(entry.tier)} flex items-center justify-center text-white font-bold text-3xl overflow-hidden`}>
+                    <div className={`w-20 h-20 rounded-xl bg-gradient-to-br ${getTierGradient(entry.tier)} flex items-center justify-center text-white font-bold text-3xl overflow-hidden`}>
                       {entry.avatar ? (
                         <Image
                           src={entry.avatar}
@@ -455,7 +368,7 @@ export default function LeaderboardPage() {
                 </tr>
               </thead>
               <tbody>
-                {mockLeaderboard.slice(3).map((entry, index) => (
+                {filteredLeaderboard.slice(3).map((entry, index) => (
                   <motion.tr
                     key={entry.username}
                     initial={{ opacity: 0, x: -20 }}
@@ -475,7 +388,7 @@ export default function LeaderboardPage() {
                         href={`/dashboard-v2/traders/${entry.username}`}
                         className="flex items-center gap-3 group"
                       >
-                        <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${getTierColor(entry.tier)} flex items-center justify-center text-white font-bold overflow-hidden`}>
+                        <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${getTierGradient(entry.tier)} flex items-center justify-center text-white font-bold overflow-hidden`}>
                           {entry.avatar ? (
                             <Image
                               src={entry.avatar}

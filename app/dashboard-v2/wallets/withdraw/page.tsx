@@ -1,18 +1,20 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import GlassCard from '@/components/ui/GlassCard';
-
-interface Wallet {
-  symbol: string;
-  name: string;
-  balance: number;
-  icon: string;
-  gradient: string;
-  networks: Network[];
-}
+import Image from 'next/image';
+import {
+  ChevronLeft,
+  AlertTriangle,
+  Shield,
+  CheckCircle,
+  Clock,
+  Info,
+} from 'lucide-react';
+import Stepper from '@/components/ui/Stepper';
+import { useToast } from '@/context/ToastContext';
+import { getBalance } from '@/lib/balances';
 
 interface Network {
   id: string;
@@ -21,186 +23,134 @@ interface Network {
   minAmount: number;
 }
 
-interface SavedAddress {
-  id: number;
-  address: string;
-  label: string;
-  network: string;
-  lastUsed: number;
-}
-
-const wallets: Wallet[] = [
-  {
-    symbol: 'USDT',
-    name: 'Tether',
-    balance: 15847.32,
-    icon: '₮',
-    gradient: 'from-green-500 to-emerald-500',
-    networks: [
-      { id: 'erc20', name: 'Ethereum (ERC20)', fee: '2 USDT', minAmount: 10 },
-      { id: 'trc20', name: 'Tron (TRC20)', fee: '0.5 USDT', minAmount: 5 },
-      { id: 'bep20', name: 'BSC (BEP20)', fee: '0.3 USDT', minAmount: 5 },
-    ],
-  },
-  {
-    symbol: 'BTC',
-    name: 'Bitcoin',
-    balance: 0.05432,
-    icon: '₿',
-    gradient: 'from-orange-500 to-yellow-500',
-    networks: [
-      { id: 'btc', name: 'Bitcoin Network', fee: '0.0001 BTC', minAmount: 0.001 },
-    ],
-  },
-  {
-    symbol: 'ETH',
-    name: 'Ethereum',
-    balance: 2.543,
-    icon: 'Ξ',
-    gradient: 'from-blue-500 to-cyan-500',
-    networks: [
-      { id: 'erc20', name: 'Ethereum (ERC20)', fee: '0.002 ETH', minAmount: 0.01 },
-    ],
-  },
-  {
-    symbol: 'BNB',
-    name: 'Binance Coin',
-    balance: 12.45,
-    icon: 'B',
-    gradient: 'from-yellow-500 to-amber-500',
-    networks: [
-      { id: 'bep20', name: 'BSC (BEP20)', fee: '0.0005 BNB', minAmount: 0.01 },
-    ],
-  },
-  {
-    symbol: 'USDC',
-    name: 'USD Coin',
-    balance: 5000.0,
-    icon: '$',
-    gradient: 'from-blue-600 to-blue-400',
-    networks: [
-      { id: 'erc20', name: 'Ethereum (ERC20)', fee: '2 USDC', minAmount: 10 },
-      { id: 'polygon', name: 'Polygon', fee: '0.01 USDC', minAmount: 5 },
-    ],
-  },
-  {
-    symbol: 'SOL',
-    name: 'Solana',
-    balance: 45.67,
-    icon: '◎',
-    gradient: 'from-purple-500 to-pink-500',
-    networks: [
-      { id: 'solana', name: 'Solana Network', fee: '0.00001 SOL', minAmount: 0.1 },
-    ],
-  },
-  {
-    symbol: 'TRX',
-    name: 'Tron',
-    balance: 1234.56,
-    icon: 'T',
-    gradient: 'from-red-500 to-orange-500',
-    networks: [
-      { id: 'trc20', name: 'Tron Network', fee: '1 TRX', minAmount: 10 },
-    ],
-  },
+const NETWORKS: Network[] = [
+  { id: 'erc20', name: 'Ethereum (ERC20)', fee: '2 USDT', minAmount: 10 },
+  { id: 'trc20', name: 'Tron (TRC20)', fee: '0.5 USDT', minAmount: 5 },
+  { id: 'bep20', name: 'BSC (BEP20)', fee: '0.3 USDT', minAmount: 5 },
 ];
 
-const savedAddresses: SavedAddress[] = [
-  {
-    id: 1,
-    address: 'TRX7NqM7SXfBZQ3KvN3Y9xPh8zC4jR5wD2',
-    label: 'My Binance Wallet',
-    network: 'TRC20',
-    lastUsed: Date.now() - 5 * 24 * 60 * 60 * 1000,
-  },
-  {
-    id: 2,
-    address: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
-    label: 'Hardware Wallet',
-    network: 'ERC20',
-    lastUsed: Date.now() - 15 * 24 * 60 * 60 * 1000,
-  },
-  {
-    id: 3,
-    address: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
-    label: 'Cold Storage',
-    network: 'BTC',
-    lastUsed: Date.now() - 30 * 24 * 60 * 60 * 1000,
-  },
+const STEPS = [
+  { label: 'Details', description: 'Amount & address' },
+  { label: 'Security', description: 'Verify identity' },
+  { label: 'Confirm', description: 'Review & submit' },
 ];
 
 export default function WithdrawPage() {
   const [step, setStep] = useState(1);
-  const [selectedWallet, setSelectedWallet] = useState<Wallet | null>(null);
-  const [selectedNetwork, setSelectedNetwork] = useState<Network | null>(null);
+  const [selectedNetwork, setSelectedNetwork] = useState<Network>(NETWORKS[1]); // Default to TRC20
   const [amount, setAmount] = useState('');
   const [withdrawAddress, setWithdrawAddress] = useState('');
-  const [showSavedAddresses, setShowSavedAddresses] = useState(false);
+  const [pinCode, setPinCode] = useState(['', '', '', '']);
+  const [twoFACode, setTwoFACode] = useState(['', '', '', '', '', '']);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [pinCode, setPinCode] = useState('');
-  const [twoFACode, setTwoFACode] = useState('');
+  const [availableBalance, setAvailableBalance] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const toast = useToast();
 
   const userHasPIN = true;
   const userHas2FA = false;
 
-  const handleWalletSelect = (wallet: Wallet) => {
-    setSelectedWallet(wallet);
-    setSelectedNetwork(wallet.networks[0]);
-    setAmount('');
-    setWithdrawAddress('');
-  };
+  useEffect(() => {
+    async function loadBalance() {
+      try {
+        const userId = localStorage.getItem('currentUserId');
+        if (!userId) {
+          setIsLoading(false);
+          return;
+        }
+
+        const balance = await getBalance(userId);
+        setAvailableBalance(balance.available);
+        setIsLoading(false);
+      } catch (error) {
+        console.error('[Withdraw] Error loading balance:', error);
+        setIsLoading(false);
+      }
+    }
+
+    loadBalance();
+  }, []);
 
   const handleMaxAmount = () => {
-    if (selectedWallet && selectedNetwork) {
-      const maxAmount = selectedWallet.balance - parseFloat(selectedNetwork.fee.split(' ')[0]);
-      setAmount(maxAmount > 0 ? maxAmount.toString() : '0');
-    }
+    const feeNum = parseFloat(selectedNetwork.fee.split(' ')[0]);
+    const maxAmount = Math.max(0, availableBalance - feeNum);
+    setAmount(maxAmount.toString());
   };
 
-  const handleSelectSavedAddress = (address: SavedAddress) => {
-    setWithdrawAddress(address.address);
-    setShowSavedAddresses(false);
-  };
-
-  const handleContinue = () => {
-    // Validation
-    if (!selectedWallet || !selectedNetwork || !amount || !withdrawAddress) {
-      alert('Please fill all fields');
-      return;
-    }
-
+  const handleContinueToSecurity = () => {
     const amountNum = parseFloat(amount);
     if (isNaN(amountNum) || amountNum < selectedNetwork.minAmount) {
-      alert(`Minimum withdrawal: ${selectedNetwork.minAmount} ${selectedWallet.symbol}`);
+      toast.error('Invalid amount', `Minimum withdrawal: ${selectedNetwork.minAmount} USDT`);
       return;
     }
 
-    if (amountNum > selectedWallet.balance) {
-      alert('Insufficient balance');
+    if (amountNum > availableBalance) {
+      toast.error('Insufficient balance', 'You do not have enough available balance');
+      return;
+    }
+
+    if (!withdrawAddress) {
+      toast.error('Address required', 'Please enter a withdrawal address');
       return;
     }
 
     setStep(2);
   };
 
+  const handleContinueToConfirm = () => {
+    if (userHasPIN && pinCode.some((digit) => digit === '')) {
+      toast.error('PIN required', 'Please enter your 4-digit PIN code');
+      return;
+    }
+
+    if (userHas2FA && twoFACode.some((digit) => digit === '')) {
+      toast.error('2FA required', 'Please enter your 6-digit 2FA code');
+      return;
+    }
+
+    setStep(3);
+  };
+
   const handleSubmitWithdrawal = () => {
-    // Validation for security
-    if (userHasPIN && pinCode.length !== 4) {
-      alert('Please enter 4-digit PIN code');
-      return;
-    }
-
-    if (userHas2FA && twoFACode.length !== 6) {
-      alert('Please enter 6-digit 2FA code');
-      return;
-    }
-
     setShowConfirmModal(true);
   };
 
-  const handleConfirmWithdrawal = async () => {
-    alert('Withdrawal request submitted! Processing time: up to 24 hours');
+  const handleConfirmWithdrawal = () => {
+    toast.success(
+      'Withdrawal submitted!',
+      'Your withdrawal request is being processed. Processing time: up to 24 hours'
+    );
     setShowConfirmModal(false);
+    setTimeout(() => {
+      window.location.href = '/dashboard-v2/wallets';
+    }, 2000);
+  };
+
+  const handlePinInput = (index: number, value: string) => {
+    if (!/^\d*$/.test(value)) return;
+    const newPin = [...pinCode];
+    newPin[index] = value.slice(-1);
+    setPinCode(newPin);
+
+    // Auto-focus next input
+    if (value && index < 3) {
+      const nextInput = document.getElementById(`pin-${index + 1}`);
+      nextInput?.focus();
+    }
+  };
+
+  const handle2FAInput = (index: number, value: string) => {
+    if (!/^\d*$/.test(value)) return;
+    const newCode = [...twoFACode];
+    newCode[index] = value.slice(-1);
+    setTwoFACode(newCode);
+
+    // Auto-focus next input
+    if (value && index < 5) {
+      const nextInput = document.getElementById(`2fa-${index + 1}`);
+      nextInput?.focus();
+    }
   };
 
   const formatNumber = (num: number, decimals = 2) => {
@@ -211,137 +161,115 @@ export default function WithdrawPage() {
   };
 
   const calculateTotal = () => {
-    if (!selectedNetwork || !amount) return 0;
+    if (!amount) return 0;
     const amountNum = parseFloat(amount);
     const feeNum = parseFloat(selectedNetwork.fee.split(' ')[0]);
     return Math.max(0, amountNum - feeNum);
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-dark-950 text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-dark-300">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Header */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-        <div className="flex items-center gap-4 mb-4">
+    <div className="min-h-screen bg-dark-950 text-white">
+      <div className="max-w-[1400px] mx-auto p-4 lg:p-6">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8"
+        >
           <Link
             href="/dashboard-v2/wallets"
-            className="p-2 hover:bg-dark-800 rounded-lg transition-colors text-dark-400 hover:text-white"
+            className="inline-flex items-center gap-2 text-dark-400 hover:text-white transition-colors mb-4"
           >
-            ← Back
+            <ChevronLeft className="w-5 h-5" />
+            Back to Wallets
           </Link>
-        </div>
-        <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">Withdraw Funds</h1>
-        <p className="text-dark-300">Transfer your crypto to an external wallet</p>
-      </motion.div>
+          <h1 className="text-3xl lg:text-4xl font-bold text-white mb-1">Withdraw Funds</h1>
+          <p className="text-dark-400">Transfer your crypto to an external wallet</p>
+        </motion.div>
 
-      {/* Progress Steps */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="mb-8"
-      >
-        <div className="flex items-center justify-center gap-4">
-          {[1, 2].map((s) => (
-            <div key={s} className="flex items-center gap-4">
-              <div
-                className={`
-                  flex items-center gap-3 px-6 py-2 rounded-xl border-2
-                  ${
-                    s === step
-                      ? 'bg-gradient-to-r from-primary-500 to-accent-500 border-primary-500 text-white'
-                      : s < step
-                      ? 'bg-dark-800 border-green-500/50 text-green-400'
-                      : 'bg-dark-900/50 border-dark-700 text-dark-400'
-                  }
-                `}
-              >
-                <div className="text-xl font-bold">{s}</div>
-                <div className="text-sm font-medium">{s === 1 ? 'Details' : 'Confirm'}</div>
-              </div>
-              {s < 2 && <div className="text-dark-600">→</div>}
-            </div>
-          ))}
-        </div>
-      </motion.div>
-
-      {/* Step Content */}
-      <AnimatePresence mode="wait">
+        {/* Stepper */}
         <motion.div
-          key={step}
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-          transition={{ duration: 0.3 }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="mb-8"
         >
-          {/* Step 1: Withdrawal Details */}
-          {step === 1 && (
-            <GlassCard>
-              <div className="p-6 space-y-6">
-                {/* Select Currency */}
-                <div>
-                  <label className="block text-sm font-medium text-dark-300 mb-3">Select Currency</label>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                    {wallets.map((wallet) => (
-                      <button
-                        key={wallet.symbol}
-                        onClick={() => handleWalletSelect(wallet)}
-                        className={`p-4 rounded-xl border-2 transition-all ${
-                          selectedWallet?.symbol === wallet.symbol
-                            ? 'bg-primary-500/10 border-primary-500'
-                            : 'bg-dark-800/50 border-dark-700 hover:border-primary-500/50'
-                        }`}
-                      >
-                        <div
-                          className={`w-12 h-12 mx-auto mb-2 bg-gradient-to-br ${wallet.gradient} rounded-xl flex items-center justify-center text-white text-xl font-bold`}
-                        >
-                          {wallet.icon}
-                        </div>
-                        <div className="font-bold text-white text-sm">{wallet.symbol}</div>
-                        <div className="text-xs text-dark-400 mt-1">{formatNumber(wallet.balance, 2)}</div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
+          <Stepper steps={STEPS} currentStep={step} />
+        </motion.div>
 
-                {selectedWallet && (
-                  <>
-                    {/* Select Network */}
-                    {selectedWallet.networks.length > 1 && (
-                      <div>
-                        <label className="block text-sm font-medium text-dark-300 mb-3">Select Network</label>
-                        <div className="space-y-2">
-                          {selectedWallet.networks.map((network) => (
-                            <button
-                              key={network.id}
-                              onClick={() => setSelectedNetwork(network)}
-                              className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
-                                selectedNetwork?.id === network.id
+        {/* Main Content - Split Layout */}
+        <div className="grid lg:grid-cols-12 gap-6">
+          {/* Main Form Area - col-span-7 */}
+          <div className="lg:col-span-7">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={step}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                {/* Step 1: Withdrawal Details */}
+                {step === 1 && (
+                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6 space-y-6">
+                    <h2 className="text-2xl font-bold text-white">Withdrawal Details</h2>
+
+                    {/* Network Selection */}
+                    <div>
+                      <label className="block text-sm font-medium text-dark-300 mb-3">
+                        Select Network
+                      </label>
+                      <div className="space-y-2">
+                        {NETWORKS.map((network) => (
+                          <button
+                            key={network.id}
+                            onClick={() => setSelectedNetwork(network)}
+                            className={`
+                              w-full p-4 rounded-xl border-2 text-left transition-all
+                              ${
+                                selectedNetwork.id === network.id
                                   ? 'bg-primary-500/10 border-primary-500'
                                   : 'bg-dark-800/50 border-dark-700 hover:border-primary-500/50'
-                              }`}
-                            >
-                              <div className="flex items-center justify-between">
-                                <div>
-                                  <div className="font-bold text-white">{network.name}</div>
-                                  <div className="text-sm text-dark-400">Fee: {network.fee}</div>
-                                </div>
-                                <div
-                                  className={`w-5 h-5 rounded-full border-2 ${
-                                    selectedNetwork?.id === network.id
+                              }
+                            `}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <div className="font-bold text-white">{network.name}</div>
+                                <div className="text-sm text-dark-400">Fee: {network.fee}</div>
+                              </div>
+                              <div
+                                className={`
+                                  w-5 h-5 rounded-full border-2
+                                  ${
+                                    selectedNetwork.id === network.id
                                       ? 'border-primary-500 bg-primary-500'
                                       : 'border-dark-600'
-                                  }`}
-                                />
-                              </div>
-                            </button>
-                          ))}
-                        </div>
+                                  }
+                                `}
+                              />
+                            </div>
+                          </button>
+                        ))}
                       </div>
-                    )}
+                    </div>
 
                     {/* Amount */}
                     <div>
-                      <label className="block text-sm font-medium text-dark-300 mb-3">Amount</label>
+                      <label className="block text-sm font-medium text-dark-300 mb-3">
+                        Amount (USDT)
+                      </label>
                       <div className="relative">
                         <input
                           type="text"
@@ -360,85 +288,35 @@ export default function WithdrawPage() {
                           MAX
                         </button>
                       </div>
-                      {selectedNetwork && (
-                        <div className="mt-2 text-sm text-dark-400">
-                          Minimum: {selectedNetwork.minAmount} {selectedWallet.symbol} • Available:{' '}
-                          {formatNumber(selectedWallet.balance, 2)} {selectedWallet.symbol}
-                        </div>
-                      )}
+                      <div className="mt-2 text-sm text-dark-400">
+                        Minimum: {selectedNetwork.minAmount} USDT • Available:{' '}
+                        {formatNumber(availableBalance, 2)} USDT
+                      </div>
                     </div>
 
-                    {/* Wallet Address */}
+                    {/* Withdrawal Address */}
                     <div>
                       <label className="block text-sm font-medium text-dark-300 mb-3">
                         Withdrawal Address
                       </label>
-                      <div className="relative">
-                        <input
-                          type="text"
-                          value={withdrawAddress}
-                          onChange={(e) => setWithdrawAddress(e.target.value)}
-                          placeholder="Enter wallet address"
-                          className="w-full px-4 py-3 bg-dark-800 border-2 border-dark-700 focus:border-primary-500 rounded-xl text-white outline-none pr-32"
-                        />
-                        <button
-                          onClick={() => setShowSavedAddresses(!showSavedAddresses)}
-                          className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1 bg-accent-500/10 hover:bg-accent-500/20 border border-accent-500/30 rounded-lg text-accent-400 text-sm font-medium transition-colors whitespace-nowrap"
-                        >
-                          📌 Saved
-                        </button>
-                      </div>
-
-                      {/* Saved Addresses Dropdown */}
-                      <AnimatePresence>
-                        {showSavedAddresses && (
-                          <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            exit={{ opacity: 0, height: 0 }}
-                            className="mt-2 overflow-hidden"
-                          >
-                            <div className="p-3 bg-dark-800 border border-dark-700 rounded-xl space-y-2">
-                              <div className="text-xs font-medium text-dark-400 mb-2">SAVED ADDRESSES</div>
-                              {savedAddresses.map((saved) => (
-                                <button
-                                  key={saved.id}
-                                  onClick={() => handleSelectSavedAddress(saved)}
-                                  className="w-full p-3 bg-dark-900/50 hover:bg-dark-900 border border-dark-700 hover:border-primary-500/50 rounded-lg text-left transition-all group"
-                                >
-                                  <div className="flex items-start justify-between gap-3">
-                                    <div className="flex-1 min-w-0">
-                                      <div className="font-medium text-white text-sm mb-1">{saved.label}</div>
-                                      <div className="text-xs text-dark-400 font-mono truncate">
-                                        {saved.address}
-                                      </div>
-                                      <div className="text-xs text-dark-500 mt-1">
-                                        {saved.network} • Last used{' '}
-                                        {Math.floor((Date.now() - saved.lastUsed) / (24 * 60 * 60 * 1000))} days
-                                        ago
-                                      </div>
-                                    </div>
-                                    <div className="text-primary-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                                      →
-                                    </div>
-                                  </div>
-                                </button>
-                              ))}
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
+                      <input
+                        type="text"
+                        value={withdrawAddress}
+                        onChange={(e) => setWithdrawAddress(e.target.value)}
+                        placeholder="Enter wallet address"
+                        className="w-full px-4 py-3 bg-dark-800 border-2 border-dark-700 focus:border-primary-500 rounded-xl text-white outline-none"
+                      />
                     </div>
 
                     {/* Warning */}
                     <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl">
                       <div className="flex items-start gap-3">
-                        <span className="text-yellow-400 text-xl flex-shrink-0">⚠️</span>
+                        <AlertTriangle className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
                         <div className="text-sm text-yellow-200">
                           <div className="font-semibold mb-1">Important</div>
                           <div className="text-yellow-200/80">
-                            Please double-check the withdrawal address. Cryptocurrency transactions are
-                            irreversible. Sending to an incorrect address will result in permanent loss of funds.
+                            Please double-check the withdrawal address. Cryptocurrency transactions
+                            are irreversible.
                           </div>
                         </div>
                       </div>
@@ -446,138 +324,210 @@ export default function WithdrawPage() {
 
                     {/* Continue Button */}
                     <button
-                      onClick={handleContinue}
+                      onClick={handleContinueToSecurity}
                       className="w-full px-6 py-4 bg-gradient-to-r from-primary-500 to-accent-500 hover:shadow-2xl rounded-xl text-white font-bold transition-all"
                     >
-                      Continue →
+                      Continue
                     </button>
-                  </>
-                )}
-              </div>
-            </GlassCard>
-          )}
-
-          {/* Step 2: Confirmation */}
-          {step === 2 && selectedWallet && selectedNetwork && (
-            <div className="space-y-6">
-              <GlassCard>
-                <div className="p-6">
-                  <h2 className="text-2xl font-bold text-white mb-6">Withdrawal Summary</h2>
-
-                  {/* Summary Details */}
-                  <div className="space-y-4 mb-6">
-                    <div className="flex justify-between py-3 border-b border-dark-700">
-                      <span className="text-dark-400">Currency</span>
-                      <span className="font-bold text-white">{selectedWallet.symbol}</span>
-                    </div>
-                    <div className="flex justify-between py-3 border-b border-dark-700">
-                      <span className="text-dark-400">Network</span>
-                      <span className="font-bold text-white">{selectedNetwork.name}</span>
-                    </div>
-                    <div className="flex justify-between py-3 border-b border-dark-700">
-                      <span className="text-dark-400">Amount</span>
-                      <span className="font-bold text-white">
-                        {amount} {selectedWallet.symbol}
-                      </span>
-                    </div>
-                    <div className="flex justify-between py-3 border-b border-dark-700">
-                      <span className="text-dark-400">Network Fee</span>
-                      <span className="font-bold text-red-400">- {selectedNetwork.fee}</span>
-                    </div>
-                    <div className="flex justify-between py-3 bg-dark-800/50 px-4 rounded-xl">
-                      <span className="font-bold text-white">You will receive</span>
-                      <span className="font-bold text-green-400">
-                        {formatNumber(calculateTotal(), 8)} {selectedWallet.symbol}
-                      </span>
-                    </div>
-                    <div className="flex justify-between py-3 border-t border-dark-700">
-                      <span className="text-dark-400">Destination Address</span>
-                      <span className="font-mono text-sm text-white max-w-[200px] truncate">
-                        {withdrawAddress}
-                      </span>
-                    </div>
                   </div>
+                )}
 
-                  {/* Security Verification */}
-                  <div className="space-y-4 mb-6">
-                    <h3 className="text-lg font-bold text-white mb-4">Security Verification</h3>
+                {/* Step 2: Security Verification */}
+                {step === 2 && (
+                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6 space-y-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-12 h-12 bg-primary-500/20 rounded-xl flex items-center justify-center">
+                        <Shield className="w-6 h-6 text-primary-400" />
+                      </div>
+                      <div>
+                        <h2 className="text-2xl font-bold text-white">Security Verification</h2>
+                        <p className="text-sm text-dark-400">Verify your identity to continue</p>
+                      </div>
+                    </div>
 
                     {/* PIN Code */}
                     {userHasPIN && (
                       <div>
-                        <label className="block text-sm font-medium text-dark-300 mb-2">
+                        <label className="block text-sm font-medium text-dark-300 mb-3">
                           Withdrawal PIN Code
                         </label>
-                        <input
-                          type="password"
-                          maxLength={4}
-                          value={pinCode}
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            if (/^\d*$/.test(val)) setPinCode(val);
-                          }}
-                          placeholder="Enter 4-digit PIN"
-                          className="w-full px-4 py-3 bg-dark-800 border-2 border-dark-700 focus:border-primary-500 rounded-xl text-white text-center text-2xl tracking-widest outline-none"
-                        />
+                        <div className="flex gap-3 justify-center">
+                          {pinCode.map((digit, index) => (
+                            <input
+                              key={index}
+                              id={`pin-${index}`}
+                              type="password"
+                              maxLength={1}
+                              value={digit}
+                              onChange={(e) => handlePinInput(index, e.target.value)}
+                              className="w-16 h-16 bg-dark-800 border-2 border-dark-700 focus:border-primary-500 rounded-xl text-white text-center text-2xl outline-none"
+                            />
+                          ))}
+                        </div>
                       </div>
                     )}
 
                     {/* 2FA Code */}
                     {userHas2FA && (
                       <div>
-                        <label className="block text-sm font-medium text-dark-300 mb-2">
+                        <label className="block text-sm font-medium text-dark-300 mb-3">
                           2FA Code (Google Authenticator)
                         </label>
-                        <input
-                          type="text"
-                          maxLength={6}
-                          value={twoFACode}
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            if (/^\d*$/.test(val)) setTwoFACode(val);
-                          }}
-                          placeholder="Enter 6-digit code"
-                          className="w-full px-4 py-3 bg-dark-800 border-2 border-dark-700 focus:border-primary-500 rounded-xl text-white text-center text-2xl tracking-widest outline-none"
-                        />
+                        <div className="flex gap-2 justify-center">
+                          {twoFACode.map((digit, index) => (
+                            <input
+                              key={index}
+                              id={`2fa-${index}`}
+                              type="text"
+                              maxLength={1}
+                              value={digit}
+                              onChange={(e) => handle2FAInput(index, e.target.value)}
+                              className="w-12 h-12 bg-dark-800 border-2 border-dark-700 focus:border-primary-500 rounded-xl text-white text-center text-xl outline-none"
+                            />
+                          ))}
+                        </div>
                       </div>
                     )}
-                  </div>
 
-                  {/* Processing Time Info */}
-                  <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl mb-6">
-                    <div className="flex items-start gap-3">
-                      <span className="text-blue-400 text-xl flex-shrink-0">ℹ️</span>
-                      <div className="text-sm text-blue-200">
-                        <div className="font-semibold mb-1">Processing Time</div>
-                        <div className="text-blue-200/80">
-                          Withdrawals are processed within 24 hours. You will receive an email confirmation once
-                          your withdrawal is processed.
+                    {/* Info */}
+                    <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl">
+                      <div className="flex items-start gap-3">
+                        <Info className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                        <div className="text-sm text-blue-200">
+                          <div className="font-semibold mb-1">Security Check</div>
+                          <div className="text-blue-200/80">
+                            We use PIN verification to protect your funds from unauthorized
+                            withdrawals.
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Action Buttons */}
-                  <div className="flex gap-4">
-                    <button
-                      onClick={() => setStep(1)}
-                      className="flex-1 px-6 py-3 bg-dark-800 hover:bg-dark-700 border-2 border-dark-700 rounded-xl text-white font-medium transition-colors"
-                    >
-                      ← Back
-                    </button>
-                    <button
-                      onClick={handleSubmitWithdrawal}
-                      className="flex-1 px-6 py-3 bg-gradient-to-r from-primary-500 to-accent-500 hover:shadow-2xl rounded-xl text-white font-bold transition-all"
-                    >
-                      Submit Withdrawal
-                    </button>
+                    {/* Buttons */}
+                    <div className="flex gap-4">
+                      <button
+                        onClick={() => setStep(1)}
+                        className="flex-1 px-6 py-3 bg-dark-800 hover:bg-dark-700 border-2 border-dark-700 rounded-xl text-white font-medium transition-colors"
+                      >
+                        <ChevronLeft className="w-4 h-4 inline mr-2" />
+                        Back
+                      </button>
+                      <button
+                        onClick={handleContinueToConfirm}
+                        className="flex-1 px-6 py-3 bg-gradient-to-r from-primary-500 to-accent-500 hover:shadow-2xl rounded-xl text-white font-bold transition-all"
+                      >
+                        Continue
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Step 3: Confirmation */}
+                {step === 3 && (
+                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6 space-y-6">
+                    <h2 className="text-2xl font-bold text-white">Review Withdrawal</h2>
+
+                    {/* Processing Time Info */}
+                    <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl">
+                      <div className="flex items-start gap-3">
+                        <Clock className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                        <div className="text-sm text-blue-200">
+                          <div className="font-semibold mb-1">Processing Time</div>
+                          <div className="text-blue-200/80">
+                            Withdrawals are processed within 24 hours. You will receive an email
+                            confirmation.
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Buttons */}
+                    <div className="flex gap-4">
+                      <button
+                        onClick={() => setStep(2)}
+                        className="flex-1 px-6 py-3 bg-dark-800 hover:bg-dark-700 border-2 border-dark-700 rounded-xl text-white font-medium transition-colors"
+                      >
+                        <ChevronLeft className="w-4 h-4 inline mr-2" />
+                        Back
+                      </button>
+                      <button
+                        onClick={handleSubmitWithdrawal}
+                        className="flex-1 px-6 py-3 bg-gradient-to-r from-primary-500 to-accent-500 hover:shadow-2xl rounded-xl text-white font-bold transition-all"
+                      >
+                        Submit Withdrawal
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* Live Summary Sidebar - col-span-5, sticky */}
+          <div className="lg:col-span-5">
+            <div className="sticky top-6">
+              <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6">
+                <h3 className="text-xl font-bold text-white mb-6">Withdrawal Summary</h3>
+
+                {/* Currency Icon */}
+                <div className="flex items-center gap-3 mb-6 pb-6 border-b border-dark-700">
+                  <Image
+                    src="/currency/Tether.svg"
+                    alt="USDT"
+                    width={48}
+                    height={48}
+                    className="w-12 h-12"
+                  />
+                  <div>
+                    <div className="text-sm text-dark-400">Currency</div>
+                    <div className="text-xl font-bold text-white">USDT (Tether)</div>
                   </div>
                 </div>
-              </GlassCard>
+
+                {/* Summary Details */}
+                <div className="space-y-4">
+                  <div className="flex justify-between py-3 border-b border-dark-700">
+                    <span className="text-dark-400">Network</span>
+                    <span className="font-bold text-white">{selectedNetwork.name}</span>
+                  </div>
+                  <div className="flex justify-between py-3 border-b border-dark-700">
+                    <span className="text-dark-400">Amount</span>
+                    <span className="font-bold text-white">
+                      {amount || '0.00'} USDT
+                    </span>
+                  </div>
+                  <div className="flex justify-between py-3 border-b border-dark-700">
+                    <span className="text-dark-400">Network Fee</span>
+                    <span className="font-bold text-red-400">- {selectedNetwork.fee}</span>
+                  </div>
+                  <div className="flex justify-between py-3 bg-dark-800/50 px-4 -mx-2 rounded-xl">
+                    <span className="font-bold text-white">You will receive</span>
+                    <span className="font-bold text-green-400">
+                      {formatNumber(calculateTotal(), 2)} USDT
+                    </span>
+                  </div>
+                  {withdrawAddress && (
+                    <div className="flex justify-between py-3 border-t border-dark-700">
+                      <span className="text-dark-400">Destination</span>
+                      <span className="font-mono text-sm text-white max-w-[200px] truncate">
+                        {withdrawAddress}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Available Balance */}
+                <div className="mt-6 p-4 bg-green-500/10 border border-green-500/20 rounded-xl">
+                  <div className="text-xs text-green-400/70 mb-1">Available Balance</div>
+                  <div className="text-2xl font-bold text-green-400">
+                    {formatNumber(availableBalance, 2)} USDT
+                  </div>
+                </div>
+              </div>
             </div>
-          )}
-        </motion.div>
-      </AnimatePresence>
+          </div>
+        </div>
+      </div>
 
       {/* Confirmation Modal */}
       <AnimatePresence>
@@ -594,56 +544,60 @@ export default function WithdrawPage() {
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
               onClick={(e) => e.stopPropagation()}
-              className="max-w-md w-full"
+              className="max-w-md w-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6"
             >
-              <GlassCard>
-                <div className="p-6">
-                  <div className="text-center mb-6">
-                    <div className="w-16 h-16 bg-yellow-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <span className="text-3xl">⚠️</span>
-                    </div>
-                    <h3 className="text-2xl font-bold text-white mb-2">Confirm Withdrawal</h3>
-                    <p className="text-dark-300">
-                      You are about to withdraw{' '}
-                      <span className="font-bold text-white">
-                        {amount} {selectedWallet?.symbol}
-                      </span>
-                    </p>
-                  </div>
+              <div className="text-center mb-6">
+                <motion.div
+                  className="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-4"
+                  animate={{
+                    scale: [1, 1.1, 1],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                  }}
+                >
+                  <Shield className="w-8 h-8 text-green-400" />
+                </motion.div>
+                <h3 className="text-2xl font-bold text-white mb-2">Confirm Withdrawal</h3>
+                <p className="text-dark-300">
+                  You are about to withdraw{' '}
+                  <span className="font-bold text-white">{amount} USDT</span>
+                </p>
+              </div>
 
-                  <div className="space-y-3 mb-6 p-4 bg-dark-800/50 rounded-xl">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-dark-400">Processing Time</span>
-                      <span className="text-white font-medium">Up to 24 hours</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-dark-400">Status</span>
-                      <span className="text-yellow-400 font-medium">Pending Review</span>
-                    </div>
-                  </div>
-
-                  <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl mb-6">
-                    <p className="text-sm text-yellow-200">
-                      This action cannot be undone. Please make sure all details are correct before confirming.
-                    </p>
-                  </div>
-
-                  <div className="flex gap-3">
-                    <button
-                      onClick={() => setShowConfirmModal(false)}
-                      className="flex-1 px-6 py-3 bg-dark-800 hover:bg-dark-700 border-2 border-dark-700 rounded-xl text-white font-medium transition-colors"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleConfirmWithdrawal}
-                      className="flex-1 px-6 py-3 bg-gradient-to-r from-primary-500 to-accent-500 hover:shadow-2xl rounded-xl text-white font-bold transition-all"
-                    >
-                      Confirm
-                    </button>
-                  </div>
+              <div className="space-y-3 mb-6 p-4 bg-dark-800/50 rounded-xl">
+                <div className="flex justify-between text-sm">
+                  <span className="text-dark-400">Processing Time</span>
+                  <span className="text-white font-medium">Up to 24 hours</span>
                 </div>
-              </GlassCard>
+                <div className="flex justify-between text-sm">
+                  <span className="text-dark-400">Status</span>
+                  <span className="text-yellow-400 font-medium">Pending Review</span>
+                </div>
+              </div>
+
+              <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl mb-6">
+                <p className="text-sm text-yellow-200">
+                  This action cannot be undone. Please make sure all details are correct.
+                </p>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowConfirmModal(false)}
+                  className="flex-1 px-6 py-3 bg-dark-800 hover:bg-dark-700 border-2 border-dark-700 rounded-xl text-white font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleConfirmWithdrawal}
+                  className="flex-1 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 hover:shadow-2xl rounded-xl text-white font-bold transition-all flex items-center justify-center gap-2"
+                >
+                  <CheckCircle className="w-5 h-5" />
+                  Confirm
+                </button>
+              </div>
             </motion.div>
           </motion.div>
         )}

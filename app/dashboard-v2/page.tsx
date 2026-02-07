@@ -2,10 +2,12 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { BotSettingsModal } from '@/components/dashboard-v2/BotSettingsModal';
 import { AddFundsModal } from '@/components/dashboard-v2/AddFundsModal';
 import { ConfirmationModal } from '@/components/dashboard-v2/ConfirmationModal';
+import { NetWorthHero } from '@/components/dashboard-v2/NetWorthHero';
 import { botManager } from '@/lib/BotManager';
 import { priceService } from '@/lib/PriceService';
 import { botsApi } from '@/lib/api/botsApi';
@@ -231,6 +233,7 @@ const mockActiveBots: ActiveBot[] = [
 ];
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [settingsBotId, setSettingsBotId] = useState<string | null>(null);
   const [addFundsBot, setAddFundsBot] = useState<ActiveBot | null>(null);
   const [bots, setBots] = useState<ActiveBot[]>([]);
@@ -405,6 +408,7 @@ export default function DashboardPage() {
   const activeBots = bots.filter(bot => bot.status === 'active').length;
   const todayPnL = bots.reduce((sum, bot) => sum + bot.todayPnL, 0);
   const totalOpenPositions = bots.reduce((sum, bot) => sum + bot.openPositions.length, 0);
+  const netWorth = totalValue + availableBalance;
 
   // Mock actions - will be replaced with API calls
   const handleTogglePause = (botId: string) => {
@@ -466,6 +470,7 @@ export default function DashboardPage() {
     setBots(activeBots);
   };
 
+
   return (
     <div className="min-h-screen bg-dark-950 text-white">
       <div className="max-w-[1800px] mx-auto p-4 lg:p-6">
@@ -491,142 +496,79 @@ export default function DashboardPage() {
 
         {/* Bento Grid Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
-          {/* Hero Stats - Left Side (Tall) */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="lg:col-span-4 lg:row-span-2"
-          >
-            <div className="relative h-full overflow-hidden bg-gradient-to-br from-primary-500/10 via-accent-500/5 to-primary-500/10 border border-primary-500/30 rounded-2xl p-6">
-              {/* Animated Background */}
-              <div className="absolute inset-0 bg-gradient-to-br from-primary-500/5 to-accent-500/5 opacity-50" />
-              <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary-500/20 rounded-full blur-3xl" />
-              <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-accent-500/20 rounded-full blur-3xl" />
+          {/* Row 1: Hero + Action Cards */}
+          <NetWorthHero
+            netWorth={netWorth}
+            portfolioValue={totalValue}
+            cashBalance={availableBalance}
+            totalProfit={totalProfit}
+            totalProfitPercent={totalProfitPercent}
+            todayPnL={todayPnL}
+            totalOpenPositions={totalOpenPositions}
+          />
 
-              <div className="relative z-10 h-full flex flex-col">
-                <div className="flex items-center gap-3 mb-8">
-                  <div className="w-14 h-14 bg-gradient-to-br from-primary-500 to-accent-500 rounded-xl flex items-center justify-center shadow-xl">
-                    <Wallet className="w-7 h-7 text-white" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-dark-400 font-medium">Total Portfolio</p>
-                    <p className="text-xs text-dark-500">All your investments</p>
-                  </div>
-                </div>
-
-                <div className="mb-8">
-                  <p className="text-5xl lg:text-6xl font-bold text-white mb-2">
-                    ${totalValue.toFixed(2)}
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <div className={`flex items-center gap-1 px-3 py-1 rounded-lg ${
-                      totalProfit >= 0
-                        ? 'bg-green-500/20 text-green-400'
-                        : 'bg-red-500/20 text-red-400'
-                    }`}>
-                      {totalProfit >= 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
-                      <span className="text-sm font-bold">
-                        {totalProfit >= 0 ? '+' : ''}${totalProfit.toFixed(0)}
-                      </span>
-                    </div>
-                    <span className={`text-sm font-medium ${totalProfit >= 0 ? 'text-green-400/70' : 'text-red-400/70'}`}>
-                      {totalProfit >= 0 ? '+' : ''}{totalProfitPercent.toFixed(2)}%
-                    </span>
-                  </div>
-                </div>
-
-                <div className="mt-auto space-y-4">
-                  <div className="flex items-center justify-between p-4 bg-dark-900/50 backdrop-blur-sm rounded-xl border border-dark-700">
-                    <div>
-                      <p className="text-xs text-dark-400 mb-1">Invested</p>
-                      <p className="text-xl font-bold text-white">${totalInvested.toLocaleString()}</p>
-                    </div>
-                    <div className="w-px h-12 bg-dark-700" />
-                    <div>
-                      <p className="text-xs text-dark-400 mb-1">Available</p>
-                      <p className="text-xl font-bold text-green-400">${availableBalance.toLocaleString()}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-3">
-                    <div className="flex-1 p-3 bg-blue-500/10 rounded-xl border border-blue-500/30">
-                      <p className="text-xs text-blue-400/70 mb-1">Today</p>
-                      <p className="text-lg font-bold text-blue-400">
-                        {todayPnL >= 0 ? '+' : ''}${todayPnL.toFixed(1)}
-                      </p>
-                    </div>
-                    <div className="flex-1 p-3 bg-purple-500/10 rounded-xl border border-purple-500/30">
-                      <p className="text-xs text-purple-400/70 mb-1">Positions</p>
-                      <p className="text-lg font-bold text-purple-400">{totalOpenPositions}</p>
-                    </div>
-                  </div>
-
-                  {/* Deposit/Withdraw Buttons */}
-                  <div className="flex gap-3">
-                    <button className="flex-1 px-4 py-3 bg-green-500/10 hover:bg-green-500/20 border border-green-500/30 hover:border-green-500/50 rounded-xl font-semibold text-green-400 hover:text-green-300 transition-all flex items-center justify-center gap-2">
-                      <ArrowDownLeft className="w-4 h-4" />
-                      Deposit
-                    </button>
-                    <button className="flex-1 px-4 py-3 bg-dark-700 hover:bg-dark-600 border border-dark-600 hover:border-dark-500 rounded-xl font-semibold text-dark-300 hover:text-white transition-all flex items-center justify-center gap-2">
-                      <ArrowUpLeft className="w-4 h-4" />
-                      Withdraw
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Quick Stats - Top Right */}
+          {/* Quick Start Card */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
             className="lg:col-span-4"
           >
-            <div className="relative overflow-hidden bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-5 hover:border-green-500/50 transition-all group">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity" />
+            <button
+              onClick={() => router.push('/dashboard-v2/quick-start')}
+              className="w-full relative overflow-hidden bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-5 hover:border-green-500/50 transition-all group"
+            >
+              <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/10 rounded-full blur-3xl opacity-100 group-hover:scale-150 transition-transform" />
               <div className="relative flex items-start justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-green-500/20 border border-green-500/30 rounded-xl flex items-center justify-center">
-                    <Bot className="w-6 h-6 text-green-400" />
+                    <Zap className="w-6 h-6 text-green-400" />
                   </div>
                   <div>
-                    <p className="text-xs text-dark-400 font-medium mb-1">Active Bots</p>
-                    <p className="text-3xl font-bold text-white">{activeBots}</p>
-                    <p className="text-xs text-green-400 mt-1">
-                      {bots.reduce((sum, bot) => sum + bot.trades, 0)} total trades
+                    <p className="text-xs text-dark-400 font-medium mb-1 text-left">Quick Start</p>
+                    <p className="text-3xl font-bold text-white text-left">Start Now</p>
+                    <p className="text-xs text-green-400 mt-1 text-left">
+                      Get started in 3 clicks
                     </p>
                   </div>
                 </div>
-                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+                <div className="text-green-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <ChevronRight className="w-6 h-6" />
+                </div>
               </div>
-            </div>
+            </button>
           </motion.div>
 
+          {/* Add Bot Card */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 }}
             className="lg:col-span-4"
           >
-            <div className="relative overflow-hidden bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-5 hover:border-yellow-500/50 transition-all group">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-500/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity" />
+            <button
+              onClick={() => router.push('/dashboard-v2/bots')}
+              className="w-full relative overflow-hidden bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-5 hover:border-primary-500/50 transition-all group"
+            >
+              <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500/10 rounded-full blur-3xl opacity-100 group-hover:scale-150 transition-transform" />
               <div className="relative flex items-start justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-yellow-500/20 border border-yellow-500/30 rounded-xl flex items-center justify-center">
-                    <Target className="w-6 h-6 text-yellow-400" />
+                  <div className="w-12 h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
+                    <Plus className="w-6 h-6 text-primary-400" />
                   </div>
                   <div>
-                    <p className="text-xs text-dark-400 font-medium mb-1">Avg Win Rate</p>
-                    <p className="text-3xl font-bold text-white">
-                      {bots.length > 0 ? Math.round(bots.reduce((sum, bot) => sum + bot.winRate, 0) / bots.length) : 0}%
+                    <p className="text-xs text-dark-400 font-medium mb-1 text-left">Add Bot</p>
+                    <p className="text-3xl font-bold text-white text-left">Explore</p>
+                    <p className="text-xs text-primary-400 mt-1 text-left">
+                      Browse marketplace
                     </p>
-                    <p className="text-xs text-yellow-400 mt-1">Across all bots</p>
                   </div>
                 </div>
+                <div className="text-primary-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <ChevronRight className="w-6 h-6" />
+                </div>
               </div>
-            </div>
+            </button>
           </motion.div>
 
           {/* Closed Positions History */}

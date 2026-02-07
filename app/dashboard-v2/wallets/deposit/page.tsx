@@ -3,39 +3,17 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { QRCodeSVG } from 'qrcode.react';
-import GlassCard from '@/components/ui/GlassCard';
-
-// Currency icon mapping
-const CURRENCY_ICONS: Record<string, string> = {
-  'USDT': '₮',
-  'BTC': '₿',
-  'ETH': 'Ξ',
-  'BNB': 'B',
-  'USDC': '$',
-  'SOL': '◎',
-  'TRX': 'T',
-  'MATIC': 'M',
-  'POL': 'P',
-};
-
-// Currency gradient mapping
-const CURRENCY_GRADIENTS: Record<string, string> = {
-  'USDT': 'from-green-500 to-emerald-500',
-  'BTC': 'from-orange-500 to-yellow-500',
-  'ETH': 'from-blue-500 to-cyan-500',
-  'BNB': 'from-yellow-500 to-amber-500',
-  'USDC': 'from-blue-600 to-blue-400',
-  'SOL': 'from-purple-500 to-pink-500',
-  'TRX': 'from-red-500 to-orange-500',
-  'MATIC': 'from-purple-600 to-indigo-500',
-  'POL': 'from-purple-600 to-indigo-500',
-};
+import { ChevronLeft, Copy, CheckCircle, AlertTriangle, Info, Clock } from 'lucide-react';
+import Stepper from '@/components/ui/Stepper';
+import CurrencyCard from '@/components/wallet/CurrencyCard';
+import { useToast } from '@/context/ToastContext';
 
 interface Currency {
   symbol: string;
   name: string;
-  price: string;
+  icon: string;
   networks: Network[];
 }
 
@@ -47,12 +25,11 @@ interface Network {
   minAmount: string;
 }
 
-
-const SAMPLE_CURRENCIES: Currency[] = [
+const CURRENCIES: Currency[] = [
   {
     symbol: 'USDT',
     name: 'Tether',
-    price: '1.00',
+    icon: '/currency/Tether.svg',
     networks: [
       { id: 'erc20', name: 'Ethereum (ERC20)', networkName: 'ERC20', fee: '2 USDT', minAmount: '10' },
       { id: 'trc20', name: 'Tron (TRC20)', networkName: 'TRC20', fee: '0.5 USDT', minAmount: '5' },
@@ -62,7 +39,7 @@ const SAMPLE_CURRENCIES: Currency[] = [
   {
     symbol: 'BTC',
     name: 'Bitcoin',
-    price: '50000.00',
+    icon: '/currency/Bitcoin.svg',
     networks: [
       { id: 'btc', name: 'Bitcoin Network', networkName: 'BTC', fee: '0.0001 BTC', minAmount: '0.001' },
     ],
@@ -70,49 +47,53 @@ const SAMPLE_CURRENCIES: Currency[] = [
   {
     symbol: 'ETH',
     name: 'Ethereum',
-    price: '2000.00',
+    icon: '/currency/Ethereum.svg',
     networks: [
       { id: 'erc20', name: 'Ethereum (ERC20)', networkName: 'ERC20', fee: '0.002 ETH', minAmount: '0.01' },
     ],
   },
+  {
+    symbol: 'BNB',
+    name: 'Binance Coin',
+    icon: '/currency/bnb.svg',
+    networks: [
+      { id: 'bep20', name: 'BSC (BEP20)', networkName: 'BEP20', fee: '0.0005 BNB', minAmount: '0.01' },
+    ],
+  },
+  {
+    symbol: 'SOL',
+    name: 'Solana',
+    icon: '/currency/Solana.svg',
+    networks: [
+      { id: 'solana', name: 'Solana Network', networkName: 'SOL', fee: '0.00001 SOL', minAmount: '0.1' },
+    ],
+  },
+  {
+    symbol: 'TRX',
+    name: 'Tron',
+    icon: '/currency/Tron.svg',
+    networks: [
+      { id: 'trc20', name: 'Tron Network', networkName: 'TRC20', fee: '1 TRX', minAmount: '10' },
+    ],
+  },
 ];
 
-const SAMPLE_DEPOSITS = [
-  {
-    id: 1,
-    amount: 5000,
-    currency: 'USDT',
-    network: 'TRC20',
-    date: Date.now() - 24 * 60 * 60 * 1000,
-    status: 'completed',
-    txHash: '0x1a2b3c4d5e6f7g8h9i0j',
-  },
-  {
-    id: 2,
-    amount: 0.05,
-    currency: 'BTC',
-    network: 'BTC',
-    date: Date.now() - 48 * 60 * 60 * 1000,
-    status: 'completed',
-    txHash: '0x9i8h7g6f5e4d3c2b1a0j',
-  },
+const STEPS = [
+  { label: 'Currency', description: 'Select coin' },
+  { label: 'Network', description: 'Choose network' },
+  { label: 'Address', description: 'Get address' },
 ];
 
 export default function DepositPage() {
   const [step, setStep] = useState(1);
   const [selectedCurrency, setSelectedCurrency] = useState<Currency | null>(null);
   const [selectedNetwork, setSelectedNetwork] = useState<Network | null>(null);
-  const [showAllHistory, setShowAllHistory] = useState(false);
+  const toast = useToast();
 
-  const currencies = SAMPLE_CURRENCIES;
-  const currenciesLoading = false;
-  const addressLoading = false;
-  const deposits = SAMPLE_DEPOSITS;
-  const historyLoading = false;
-
-  const depositAddress = selectedCurrency && selectedNetwork
-    ? 'TRX7NqM7SXfBZQ3KvN3Y9xPh8zC4jR5wD2eF3gH4iJ5k'
-    : '';
+  const depositAddress =
+    selectedCurrency && selectedNetwork
+      ? 'TRX7NqM7SXfBZQ3KvN3Y9xPh8zC4jR5wD2eF3gH4iJ5k'
+      : '';
 
   const handleCurrencySelect = (currency: Currency) => {
     setSelectedCurrency(currency);
@@ -135,145 +116,84 @@ export default function DepositPage() {
     }
   };
 
-  const handleCopyAddress = () => {
+  const handleCopyAddress = async () => {
     if (depositAddress) {
-      navigator.clipboard.writeText(depositAddress);
-      alert('Address copied to clipboard!');
+      await navigator.clipboard.writeText(depositAddress);
+      toast.success('Address copied!', 'Deposit address copied to clipboard');
     }
   };
 
-  const formatDate = (timestamp: number) => {
-    return new Date(timestamp).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  };
-
-  const formatNumber = (num: number, decimals = 2) => {
-    return new Intl.NumberFormat('en-US', {
-      minimumFractionDigits: decimals,
-      maximumFractionDigits: decimals,
-    }).format(num);
-  };
-
-  const displayedHistory = showAllHistory ? deposits : deposits.slice(0, 10);
-
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Header */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-        <div className="flex items-center gap-4 mb-4">
+    <div className="min-h-screen bg-dark-950 text-white">
+      <div className="max-w-[1400px] mx-auto p-4 lg:p-6">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8"
+        >
           <Link
             href="/dashboard-v2/wallets"
-            className="p-2 hover:bg-dark-800 rounded-lg transition-colors text-dark-400 hover:text-white"
+            className="inline-flex items-center gap-2 text-dark-400 hover:text-white transition-colors mb-4"
           >
-            ← Back
+            <ChevronLeft className="w-5 h-5" />
+            Back to Wallets
           </Link>
-        </div>
-        <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">Deposit Funds</h1>
-        <p className="text-dark-300">Select a currency and network to generate your deposit address</p>
-      </motion.div>
+          <h1 className="text-3xl lg:text-4xl font-bold text-white mb-1">Deposit Funds</h1>
+          <p className="text-dark-400">
+            Select a currency and network to generate your deposit address
+          </p>
+        </motion.div>
 
-      {/* Progress Steps */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="mb-8"
-      >
-        <div className="flex items-center justify-center gap-4">
-          {[1, 2, 3].map((s) => (
-            <div key={s} className="flex items-center gap-4">
-              <div
-                className={`
-                  flex items-center gap-3 px-4 py-2 rounded-xl border-2
-                  ${
-                    s === step
-                      ? 'bg-gradient-to-r from-primary-500 to-accent-500 border-primary-500 text-white'
-                      : s < step
-                      ? 'bg-dark-800 border-green-500/50 text-green-400'
-                      : 'bg-dark-900/50 border-dark-700 text-dark-400'
-                  }
-                `}
-              >
-                <div className="text-xl font-bold">{s}</div>
-                <div className="text-sm font-medium">
-                  {s === 1 ? 'Currency' : s === 2 ? 'Network' : 'Address'}
+        {/* Stepper */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="mb-8"
+        >
+          <Stepper steps={STEPS} currentStep={step} />
+        </motion.div>
+
+        {/* Content */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={step}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.3 }}
+          >
+            {/* Step 1: Select Currency */}
+            {step === 1 && (
+              <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6">
+                <h2 className="text-2xl font-bold text-white mb-6">Select Currency</h2>
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {CURRENCIES.map((currency, index) => (
+                    <CurrencyCard
+                      key={currency.symbol}
+                      symbol={currency.symbol}
+                      name={currency.name}
+                      icon={currency.icon}
+                      networks={currency.networks.length}
+                      selected={selectedCurrency?.symbol === currency.symbol}
+                      onClick={() => handleCurrencySelect(currency)}
+                      delay={index * 0.05}
+                    />
+                  ))}
                 </div>
               </div>
-              {s < 3 && <div className="text-dark-600">→</div>}
-            </div>
-          ))}
-        </div>
-      </motion.div>
+            )}
 
-      {/* Loading State */}
-      {currenciesLoading && step === 1 && (
-        <GlassCard>
-          <div className="p-6 text-center">
-            <div className="text-dark-400">Loading currencies...</div>
-          </div>
-        </GlassCard>
-      )}
-
-      {/* Step Content */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={step}
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-          transition={{ duration: 0.3 }}
-        >
-          {/* Step 1: Select Currency */}
-          {step === 1 && !currenciesLoading && (
-            <GlassCard>
-              <div className="p-6">
-                <h2 className="text-2xl font-bold text-white mb-6">Select Currency</h2>
-                {currencies.length === 0 ? (
-                  <div className="text-center py-8 text-dark-400">
-                    No currencies available. Please contact support.
-                  </div>
-                ) : (
-                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                    {currencies.map((currency, index) => (
-                      <motion.button
-                        key={currency.symbol}
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: index * 0.05 }}
-                        onClick={() => handleCurrencySelect(currency)}
-                        className="p-6 bg-dark-800/50 hover:bg-dark-800 border-2 border-dark-700 hover:border-primary-500/50 rounded-2xl transition-all group"
-                      >
-                        <div
-                          className={`w-16 h-16 mx-auto mb-4 bg-gradient-to-br ${
-                            CURRENCY_GRADIENTS[currency.symbol] || 'from-gray-500 to-gray-600'
-                          } rounded-2xl flex items-center justify-center text-white text-3xl font-bold shadow-lg group-hover:scale-110 transition-transform`}
-                        >
-                          {CURRENCY_ICONS[currency.symbol] || currency.symbol.charAt(0)}
-                        </div>
-                        <div className="font-bold text-white text-lg mb-1">{currency.symbol}</div>
-                        <div className="text-sm text-dark-400">{currency.name}</div>
-                        <div className="mt-3 text-xs text-dark-500">
-                          {currency.networks.length} network{currency.networks.length > 1 ? 's' : ''}
-                        </div>
-                      </motion.button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </GlassCard>
-          )}
-
-          {/* Step 2: Select Network */}
-          {step === 2 && selectedCurrency && (
-            <GlassCard>
-              <div className="p-6">
-                <h2 className="text-2xl font-bold text-white mb-6">
+            {/* Step 2: Select Network */}
+            {step === 2 && selectedCurrency && (
+              <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6">
+                <h2 className="text-2xl font-bold text-white mb-2">
                   Select Network for {selectedCurrency.name}
                 </h2>
-                <div className="space-y-4">
+                <p className="text-dark-400 mb-6">Choose the blockchain network for deposit</p>
+
+                <div className="space-y-4 mb-6">
                   {selectedCurrency.networks.map((network, index) => (
                     <motion.button
                       key={network.id}
@@ -281,10 +201,17 @@ export default function DepositPage() {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.1 }}
                       onClick={() => handleNetworkSelect(network)}
-                      className="w-full p-6 bg-dark-800/50 hover:bg-dark-800 border-2 border-dark-700 hover:border-primary-500/50 rounded-2xl transition-all text-left group"
+                      className={`
+                        w-full p-6 rounded-2xl border-2 text-left transition-all
+                        ${
+                          selectedNetwork?.id === network.id
+                            ? 'bg-primary-500/10 border-primary-500'
+                            : 'bg-dark-800/50 border-dark-700 hover:border-primary-500/50 hover:bg-dark-800'
+                        }
+                      `}
                     >
                       <div className="flex items-center justify-between">
-                        <div>
+                        <div className="flex-1">
                           <div className="text-lg font-bold text-white mb-2">{network.name}</div>
                           <div className="flex items-center gap-4 text-sm text-dark-400">
                             <span>Fee: {network.fee}</span>
@@ -296,271 +223,199 @@ export default function DepositPage() {
                             )}
                           </div>
                         </div>
-                        <div className="text-2xl text-dark-600 group-hover:text-primary-400 transition-colors">
-                          →
+                        <div
+                          className={`
+                            w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all
+                            ${
+                              selectedNetwork?.id === network.id
+                                ? 'border-primary-500 bg-primary-500'
+                                : 'border-dark-600'
+                            }
+                          `}
+                        >
+                          {selectedNetwork?.id === network.id && (
+                            <CheckCircle className="w-4 h-4 text-white" />
+                          )}
                         </div>
                       </div>
                     </motion.button>
                   ))}
                 </div>
-                <div className="mt-6">
-                  <button
-                    onClick={handleBack}
-                    className="px-6 py-3 bg-dark-800 hover:bg-dark-700 border-2 border-dark-700 rounded-xl text-white font-medium transition-colors"
-                  >
-                    ← Back
-                  </button>
-                </div>
-              </div>
-            </GlassCard>
-          )}
 
-          {/* Step 3: Deposit Address & QR */}
-          {step === 3 && selectedCurrency && selectedNetwork && (
-            <div className="space-y-6">
-              <GlassCard>
-                <div className="p-6">
-                  <h2 className="text-2xl font-bold text-white mb-6">
-                    Deposit {selectedCurrency.name} via {selectedNetwork.name}
-                  </h2>
-
-                  {/* Loading State */}
-                  {addressLoading && (
-                    <div className="text-center py-8">
-                      <div className="text-dark-400 mb-2">Generating your deposit address...</div>
-                      <div className="text-sm text-dark-500">This may take a few seconds</div>
-                    </div>
-                  )}
-
-                  {/* Address Generated */}
-                  {!addressLoading && depositAddress && (
-                    <>
-                      {/* QR Code */}
-                      <div className="flex flex-col items-center mb-8">
-                        <div className="bg-white rounded-2xl p-4 mb-4">
-                          <QRCodeSVG
-                            value={depositAddress}
-                            size={256}
-                            level="H"
-                            includeMargin={true}
-                          />
-                        </div>
-                        <div className="text-sm text-dark-400">
-                          Scan to deposit {selectedCurrency.symbol}
-                        </div>
-                      </div>
-
-                      {/* Deposit Address */}
-                      <div className="mb-6">
-                        <label className="block text-sm font-medium text-dark-300 mb-2">
-                          Deposit Address
-                        </label>
-                        <div className="flex gap-2">
-                          <input
-                            type="text"
-                            value={depositAddress}
-                            readOnly
-                            className="flex-1 px-4 py-3 bg-dark-800 border-2 border-dark-700 rounded-xl text-white font-mono text-sm"
-                          />
-                          <button
-                            onClick={handleCopyAddress}
-                            className="px-6 py-3 bg-primary-500/10 hover:bg-primary-500/20 border-2 border-primary-500/30 rounded-xl text-primary-400 font-medium transition-colors whitespace-nowrap"
-                          >
-                            📋 Copy
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Important Info */}
-                      <div className="space-y-4">
-                        {/* Minimum Amount */}
-                        {selectedNetwork.minAmount && parseFloat(selectedNetwork.minAmount) > 0 && (
-                          <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl">
-                            <div className="flex items-start gap-3">
-                              <span className="text-blue-400 text-xl">ℹ️</span>
-                              <div className="text-sm text-blue-200">
-                                <div className="font-semibold mb-1">
-                                  Minimum Deposit: ${selectedNetwork.minAmount}
-                                </div>
-                                <div className="text-blue-200/80">
-                                  Deposits below minimum amount will not be credited to your account.
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Network Warning */}
-                        <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl">
-                          <div className="flex items-start gap-3">
-                            <span className="text-yellow-400 text-xl">⚠️</span>
-                            <div className="text-sm text-yellow-200">
-                              <div className="font-semibold mb-1">Important Network Information</div>
-                              <div className="text-yellow-200/80">
-                                Please ensure you send {selectedCurrency.symbol} via {selectedNetwork.name} only.
-                                Sending via a different network may result in permanent loss of funds.
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Processing Info */}
-                        <div className="p-4 bg-dark-800/50 border border-dark-700 rounded-xl">
-                          <div className="grid grid-cols-2 gap-4 text-sm">
-                            <div>
-                              <div className="text-dark-400 mb-1">Network Fee</div>
-                              <div className="text-white font-semibold">{selectedNetwork.fee}</div>
-                            </div>
-                            <div>
-                              <div className="text-dark-400 mb-1">Processing Time</div>
-                              <div className="text-white font-semibold">3-10 minutes</div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </>
-                  )}
-
-                  {/* Error State */}
-                  {!addressLoading && !depositAddress && (
-                    <div className="text-center py-8">
-                      <div className="text-red-400 mb-2">Failed to generate deposit address</div>
-                      <div className="text-sm text-dark-500">
-                        Please try again or contact support
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Back Button */}
-                  <div className="mt-6">
-                    <button
-                      onClick={handleBack}
-                      className="px-6 py-3 bg-dark-800 hover:bg-dark-700 border-2 border-dark-700 rounded-xl text-white font-medium transition-colors"
-                    >
-                      ← Back
-                    </button>
-                  </div>
-                </div>
-              </GlassCard>
-
-              {/* Instructions */}
-              <GlassCard>
-                <div className="p-6">
-                  <h3 className="text-xl font-bold text-white mb-4">How to Deposit</h3>
-                  <ol className="space-y-3 text-dark-300">
-                    <li className="flex gap-3">
-                      <span className="flex-shrink-0 w-6 h-6 bg-primary-500/20 border border-primary-500/30 rounded-full flex items-center justify-center text-xs font-bold text-primary-400">
-                        1
-                      </span>
-                      <span>Copy the deposit address above or scan the QR code</span>
-                    </li>
-                    <li className="flex gap-3">
-                      <span className="flex-shrink-0 w-6 h-6 bg-primary-500/20 border border-primary-500/30 rounded-full flex items-center justify-center text-xs font-bold text-primary-400">
-                        2
-                      </span>
-                      <span>
-                        Open your wallet and send {selectedCurrency.symbol} to this address via{' '}
-                        {selectedNetwork.name}
-                      </span>
-                    </li>
-                    <li className="flex gap-3">
-                      <span className="flex-shrink-0 w-6 h-6 bg-primary-500/20 border border-primary-500/30 rounded-full flex items-center justify-center text-xs font-bold text-primary-400">
-                        3
-                      </span>
-                      <span>Wait for network confirmations (usually 3-10 minutes)</span>
-                    </li>
-                    <li className="flex gap-3">
-                      <span className="flex-shrink-0 w-6 h-6 bg-primary-500/20 border border-primary-500/30 rounded-full flex items-center justify-center text-xs font-bold text-primary-400">
-                        4
-                      </span>
-                      <span>Funds will be automatically credited to your account once confirmed</span>
-                    </li>
-                  </ol>
-                </div>
-              </GlassCard>
-            </div>
-          )}
-        </motion.div>
-      </AnimatePresence>
-
-      {/* Deposit History */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="mt-8"
-      >
-        <GlassCard>
-          <div className="p-6">
-            <h3 className="text-2xl font-bold text-white mb-6">Recent Deposits</h3>
-
-            {historyLoading && (
-              <div className="text-center py-8 text-dark-400">Loading deposit history...</div>
-            )}
-
-            {!historyLoading && deposits.length === 0 && (
-              <div className="text-center py-8 text-dark-400">No deposits yet</div>
-            )}
-
-            {!historyLoading && deposits.length > 0 && (
-              <div className="space-y-3">
-                {displayedHistory.map((deposit, index) => (
-                  <motion.div
-                    key={deposit.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    className="flex items-center justify-between p-4 bg-dark-800/50 rounded-xl border border-dark-700"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center text-xl">
-                        ↓
-                      </div>
-                      <div>
-                        <div className="font-bold text-white">
-                          +{formatNumber(deposit.amount, deposit.currency === 'BTC' ? 8 : 2)}{' '}
-                          {deposit.currency}
-                        </div>
-                        <div className="text-xs text-dark-400">
-                          {deposit.network} • {formatDate(deposit.date)}
-                        </div>
-                        {deposit.txHash && (
-                          <div className="text-xs text-dark-500 font-mono mt-1">{deposit.txHash}</div>
-                        )}
-                      </div>
-                    </div>
-                    <div>
-                      <span
-                        className={`px-3 py-1 rounded-lg text-xs font-semibold border ${
-                          deposit.status === 'completed'
-                            ? 'bg-green-500/10 border-green-500/30 text-green-400'
-                            : deposit.status === 'pending'
-                            ? 'bg-yellow-500/10 border-yellow-500/30 text-yellow-400'
-                            : 'bg-red-500/10 border-red-500/30 text-red-400'
-                        }`}
-                      >
-                        {deposit.status}
-                      </span>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            )}
-
-            {/* Load More Button */}
-            {deposits.length > 10 && !showAllHistory && (
-              <div className="mt-6 text-center">
                 <button
-                  onClick={() => setShowAllHistory(true)}
+                  onClick={handleBack}
                   className="px-6 py-3 bg-dark-800 hover:bg-dark-700 border-2 border-dark-700 rounded-xl text-white font-medium transition-colors"
                 >
-                  Load More
+                  <ChevronLeft className="w-4 h-4 inline mr-2" />
+                  Back
                 </button>
               </div>
             )}
-          </div>
-        </GlassCard>
-      </motion.div>
+
+            {/* Step 3: Deposit Address & QR (Split Panel) */}
+            {step === 3 && selectedCurrency && selectedNetwork && (
+              <div className="grid lg:grid-cols-12 gap-6">
+                {/* Left Panel - QR & Address (col-span-5) */}
+                <div className="lg:col-span-5">
+                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6 sticky top-6">
+                    <h3 className="text-xl font-bold text-white mb-6">Deposit Address</h3>
+
+                    {/* QR Code */}
+                    <div className="flex flex-col items-center mb-6">
+                      <div className="bg-white rounded-2xl p-4 mb-4">
+                        <QRCodeSVG value={depositAddress} size={256} level="H" includeMargin={true} />
+                      </div>
+                      <p className="text-sm text-dark-400">
+                        Scan to deposit {selectedCurrency.symbol}
+                      </p>
+                    </div>
+
+                    {/* Address Input */}
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-dark-300 mb-2">
+                        Deposit Address
+                      </label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={depositAddress}
+                          readOnly
+                          className="flex-1 px-4 py-3 bg-dark-800 border-2 border-dark-700 rounded-xl text-white font-mono text-sm"
+                        />
+                        <button
+                          onClick={handleCopyAddress}
+                          className="px-4 py-3 bg-primary-500/10 hover:bg-primary-500/20 border-2 border-primary-500/30 rounded-xl text-primary-400 font-medium transition-colors whitespace-nowrap flex items-center gap-2"
+                        >
+                          <Copy className="w-4 h-4" />
+                          Copy
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Back Button */}
+                    <button
+                      onClick={handleBack}
+                      className="w-full px-6 py-3 bg-dark-800 hover:bg-dark-700 border-2 border-dark-700 rounded-xl text-white font-medium transition-colors"
+                    >
+                      <ChevronLeft className="w-4 h-4 inline mr-2" />
+                      Back
+                    </button>
+                  </div>
+                </div>
+
+                {/* Right Panel - Details & Warnings (col-span-7) */}
+                <div className="lg:col-span-7 space-y-4">
+                  {/* Network Info */}
+                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6">
+                    <h3 className="text-xl font-bold text-white mb-4">Network Details</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="p-4 bg-dark-900/50 rounded-xl">
+                        <div className="text-xs text-dark-400 mb-1">Currency</div>
+                        <div className="flex items-center gap-2">
+                          <Image
+                            src={selectedCurrency.icon}
+                            alt={selectedCurrency.symbol}
+                            width={24}
+                            height={24}
+                            className="w-6 h-6"
+                          />
+                          <div className="text-lg font-bold text-white">
+                            {selectedCurrency.symbol}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="p-4 bg-dark-900/50 rounded-xl">
+                        <div className="text-xs text-dark-400 mb-1">Network</div>
+                        <div className="text-lg font-bold text-white">
+                          {selectedNetwork.networkName}
+                        </div>
+                      </div>
+                      <div className="p-4 bg-dark-900/50 rounded-xl">
+                        <div className="text-xs text-dark-400 mb-1">Network Fee</div>
+                        <div className="text-lg font-bold text-white">{selectedNetwork.fee}</div>
+                      </div>
+                      <div className="p-4 bg-dark-900/50 rounded-xl">
+                        <div className="text-xs text-dark-400 mb-1">Processing Time</div>
+                        <div className="text-lg font-bold text-white">3-10 min</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Minimum Amount Warning */}
+                  {selectedNetwork.minAmount && parseFloat(selectedNetwork.minAmount) > 0 && (
+                    <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl">
+                      <div className="flex items-start gap-3">
+                        <Info className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                        <div className="text-sm text-blue-200">
+                          <div className="font-semibold mb-1">
+                            Minimum Deposit: ${selectedNetwork.minAmount}
+                          </div>
+                          <div className="text-blue-200/80">
+                            Deposits below minimum amount will not be credited to your account.
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Network Warning */}
+                  <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl">
+                    <div className="flex items-start gap-3">
+                      <AlertTriangle className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
+                      <div className="text-sm text-yellow-200">
+                        <div className="font-semibold mb-1">Important Network Information</div>
+                        <div className="text-yellow-200/80">
+                          Please ensure you send {selectedCurrency.symbol} via {selectedNetwork.name}{' '}
+                          only. Sending via a different network may result in permanent loss of funds.
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Instructions */}
+                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6">
+                    <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                      <Clock className="w-5 h-5 text-primary-400" />
+                      How to Deposit
+                    </h3>
+                    <ol className="space-y-3 text-dark-300">
+                      <li className="flex gap-3">
+                        <span className="flex-shrink-0 w-6 h-6 bg-primary-500/20 border border-primary-500/30 rounded-full flex items-center justify-center text-xs font-bold text-primary-400">
+                          1
+                        </span>
+                        <span>Copy the deposit address above or scan the QR code</span>
+                      </li>
+                      <li className="flex gap-3">
+                        <span className="flex-shrink-0 w-6 h-6 bg-primary-500/20 border border-primary-500/30 rounded-full flex items-center justify-center text-xs font-bold text-primary-400">
+                          2
+                        </span>
+                        <span>
+                          Open your wallet and send {selectedCurrency.symbol} to this address via{' '}
+                          {selectedNetwork.name}
+                        </span>
+                      </li>
+                      <li className="flex gap-3">
+                        <span className="flex-shrink-0 w-6 h-6 bg-primary-500/20 border border-primary-500/30 rounded-full flex items-center justify-center text-xs font-bold text-primary-400">
+                          3
+                        </span>
+                        <span>Wait for network confirmations (usually 3-10 minutes)</span>
+                      </li>
+                      <li className="flex gap-3">
+                        <span className="flex-shrink-0 w-6 h-6 bg-primary-500/20 border border-primary-500/30 rounded-full flex items-center justify-center text-xs font-bold text-primary-400">
+                          4
+                        </span>
+                        <span>
+                          Funds will be automatically credited to your account once confirmed
+                        </span>
+                      </li>
+                    </ol>
+                  </div>
+                </div>
+              </div>
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </div>
     </div>
   );
 }
