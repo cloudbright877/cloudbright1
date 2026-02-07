@@ -662,9 +662,15 @@ Changes based on architect + auditor review:
 1. ~~**Wide Mode Deviation Bug**~~ - **FIXED** (2026-02-07, commit `c021b77`)
    - Was: 23.4% positive bias due to asymmetric distribution
    - Now: 0.7% deviation with symmetric distribution
-2. **PriceService fallback chain** - postponed to Task #11 (use existing Binance for now)
+2. ~~**PriceService fallback chain**~~ - **SKIPPED** (postponed until after backend migration)
+   - Current: PriceService.ts works with Binance WebSocket
+   - Future: Backend will handle all price sources and fallback logic
 3. ~~**Dynamic thresholds (Layer 2)**~~ - **IMPLEMENTED** in Day 4-5 (ConvergenceController)
 4. ~~**Emergency mode**~~ - **IMPLEMENTED** in Day 4-5 (ConvergenceController)
-5. **Performance optimization** - Task #10 (debounce, React.memo, virtualization)
+5. ~~**Performance optimization**~~ - **COMPLETED** (2026-02-07, commit `140d1ed`)
+   - React.memo on PositionRow (memoization)
+   - Virtualization for 100+ positions (@tanstack/react-virtual)
+   - localStorage auto-cleanup (1000 trades limit)
+   - WebSocket debounce already present (500ms)
 6. **Multi-timeframe analysis** - not needed, but could be added if volatility adjustment required
 7. **Trend strength (momentum)** - binary decision is sufficient for now, could enhance later
