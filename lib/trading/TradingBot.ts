@@ -175,17 +175,31 @@ export class TradingBot {
 
       // PRIORITY 1: Check if TP or SL reached
       if (realPnlPercent >= pos.targetPnL) {
-        shouldClose = true;
-        slippageReason = pos.shouldWin
-          ? 'Natural win (TP reached)'
-          : 'Unexpected win (TP reached)';
+        // ✅ Enforce minDuration even for TP
+        if (duration >= minDuration) {
+          shouldClose = true;
+          slippageReason = pos.shouldWin
+            ? 'Natural win (TP reached)'
+            : 'Unexpected win (TP reached)';
+        } else {
+          // Wait for minDuration
+          remainingPositions.push(pos);
+          return;
+        }
       } else if (realPnlPercent <= pos.stopLossPnL) {
-        shouldClose = true;
-        slippageReason = !pos.shouldWin
-          ? 'Natural loss (SL reached)'
-          : 'Unexpected loss (SL reached)';
+        // ✅ Enforce minDuration even for SL
+        if (duration >= minDuration) {
+          shouldClose = true;
+          slippageReason = !pos.shouldWin
+            ? 'Natural loss (SL reached)'
+            : 'Unexpected loss (SL reached)';
+        } else {
+          // Wait for minDuration
+          remainingPositions.push(pos);
+          return;
+        }
       }
-      // PRIORITY 2: Check minimum duration
+      // PRIORITY 2: Check minimum duration (for other closures)
       else if (duration < minDuration) {
         remainingPositions.push(pos);
         return;
@@ -287,11 +301,46 @@ export class TradingBot {
   // Close Position with Slippage
   // ============================================================================
 
+  /**
+   * Recalculate exitPrice from finalPnlPercent to ensure mathematical consistency
+   */
+  private recalculateExitPrice(
+    entryPrice: number,
+    pnlPercent: number,
+    leverage: number,
+    side: 'LONG' | 'SHORT'
+  ): number {
+    // Calculate required price change to achieve pnlPercent
+    // Formula: pnlPercent = (priceChange / entryPrice) * leverage * 100 * (side === 'LONG' ? 1 : -1)
+    // Solving for priceChange:
+    const priceChangePercent = pnlPercent / (leverage * 100);
+    const priceChange = entryPrice * priceChangePercent;
+
+    return side === 'LONG'
+      ? entryPrice + priceChange
+      : entryPrice - priceChange;
+  }
+
   private closePosition(pos: Position, needsSlippage: boolean, realPnlPercent: number): void {
     let exitPrice = pos.currentPrice;
     let finalPnlPercent = realPnlPercent;
     let hadSlippage = false;
     let slippageAmount = 0;
+
+    // DEBUG LOGGING: Before slippage - log all input variables
+    console.log(`[${this.config.name}] === Close Position Debug ===`);
+    console.log(`[${this.config.name}] 1. BEFORE SLIPPAGE:`);
+    console.log(`[${this.config.name}]    entryPrice: ${pos.entryPrice.toFixed(2)}`);
+    console.log(`[${this.config.name}]    currentPrice: ${pos.currentPrice.toFixed(2)}`);
+    console.log(`[${this.config.name}]    exitPrice (initial): ${exitPrice.toFixed(2)}`);
+    console.log(`[${this.config.name}]    realPnlPercent: ${realPnlPercent.toFixed(4)}%`);
+    console.log(`[${this.config.name}]    targetPnL: ${pos.targetPnL.toFixed(4)}%`);
+    console.log(`[${this.config.name}]    stopLossPnL: ${pos.stopLossPnL.toFixed(4)}%`);
+    console.log(`[${this.config.name}]    shouldWin: ${pos.shouldWin}`);
+    console.log(`[${this.config.name}]    positionSize: $${pos.positionSize.toFixed(2)}`);
+    console.log(`[${this.config.name}]    leverage: ${pos.leverage}x`);
+    console.log(`[${this.config.name}]    side: ${pos.side}`);
+    console.log(`[${this.config.name}]    needsSlippage: ${needsSlippage}`);
 
     if (needsSlippage) {
       const targetPnl = pos.shouldWin ? pos.targetPnL : pos.stopLossPnL;
@@ -319,6 +368,13 @@ export class TradingBot {
         ? exitPrice - pos.entryPrice
         : pos.entryPrice - exitPrice;
       finalPnlPercent = (priceChange / pos.entryPrice) * pos.leverage * 100;
+
+      // DEBUG LOGGING: After slippage
+      console.log(`[${this.config.name}] 2. AFTER SLIPPAGE:`);
+      console.log(`[${this.config.name}]    gap (target - real): ${(pos.shouldWin ? pos.targetPnL : pos.stopLossPnL - realPnlPercent).toFixed(4)}%`);
+      console.log(`[${this.config.name}]    slippageAmount: ${slippageAmount.toFixed(4)}%`);
+      console.log(`[${this.config.name}]    exitPriceAfterSlippage: ${exitPrice.toFixed(2)}`);
+      console.log(`[${this.config.name}]    finalPnlPercentAfterSlippage: ${finalPnlPercent.toFixed(4)}%`);
     }
 
     // Layer 6: Micro-steering (final 10 trades)
@@ -332,10 +388,21 @@ export class TradingBot {
     if (microSteering !== 0) {
       const beforeSteering = finalPnlPercent;
       finalPnlPercent += microSteering;
-      console.log(
-        `[${this.config.name}] Layer 6: Micro-steering applied: ${microSteering.toFixed(3)}% ` +
-        `(${beforeSteering.toFixed(3)}% → ${finalPnlPercent.toFixed(3)}%)`
+
+      // ✅ RECALCULATE exitPrice to match new finalPnlPercent
+      exitPrice = this.recalculateExitPrice(
+        pos.entryPrice,
+        finalPnlPercent,
+        pos.leverage,
+        pos.side
       );
+
+      // DEBUG LOGGING: After Layer 6 micro-steering
+      console.log(`[${this.config.name}] 3. AFTER LAYER 6 MICRO-STEERING:`);
+      console.log(`[${this.config.name}]    beforeSteering: ${beforeSteering.toFixed(4)}%`);
+      console.log(`[${this.config.name}]    steeringAmount: ${microSteering.toFixed(4)}%`);
+      console.log(`[${this.config.name}]    afterSteering: ${finalPnlPercent.toFixed(4)}%`);
+      console.log(`[${this.config.name}]    exitPrice recalculated: ${exitPrice.toFixed(2)}`);
     }
 
     // CRITICAL: Prevent ANY source (slippage, friction, Layer 6) from flipping shouldWin outcome
@@ -357,15 +424,49 @@ export class TradingBot {
         finalPnlPercent = -avgStopLoss;
       }
 
-      console.log(
-        `[${this.config.name}] Outcome flip prevented (shouldWin=${pos.shouldWin}): ` +
-        `${beforeFlipCheck.toFixed(3)}% → ${finalPnlPercent.toFixed(3)}%`
+      // ✅ RECALCULATE exitPrice to match new finalPnlPercent
+      exitPrice = this.recalculateExitPrice(
+        pos.entryPrice,
+        finalPnlPercent,
+        pos.leverage,
+        pos.side
       );
+
+      // DEBUG LOGGING: After flip prevention
+      console.log(`[${this.config.name}] 4. AFTER FLIP PREVENTION:`);
+      console.log(`[${this.config.name}]    beforeFlip: ${beforeFlipCheck.toFixed(4)}%`);
+      console.log(`[${this.config.name}]    afterFlip: ${finalPnlPercent.toFixed(4)}%`);
+      console.log(`[${this.config.name}]    shouldWin: ${pos.shouldWin}`);
+      console.log(`[${this.config.name}]    resultNegative: ${resultNegative}`);
+      console.log(`[${this.config.name}]    exitPrice recalculated: ${exitPrice.toFixed(2)}`);
     }
 
     const finalPnl = (pos.positionSize * finalPnlPercent) / 100;
     const isWin = finalPnl >= 0;
     const expectedWin = pos.shouldWin;
+
+    // DEBUG LOGGING: Final trade summary
+    console.log(`[${this.config.name}] 5. FINAL TRADE SUMMARY:`);
+    console.log(`[${this.config.name}]    entryPrice: ${pos.entryPrice.toFixed(2)}`);
+    console.log(`[${this.config.name}]    exitPrice: ${exitPrice.toFixed(2)}`);
+    console.log(`[${this.config.name}]    finalPnl: $${finalPnl.toFixed(4)}`);
+    console.log(`[${this.config.name}]    finalPnlPercent: ${finalPnlPercent.toFixed(4)}%`);
+
+    // Calculate expected P&L from prices
+    const priceChangeFromPrices = pos.side === 'LONG'
+      ? exitPrice - pos.entryPrice
+      : pos.entryPrice - exitPrice;
+    const expectedPnlFromPrices = (priceChangeFromPrices / pos.entryPrice) * pos.leverage * pos.positionSize;
+    console.log(`[${this.config.name}]    expectedPnlFromPrices: $${expectedPnlFromPrices.toFixed(4)}`);
+
+    // Validation check
+    const deviation = Math.abs(finalPnl - expectedPnlFromPrices);
+    if (deviation > 0.01) {
+      console.error(`[${this.config.name}] ❌ P&L MISMATCH: calculated=$${expectedPnlFromPrices.toFixed(4)}, stored=$${finalPnl.toFixed(4)}, deviation=$${deviation.toFixed(4)}`);
+    } else {
+      console.log(`[${this.config.name}] ✅ P&L MATCH: deviation=$${deviation.toFixed(4)}`);
+    }
+    console.log(`[${this.config.name}] === End Debug ===\n`);
 
     // Mark as closed
     this.closedPositionIds.add(pos.id);
@@ -380,9 +481,26 @@ export class TradingBot {
     const symbol = pos.pair.replace('/', '');
     const trend = trendDetector.getTrend(symbol);
 
+    // ============================================================================
+    // REALISTIC TRADING METRICS - Calculate fees and net P&L
+    // ============================================================================
+
+    // Trading fees (typical: 0.04% per side for maker/taker average)
+    const feeRate = 0.04; // 0.04% per trade side
+    const openFee = (pos.positionSize * feeRate) / 100;
+    const closeFee = (pos.positionSize * feeRate) / 100;
+    const totalFees = openFee + closeFee;
+
+    // Net P&L after fees
+    const netPnl = finalPnl - totalFees;
+
+    // Slippage percentage (from earlier calculation)
+    const slippagePercent = hadSlippage && slippageAmount !== undefined ? slippageAmount : 0;
+
     // Add to trade history
     const trade: Trade = {
       id: `trade-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      botName: this.config.name,
       pair: pos.pair,
       side: pos.side,
       leverage: pos.leverage,
@@ -394,10 +512,21 @@ export class TradingBot {
       pnlPercent: finalPnlPercent,
       duration: pos.duration,
       closedAt: new Date().toISOString(),
+
+      // Realistic Trading Metrics
+      openFee,
+      closeFee,
+      totalFees,
+      netPnl,
+      slippage: slippagePercent,
+
+      // Internal System Fields (optional)
       expectedOutcome: expectedWin ? 'WIN' : 'LOSS',
       actualOutcome: isWin ? 'WIN' : 'LOSS',
       hadSlippage,
       slippageAmount: hadSlippage ? slippageAmount : undefined,
+      convergenceLayer: pos.convergenceLayer,  // Dominant layer at close
+      favorabilityScore: pos.favorabilityScore, // Entry favorability
       technicalIndicators: {
         trend, // Just the trend, not full TA
         // Other fields undefined (not needed for Layer 2)

@@ -21,6 +21,10 @@ import {
   MessageCircle,
   Gauge,
   ShieldCheck,
+  Wallet,
+  Receipt,
+  Gift,
+  Bell,
 } from 'lucide-react';
 
 interface NavItemProps {
@@ -143,6 +147,48 @@ export default function Sidebar() {
             icon={<BarChart3 className="w-6 h-6" />}
             label="Analytics"
             active={pathname?.startsWith('/dashboard-v2/analytics')}
+            isCollapsed={isCollapsed}
+          />
+
+          <NavItem
+            href="/dashboard-v2/notifications"
+            icon={<Bell className="w-6 h-6" />}
+            label="Notifications"
+            active={pathname?.startsWith('/dashboard-v2/notifications')}
+            isCollapsed={isCollapsed}
+          />
+
+          <NavDivider />
+
+          {!isCollapsed && (
+            <div className="px-2 mb-2">
+              <div className="text-xs font-medium text-dark-500 uppercase tracking-wider">
+                Finance
+              </div>
+            </div>
+          )}
+
+          <NavItem
+            href="/dashboard-v2/wallets"
+            icon={<Wallet className="w-6 h-6" />}
+            label="Wallets"
+            active={pathname?.startsWith('/dashboard-v2/wallets')}
+            isCollapsed={isCollapsed}
+          />
+
+          <NavItem
+            href="/dashboard-v2/transactions"
+            icon={<Receipt className="w-6 h-6" />}
+            label="Transactions"
+            active={pathname?.startsWith('/dashboard-v2/transactions')}
+            isCollapsed={isCollapsed}
+          />
+
+          <NavItem
+            href="/dashboard-v2/referrals"
+            icon={<Gift className="w-6 h-6" />}
+            label="Referrals"
+            active={pathname?.startsWith('/dashboard-v2/referrals')}
             isCollapsed={isCollapsed}
           />
 

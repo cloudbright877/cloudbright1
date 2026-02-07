@@ -13,6 +13,9 @@
  * 6. Micro-steering - tiny P&L adjustments in final 10 trades
  */
 
+// Minimum TP threshold to prevent micro-trades
+const MIN_TP_PERCENT = 0.5; // Never allow TP below 0.5%
+
 export interface ConvergenceMetrics {
   dailyProgress: number;        // 0-200% (current P&L / target P&L * 100)
   tradesCompleted: number;      // Trades closed today
@@ -176,8 +179,16 @@ export class ConvergenceController {
       { boundary: 120, prev: 1.3, next: 1.5 },
     ]);
 
+    // Apply minimum TP threshold to prevent micro-trades
+    const calculatedTP = baseTP * smoothTP;
+    const finalTP = Math.max(MIN_TP_PERCENT, calculatedTP);
+
+    if (finalTP > calculatedTP) {
+      console.log(`[Layer 3] TP clamped to minimum: ${calculatedTP.toFixed(4)}% → ${finalTP.toFixed(4)}%`);
+    }
+
     return {
-      tp: baseTP * smoothTP,
+      tp: finalTP,
       sl: baseSL * smoothSL,
     };
   }

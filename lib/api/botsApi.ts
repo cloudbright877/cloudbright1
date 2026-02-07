@@ -5,12 +5,17 @@ import {
   getUserCopies as getUserCopiesStorage,
   getUserCopy as getUserCopyStorage,
   deleteUserCopy as deleteUserCopyStorage,
+  updateUserCopy,
 } from '../userCopies';
 import {
   getUserCopyStats,
   getMasterBotAggregatedStats,
 } from '../userCopyStats';
 import { getAllDemoBots, getDemoBotById } from '../demoMarketplace';
+import { distributeReferralCommissions } from '../referralCommissions';
+import { checkAndAwardTurnoverBonuses } from '../turnoverBonuses';
+import { unfreezeFunds, freezeFunds } from '../balances';
+import { getUser, getUplineChain } from '../users';
 import type { DemoBot } from '../demoMarketplace';
 import type { BotConfig, BotStats } from '../trading/types';
 import type { AggregatedMasterBotStats } from '../userCopyStats';
@@ -108,14 +113,18 @@ export const botsApi = {
    */
   async createBotCopy(
     masterBotId: string,
-    investedAmount: number
+    investedAmount: number,
+    userId: string = 'user_default'
   ): Promise<string> {
     await new Promise((resolve) => setTimeout(resolve, 100));
 
     // Ensure Master Bot instance exists before creating copy
     await this.ensureMasterBot(masterBotId);
 
-    const copyId = createUserCopy(masterBotId, investedAmount);
+    // Move funds from available to frozen
+    await freezeFunds(userId, investedAmount, 'pending_copy');
+
+    const copyId = createUserCopy(masterBotId, investedAmount, userId);
     return copyId;
 
     /* FUTURE:
@@ -126,6 +135,108 @@ export const botsApi = {
     });
     const data = await response.json();
     return data.copyId;
+    */
+  },
+
+  /**
+   * Close a user copy (NEW)
+   *
+   * Flow:
+   * 1. Mark copy as CLOSING
+   * 2. Calculate final P&L
+   * 3. Distribute referral commissions (if profitable)
+   * 4. Award turnover bonuses to upline chain
+   * 5. Unfreeze funds and return to investor
+   * 6. Mark copy as CLOSED
+   *
+   * @param copyId User copy ID
+   * @returns Closed copy stats and commission breakdown
+   */
+  async closeUserCopy(copyId: string): Promise<{
+    copy: BotStats | null;
+    finalPnL: number;
+    finalValue: number;
+    totalCommissions: number;
+    investorReceives: number;
+  }> {
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    // 1. Get copy and validate status
+    const copy = getUserCopyStorage(copyId);
+    if (!copy) {
+      throw new Error(`Copy ${copyId} not found`);
+    }
+
+    if (copy.status !== 'ACTIVE') {
+      throw new Error(`Copy ${copyId} is not active (status: ${copy.status})`);
+    }
+
+    // 2. Mark as CLOSING
+    updateUserCopy(copyId, { status: 'CLOSING' });
+
+    // 3. Calculate final P&L
+    const stats = getUserCopyStats(copyId);
+    if (!stats) {
+      throw new Error(`Failed to get stats for copy ${copyId}`);
+    }
+
+    const finalPnL = stats.totalPnL;
+    const finalValue = copy.investedAmount + finalPnL;
+
+    // 4. Distribute referral commissions (if profitable)
+    let totalCommissions = 0;
+    if (finalPnL > 0) {
+      totalCommissions = await distributeReferralCommissions(
+        copy.userId,
+        copyId,
+        finalPnL
+      );
+
+      // 5. Award turnover bonuses to all uplines
+      const uplineChain = await getUplineChain(copy.userId);
+      for (const upline of uplineChain) {
+        await checkAndAwardTurnoverBonuses(upline.id);
+      }
+    }
+
+    // 6. Calculate investor receives (principal + profit - commissions)
+    const investorReceives = finalValue - totalCommissions;
+
+    // 7. Unfreeze funds (frozen → available)
+    await unfreezeFunds(
+      copy.userId,
+      copy.investedAmount,
+      investorReceives,
+      copyId
+    );
+
+    // 8. Mark as CLOSED
+    updateUserCopy(copyId, {
+      status: 'CLOSED',
+      closedAt: Date.now(),
+      finalPnL,
+      finalValue,
+    });
+
+    console.log(`[botsApi] Closed copy ${copyId}:`);
+    console.log(`  Principal: $${copy.investedAmount.toFixed(2)}`);
+    console.log(`  P&L: $${finalPnL.toFixed(2)}`);
+    console.log(`  Commissions: $${totalCommissions.toFixed(2)}`);
+    console.log(`  Investor receives: $${investorReceives.toFixed(2)}`);
+
+    return {
+      copy: getUserCopyStats(copyId),
+      finalPnL,
+      finalValue,
+      totalCommissions,
+      investorReceives,
+    };
+
+    /* FUTURE:
+    const response = await fetch(`/api/user/bots/${copyId}/close`, {
+      method: 'POST',
+    });
+    return await response.json();
     */
   },
 

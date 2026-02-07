@@ -577,11 +577,27 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
             openedAt: pos.duration, // Use duration as openedAt string (already formatted)
           }));
 
-          // Convert Trade[] to add botName field
-          const recentTrades = trades.map(t => ({
-            ...t,
-            botName: aggStats.masterBotStats.name,
-          }));
+          // Convert Trade[] to add botName and realistic metrics
+          const recentTrades: ApiTrade[] = trades.map((t: any) => {
+            // Calculate realistic metrics if not present
+            const feeRate = 0.04;
+            const posSize = t.positionSize || 0;
+            const openFee = t.openFee ?? (posSize * feeRate / 100);
+            const closeFee = t.closeFee ?? (posSize * feeRate / 100);
+            const totalFees = t.totalFees ?? (openFee + closeFee);
+            const netPnl = t.netPnl ?? (t.pnl - totalFees);
+            const slippage = t.slippage ?? 0;
+
+            return {
+              ...t,
+              botName: aggStats.masterBotStats.name,
+              openFee,
+              closeFee,
+              totalFees,
+              netPnl,
+              slippage,
+            } as ApiTrade;
+          });
 
           return {
             ...prev,

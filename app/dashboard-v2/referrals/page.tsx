@@ -1,96 +1,27 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import GlassCard from '@/components/ui/GlassCard';
+import { getUser, getDirectReferrals, getAllReferrals } from '@/lib/users';
+import { getTotalEarned, getUserCommissions } from '@/lib/referralCommissions';
+import { calculateTeamTurnover, getTurnoverStats, TURNOVER_LEVELS } from '@/lib/turnoverBonuses';
+import { getBalance } from '@/lib/balances';
+import { getUserCopy, getActiveUserCopies, getClosedUserCopies } from '@/lib/userCopies';
 
 
-const TURNOVER_BONUSES = [
-  { id: 1,  minAmount: 1_000,    maxAmount: 2_499.99,   bonus: 30,     investment: 100 },
-  { id: 2,  minAmount: 2_500,    maxAmount: 4_999.99,   bonus: 75,     investment: 250 },
-  { id: 3,  minAmount: 5_000,    maxAmount: 9_999.99,   bonus: 150,    investment: 500 },
-  { id: 4,  minAmount: 10_000,   maxAmount: 24_999.99,  bonus: 300,    investment: 1_000 },
-  { id: 5,  minAmount: 25_000,   maxAmount: 49_999.99,  bonus: 750,    investment: 2_500 },
-  { id: 6,  minAmount: 50_000,   maxAmount: 99_999.99,  bonus: 1_500,  investment: 5_000 },
-  { id: 7,  minAmount: 100_000,  maxAmount: 249_999.99, bonus: 3_000,  investment: 10_000 },
-  { id: 8,  minAmount: 250_000,  maxAmount: 499_999.99, bonus: 7_500,  investment: 25_000 },
-  { id: 9,  minAmount: 500_000,  maxAmount: 999_999.99, bonus: 15_000, investment: 50_000 },
-  { id: 10, minAmount: 1_000_000, maxAmount: Infinity,  bonus: 30_000, investment: 100_000 },
-];
+// Helper function to calculate level between two users
+async function calculateReferralLevel(uplineUserId: string, referralUserId: string): Promise<number> {
+  const referral = await getUser(referralUserId);
+  if (!referral || !referral.referralPath) return 0;
 
-// Referral data
-const referralStats = {
-  totalReferrals: 47,
-  activeInvestors: 28,
-  totalEarned: 5847.32,
-  turnover: 125840.50,
-};
+  const pathParts = referral.referralPath.split('/').filter(Boolean);
+  const uplineIndex = pathParts.indexOf(uplineUserId);
 
-const userData = {
-  referredBy: 'JohnDoe',
-  referredByAvatar: null,
-};
-
-const referralsList = [
-  {
-    id: 1,
-    username: 'alice_investor',
-    email: 'alice@example.com',
-    level: 1,
-    deposits: 15000,
-    bonus: 750,
-    status: 'active',
-    date: Date.now() - 15 * 24 * 60 * 60 * 1000,
-    avatar: null,
-  },
-  {
-    id: 2,
-    username: 'bob_trader',
-    email: 'bob@example.com',
-    level: 1,
-    deposits: 12500,
-    bonus: 625,
-    status: 'active',
-    date: Date.now() - 25 * 24 * 60 * 60 * 1000,
-    avatar: null,
-  },
-  {
-    id: 3,
-    username: 'charlie_crypto',
-    email: 'charlie@example.com',
-    level: 2,
-    deposits: 8000,
-    bonus: 240,
-    status: 'active',
-    date: Date.now() - 35 * 24 * 60 * 60 * 1000,
-    avatar: null,
-  },
-];
-
-const recentBonusList = [
-  {
-    id: 1,
-    amount: 50.00,
-    currency: 'USDT',
-    from: 'alice_investor',
-    date: Date.now() - 2 * 60 * 60 * 1000,
-  },
-  {
-    id: 2,
-    amount: 37.50,
-    currency: 'USDT',
-    from: 'bob_trader',
-    date: Date.now() - 5 * 60 * 60 * 1000,
-  },
-  {
-    id: 3,
-    amount: 24.00,
-    currency: 'USDT',
-    from: 'charlie_crypto',
-    date: Date.now() - 12 * 60 * 60 * 1000,
-  },
-];
+  if (uplineIndex === -1) return 0;
+  return pathParts.length - uplineIndex;
+}
 
 export default function ReferralsPage() {
   const [copied, setCopied] = useState(false);
@@ -101,24 +32,152 @@ export default function ReferralsPage() {
   const [showCurrencyDropdown, setShowCurrencyDropdown] = useState(false);
   const referralsPerPage = 5;
 
-  // Static data
-  const stats = referralStats;
-  const referrals = referralsList;
-  const recentBonuses = recentBonusList;
-  const walletForBonus = 'USDT';
-  const teamTurnover = 125840.50;
-  const personalInvestment = 5000;
-  const claimedLevels = 3;
+  // Real data state
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [totalEarned, setTotalEarned] = useState(0);
+  const [teamTurnover, setTeamTurnover] = useState(0);
+  const [referrals, setReferrals] = useState<any[]>([]);
+  const [recentCommissions, setRecentCommissions] = useState<any[]>([]);
+  const [turnoverStats, setTurnoverStats] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [referrerUser, setReferrerUser] = useState<any>(null);
 
-  // Referral link
-  const referralLink = `${typeof window !== 'undefined' ? window.location.origin : ''}/register?ref=JOHNDOE123`;
+  const walletForBonus = 'USDT';
 
   const commissionStructure = [
-    { level: 1, commission: 5 },
-    { level: 2, commission: 3 },
-    { level: 3, commission: 2 },
-    { level: '4-10', commission: 1 },
+    { level: 1, commission: 10 },
+    { level: 2, commission: 5 },
+    { level: 3, commission: 3 },
+    { level: '4-10', commission: 2 },
   ];
+
+  // Load real data
+  useEffect(() => {
+    async function loadData() {
+      try {
+        // Get current user from localStorage
+        const currentUserId = localStorage.getItem('currentUserId');
+        if (!currentUserId) {
+          console.warn('[Referrals] No current user found');
+          setIsLoading(false);
+          return;
+        }
+
+        const user = await getUser(currentUserId);
+        if (!user) {
+          console.warn('[Referrals] User not found:', currentUserId);
+          setIsLoading(false);
+          return;
+        }
+
+        setCurrentUser(user);
+
+        // Load referrer if exists
+        if (user.referredBy) {
+          const referrer = await getUser(user.referredBy);
+          setReferrerUser(referrer);
+        }
+
+        // Load total earned
+        const earned = await getTotalEarned(currentUserId);
+        setTotalEarned(earned);
+
+        // Load team turnover
+        const turnover = await calculateTeamTurnover(currentUserId);
+        setTeamTurnover(turnover);
+
+        // Load turnover stats
+        const stats = await getTurnoverStats(currentUserId);
+        setTurnoverStats(stats);
+
+        // Load all referrals (all levels)
+        const allReferrals = await getAllReferrals(currentUserId);
+
+        // For each referral, calculate their data
+        const referralsWithData = await Promise.all(
+          allReferrals.map(async (referral) => {
+            // Calculate level
+            const level = await calculateReferralLevel(currentUserId, referral.id);
+
+            // Get their balance
+            const balance = await getBalance(referral.id);
+            const totalDeposits = balance.available + balance.frozen;
+
+            // Get active copies count
+            const activeCopies = await getActiveUserCopies(referral.id);
+            const isActive = activeCopies.length > 0;
+
+            // Calculate total commissions earned from this referral
+            const commissions = await getUserCommissions(currentUserId);
+            const commissionsFromReferral = commissions
+              .filter(c => c.investorUserId === referral.id)
+              .reduce((sum, c) => sum + c.commissionAmount, 0);
+
+            return {
+              id: referral.id,
+              username: referral.username,
+              email: referral.email,
+              level,
+              deposits: totalDeposits,
+              bonus: commissionsFromReferral,
+              status: isActive ? 'active' : 'inactive',
+              date: referral.createdAt,
+              avatar: null,
+            };
+          })
+        );
+
+        setReferrals(referralsWithData);
+
+        // Load recent commissions (last 10)
+        const commissions = await getUserCommissions(currentUserId);
+        const recent = commissions
+          .sort((a, b) => b.createdAt - a.createdAt)
+          .slice(0, 10)
+          .map(async (c) => {
+            const investor = await getUser(c.investorUserId);
+            return {
+              id: c.id,
+              amount: c.commissionAmount,
+              currency: 'USDT',
+              from: investor?.username || 'Unknown',
+              level: c.level,
+              date: c.createdAt,
+            };
+          });
+
+        const recentWithUsernames = await Promise.all(recent);
+        setRecentCommissions(recentWithUsernames);
+
+        setIsLoading(false);
+      } catch (error) {
+        console.error('[Referrals] Error loading data:', error);
+        setIsLoading(false);
+      }
+    }
+
+    loadData();
+
+    // Auto-refresh every 30 seconds
+    const interval = setInterval(loadData, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Referral link
+  const referralLink = currentUser
+    ? `${typeof window !== 'undefined' ? window.location.origin : ''}/register?ref=${currentUser.referralCode}`
+    : '';
+
+  // Stats
+  const stats = {
+    totalReferrals: referrals.length,
+    activeInvestors: referrals.filter(r => r.status === 'active').length,
+    totalEarned,
+    turnover: teamTurnover,
+  };
+
+  const recentBonuses = recentCommissions;
+  const claimedLevels = turnoverStats?.currentLevel || 0;
 
   // Available currencies for bonus preference
   const bonusCurrencies = [
@@ -201,6 +260,20 @@ export default function ReferralsPage() {
     setCurrentPage(1);
   };
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <div className="w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-dark-300">Loading referral data...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
@@ -212,7 +285,9 @@ export default function ReferralsPage() {
         <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">
           Referral Program
         </h1>
-        <p className="text-dark-300">Earn lifetime commissions by inviting friends</p>
+        <p className="text-dark-300">
+          Earn up to 32% commissions from your referral network (10 levels deep)
+        </p>
       </motion.div>
 
       <div className="grid lg:grid-cols-3 gap-8">
@@ -325,24 +400,24 @@ export default function ReferralsPage() {
                   <div className="text-2xl mb-2">🎯</div>
                   <h4 className="font-bold text-white mb-2">Direct Referral Bonuses</h4>
                   <p className="text-sm text-dark-300 mb-3">
-                    Earn instant commissions when your referrals invest
+                    Earn instant commissions when your referrals close profitable copies
                   </p>
                   <div className="space-y-1 text-sm">
                     <div className="flex justify-between">
                       <span className="text-dark-400">Level 1:</span>
-                      <span className="text-white font-medium">5%</span>
+                      <span className="text-white font-medium">10%</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-dark-400">Level 2:</span>
-                      <span className="text-white font-medium">3%</span>
+                      <span className="text-white font-medium">5%</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-dark-400">Level 3:</span>
-                      <span className="text-white font-medium">2%</span>
+                      <span className="text-white font-medium">3%</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-dark-400">Levels 4-10:</span>
-                      <span className="text-white font-medium">1%</span>
+                      <span className="text-white font-medium">2%</span>
                     </div>
                   </div>
                 </div>
@@ -359,12 +434,14 @@ export default function ReferralsPage() {
                       <span className="text-white font-medium">${formatNumber(teamTurnover)}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-dark-400">Personal Investment:</span>
-                      <span className="text-white font-medium">${formatNumber(personalInvestment)}</span>
+                      <span className="text-dark-400">Achieved Levels:</span>
+                      <span className="text-white font-medium">{claimedLevels} / 10</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-dark-400">Claimed Levels:</span>
-                      <span className="text-white font-medium">{claimedLevels} / 10</span>
+                      <span className="text-dark-400">Bonuses Earned:</span>
+                      <span className="text-white font-medium">
+                        ${formatNumber(turnoverStats?.totalBonusesEarned || 0)}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -384,7 +461,7 @@ export default function ReferralsPage() {
                     </h4>
                     <div className="bg-dark-800/30 rounded-lg p-4 space-y-3">
                       <p className="text-sm text-dark-300">
-                        Every time someone in your referral network makes an investment, you earn a percentage based on their level:
+                        When someone in your referral network closes a profitable copy, you earn a commission based on their level:
                       </p>
 
                       <div className="space-y-2">
@@ -409,9 +486,9 @@ export default function ReferralsPage() {
 
                       <div className="mt-4 p-3 bg-primary-500/10 border border-primary-500/20 rounded-lg">
                         <p className="text-sm text-dark-200">
-                          <strong className="text-white">Example:</strong> Your direct referral (Level 1) invests $1,000.
-                          You earn <strong className="text-primary-400">$50 instantly</strong> (5%).
-                          If they refer someone who invests $1,000, you earn <strong className="text-primary-400">$30</strong> (3% from Level 2).
+                          <strong className="text-white">Example:</strong> Your direct referral (Level 1) closes a copy with $1,000 profit.
+                          You earn <strong className="text-primary-400">$100 instantly</strong> (10%).
+                          If they refer someone who profits $1,000, you earn <strong className="text-primary-400">$50</strong> (5% from Level 2).
                         </p>
                       </div>
                     </div>
@@ -438,13 +515,13 @@ export default function ReferralsPage() {
                       <div className="mt-4">
                         <h5 className="text-sm font-bold text-white mb-3">Turnover Bonus Levels:</h5>
                         <div className="space-y-2 max-h-64 overflow-y-auto">
-                          {TURNOVER_BONUSES.map((bonus) => {
-                            const isUnlocked = teamTurnover >= bonus.minAmount && personalInvestment >= bonus.investment;
-                            const isClaimed = bonus.id <= claimedLevels;
+                          {TURNOVER_LEVELS.map((level) => {
+                            const isUnlocked = teamTurnover >= level.threshold;
+                            const isClaimed = level.level <= claimedLevels;
 
                             return (
                               <div
-                                key={bonus.id}
+                                key={level.level}
                                 className={`p-3 rounded-lg border ${
                                   isClaimed
                                     ? 'bg-green-500/10 border-green-500/30'
@@ -461,13 +538,13 @@ export default function ReferralsPage() {
                                         isUnlocked ? 'bg-yellow-500/20 text-yellow-400' :
                                         'bg-dark-700 text-dark-400'
                                       }`}>
-                                        Level {bonus.id}
+                                        Level {level.level}
                                       </span>
                                       {isClaimed && <span className="text-green-400 text-sm">✓ Claimed</span>}
                                       {!isClaimed && isUnlocked && <span className="text-yellow-400 text-sm">⚡ Ready!</span>}
                                     </div>
                                     <div className="text-sm text-dark-300">
-                                      Turnover: ${formatNumber(bonus.minAmount)} • Investment: ${formatNumber(bonus.investment)}
+                                      Turnover: ${formatNumber(level.threshold)}
                                     </div>
                                   </div>
                                   <div className={`text-lg font-bold ${
@@ -475,7 +552,7 @@ export default function ReferralsPage() {
                                     isUnlocked ? 'text-yellow-400' :
                                     'text-dark-500'
                                   }`}>
-                                    ${formatNumber(bonus.bonus)}
+                                    ${formatNumber(level.bonus)}
                                   </div>
                                 </div>
                               </div>
@@ -486,8 +563,8 @@ export default function ReferralsPage() {
 
                       <div className="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
                         <p className="text-sm text-dark-200">
-                          <strong className="text-white">Important:</strong> You must have the minimum personal investment to claim each level.
-                          Bonuses are automatically credited when you reach the turnover threshold AND have the required investment.
+                          <strong className="text-white">Important:</strong> Bonuses are automatically awarded when your team reaches the turnover threshold.
+                          Team turnover = sum of all positive P&L from closed copies (losses excluded).
                         </p>
                       </div>
                     </div>
@@ -678,8 +755,15 @@ export default function ReferralsPage() {
                         💰
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="text-sm font-bold text-green-400">
-                          +{formatNumber(bonus.amount)} {bonus.currency}
+                        <div className="flex items-center gap-2">
+                          <div className="text-sm font-bold text-green-400">
+                            +${formatNumber(bonus.amount)}
+                          </div>
+                          {bonus.level && (
+                            <span className="text-xs px-1.5 py-0.5 rounded bg-primary-500/20 text-primary-400">
+                              L{bonus.level}
+                            </span>
+                          )}
                         </div>
                         <div className="text-xs text-dark-400 truncate">
                           from {bonus.from}
@@ -691,7 +775,8 @@ export default function ReferralsPage() {
                 ) : (
                   <div className="text-center py-8 text-dark-400">
                     <div className="text-4xl mb-2">💰</div>
-                    <div className="text-sm">No bonuses yet</div>
+                    <div className="text-sm">No commissions yet</div>
+                    <div className="text-xs mt-1">Share your link to start earning</div>
                   </div>
                 )}
               </div>
@@ -740,7 +825,7 @@ export default function ReferralsPage() {
           </motion.div>
 
           {/* Referred By Section */}
-          {userData?.referredBy && (
+          {referrerUser && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -749,21 +834,12 @@ export default function ReferralsPage() {
               <GlassCard>
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-gradient-to-br from-primary-600 to-secondary-600 rounded-lg flex items-center justify-center text-white font-bold overflow-hidden">
-                    {userData.referredByAvatar ? (
-                      <Image
-                        src={userData.referredByAvatar}
-                        alt={userData.referredBy}
-                        width={40}
-                        height={40}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <span>{userData.referredBy[0]?.toUpperCase() || '?'}</span>
-                    )}
+                    <span>{referrerUser.username[0]?.toUpperCase() || '?'}</span>
                   </div>
                   <div className="flex-1">
                     <div className="text-xs text-dark-400">Referred By</div>
-                    <div className="font-medium text-white">{userData.referredBy}</div>
+                    <div className="font-medium text-white">{referrerUser.username}</div>
+                    <div className="text-xs text-dark-500">Code: {referrerUser.referralCode}</div>
                   </div>
                 </div>
               </GlassCard>

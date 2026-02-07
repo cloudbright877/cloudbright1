@@ -140,6 +140,24 @@ export interface Trade {
   pnlPercent: number;       // ROE percentage
   duration: string;         // Hold time (e.g., "4h 20m")
   closedAt: string;         // ISO date string or human-readable
+
+  // Realistic Trading Metrics
+  openFee: number;                  // Opening fee ($)
+  closeFee: number;                 // Closing fee ($)
+  totalFees: number;                // Total fees ($)
+  netPnl: number;                   // Net P&L after fees ($)
+  slippage: number;                 // Slippage in % (e.g., 0.02 = 0.02%)
+
+  // Internal System Fields (optional)
+  expectedOutcome?: 'WIN' | 'LOSS';  // Pre-determined outcome
+  actualOutcome?: 'WIN' | 'LOSS';    // Actual result
+  hadSlippage?: boolean;             // Was slippage applied?
+  slippageAmount?: number;          // Slippage percentage (if applied)
+  convergenceLayer?: number;        // Dominant layer (0-6)
+  favorabilityScore?: number;       // Technical analysis score (0-1)
+  technicalIndicators?: {           // SimpleTrendDetector snapshot
+    trend: 'up' | 'down' | 'flat';
+  };
 }
 
 // ============================================================================

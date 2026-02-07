@@ -24,12 +24,18 @@
  * ✅ RIGHT: Creating lightweight record that references master bot ID
  */
 
+export type UserCopyStatus = 'ACTIVE' | 'CLOSING' | 'CLOSED';
+
 export interface UserCopy {
   id: string; // copy_1234567890_abc123
   userId: string; // user_default (for now)
   masterBotId: string; // demo-btc-scalper
   investedAmount: number; // User's investment
+  status: UserCopyStatus; // Lifecycle: ACTIVE → CLOSING → CLOSED
   createdAt: number; // Unix timestamp
+  closedAt?: number; // Unix timestamp when closed
+  finalPnL?: number; // Final P&L in USDT when closed
+  finalValue?: number; // investedAmount + finalPnL
 }
 
 // Storage key
@@ -48,6 +54,7 @@ export function createUserCopy(
     userId,
     masterBotId,
     investedAmount,
+    status: 'ACTIVE', // Default status
     createdAt: Date.now(),
   };
 
@@ -55,7 +62,7 @@ export function createUserCopy(
   copies.push(copy);
   localStorage.setItem(USER_COPIES_KEY, JSON.stringify(copies));
 
-  console.log(`[UserCopies] Created copy ${copy.id} of ${masterBotId}`);
+  console.log(`[UserCopies] Created copy ${copy.id} of ${masterBotId} (status: ACTIVE)`);
   return copy.id;
 }
 
@@ -84,6 +91,20 @@ export function getUserCopies(userId: string = 'user_default'): UserCopy[] {
 }
 
 /**
+ * Get active user copies by userId
+ */
+export function getActiveUserCopies(userId: string = 'user_default'): UserCopy[] {
+  return getAllUserCopies().filter((c) => c.userId === userId && c.status === 'ACTIVE');
+}
+
+/**
+ * Get closed user copies by userId
+ */
+export function getClosedUserCopies(userId: string = 'user_default'): UserCopy[] {
+  return getAllUserCopies().filter((c) => c.userId === userId && c.status === 'CLOSED');
+}
+
+/**
  * Get single user copy by ID
  */
 export function getUserCopy(copyId: string): UserCopy | null {
@@ -98,9 +119,34 @@ export function getAllCopiesOfMaster(masterBotId: string): UserCopy[] {
 }
 
 /**
- * Delete a user copy
+ * Update a user copy
+ */
+export function updateUserCopy(copyId: string, data: Partial<UserCopy>): UserCopy | null {
+  const copies = getAllUserCopies();
+  const index = copies.findIndex((c) => c.id === copyId);
+
+  if (index === -1) {
+    console.error(`[UserCopies] Copy ${copyId} not found`);
+    return null;
+  }
+
+  copies[index] = { ...copies[index], ...data };
+  localStorage.setItem(USER_COPIES_KEY, JSON.stringify(copies));
+
+  console.log(`[UserCopies] Updated copy ${copyId}`, data);
+  return copies[index];
+}
+
+/**
+ * Delete a user copy (only for CLOSED copies)
  */
 export function deleteUserCopy(copyId: string): void {
+  const copy = getUserCopy(copyId);
+
+  if (copy && copy.status !== 'CLOSED') {
+    throw new Error(`Cannot delete copy ${copyId}: status is ${copy.status}, must be CLOSED`);
+  }
+
   const copies = getAllUserCopies().filter((c) => c.id !== copyId);
   localStorage.setItem(USER_COPIES_KEY, JSON.stringify(copies));
   console.log(`[UserCopies] Deleted copy ${copyId}`);

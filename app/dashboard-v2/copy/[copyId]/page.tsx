@@ -181,22 +181,48 @@ export default function UserCopyPage() {
         stopLossPnL: 0,
       }));
 
-      const convertedTrades: Trade[] = stats.trades.slice(0, 50).map((trade: any) => ({
-        id: trade.id,
-        botName: stats.name || 'User Copy',
-        pair: trade.pair,
-        side: trade.side,
-        leverage: trade.leverage,
-        entryPrice: trade.entryPrice,
-        exitPrice: trade.exitPrice,
-        amount: trade.amount,
-        positionSize: trade.positionSize,
-        pnl: trade.pnl,
-        pnlPercent: trade.pnlPercent,
-        duration: trade.duration || '0s',
-        closedAt: trade.closedAt,
-        tradeType: 'scalp' as const,
-      }));
+      const convertedTrades: Trade[] = stats.trades.slice(0, 50).map((trade: any) => {
+        // Calculate realistic metrics if not present
+        const feeRate = 0.04;
+        const posSize = trade.positionSize || 0;
+        const openFee = trade.openFee ?? (posSize * feeRate / 100);
+        const closeFee = trade.closeFee ?? (posSize * feeRate / 100);
+        const totalFees = trade.totalFees ?? (openFee + closeFee);
+        const netPnl = trade.netPnl ?? (trade.pnl - totalFees);
+        const slippage = trade.slippage ?? 0;
+
+        return {
+          id: trade.id,
+          botName: stats.name || 'User Copy',
+          pair: trade.pair,
+          side: trade.side,
+          leverage: trade.leverage,
+          entryPrice: trade.entryPrice,
+          exitPrice: trade.exitPrice,
+          amount: trade.amount,
+          positionSize: trade.positionSize,
+          pnl: trade.pnl,
+          pnlPercent: trade.pnlPercent,
+          duration: trade.duration || '0s',
+          closedAt: trade.closedAt,
+
+          // Realistic Trading Metrics
+          openFee,
+          closeFee,
+          totalFees,
+          netPnl,
+          slippage,
+
+          // Internal System Fields (optional)
+          expectedOutcome: trade.expectedOutcome || (trade.pnl >= 0 ? 'WIN' : 'LOSS'),
+          actualOutcome: trade.actualOutcome || (trade.pnl >= 0 ? 'WIN' : 'LOSS'),
+          hadSlippage: trade.hadSlippage || false,
+          slippageAmount: trade.slippageAmount,
+          convergenceLayer: trade.convergenceLayer,
+          favorabilityScore: trade.favorabilityScore,
+          technicalIndicators: trade.technicalIndicators,
+        };
+      });
 
       setLivePositions(convertedPositions);
       setTradeHistory(convertedTrades);
@@ -1168,6 +1194,7 @@ export default function UserCopyPage() {
                       className="overflow-hidden"
                     >
                       <div className="px-3 pb-3 pt-0 border-t border-dark-700/50">
+                        {/* Row 1: Basic Details */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
                           <div>
                             <div className="text-[10px] text-dark-400 mb-1">Entry Price</div>
@@ -1188,6 +1215,28 @@ export default function UserCopyPage() {
                           <div>
                             <div className="text-[10px] text-dark-400 mb-1">Duration</div>
                             <div className="text-sm text-white font-semibold">{trade.duration}</div>
+                          </div>
+                        </div>
+
+                        {/* Row 2: Trading Costs */}
+                        <div className="grid grid-cols-2 gap-3 mt-3">
+                          <div>
+                            <div className="text-[10px] text-dark-400 mb-1">Total Fees</div>
+                            <div className="font-mono text-sm text-red-400 font-semibold">
+                              -${trade.totalFees.toFixed(2)}
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-[10px] text-dark-400 mb-1">Slippage</div>
+                            {trade.slippage > 0 ? (
+                              <div className="font-mono text-sm text-amber-400 font-semibold">
+                                {trade.slippage.toFixed(3)}%
+                              </div>
+                            ) : (
+                              <div className="font-mono text-sm text-dark-500 font-semibold">
+                                0%
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>

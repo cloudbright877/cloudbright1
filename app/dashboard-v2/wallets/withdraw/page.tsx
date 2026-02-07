@@ -223,7 +223,7 @@ export default function WithdrawPage() {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
         <div className="flex items-center gap-4 mb-4">
           <Link
-            href="/wallets"
+            href="/dashboard-v2/wallets"
             className="p-2 hover:bg-dark-800 rounded-lg transition-colors text-dark-400 hover:text-white"
           >
             ← Back

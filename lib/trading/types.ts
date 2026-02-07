@@ -36,6 +36,7 @@ export interface Position {
 
 export interface Trade {
   id: string;
+  botName: string;
   pair: string;
   side: 'LONG' | 'SHORT';
   leverage: number;
@@ -47,10 +48,20 @@ export interface Trade {
   pnlPercent: number;
   duration: string;
   closedAt: string;
-  expectedOutcome: 'WIN' | 'LOSS';
-  actualOutcome: 'WIN' | 'LOSS';
-  hadSlippage: boolean;
+
+  // Realistic Trading Metrics
+  openFee: number;                  // Opening fee ($)
+  closeFee: number;                 // Closing fee ($)
+  totalFees: number;                // Total fees ($)
+  netPnl: number;                   // Net P&L after fees ($)
+  slippage: number;                 // Slippage in % (e.g., 0.02 = 0.02%)
+
+  // Internal System Fields (optional)
+  expectedOutcome?: 'WIN' | 'LOSS';
+  actualOutcome?: 'WIN' | 'LOSS';
+  hadSlippage?: boolean;
   slippageAmount?: number;
+  convergenceLayer?: number;        // Dominant layer (0-6)
 
   // NEW FIELDS (ADAPTIVE_CONVERGENCE_SYSTEM):
   priceSource?: 'simulated' | 'binance' | 'coingecko';  // Price source used
