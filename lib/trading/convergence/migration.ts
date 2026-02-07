@@ -20,6 +20,12 @@ export function migratePosition(position: Position): Position {
     ...position,
     _version: 'v2',
 
+    // CRITICAL: Add required fields for Adaptive Convergence System
+    // These fields are required by the new system but missing in v1 positions
+    shouldWin: position.shouldWin ?? (Math.random() > 0.5), // Random outcome if missing
+    targetPnL: position.targetPnL ?? 2.0, // Default TP: +2%
+    stopLossPnL: position.stopLossPnL ?? -1.5, // Default SL: -1.5%
+
     // Price source defaults to 'simulated' for old positions
     priceSource: position.priceSource ?? 'simulated',
 
@@ -39,14 +45,30 @@ export function migratePosition(position: Position): Position {
  * Adds default values for new optional fields if missing
  */
 export function migrateTrade(trade: Trade): Trade {
-  // Check if already migrated (has priceSource set)
-  if (trade.priceSource !== undefined) {
+  // Check if already migrated (has realistic metrics)
+  if (trade.openFee !== undefined && trade.botName !== undefined) {
     return trade;
   }
+
+  // Calculate realistic trading metrics (0.04% per side)
+  const feeRate = 0.04;
+  const posSize = trade.positionSize || 0;
+  const openFee = (posSize * feeRate) / 100;
+  const closeFee = (posSize * feeRate) / 100;
+  const totalFees = openFee + closeFee;
+  const netPnl = trade.pnl - totalFees;
 
   // Migrate v1 -> v2
   return {
     ...trade,
+
+    // CRITICAL: Add required fields for new Trade interface
+    botName: (trade as any).botName ?? 'Legacy Bot', // Default name for old trades
+    openFee,
+    closeFee,
+    totalFees,
+    netPnl,
+    slippage: 0, // Old trades had no slippage tracking
 
     // Price source defaults to 'simulated' for old trades
     priceSource: 'simulated',
