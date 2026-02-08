@@ -1,8 +1,16 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import Link from 'next/link';
-import Image from 'next/image';
+import { ScrambleText } from '@/components/animations/ScrambleText';
+import { AnimatedCounter } from '@/components/animations/AnimatedCounter';
+import { GlowButton } from '@/components/animations/GlowButton';
+import { Shield, Zap, Globe } from 'lucide-react';
+
+const stats = [
+  { value: 40, suffix: '+', label: 'Team Members', icon: Globe },
+  { value: 9, suffix: '+', label: 'Exchanges', icon: Zap },
+  { value: 10, suffix: '+', label: 'Trading Bots', icon: Shield },
+];
 
 export default function Hero() {
   return (
@@ -33,12 +41,12 @@ export default function Hero() {
           <source src="/homepage_hero_mobile.mp4" type="video/mp4" />
         </video>
 
-        {/* Light dark overlay */}
-        <div className="absolute inset-0 bg-dark-900/30" />
+        {/* Dark overlay */}
+        <div className="absolute inset-0 bg-dark-900/40" />
       </div>
 
       {/* Animated overlay elements */}
-      <div className="absolute inset-0 overflow-hidden">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
           className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary-500/10 rounded-full blur-3xl"
           animate={{
@@ -48,7 +56,7 @@ export default function Hero() {
           transition={{
             duration: 8,
             repeat: Infinity,
-            ease: "easeInOut",
+            ease: 'easeInOut',
           }}
         />
         <motion.div
@@ -60,7 +68,7 @@ export default function Hero() {
           transition={{
             duration: 8,
             repeat: Infinity,
-            ease: "easeInOut",
+            ease: 'easeInOut',
           }}
         />
       </div>
@@ -72,25 +80,34 @@ export default function Hero() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-primary-500/10 border border-primary-500/30 rounded-full mb-8 backdrop-blur-sm"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-500/10 border border-primary-500/30 rounded-full mb-8 backdrop-blur-sm"
           >
-            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-            <span className="text-sm font-medium text-primary-300">
-              15,000+ Active Investors Earning Daily
+            <span className="w-2 h-2 bg-accent-400 rounded-full animate-pulse" />
+            <span className="text-sm font-medium text-primary-200">
+              Bot Marketplace &mdash; 9+ Exchanges Supported
             </span>
           </motion.div>
 
-          {/* Main headline */}
+          {/* Main headline with ScrambleText */}
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
             className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 leading-tight text-white"
           >
-            The World&apos;s Most{' '}
-            <span className="text-gradient">Transparent</span>
+            <ScrambleText
+              text="Professional Trading Bots,"
+              delay={400}
+              duration={1200}
+            />
             <br />
-            Trading Bots
+            <span className="text-gradient">
+              <ScrambleText
+                text="One Click Away"
+                delay={900}
+                duration={1000}
+              />
+            </span>
           </motion.h1>
 
           {/* Subheadline */}
@@ -98,31 +115,41 @@ export default function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="text-xl sm:text-2xl text-dark-200 mb-8 max-w-3xl mx-auto"
+            className="text-xl sm:text-2xl text-dark-200 mb-10 max-w-3xl mx-auto leading-relaxed"
           >
-            See every ML model decision in real-time. <span className="text-white font-semibold">Non-custodial storage</span>,
-            risk control, unlimited asset management.
+            Browse curated trading bots, copy top strategies, and keep full
+            control of your funds.{' '}
+            <span className="text-white font-semibold">
+              100% non-custodial
+            </span>{' '}
+            &mdash; your keys, your crypto.
           </motion.p>
 
-          {/* Social proof stats */}
+          {/* Stats */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.6 }}
-            className="flex flex-wrap justify-center gap-8 mb-12"
+            className="flex flex-wrap justify-center gap-8 sm:gap-12 mb-12"
           >
-            <div className="text-center">
-              <div className="text-4xl font-bold text-gradient">$127M+</div>
-              <div className="text-sm text-dark-300 mt-1">Assets Under Management</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-gradient">90%</div>
-              <div className="text-sm text-dark-300 mt-1">Monthly ROI</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-gradient">99.7%</div>
-              <div className="text-sm text-dark-300 mt-1">Uptime Guarantee</div>
-            </div>
+            {stats.map((stat) => {
+              const Icon = stat.icon;
+              return (
+                <div key={stat.label} className="text-center group">
+                  <div className="flex items-center justify-center gap-2 mb-1">
+                    <Icon className="w-5 h-5 text-primary-400 opacity-70 group-hover:opacity-100 transition-opacity" />
+                    <div className="text-4xl font-bold text-gradient">
+                      <AnimatedCounter
+                        value={stat.value}
+                        suffix={stat.suffix}
+                        duration={1400}
+                      />
+                    </div>
+                  </div>
+                  <div className="text-sm text-dark-300">{stat.label}</div>
+                </div>
+              );
+            })}
           </motion.div>
 
           {/* CTA Buttons */}
@@ -132,24 +159,24 @@ export default function Hero() {
             transition={{ duration: 0.6, delay: 0.8 }}
             className="flex flex-col sm:flex-row gap-4 justify-center items-center"
           >
-            <Link href="/register" className="group relative px-8 py-4 bg-gradient-to-r from-primary-500 to-accent-500 rounded-full font-semibold text-lg text-white shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 glow-effect">
-              <span className="relative z-10">Start Earning Today</span>
-              <div className="absolute inset-0 bg-gradient-to-r from-primary-600 to-accent-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            </Link>
-
-            <a href="#technology" className="px-8 py-4 bg-transparent border-2 border-primary-500 rounded-full font-semibold text-lg text-primary-400 hover:bg-primary-500/10 transition-all duration-300 backdrop-blur-sm">
-              Watch How It Works
-            </a>
+            <GlowButton href="/register" variant="primary" size="lg">
+              Get Started
+            </GlowButton>
+            <GlowButton href="/dashboard-v2/bots" variant="secondary" size="lg">
+              Explore Bots
+            </GlowButton>
           </motion.div>
 
-          {/* Risk-free guarantee */}
+          {/* Risk disclosure */}
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 1 }}
-            className="mt-8 text-sm text-dark-300"
+            className="mt-10 text-xs text-dark-400 max-w-2xl mx-auto leading-relaxed"
           >
-            🛡️ 30-Day Money-Back Guarantee • 🔒 Bank-Level Security • ⚡ Instant Withdrawals
+            Trading bots involve risk. Past performance does not guarantee future
+            results. Only invest what you can afford to lose. CLOUDBRIGHT does
+            not provide financial advice.
           </motion.p>
         </div>
       </div>

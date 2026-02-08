@@ -22,18 +22,17 @@ interface NavLink {
 
 const navLinks: NavLink[] = [
   {
-    name: 'Company',
+    name: 'Product',
     subLinks: [
-      { name: 'About Us', href: '/about', description: 'Learn about our mission and team', icon: '/menu/About.svg' },
-      { name: 'Affiliate Program', href: '/affiliate', description: 'Earn with our partnership', icon: '/menu/Affiliate.svg' },
+      { name: 'Features', href: '/features', description: 'Bot marketplace & copy trading', icon: '/menu/Services.svg' },
+      { name: 'Security', href: '/security', description: 'Non-custodial architecture', icon: '/menu/Security.svg' },
+      { name: 'Pricing', href: '/pricing', description: 'Simple, transparent pricing', icon: '/menu/Performance.svg' },
     ],
   },
   {
-    name: 'Product',
+    name: 'Company',
     subLinks: [
-      { name: 'Services', href: '/services', description: 'AI-powered trading solutions', icon: '/menu/Services.svg' },
-      { name: 'Security', href: '/security', description: 'Your funds protected', icon: '/menu/Security.svg' },
-      { name: 'Performance', href: '/performance', description: 'Track record & metrics', icon: '/menu/Performance.svg' },
+      { name: 'About Us', href: '/about', description: 'Our mission and team', icon: '/menu/About.svg' },
     ],
   },
   {

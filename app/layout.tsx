@@ -4,10 +4,10 @@ import "./fonts.css";
 import Providers from "@/components/Providers";
 
 export const metadata: Metadata = {
-  title: "Celestian - AI-Powered Crypto Investing | 1% Daily ROI",
-  description: "Earn consistent 1% daily returns with our advanced AI trading algorithms. Join thousands of smart investors who trust Celestian for automated crypto trading.",
-  keywords: "crypto investing, AI trading, passive income, crypto staking, automated trading, daily ROI",
-  authors: [{ name: "Celestian Limited" }],
+  title: "CLOUDBRIGHT — Bot Marketplace & Copy Trading Platform",
+  description: "Professional trading bot marketplace. Browse, compare, and copy algorithmic trading strategies across 9+ exchanges. Non-custodial — your funds stay on your exchange.",
+  keywords: "crypto trading bots, copy trading, bot marketplace, algorithmic trading, non-custodial, Binance, Bybit, OKX",
+  authors: [{ name: "HONG KONG CLOUD BRIGHT SOFTWARE LIMITED" }],
   robots: {
     index: false,
     follow: false,
@@ -22,8 +22,8 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "Celestian - AI-Powered Crypto Investing",
-    description: "Earn 1% daily returns with AI-driven crypto trading",
+    title: "CLOUDBRIGHT — Bot Marketplace & Copy Trading",
+    description: "Professional trading bot marketplace. Copy algorithmic strategies across 9+ exchanges. Non-custodial.",
     type: "website",
   },
 };

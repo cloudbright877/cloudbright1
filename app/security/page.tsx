@@ -1,138 +1,146 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import PageHero from '@/components/PageHero';
 import Footer from '@/components/Footer';
+import { RevealOnScroll } from '@/components/animations/RevealOnScroll';
+import { AnimatedCounter } from '@/components/animations/AnimatedCounter';
 import Link from 'next/link';
+import { Shield, Lock, Key, Server, Globe, ShieldCheck } from 'lucide-react';
 
 export default function SecurityPage() {
-  const securityFeatures = [
+  const stats = [
+    { value: '0', label: 'Funds Held by CLOUDBRIGHT', isText: true },
+    { value: 'AES-256', label: 'Encryption Standard', isText: true },
+    { numericValue: 24, suffix: '/7', label: 'Security Monitoring', isText: false },
+    { value: '2FA', label: 'Authentication Support', isText: true },
+  ];
+
+  const coreFeatures = [
     {
-      icon: '🔐',
-      title: 'Military-Grade Encryption',
-      description: 'All data transmission and storage protected by AES-256 encryption, the same standard used by governments and military organizations worldwide.',
-      features: ['End-to-end encryption', 'Encrypted data storage', 'Secure SSL/TLS connections', 'Zero-knowledge architecture'],
+      icon: Shield,
+      title: 'Non-Custodial Architecture',
+      description:
+        'Your funds never leave your exchange. CLOUDBRIGHT connects via API keys with limited permissions. We physically cannot withdraw your funds.',
+      features: [
+        'Funds stay on your exchange at all times',
+        'No deposit or withdrawal capability',
+        'You maintain full control of your assets',
+        'Revoke access anytime from your exchange',
+      ],
       gradient: 'from-blue-500 to-cyan-500',
     },
     {
-      icon: '❄️',
-      title: 'Cold Storage Custody',
-      description: '95% of client funds stored offline in bank-grade cold storage vaults with multi-signature protection and geographic distribution.',
-      features: ['Multi-signature wallets', 'Hardware security modules', 'Geographic redundancy', 'Air-gapped systems'],
+      icon: Lock,
+      title: 'API Key Encryption',
+      description:
+        'All API keys are encrypted with AES-256 before storage. Keys are never stored in plaintext. Only minimal permissions are required — trade-only, no withdrawal.',
+      features: [
+        'AES-256 encryption at rest',
+        'Keys never stored in plaintext',
+        'Trade-only permissions required',
+        'No withdrawal permission needed',
+      ],
       gradient: 'from-purple-500 to-pink-500',
     },
     {
-      icon: '🛡️',
-      title: 'Multi-Factor Authentication',
-      description: 'Advanced 2FA/MFA with support for authenticator apps, biometrics, hardware keys, and SMS verification for maximum account security.',
-      features: ['TOTP authenticator support', 'Biometric verification', 'Hardware key support', 'Withdrawal whitelisting'],
+      icon: ShieldCheck,
+      title: 'Smart Contract Security',
+      description:
+        'Blockchain-based infrastructure with audited smart contracts. Transparent, verifiable, and trustless execution of trading strategies.',
+      features: [
+        'Audited smart contracts',
+        'On-chain transparency',
+        'Verifiable execution logic',
+        'Trustless architecture',
+      ],
       gradient: 'from-orange-500 to-red-500',
     },
     {
-      icon: '💼',
-      title: 'Insurance Protection',
-      description: '$100M insurance coverage protecting client assets against theft, hacks, and unauthorized access through our partnership with leading insurers.',
-      features: ['Lloyd\'s of London coverage', 'Crime insurance policy', 'Regulatory compliance', 'Annual security audits'],
+      icon: Globe,
+      title: 'Web3 Foundation',
+      description:
+        'Built on Web3 principles: decentralization, transparency, and user sovereignty. No central point of failure for your funds.',
+      features: [
+        'Decentralized by design',
+        'User sovereignty first',
+        'No single point of failure',
+        'Transparent operations',
+      ],
       gradient: 'from-green-500 to-emerald-500',
     },
   ];
 
-  const compliance = [
+  const additionalMeasures = [
     {
-      title: 'Regulatory Compliance',
-      items: [
-        { name: 'SEC Registered', status: 'Verified' },
-        { name: 'FinCEN MSB Licensed', status: 'Verified' },
-        { name: 'GDPR Compliant', status: 'Verified' },
-        { name: 'SOC 2 Type II Certified', status: 'Verified' },
-      ],
+      icon: Key,
+      title: 'Two-Factor Authentication',
+      description:
+        'Protect your account with 2FA using authenticator apps. An additional layer of security beyond your password.',
     },
     {
-      title: 'Security Standards',
-      items: [
-        { name: 'PCI DSS Level 1', status: 'Certified' },
-        { name: 'ISO 27001:2013', status: 'Certified' },
-        { name: 'CryptoCurrency Security Standard', status: 'Certified' },
-        { name: 'NIST Cybersecurity Framework', status: 'Compliant' },
-      ],
-    },
-  ];
-
-  const auditReports = [
-    {
-      year: '2024',
-      auditor: 'Deloitte Cybersecurity',
-      type: 'Full Security Audit',
-      result: 'AAA Rating',
-      date: 'January 2024',
-      gradient: 'from-blue-500 to-cyan-500',
+      icon: Lock,
+      title: 'SSL/TLS Encryption',
+      description:
+        'All data transmitted between your browser and our servers is encrypted with industry-standard HTTPS/SSL protocols.',
     },
     {
-      year: '2024',
-      auditor: 'Trail of Bits',
-      type: 'Smart Contract Audit',
-      result: 'No Critical Issues',
-      date: 'March 2024',
-      gradient: 'from-purple-500 to-pink-500',
+      icon: ShieldCheck,
+      title: 'Regular Security Audits',
+      description:
+        'Our systems undergo periodic security reviews and audits to identify and address potential vulnerabilities.',
     },
     {
-      year: '2023',
-      auditor: 'CertiK',
-      type: 'Blockchain Security Audit',
-      result: '98/100 Score',
-      date: 'October 2023',
-      gradient: 'from-orange-500 to-red-500',
+      icon: Server,
+      title: 'DDoS Protection',
+      description:
+        'Multi-layered DDoS mitigation ensures platform availability even during attempted distributed denial-of-service attacks.',
+    },
+    {
+      icon: Shield,
+      title: 'Rate Limiting & IP Whitelisting',
+      description:
+        'API rate limiting prevents abuse. IP whitelisting on exchange API keys adds another layer of protection for your account.',
+    },
+    {
+      icon: Lock,
+      title: 'Encrypted Data Storage',
+      description:
+        'All sensitive data including API keys and personal information is encrypted at rest using industry-standard encryption.',
     },
   ];
 
-  const trustBadges = [
-    { name: 'Norton Secured', icon: '✓' },
-    { name: 'McAfee Secure', icon: '✓' },
-    { name: 'PCI DSS Compliant', icon: '✓' },
-    { name: 'SSL Certified', icon: '✓' },
-    { name: 'SOC 2 Type II', icon: '✓' },
-    { name: 'ISO 27001', icon: '✓' },
-  ];
-
-  const securityPractices = [
+  const howItWorksSteps = [
     {
-      title: 'Advanced Threat Detection',
-      description: 'AI-powered monitoring systems detect and prevent suspicious activities in real-time, 24/7/365.',
-      icon: '🎯',
+      step: 1,
+      title: 'Keep Funds on YOUR Exchange',
+      description:
+        'Your crypto stays on your exchange account — Binance, Bybit, OKX, or any supported platform. CLOUDBRIGHT never holds your money.',
     },
     {
-      title: 'Regular Penetration Testing',
-      description: 'Quarterly penetration tests by independent security experts to identify and fix vulnerabilities.',
-      icon: '🔬',
+      step: 2,
+      title: 'Create Trade-Only API Keys',
+      description:
+        'Generate API keys on your exchange with trade-only permission. Withdrawal permission is never required or requested.',
     },
     {
-      title: 'Bug Bounty Program',
-      description: 'Up to $100,000 rewards for security researchers who help us maintain the highest security standards.',
-      icon: '🏅',
+      step: 3,
+      title: 'Bots Execute Trades via API',
+      description:
+        'CLOUDBRIGHT bots use your API keys to execute trading strategies on your behalf, directly on your exchange account.',
     },
     {
-      title: 'Incident Response Team',
-      description: 'Dedicated security team ready to respond to any potential threats within minutes.',
-      icon: '⚡',
+      step: 4,
+      title: 'Profits Stay in YOUR Wallet',
+      description:
+        'All profits from trades remain in your exchange wallet. You see every trade in your exchange history in real time.',
     },
     {
-      title: 'Employee Background Checks',
-      description: 'Comprehensive screening and security training for all team members with access to systems.',
-      icon: '👥',
+      step: 5,
+      title: 'Revoke Access Anytime',
+      description:
+        'You can delete or disable API keys from your exchange at any time, instantly cutting off bot access. You are always in control.',
     },
-    {
-      title: 'Data Loss Prevention',
-      description: 'Automated backup systems with point-in-time recovery and disaster recovery protocols.',
-      icon: '💾',
-    },
-  ];
-
-  const stats = [
-    { value: '$2.5B+', label: 'Assets Secured' },
-    { value: '0', label: 'Security Breaches' },
-    { value: '99.99%', label: 'Uptime SLA' },
-    { value: '24/7', label: 'Security Monitoring' },
   ];
 
   return (
@@ -144,17 +152,20 @@ export default function SecurityPage() {
         videoSrcMobile="/security_hero_mobile.mp4"
         title={
           <span className="text-white drop-shadow-2xl">
-            Your Assets, <span className="text-gradient">Protected</span> with Military-Grade Security
+            Non-Custodial by Design —{' '}
+            <span className="text-gradient">Your Keys, Your Crypto</span>
           </span>
         }
-        subtitle="We employ the most advanced security infrastructure in the industry. Bank-grade encryption, cold storage custody, and $100M insurance protection—your peace of mind is our priority."
+        subtitle="CLOUDBRIGHT never holds your funds. Our non-custodial architecture means your crypto stays on your exchange, protected by your own security settings. We connect via encrypted, trade-only API keys."
         badge={{
-          text: 'Zero Security Breaches Since 2019',
-          icon: <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />,
+          text: 'Security Audits Passed',
+          icon: (
+            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+          ),
         }}
         ctaButtons={[
-          { text: 'Start Investing Securely', href: '/register', variant: 'primary' },
-          { text: 'Read Security Docs', href: '#docs', variant: 'secondary' },
+          { text: 'Get Started', href: '/register', variant: 'primary' },
+          { text: 'Learn More', href: '#architecture', variant: 'secondary' },
         ]}
         overlay="dark"
       />
@@ -165,313 +176,369 @@ export default function SecurityPage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
               {stats.map((stat, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  className="text-center"
-                >
-                  <div className="text-4xl md:text-5xl font-black text-gradient mb-2">
-                    {stat.value}
+                <RevealOnScroll key={index} delay={index * 0.1}>
+                  <div className="text-center">
+                    <div className="text-4xl md:text-5xl font-black text-gradient mb-2">
+                      {stat.isText ? (
+                        stat.value
+                      ) : (
+                        <AnimatedCounter
+                          value={stat.numericValue!}
+                          suffix={stat.suffix}
+                        />
+                      )}
+                    </div>
+                    <div className="text-gray-600 dark:text-dark-300 font-medium">
+                      {stat.label}
+                    </div>
                   </div>
-                  <div className="text-gray-600 dark:text-dark-300 font-medium">
-                    {stat.label}
-                  </div>
-                </motion.div>
+                </RevealOnScroll>
               ))}
             </div>
           </div>
         </section>
 
-        {/* Core Security Features */}
-        <section className="py-24">
+        {/* Core Security Architecture */}
+        <section id="architecture" className="py-24">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="text-center mb-16"
-            >
-              <span className="text-primary-500 dark:text-primary-400 font-semibold text-sm uppercase tracking-wide">
-                Security Infrastructure
-              </span>
-              <h2 className="text-4xl md:text-5xl font-black mt-4 mb-6 text-gray-900 dark:text-white">
-                Industry-Leading <span className="text-gradient">Protection</span>
-              </h2>
-              <p className="text-xl text-gray-600 dark:text-dark-300 max-w-3xl mx-auto">
-                Multi-layered security architecture designed to protect your investments from every possible threat vector.
-              </p>
-            </motion.div>
+            <RevealOnScroll>
+              <div className="text-center mb-16">
+                <span className="text-primary-500 dark:text-primary-400 font-semibold text-sm uppercase tracking-wide">
+                  Security Architecture
+                </span>
+                <h2 className="text-4xl md:text-5xl font-black mt-4 mb-6 text-gray-900 dark:text-white">
+                  Core Security{' '}
+                  <span className="text-gradient">Architecture</span>
+                </h2>
+                <p className="text-xl text-gray-600 dark:text-dark-300 max-w-3xl mx-auto">
+                  Built from the ground up on non-custodial principles. Your
+                  funds remain on your exchange — we never have access to
+                  withdraw them.
+                </p>
+              </div>
+            </RevealOnScroll>
 
             <div className="grid md:grid-cols-2 gap-8">
-              {securityFeatures.map((feature, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  className="group relative bg-white dark:bg-dark-800 rounded-3xl p-8 border border-gray-200 dark:border-dark-700 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
-                >
-                  <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-5 dark:group-hover:opacity-10 transition-opacity duration-500 rounded-3xl`} />
+              {coreFeatures.map((feature, index) => {
+                const IconComponent = feature.icon;
+                return (
+                  <RevealOnScroll
+                    key={index}
+                    delay={index * 0.1}
+                    direction={index % 2 === 0 ? 'left' : 'right'}
+                  >
+                    <div className="group relative h-full bg-white dark:bg-dark-800 rounded-3xl p-8 border border-gray-200 dark:border-dark-700 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
+                      <div
+                        className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-5 dark:group-hover:opacity-10 transition-opacity duration-500 rounded-3xl`}
+                      />
 
-                  <div className="relative z-10">
-                    <div className="text-6xl mb-4">{feature.icon}</div>
-                    <h3 className="text-2xl font-black mb-3 text-gray-900 dark:text-white">
-                      {feature.title}
-                    </h3>
-                    <p className="text-gray-600 dark:text-dark-300 mb-6 leading-relaxed">
-                      {feature.description}
-                    </p>
-
-                    <div className="space-y-2">
-                      {feature.features.map((item, idx) => (
-                        <div key={idx} className="flex items-center gap-2 text-gray-700 dark:text-dark-200">
-                          <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                          </svg>
-                          {item}
+                      <div className="relative z-10">
+                        <div
+                          className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-6`}
+                        >
+                          <IconComponent className="w-8 h-8 text-white" />
                         </div>
-                      ))}
-                    </div>
+                        <h3 className="text-2xl font-black mb-3 text-gray-900 dark:text-white">
+                          {feature.title}
+                        </h3>
+                        <p className="text-gray-600 dark:text-dark-300 mb-6 leading-relaxed">
+                          {feature.description}
+                        </p>
 
-                    <div className={`mt-6 h-1 w-0 group-hover:w-full bg-gradient-to-r ${feature.gradient} transition-all duration-700 rounded-full`} />
-                  </div>
-                </motion.div>
-              ))}
+                        <div className="space-y-2">
+                          {feature.features.map((item, idx) => (
+                            <div
+                              key={idx}
+                              className="flex items-center gap-2 text-gray-700 dark:text-dark-200"
+                            >
+                              <svg
+                                className="w-5 h-5 text-green-500 shrink-0"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M5 13l4 4L19 7"
+                                />
+                              </svg>
+                              {item}
+                            </div>
+                          ))}
+                        </div>
+
+                        <div
+                          className={`mt-6 h-1 w-0 group-hover:w-full bg-gradient-to-r ${feature.gradient} transition-all duration-700 rounded-full`}
+                        />
+                      </div>
+                    </div>
+                  </RevealOnScroll>
+                );
+              })}
             </div>
           </div>
         </section>
 
-        {/* Compliance & Regulations */}
+        {/* Additional Security Measures */}
         <section className="py-24 bg-gray-50 dark:bg-dark-800/50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="text-center mb-16"
-            >
-              <span className="text-primary-500 dark:text-primary-400 font-semibold text-sm uppercase tracking-wide">
-                Compliance & Certifications
-              </span>
-              <h2 className="text-4xl md:text-5xl font-black mt-4 mb-6 text-gray-900 dark:text-white">
-                Fully <span className="text-gradient">Regulated & Compliant</span>
-              </h2>
-              <p className="text-xl text-gray-600 dark:text-dark-300 max-w-3xl mx-auto">
-                We maintain the highest regulatory standards and hold all necessary licenses to operate globally.
-              </p>
-            </motion.div>
+            <RevealOnScroll>
+              <div className="text-center mb-16">
+                <span className="text-primary-500 dark:text-primary-400 font-semibold text-sm uppercase tracking-wide">
+                  Defense in Depth
+                </span>
+                <h2 className="text-4xl md:text-5xl font-black mt-4 mb-6 text-gray-900 dark:text-white">
+                  Additional{' '}
+                  <span className="text-gradient">Security Measures</span>
+                </h2>
+                <p className="text-xl text-gray-600 dark:text-dark-300 max-w-3xl mx-auto">
+                  Multiple layers of protection to keep your account and data
+                  safe at every level.
+                </p>
+              </div>
+            </RevealOnScroll>
 
-            <div className="grid md:grid-cols-2 gap-8">
-              {compliance.map((category, index) => (
-                <motion.div
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {additionalMeasures.map((measure, index) => {
+                const IconComponent = measure.icon;
+                return (
+                  <RevealOnScroll key={index} delay={index * 0.1}>
+                    <div className="h-full bg-white dark:bg-dark-800 p-6 rounded-2xl border border-gray-200 dark:border-dark-700 hover:shadow-xl transition-all duration-300">
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center mb-4">
+                        <IconComponent className="w-6 h-6 text-white" />
+                      </div>
+                      <h3 className="text-lg font-bold mb-2 text-gray-900 dark:text-white">
+                        {measure.title}
+                      </h3>
+                      <p className="text-gray-600 dark:text-dark-300 text-sm leading-relaxed">
+                        {measure.description}
+                      </p>
+                    </div>
+                  </RevealOnScroll>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* How Non-Custodial Works */}
+        <section className="py-24">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <RevealOnScroll>
+              <div className="text-center mb-16">
+                <span className="text-primary-500 dark:text-primary-400 font-semibold text-sm uppercase tracking-wide">
+                  How It Works
+                </span>
+                <h2 className="text-4xl md:text-5xl font-black mt-4 mb-6 text-gray-900 dark:text-white">
+                  How{' '}
+                  <span className="text-gradient">Non-Custodial</span>{' '}
+                  Trading Works
+                </h2>
+                <p className="text-xl text-gray-600 dark:text-dark-300 max-w-3xl mx-auto">
+                  You stay in control from start to finish. Here is how
+                  CLOUDBRIGHT connects to your exchange without ever touching
+                  your funds.
+                </p>
+              </div>
+            </RevealOnScroll>
+
+            <div className="max-w-4xl mx-auto">
+              {howItWorksSteps.map((step, index) => (
+                <RevealOnScroll
                   key={index}
-                  initial={{ opacity: 0, x: index === 0 ? -30 : 30 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: index * 0.2 }}
-                  className="bg-white dark:bg-dark-800 rounded-3xl p-8 border border-gray-200 dark:border-dark-700"
+                  delay={index * 0.12}
+                  direction={index % 2 === 0 ? 'left' : 'right'}
                 >
-                  <h3 className="text-2xl font-black mb-6 text-gray-900 dark:text-white">
-                    {category.title}
+                  <div className="relative flex gap-6 mb-8 last:mb-0">
+                    {/* Timeline line */}
+                    {index < howItWorksSteps.length - 1 && (
+                      <div className="absolute left-7 top-16 w-0.5 h-full bg-gradient-to-b from-primary-500/40 to-transparent" />
+                    )}
+
+                    {/* Step number */}
+                    <div className="shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white text-xl font-black shadow-lg shadow-primary-500/25">
+                      {step.step}
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 bg-white dark:bg-dark-800 rounded-2xl p-6 border border-gray-200 dark:border-dark-700 hover:shadow-lg transition-shadow duration-300">
+                      <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">
+                        {step.title}
+                      </h3>
+                      <p className="text-gray-600 dark:text-dark-300 leading-relaxed">
+                        {step.description}
+                      </p>
+                    </div>
+                  </div>
+                </RevealOnScroll>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Audit & Compliance */}
+        <section className="py-24 bg-gray-50 dark:bg-dark-800/50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <RevealOnScroll>
+              <div className="text-center mb-16">
+                <span className="text-primary-500 dark:text-primary-400 font-semibold text-sm uppercase tracking-wide">
+                  Trust & Transparency
+                </span>
+                <h2 className="text-4xl md:text-5xl font-black mt-4 mb-6 text-gray-900 dark:text-white">
+                  Audit &{' '}
+                  <span className="text-gradient">Compliance</span>
+                </h2>
+              </div>
+            </RevealOnScroll>
+
+            <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+              <RevealOnScroll direction="left">
+                <div className="h-full bg-white dark:bg-dark-800 rounded-3xl p-8 border border-gray-200 dark:border-dark-700">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center mb-6">
+                    <ShieldCheck className="w-7 h-7 text-white" />
+                  </div>
+                  <h3 className="text-2xl font-black mb-4 text-gray-900 dark:text-white">
+                    Security Audits
                   </h3>
                   <div className="space-y-4">
-                    {category.items.map((item, idx) => (
+                    {[
+                      'Information security audits passed',
+                      'Smart contract audits completed',
+                      'Regular internal security reviews',
+                      'Penetration testing conducted',
+                    ].map((item, idx) => (
                       <div
                         key={idx}
-                        className="flex items-center justify-between p-4 bg-gray-50 dark:bg-dark-700 rounded-xl"
+                        className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-dark-700 rounded-xl"
                       >
-                        <span className="font-semibold text-gray-900 dark:text-white">
-                          {item.name}
-                        </span>
-                        <span className="flex items-center gap-2 text-green-500 font-bold">
-                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                          </svg>
-                          {item.status}
+                        <svg
+                          className="w-5 h-5 text-green-500 shrink-0"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                        <span className="font-medium text-gray-800 dark:text-dark-100">
+                          {item}
                         </span>
                       </div>
                     ))}
                   </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
+                </div>
+              </RevealOnScroll>
 
-        {/* Audit Reports */}
-        <section className="py-24">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="text-center mb-16"
-            >
-              <span className="text-primary-500 dark:text-primary-400 font-semibold text-sm uppercase tracking-wide">
-                Third-Party Verification
-              </span>
-              <h2 className="text-4xl md:text-5xl font-black mt-4 mb-6 text-gray-900 dark:text-white">
-                Independent <span className="text-gradient">Security Audits</span>
-              </h2>
-              <p className="text-xl text-gray-600 dark:text-dark-300 max-w-3xl mx-auto">
-                Regular audits by world-renowned security firms ensure our systems remain impenetrable.
-              </p>
-            </motion.div>
-
-            <div className="grid md:grid-cols-3 gap-8">
-              {auditReports.map((report, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  className="bg-white dark:bg-dark-800 rounded-3xl p-8 border border-gray-200 dark:border-dark-700 hover:shadow-xl transition-all duration-300"
-                >
-                  <div className={`inline-block px-4 py-2 bg-gradient-to-r ${report.gradient} rounded-full text-white font-bold mb-4`}>
-                    {report.year}
+              <RevealOnScroll direction="right">
+                <div className="h-full bg-white dark:bg-dark-800 rounded-3xl p-8 border border-gray-200 dark:border-dark-700">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mb-6">
+                    <Globe className="w-7 h-7 text-white" />
                   </div>
-                  <h3 className="text-xl font-black mb-2 text-gray-900 dark:text-white">
-                    {report.auditor}
+                  <h3 className="text-2xl font-black mb-4 text-gray-900 dark:text-white">
+                    Company & Compliance
                   </h3>
-                  <p className="text-sm text-gray-600 dark:text-dark-300 mb-4">
-                    {report.type}
-                  </p>
-                  <div className="py-4 px-6 bg-green-50 dark:bg-green-900/20 rounded-xl mb-4">
-                    <p className="text-green-700 dark:text-green-400 font-bold text-center">
-                      {report.result}
-                    </p>
+                  <div className="space-y-4">
+                    {[
+                      'Hong Kong registered company (HKCBS Limited)',
+                      'Crypto-friendly HK regulatory environment',
+                      'Non-custodial model — no fund holding license required',
+                      'Transparent business operations',
+                    ].map((item, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-dark-700 rounded-xl"
+                      >
+                        <svg
+                          className="w-5 h-5 text-green-500 shrink-0"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                        <span className="font-medium text-gray-800 dark:text-dark-100">
+                          {item}
+                        </span>
+                      </div>
+                    ))}
                   </div>
-                  <p className="text-sm text-gray-500 dark:text-dark-400">
-                    Completed: {report.date}
-                  </p>
-                </motion.div>
-              ))}
+                </div>
+              </RevealOnScroll>
             </div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              className="mt-12 text-center"
-            >
-              <Link
-                href="/legal/audit-reports"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-primary-500 to-accent-500 rounded-full font-semibold text-white hover:shadow-2xl hover:shadow-primary-500/50 transition-all duration-300 hover:scale-105"
-              >
-                View All Audit Reports
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </Link>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* Security Practices */}
-        <section className="py-24 bg-gray-50 dark:bg-dark-800/50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="text-center mb-16"
-            >
-              <span className="text-primary-500 dark:text-primary-400 font-semibold text-sm uppercase tracking-wide">
-                Best Practices
-              </span>
-              <h2 className="text-4xl md:text-5xl font-black mt-4 mb-6 text-gray-900 dark:text-white">
-                Additional <span className="text-gradient">Security Measures</span>
-              </h2>
-            </motion.div>
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {securityPractices.map((practice, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  className="bg-white dark:bg-dark-800 p-6 rounded-2xl border border-gray-200 dark:border-dark-700 hover:shadow-xl transition-all duration-300"
-                >
-                  <div className="text-4xl mb-3">{practice.icon}</div>
-                  <h3 className="text-lg font-bold mb-2 text-gray-900 dark:text-white">
-                    {practice.title}
-                  </h3>
-                  <p className="text-gray-600 dark:text-dark-300 text-sm leading-relaxed">
-                    {practice.description}
-                  </p>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Trust Badges */}
-        <section className="py-16 border-y border-gray-200 dark:border-dark-800">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
-              {trustBadges.map((badge, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: index * 0.1 }}
-                  className="text-center"
-                >
-                  <div className="w-12 h-12 mx-auto mb-2 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center text-white text-xl font-black">
-                    {badge.icon}
+            {/* Risk Disclosure */}
+            <RevealOnScroll delay={0.3}>
+              <div className="mt-12 max-w-3xl mx-auto">
+                <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-700/30 rounded-2xl p-6">
+                  <div className="flex items-start gap-3">
+                    <svg
+                      className="w-6 h-6 text-amber-500 shrink-0 mt-0.5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
+                      />
+                    </svg>
+                    <div>
+                      <h4 className="font-bold text-amber-800 dark:text-amber-400 mb-1">
+                        Risk Disclosure
+                      </h4>
+                      <p className="text-sm text-amber-700 dark:text-amber-300/80 leading-relaxed">
+                        Cryptocurrency trading involves substantial risk of loss
+                        and is not suitable for every investor. Past performance
+                        does not guarantee future results. You should carefully
+                        consider whether trading is suitable for you in light of
+                        your financial condition. Only trade with funds you can
+                        afford to lose.
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-sm font-semibold text-gray-700 dark:text-dark-200">
-                    {badge.name}
-                  </p>
-                </motion.div>
-              ))}
-            </div>
+                </div>
+              </div>
+            </RevealOnScroll>
           </div>
         </section>
 
         {/* CTA Section */}
         <section className="py-24 bg-gradient-to-br from-primary-500/10 to-accent-500/10 dark:from-primary-500/20 dark:to-accent-500/20">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-            >
+            <RevealOnScroll>
               <h2 className="text-4xl md:text-5xl font-black mb-6 text-gray-900 dark:text-white">
-                Your Security is Our <span className="text-gradient">Top Priority</span>
+                Your Security is Our{' '}
+                <span className="text-gradient">Priority</span>
               </h2>
               <p className="text-xl text-gray-700 dark:text-dark-200 mb-8 max-w-2xl mx-auto">
-                Sleep soundly knowing your investments are protected by the most advanced security infrastructure in the industry.
+                Start trading with confidence. Non-custodial, encrypted, and
+                fully transparent — your crypto stays on your exchange where it
+                belongs.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
                   href="/register"
                   className="px-8 py-4 bg-gradient-to-r from-primary-500 to-accent-500 rounded-full font-semibold text-white hover:shadow-2xl hover:shadow-primary-500/50 transition-all duration-300 hover:scale-105"
                 >
-                  Start Investing Securely
+                  Get Started Now
                 </Link>
                 <Link
                   href="/contact"
                   className="px-8 py-4 bg-white dark:bg-dark-800 border-2 border-gray-300 dark:border-dark-700 rounded-full font-semibold text-gray-900 dark:text-white hover:border-primary-500 transition-all duration-300 hover:scale-105"
                 >
-                  Speak with Security Team
+                  Contact Us
                 </Link>
               </div>
-            </motion.div>
+            </RevealOnScroll>
           </div>
         </section>
       </main>

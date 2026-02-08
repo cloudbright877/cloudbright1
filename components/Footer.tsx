@@ -6,13 +6,12 @@ import FloatingShapes from './FloatingShapes';
 
 const footerLinks = {
   Product: [
-    { name: 'Services', href: '/services' },
+    { name: 'Features', href: '/features' },
     { name: 'Security', href: '/security' },
-    { name: 'Performance', href: '/performance' },
+    { name: 'Pricing', href: '/pricing' },
   ],
   Company: [
     { name: 'About Us', href: '/about' },
-    { name: 'Affiliate Program', href: '/affiliate' },
     { name: 'Contact Us', href: '/contact' },
   ],
   Resources: [
@@ -83,8 +82,8 @@ export default function Footer() {
               </div>
 
               <p className="text-dark-300 mb-6 max-w-sm leading-relaxed">
-                Empowering investors worldwide with AI-driven cryptocurrency trading.
-                Earn consistent daily returns with cutting-edge technology.
+                Professional trading bot marketplace and copy trading platform.
+                Non-custodial — your funds stay on your exchange.
               </p>
 
               {/* Social links */}
@@ -200,15 +199,15 @@ export default function Footer() {
           </div>
           <div className="flex items-center gap-2 text-dark-400">
             <span className="text-2xl">🛡️</span>
-            <span className="text-sm">$100M Insured</span>
+            <span className="text-sm">Non-Custodial</span>
           </div>
           <div className="flex items-center gap-2 text-dark-400">
             <span className="text-2xl">✓</span>
-            <span className="text-sm">SOC 2 Certified</span>
+            <span className="text-sm">Security Audited</span>
           </div>
           <div className="flex items-center gap-2 text-dark-400">
-            <span className="text-2xl">⭐</span>
-            <span className="text-sm">4.9/5 Rating</span>
+            <span className="text-2xl">🏢</span>
+            <span className="text-sm">HK Registered</span>
           </div>
         </motion.div>
 
@@ -221,7 +220,7 @@ export default function Footer() {
           className="flex flex-col md:flex-row items-center justify-between gap-4 text-dark-400 text-sm"
         >
           <div className="text-center md:text-left">
-            © {new Date().getFullYear()} Celestian Limited. All rights reserved.
+            © {new Date().getFullYear()} HONG KONG CLOUD BRIGHT SOFTWARE LIMITED. All rights reserved.
           </div>
           <div className="text-center md:text-right">
             <p className="mb-1">
