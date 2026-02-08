@@ -77,35 +77,24 @@ interface Review {
   verified: boolean;
 }
 
-// Live ticker data
-const tickerData = [
-  { icon: Flame, label: '+234 new copiers', value: 'in last 24h', color: 'text-green-400' },
-  { icon: Zap, label: '1,247 active traders', value: 'copying now', color: 'text-accent-400' },
-  { icon: TrendingUp, label: '+284.5% ROI', value: 'all-time', color: 'text-green-400' },
-  { icon: Trophy, label: '#3 Global Rank', value: '', color: 'text-yellow-400' },
-  { icon: DollarSign, label: '$84,562', value: 'total PnL', color: 'text-green-400' },
-  { icon: Star, label: '4.8/5', value: 'from 237 reviews', color: 'text-yellow-400' },
-  { icon: Target, label: '87.3% win rate', value: '', color: 'text-accent-400' },
-  { icon: Rocket, label: '99.8% uptime', value: '', color: 'text-purple-400' },
-];
+/**
+ * Generate ticker data from real DemoBot stats.
+ * BACKEND MIGRATION: Pull from real-time API.
+ */
+function getTickerData(bot: DemoBot | null | undefined) {
+  if (!bot) return [];
+  return [
+    { icon: Flame, label: `${bot.stats.copiers} copiers`, value: 'total', color: 'text-green-400' },
+    { icon: TrendingUp, label: `+${bot.stats.return1y}% ROI`, value: '1 year', color: 'text-green-400' },
+    { icon: DollarSign, label: `+${bot.stats.return30d}%`, value: '30d return', color: 'text-green-400' },
+    { icon: Star, label: `${bot.stats.rating}/5`, value: `from ${bot.stats.reviews} reviews`, color: 'text-yellow-400' },
+    { icon: Target, label: `${bot.stats.winRate}% win rate`, value: '', color: 'text-accent-400' },
+    { icon: Trophy, label: `Sharpe ${bot.stats.sharpeRatio}`, value: '', color: 'text-yellow-400' },
+    { icon: Rocket, label: `Max DD ${bot.stats.maxDD}%`, value: '', color: 'text-red-400' },
+  ];
+}
 
-// Top winning trades data
-const topWinsData: Trade[] = [
-  { pair: 'BTC/USDT', entry: 48234.50, exit: 51456.20, profit: 2845.67, roi: 5.9, date: '2024-01-15' },
-  { pair: 'ETH/USDT', entry: 2634.20, exit: 2891.30, profit: 2234.89, roi: 4.8, date: '2024-01-18' },
-  { pair: 'SOL/USDT', entry: 94.45, exit: 102.75, profit: 1876.43, roi: 4.2, date: '2024-01-20' },
-  { pair: 'BTC/USDT', entry: 49123.00, exit: 52456.50, profit: 1654.32, roi: 3.8, date: '2024-01-22' },
-  { pair: 'ETH/USDT', entry: 2712.10, exit: 2987.40, profit: 1543.21, roi: 3.5, date: '2024-01-24' },
-];
-
-// Top losing trades data
-const topLossesData: Trade[] = [
-  { pair: 'DOGE/USDT', entry: 0.0891, exit: 0.0845, profit: -234.56, roi: -2.6, date: '2024-01-12' },
-  { pair: 'XRP/USDT', entry: 0.6234, exit: 0.6051, profit: -189.23, roi: -1.9, date: '2024-01-16' },
-  { pair: 'ADA/USDT', entry: 0.5423, exit: 0.5312, profit: -145.67, roi: -1.3, date: '2024-01-19' },
-  { pair: 'MATIC/USDT', entry: 0.8934, exit: 0.8712, profit: -112.34, roi: -1.1, date: '2024-01-21' },
-  { pair: 'DOGE/USDT', entry: 0.0876, exit: 0.0854, profit: -98.45, roi: -0.9, date: '2024-01-23' },
-];
+// Top wins/losses: populated from real trade data in masterBotData.recentTrades
 
 // Reviews data
 const reviewsData: Review[] = [
@@ -116,244 +105,7 @@ const reviewsData: Review[] = [
   { name: 'Tom H.', rating: 5, text: 'Started with $5k, now at $7.2k after 2 months. Incredible!', date: '2 weeks ago', verified: true },
 ];
 
-// Bot data structure
-interface Bot {
-  id: number;
-  slug: string;
-  name: string;
-  icon: string;
-  risk: 'low' | 'medium' | 'high';
-  strategy: string;
-  description: string;
-  stats: {
-    return7d: number;
-    return30d: number;
-    return90d: number;
-    return1y: number;
-    winRate: number;
-    maxDD: number;
-    sharpeRatio: number;
-    copiers: number;
-    rating: number;
-    reviews: number;
-    minInvestment: number;
-  };
-  tags: string[];
-  trending: boolean;
-  verified: boolean;
-  ageMonths: number;
-}
-
-const mockBots: Bot[] = [
-  {
-    id: 1,
-    slug: 'alphabot',
-    name: 'AlphaBot Pro',
-    icon: 'AB',
-    risk: 'low',
-    strategy: 'Scalping',
-    description: 'Consistent low-risk profits with AI-powered scalping',
-    stats: {
-      return7d: 2.8,
-      return30d: 12.3,
-      return90d: 38.7,
-      return1y: 187.5,
-      winRate: 87,
-      maxDD: -4.2,
-      sharpeRatio: 2.8,
-      copiers: 1247,
-      rating: 4.9,
-      reviews: 234,
-      minInvestment: 500,
-    },
-    tags: ['BTC', 'ETH', 'Scalping', 'AI'],
-    trending: true,
-    verified: true,
-    ageMonths: 18,
-  },
-  {
-    id: 2,
-    slug: 'protrader',
-    name: 'ProTrader Elite',
-    icon: 'PT',
-    risk: 'medium',
-    strategy: 'Swing Trading',
-    description: 'Balanced growth with momentum strategies',
-    stats: {
-      return7d: 4.2,
-      return30d: 18.7,
-      return90d: 52.3,
-      return1y: 234.8,
-      winRate: 82,
-      maxDD: -8.5,
-      sharpeRatio: 2.3,
-      copiers: 892,
-      rating: 4.7,
-      reviews: 187,
-      minInvestment: 1000,
-    },
-    tags: ['ETH', 'Swing', 'Momentum'],
-    trending: false,
-    verified: true,
-    ageMonths: 14,
-  },
-  {
-    id: 3,
-    slug: 'sigmabot',
-    name: 'SigmaBot',
-    icon: 'Σ',
-    risk: 'high',
-    strategy: 'Aggressive',
-    description: 'Aggressive returns for risk-takers',
-    stats: {
-      return7d: 8.4,
-      return30d: 28.4,
-      return90d: 87.2,
-      return1y: 412.5,
-      winRate: 76,
-      maxDD: -15.3,
-      sharpeRatio: 1.8,
-      copiers: 543,
-      rating: 4.5,
-      reviews: 145,
-      minInvestment: 2500,
-    },
-    tags: ['Multi-asset', 'Aggressive', 'Volatility'],
-    trending: false,
-    verified: true,
-    ageMonths: 10,
-  },
-  {
-    id: 4,
-    slug: 'momentumx',
-    name: 'MomentumX',
-    icon: 'MX',
-    risk: 'high',
-    strategy: 'Momentum',
-    description: 'Captures market momentum swings',
-    stats: {
-      return7d: 9.2,
-      return30d: 35.2,
-      return90d: 94.8,
-      return1y: 485.3,
-      winRate: 72,
-      maxDD: -18.9,
-      sharpeRatio: 1.6,
-      copiers: 234,
-      rating: 4.3,
-      reviews: 98,
-      minInvestment: 5000,
-    },
-    tags: ['Momentum', 'High-frequency', 'New'],
-    trending: true,
-    verified: false,
-    ageMonths: 4,
-  },
-  {
-    id: 5,
-    slug: 'gridbot',
-    name: 'GridBot',
-    icon: 'GB',
-    risk: 'low',
-    strategy: 'Grid Trading',
-    description: 'Profits from ranging markets',
-    stats: {
-      return7d: 1.8,
-      return30d: 7.8,
-      return90d: 24.2,
-      return1y: 98.7,
-      winRate: 89,
-      maxDD: -2.1,
-      sharpeRatio: 3.2,
-      copiers: 678,
-      rating: 4.8,
-      reviews: 203,
-      minInvestment: 500,
-    },
-    tags: ['Range-trading', 'Sideways', 'Conservative'],
-    trending: false,
-    verified: true,
-    ageMonths: 22,
-  },
-  {
-    id: 6,
-    slug: 'thetagang',
-    name: 'ThetaGang',
-    icon: 'Θ',
-    risk: 'medium',
-    strategy: 'Options',
-    description: 'Options strategies for steady income',
-    stats: {
-      return7d: 3.2,
-      return30d: 14.2,
-      return90d: 42.8,
-      return1y: 178.4,
-      winRate: 84,
-      maxDD: -6.7,
-      sharpeRatio: 2.5,
-      copiers: 445,
-      rating: 4.6,
-      reviews: 156,
-      minInvestment: 3000,
-    },
-    tags: ['Options', 'Theta decay', 'Income'],
-    trending: false,
-    verified: true,
-    ageMonths: 16,
-  },
-  {
-    id: 7,
-    slug: 'dca-master',
-    name: 'DCA Master',
-    icon: 'DC',
-    risk: 'low',
-    strategy: 'DCA',
-    description: 'Dollar-cost averaging for long-term growth',
-    stats: {
-      return7d: 1.2,
-      return30d: 5.4,
-      return90d: 18.7,
-      return1y: 84.2,
-      winRate: 92,
-      maxDD: -1.5,
-      sharpeRatio: 3.5,
-      copiers: 1024,
-      rating: 4.9,
-      reviews: 287,
-      minInvestment: 100,
-    },
-    tags: ['DCA', 'Long-term', 'Beginner-friendly'],
-    trending: false,
-    verified: true,
-    ageMonths: 28,
-  },
-  {
-    id: 8,
-    slug: 'arbitrage-pro',
-    name: 'Arbitrage Pro',
-    icon: 'AR',
-    risk: 'low',
-    strategy: 'Arbitrage',
-    description: 'Risk-free profits from price differences',
-    stats: {
-      return7d: 2.1,
-      return30d: 9.2,
-      return90d: 28.4,
-      return1y: 118.7,
-      winRate: 94,
-      maxDD: -0.8,
-      sharpeRatio: 4.1,
-      copiers: 856,
-      rating: 4.8,
-      reviews: 198,
-      minInvestment: 2000,
-    },
-    tags: ['Arbitrage', 'CEX-DEX', 'Low-risk'],
-    trending: true,
-    verified: true,
-    ageMonths: 12,
-  },
-];
+// Bot data is loaded dynamically from demoMarketplace via getDemoBotBySlug()
 
 // Terminal logs
 const terminalLogs = [
@@ -1110,7 +862,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
       {/* Live Ticker */}
       <div className="w-full overflow-hidden bg-gradient-to-r from-dark-900/95 via-dark-800/85 to-dark-900/95 py-3 border-b border-dark-700/50">
         <div className="flex animate-[scroll_40s_linear_infinite]">
-          {[...tickerData, ...tickerData].map((item, idx) => {
+          {[...getTickerData(getDemoBotBySlug(slug)), ...getTickerData(getDemoBotBySlug(slug))].map((item, idx) => {
             const IconComponent = item.icon;
             return (
               <div key={idx} className="flex-none px-8 whitespace-nowrap flex items-center">

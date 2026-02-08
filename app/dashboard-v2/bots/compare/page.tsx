@@ -16,12 +16,13 @@ import {
   DollarSign
 } from 'lucide-react';
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Legend } from 'recharts';
+import { getAllDemoBots, type DemoBot } from '@/lib/demoMarketplace';
 
-interface Bot {
-  id: number;
+interface CompareBot {
+  id: string;
   slug: string;
   name: string;
-  icon: React.ReactNode;
+  icon: string;
   risk: 'low' | 'medium' | 'high';
   verified: boolean;
   stats: {
@@ -35,163 +36,49 @@ interface Bot {
     copiers: number;
     rating: number;
     minInvestment: number;
-    avgTradeDuration: string;
-    totalTrades: number;
-    profitableDays: number;
-  };
-  features: {
-    autoRebalance: boolean;
-    stopLoss: boolean;
-    takeProfit: boolean;
-    trailingStop: boolean;
-    riskManagement: boolean;
-    multiExchange: boolean;
   };
   strategy: string;
   description: string;
 }
 
-// Mock bots for comparison
-const availableBots: Bot[] = [
-  {
-    id: 1,
-    slug: 'alphabot',
-    name: 'AlphaBot Pro',
-    icon: <Shield className="w-8 h-8 text-green-400" />,
-    risk: 'low',
-    verified: true,
-    strategy: 'DCA + Grid Trading',
-    description: 'Conservative bot focused on consistent returns with minimal drawdown',
+function mapDemoBotToCompare(bot: DemoBot): CompareBot {
+  return {
+    id: bot.id,
+    slug: bot.slug,
+    name: bot.name,
+    icon: bot.icon,
+    risk: bot.risk,
+    verified: bot.verified,
+    strategy: bot.strategy,
+    description: bot.description,
     stats: {
-      return7d: 2.3,
-      return30d: 12.5,
-      return90d: 34.2,
-      return1y: 127.8,
-      winRate: 87,
-      maxDD: -4.2,
-      sharpeRatio: 2.8,
-      copiers: 2847,
-      rating: 4.9,
-      minInvestment: 100,
-      avgTradeDuration: '2.5 days',
-      totalTrades: 1247,
-      profitableDays: 87,
+      return7d: bot.stats.return7d,
+      return30d: bot.stats.return30d,
+      return90d: bot.stats.return90d,
+      return1y: bot.stats.return1y,
+      winRate: bot.stats.winRate,
+      maxDD: bot.stats.maxDD,
+      sharpeRatio: bot.stats.sharpeRatio,
+      copiers: bot.stats.copiers,
+      rating: bot.stats.rating,
+      minInvestment: bot.stats.minInvestment,
     },
-    features: {
-      autoRebalance: true,
-      stopLoss: true,
-      takeProfit: true,
-      trailingStop: false,
-      riskManagement: true,
-      multiExchange: false,
-    },
-  },
-  {
-    id: 2,
-    slug: 'protrader',
-    name: 'ProTrader Elite',
-    icon: <TrendingUp className="w-8 h-8 text-blue-400" />,
-    risk: 'medium',
-    verified: true,
-    strategy: 'Swing Trading',
-    description: 'Balanced approach with higher returns and moderate risk',
-    stats: {
-      return7d: 4.1,
-      return30d: 18.3,
-      return90d: 47.6,
-      return1y: 178.2,
-      winRate: 82,
-      maxDD: -8.5,
-      sharpeRatio: 2.3,
-      copiers: 1923,
-      rating: 4.7,
-      minInvestment: 500,
-      avgTradeDuration: '5.2 days',
-      totalTrades: 894,
-      profitableDays: 82,
-    },
-    features: {
-      autoRebalance: true,
-      stopLoss: true,
-      takeProfit: true,
-      trailingStop: true,
-      riskManagement: true,
-      multiExchange: true,
-    },
-  },
-  {
-    id: 3,
-    slug: 'sigmabot',
-    name: 'SigmaBot',
-    icon: <BarChart3 className="w-8 h-8 text-purple-400" />,
-    risk: 'high',
-    verified: true,
-    strategy: 'Scalping + Momentum',
-    description: 'Aggressive high-frequency trading for maximum returns',
-    stats: {
-      return7d: 7.8,
-      return30d: 28.9,
-      return90d: 67.3,
-      return1y: 243.5,
-      winRate: 74,
-      maxDD: -15.3,
-      sharpeRatio: 1.9,
-      copiers: 1247,
-      rating: 4.5,
-      minInvestment: 1000,
-      avgTradeDuration: '8.3 hours',
-      totalTrades: 3421,
-      profitableDays: 74,
-    },
-    features: {
-      autoRebalance: false,
-      stopLoss: true,
-      takeProfit: true,
-      trailingStop: true,
-      riskManagement: true,
-      multiExchange: true,
-    },
-  },
-  {
-    id: 4,
-    slug: 'thetagang',
-    name: 'ThetaGang',
-    icon: <DollarSign className="w-8 h-8 text-yellow-400" />,
-    risk: 'medium',
-    verified: true,
-    strategy: 'Options Selling',
-    description: 'Premium collection through options selling strategies',
-    stats: {
-      return7d: 1.8,
-      return30d: 8.7,
-      return90d: 26.4,
-      return1y: 98.3,
-      winRate: 91,
-      maxDD: -3.1,
-      sharpeRatio: 3.2,
-      copiers: 876,
-      rating: 4.8,
-      minInvestment: 2000,
-      avgTradeDuration: '30 days',
-      totalTrades: 234,
-      profitableDays: 91,
-    },
-    features: {
-      autoRebalance: true,
-      stopLoss: true,
-      takeProfit: false,
-      trailingStop: false,
-      riskManagement: true,
-      multiExchange: false,
-    },
-  },
-];
+  };
+}
+
+function getAvailableBots(): CompareBot[] {
+  return getAllDemoBots().map(mapDemoBotToCompare);
+}
 
 export default function BotComparePage() {
-  const [selectedBots, setSelectedBots] = useState<Bot[]>([availableBots[0], availableBots[1]]);
+  const availableBots = getAvailableBots();
+  const [selectedBots, setSelectedBots] = useState<CompareBot[]>(() => {
+    const bots = getAvailableBots();
+    return bots.length >= 2 ? [bots[0], bots[1]] : bots.slice(0, 2);
+  });
   const [showSelector, setShowSelector] = useState(false);
 
-  const handleSelectBot = (bot: Bot, index: number) => {
+  const handleSelectBot = (bot: CompareBot, index: number) => {
     const newSelected = [...selectedBots];
     newSelected[index] = bot;
     setSelectedBots(newSelected);
@@ -281,11 +168,7 @@ export default function BotComparePage() {
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  {typeof bot.icon === 'string' && bot.icon.startsWith('/') ? (
-                    <img src={bot.icon} alt={bot.name} className="w-12 h-12 object-contain" />
-                  ) : (
-                    <div className="text-2xl">{bot.icon}</div>
-                  )}
+                  <div className="text-2xl">{bot.icon}</div>
                   <div>
                     <div className="font-bold text-white flex items-center gap-2">
                       {bot.name}
@@ -390,11 +273,7 @@ export default function BotComparePage() {
                   {selectedBots.map((bot) => (
                     <th key={bot.id} className="text-center py-3 px-4 text-sm font-semibold text-white">
                       <div className="flex items-center justify-center gap-2">
-                        {typeof bot.icon === 'string' && bot.icon.startsWith('/') ? (
-                          <img src={bot.icon} alt={bot.name} className="w-6 h-6 object-contain" />
-                        ) : (
-                          <div className="text-lg">{bot.icon}</div>
-                        )}
+                        <div className="text-lg">{bot.icon}</div>
                         {bot.name}
                       </div>
                     </th>
@@ -480,123 +359,12 @@ export default function BotComparePage() {
                   ))}
                 </tr>
 
-                {/* Avg Trade Duration */}
+                {/* Min Investment */}
                 <tr className="hover:bg-dark-800/50 transition-colors">
-                  <td className="py-3 px-4 text-sm text-dark-300">Avg Trade Duration</td>
+                  <td className="py-3 px-4 text-sm text-dark-300">Min Investment</td>
                   {selectedBots.map((bot) => (
                     <td key={bot.id} className="py-3 px-4 text-center">
-                      <span className="font-bold text-white">{bot.stats.avgTradeDuration}</span>
-                    </td>
-                  ))}
-                </tr>
-
-                {/* Total Trades */}
-                <tr className="hover:bg-dark-800/50 transition-colors">
-                  <td className="py-3 px-4 text-sm text-dark-300">Total Trades</td>
-                  {selectedBots.map((bot) => (
-                    <td key={bot.id} className="py-3 px-4 text-center">
-                      <span className="font-bold text-white">{bot.stats.totalTrades.toLocaleString()}</span>
-                    </td>
-                  ))}
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Features Comparison */}
-        <div className="p-6 border-b border-dark-700">
-          <h2 className="text-xl font-bold text-white mb-4">Features</h2>
-
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-dark-700">
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-dark-400">Feature</th>
-                  {selectedBots.map((bot) => (
-                    <th key={bot.id} className="text-center py-3 px-4 text-sm font-semibold text-white">
-                      <div className="flex items-center justify-center gap-2">
-                        {typeof bot.icon === 'string' && bot.icon.startsWith('/') ? (
-                          <img src={bot.icon} alt={bot.name} className="w-6 h-6 object-contain" />
-                        ) : (
-                          <div className="text-lg">{bot.icon}</div>
-                        )}
-                        {bot.name}
-                      </div>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-dark-700">
-                <tr className="hover:bg-dark-800/50 transition-colors">
-                  <td className="py-3 px-4 text-sm text-dark-300">Auto-Rebalance</td>
-                  {selectedBots.map((bot) => (
-                    <td key={bot.id} className="py-3 px-4 text-center">
-                      {bot.features.autoRebalance ? (
-                        <Check className="w-5 h-5 text-green-400 mx-auto" />
-                      ) : (
-                        <X className="w-5 h-5 text-red-400 mx-auto" />
-                      )}
-                    </td>
-                  ))}
-                </tr>
-                <tr className="hover:bg-dark-800/50 transition-colors">
-                  <td className="py-3 px-4 text-sm text-dark-300">Stop Loss</td>
-                  {selectedBots.map((bot) => (
-                    <td key={bot.id} className="py-3 px-4 text-center">
-                      {bot.features.stopLoss ? (
-                        <Check className="w-5 h-5 text-green-400 mx-auto" />
-                      ) : (
-                        <X className="w-5 h-5 text-red-400 mx-auto" />
-                      )}
-                    </td>
-                  ))}
-                </tr>
-                <tr className="hover:bg-dark-800/50 transition-colors">
-                  <td className="py-3 px-4 text-sm text-dark-300">Take Profit</td>
-                  {selectedBots.map((bot) => (
-                    <td key={bot.id} className="py-3 px-4 text-center">
-                      {bot.features.takeProfit ? (
-                        <Check className="w-5 h-5 text-green-400 mx-auto" />
-                      ) : (
-                        <X className="w-5 h-5 text-red-400 mx-auto" />
-                      )}
-                    </td>
-                  ))}
-                </tr>
-                <tr className="hover:bg-dark-800/50 transition-colors">
-                  <td className="py-3 px-4 text-sm text-dark-300">Trailing Stop</td>
-                  {selectedBots.map((bot) => (
-                    <td key={bot.id} className="py-3 px-4 text-center">
-                      {bot.features.trailingStop ? (
-                        <Check className="w-5 h-5 text-green-400 mx-auto" />
-                      ) : (
-                        <X className="w-5 h-5 text-red-400 mx-auto" />
-                      )}
-                    </td>
-                  ))}
-                </tr>
-                <tr className="hover:bg-dark-800/50 transition-colors">
-                  <td className="py-3 px-4 text-sm text-dark-300">Risk Management</td>
-                  {selectedBots.map((bot) => (
-                    <td key={bot.id} className="py-3 px-4 text-center">
-                      {bot.features.riskManagement ? (
-                        <Check className="w-5 h-5 text-green-400 mx-auto" />
-                      ) : (
-                        <X className="w-5 h-5 text-red-400 mx-auto" />
-                      )}
-                    </td>
-                  ))}
-                </tr>
-                <tr className="hover:bg-dark-800/50 transition-colors">
-                  <td className="py-3 px-4 text-sm text-dark-300">Multi-Exchange</td>
-                  {selectedBots.map((bot) => (
-                    <td key={bot.id} className="py-3 px-4 text-center">
-                      {bot.features.multiExchange ? (
-                        <Check className="w-5 h-5 text-green-400 mx-auto" />
-                      ) : (
-                        <X className="w-5 h-5 text-red-400 mx-auto" />
-                      )}
+                      <span className="font-bold text-white">${bot.stats.minInvestment}</span>
                     </td>
                   ))}
                 </tr>
@@ -689,11 +457,7 @@ export default function BotComparePage() {
                   className="p-4 bg-dark-900/50 border border-dark-700 rounded-xl hover:border-primary-500/50 hover:bg-dark-800/50 transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-2xl"
                 >
                   <div className="flex items-center gap-4">
-                    {typeof bot.icon === 'string' && bot.icon.startsWith('/') ? (
-                      <img src={bot.icon} alt={bot.name} className="w-12 h-12 object-contain" />
-                    ) : (
-                      <div className="text-2xl">{bot.icon}</div>
-                    )}
+                    <div className="text-2xl">{bot.icon}</div>
                     <div className="flex-1">
                       <div className="font-bold text-white flex items-center gap-2">
                         {bot.name}

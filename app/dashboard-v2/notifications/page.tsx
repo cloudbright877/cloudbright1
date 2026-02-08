@@ -3,58 +3,80 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import GlassCard from '@/components/ui/GlassCard';
+import { getUserTransactions, type BalanceTransaction } from '@/lib/balances';
+import { getCurrentUserId } from '@/lib/getCurrentUserId';
 
 interface Notification {
-  id: number;
+  id: string;
   title: string;
   body: string;
   date: number;
   read: boolean;
 }
 
-// User notifications
-const userNotifications: Notification[] = [
-  {
-    id: 1,
-    title: 'Investment Profit Credited',
-    body: 'Your investment <strong>Professional Plan #1523</strong> has generated a profit of <strong>$187.50 USDT</strong>',
-    date: Date.now() - 3600000,
-    read: false,
-  },
-  {
-    id: 2,
-    title: 'Referral Bonus Received',
-    body: 'You received a <strong>$125.00 USDT</strong> referral bonus from <strong>user_john</strong> (Level 1)',
-    date: Date.now() - 7200000,
-    read: false,
-  },
-  {
-    id: 3,
-    title: 'Deposit Confirmed',
-    body: 'Your deposit of <strong>1000.00 USDT</strong> via TRC20 has been confirmed and credited to your account',
-    date: Date.now() - 10800000,
-    read: true,
-  },
-  {
-    id: 4,
-    title: 'Investment Completed',
-    body: 'Your investment <strong>Essential Plan #1489</strong> has completed successfully. Total profit: <strong>$3000.00 USDT</strong>',
-    date: Date.now() - 86400000,
-    read: true,
-  },
-  {
-    id: 5,
-    title: 'New Login Detected',
-    body: 'New login from <strong>Chrome on Windows</strong> at IP <strong>192.168.1.100</strong>',
-    date: Date.now() - 172800000,
-    read: true,
-  },
-];
+/**
+ * Generate notifications from real balance transactions.
+ * BACKEND MIGRATION: Replace with push notification system / notification table.
+ */
+function transactionToNotification(tx: BalanceTransaction): Notification {
+  const amount = `<strong>$${tx.amount.toFixed(2)} USDT</strong>`;
+  const ref = tx.relatedEntityId ? ` <strong>${tx.relatedEntityId}</strong>` : '';
+
+  let title = 'Transaction';
+  let body = `Amount: ${amount}`;
+
+  switch (tx.type) {
+    case 'DEPOSIT':
+      title = 'Deposit Confirmed';
+      body = `Your deposit of ${amount} has been confirmed and credited to your account`;
+      break;
+    case 'WITHDRAW':
+      title = 'Withdrawal Processed';
+      body = `Your withdrawal of ${amount} has been processed`;
+      break;
+    case 'PNL_COLLECT':
+      title = 'Profit Collected';
+      body = `You collected ${amount} profit from copy${ref}`;
+      break;
+    case 'COPY_OPEN':
+      title = 'Copy Bot Started';
+      body = `${amount} has been allocated to copy${ref}`;
+      break;
+    case 'COPY_CLOSE':
+      title = 'Copy Bot Closed';
+      body = `${amount} has been returned from copy${ref}`;
+      break;
+    case 'REFERRAL_COMMISSION':
+      title = 'Referral Bonus Received';
+      body = `You received ${amount} referral commission`;
+      break;
+    case 'TURNOVER_BONUS':
+      title = 'Turnover Bonus Awarded';
+      body = `You earned ${amount} turnover bonus`;
+      break;
+  }
+
+  return { id: tx.id, title, body, date: tx.createdAt, read: true };
+}
 
 export default function NotificationsPage() {
   const [displayCount, setDisplayCount] = useState(15);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [notifications, setNotifications] = useState<Notification[]>(userNotifications);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+
+  // Load notifications from real transactions
+  useEffect(() => {
+    const userId = getCurrentUserId();
+    if (!userId) return;
+
+    getUserTransactions(userId).then((txs) => {
+      const mapped = txs.map(transactionToNotification);
+      // Mark recent ones (last hour) as unread
+      const oneHourAgo = Date.now() - 60 * 60 * 1000;
+      mapped.forEach((n) => { if (n.date > oneHourAgo) n.read = false; });
+      setNotifications(mapped);
+    });
+  }, []);
 
   const handleMarkAllAsRead = () => {
     setNotifications(notifications.map(n => ({ ...n, read: true })));
@@ -65,7 +87,7 @@ export default function NotificationsPage() {
     setShowDeleteModal(false);
   };
 
-  const handleMarkAsRead = (id: number) => {
+  const handleMarkAsRead = (id: string) => {
     setNotifications(notifications.map(n =>
       n.id === id ? { ...n, read: true } : n
     ));

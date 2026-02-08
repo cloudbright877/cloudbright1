@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -11,6 +11,8 @@ import { StepRisk } from '@/components/dashboard-v2/quick-start/StepRisk';
 import { StepHorizon } from '@/components/dashboard-v2/quick-start/StepHorizon';
 import { StepResults } from '@/components/dashboard-v2/quick-start/StepResults';
 import { botsApi } from '@/lib/api/botsApi';
+import { getBalance } from '@/lib/balances';
+import { getCurrentUserId } from '@/lib/getCurrentUserId';
 
 type Step = 1 | 2 | 3 | 4;
 
@@ -27,7 +29,13 @@ export default function QuickStartPage() {
   // Computed allocations
   const [allocations, setAllocations] = useState<BotAllocation[]>([]);
 
-  const userBalance = 10000; // TODO: Get from user profile
+  const [userBalance, setUserBalance] = useState(0);
+
+  useEffect(() => {
+    const userId = getCurrentUserId();
+    if (!userId) return;
+    getBalance(userId).then((b) => setUserBalance(b.available));
+  }, []);
 
   const handleAmountSelect = (amount: number) => {
     setInvestmentAmount(amount);

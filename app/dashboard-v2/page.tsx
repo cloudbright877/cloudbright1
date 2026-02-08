@@ -11,6 +11,8 @@ import { priceService } from '@/lib/PriceService';
 import { botsApi } from '@/lib/api/botsApi';
 import { getUserCopy } from '@/lib/userCopies';
 import { getUserCopyPnLBreakdown } from '@/lib/userCopyStats';
+import { getBalance } from '@/lib/balances';
+import { getCurrentUserId } from '@/lib/getCurrentUserId';
 import { getDemoBotById } from '@/lib/demoMarketplace';
 import type { BotStats } from '@/lib/trading/types';
 import {
@@ -242,6 +244,7 @@ export default function DashboardPage() {
   const [bots, setBots] = useState<ActiveBot[]>([]);
   const [closedPositions, setClosedPositions] = useState<ClosedPosition[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [availableBalance, setAvailableBalance] = useState(0);
 
 
   // Load bots and connect to price service
@@ -265,6 +268,12 @@ export default function DashboardPage() {
     });
 
     setIsLoading(false);
+
+    // Load available balance
+    const userId = getCurrentUserId();
+    if (userId) {
+      getBalance(userId).then((b) => setAvailableBalance(b.available));
+    }
 
     // Update UI every second
     const interval = setInterval(async () => {
@@ -406,8 +415,7 @@ export default function DashboardPage() {
   const totalProfit = isNaN(rawTotalProfit) || !isFinite(rawTotalProfit) ? 0 : rawTotalProfit;
 
   const totalProfitPercent = totalInvested > 0 ? (totalProfit / totalInvested) * 100 : 0;
-  // Available balance = 0 for now (no wallet functionality yet)
-  const availableBalance = 0;
+  // Available balance loaded from balance system
   const activeBots = bots.filter(bot => bot.status === 'active').length;
   const todayPnL = bots.reduce((sum, bot) => sum + bot.todayPnL, 0);
   const rawUnrealizedPnL = bots.reduce((sum, bot) => sum + bot.openPositions.reduce((s, p) => s + p.pnl, 0), 0);

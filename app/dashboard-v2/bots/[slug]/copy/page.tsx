@@ -18,6 +18,7 @@ import {
 import { botsApi } from '@/lib/api/botsApi';
 import { getEarlyExitPenaltyRate } from '@/lib/capitalReservation';
 import { getDemoBotBySlug } from '@/lib/demoMarketplace';
+import { getBalance } from '@/lib/balances';
 import type { DemoBot } from '@/lib/demoMarketplace';
 
 export default function CopyBotPage() {
@@ -31,11 +32,12 @@ export default function CopyBotPage() {
   const [error, setError] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [showReservationInfo, setShowReservationInfo] = useState(true);
-
-  const userBalance = 10000; // TODO: Get from user profile
+  const [userBalance, setUserBalance] = useState(0);
 
   useEffect(() => {
     loadBot();
+    const userId = localStorage.getItem('currentUserId') || 'user_default';
+    getBalance(userId).then(b => setUserBalance(b.available));
   }, [slug]);
 
   const loadBot = () => {
@@ -97,7 +99,8 @@ export default function CopyBotPage() {
       setIsProcessing(true);
 
       // Create user copy
-      const copyId = await botsApi.createBotCopy(bot.id, amount);
+      const userId = localStorage.getItem('currentUserId') || 'user_default';
+      const copyId = await botsApi.createBotCopy(bot.id, amount, userId);
 
       console.log(`[CopyBotPage] Created copy: ${copyId}`);
 

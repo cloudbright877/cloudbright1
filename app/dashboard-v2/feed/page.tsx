@@ -34,6 +34,9 @@ import { getTierGradient } from '@/lib/social/tier-utils';
 import { getWhaleAlerts } from '@/lib/social/whale-detector';
 import { seedSocialData, getSocialTraders } from '@/lib/social/mock-seed';
 import { calculateLeaderboard } from '@/lib/social/leaderboard';
+import { botsApi } from '@/lib/api/botsApi';
+import { getUserCopyPnLBreakdown } from '@/lib/userCopyStats';
+import { getUserCopy } from '@/lib/userCopies';
 
 export default function DashboardV2Page() {
   const [activeTab, setActiveTab] = useState<'for-you' | 'following' | 'trending'>('for-you');
@@ -41,6 +44,51 @@ export default function DashboardV2Page() {
   const [whaleAlertsList, setWhaleAlertsList] = useState<WhaleAlert[]>([]);
   const [likeStates, setLikeStates] = useState<Record<string, { liked: boolean; count: number }>>({});
   const [followStates, setFollowStates] = useState<Record<string, boolean>>({});
+
+  // Real portfolio stats
+  const [portfolioValue, setPortfolioValue] = useState(0);
+  const [portfolioPercent, setPortfolioPercent] = useState(0);
+  const [activeBotCount, setActiveBotCount] = useState(0);
+  const [totalInvested, setTotalInvested] = useState(0);
+  const [todayPnL, setTodayPnL] = useState(0);
+  const [todayPnLPercent, setTodayPnLPercent] = useState(0);
+
+  // Load portfolio stats
+  useEffect(() => {
+    const loadPortfolioStats = async () => {
+      const copies = await botsApi.getUserCopies();
+      if (copies.length === 0) return;
+
+      let totalVal = 0;
+      let totalInv = 0;
+      let dayPnL = 0;
+
+      copies.forEach((stats) => {
+        const copyRecord = getUserCopy(stats.id);
+        const invested = copyRecord?.investedAmount || 0;
+        const breakdown = getUserCopyPnLBreakdown(stats.id);
+        totalVal += breakdown?.currentValue ?? (invested + stats.totalPnL);
+        totalInv += invested;
+
+        // Today's P&L
+        const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
+        dayPnL += stats.trades
+          .filter(t => new Date(t.closedAt).getTime() > oneDayAgo)
+          .reduce((sum, t) => sum + t.pnl, 0);
+      });
+
+      setPortfolioValue(totalVal);
+      setTotalInvested(totalInv);
+      setPortfolioPercent(totalInv > 0 ? ((totalVal - totalInv) / totalInv) * 100 : 0);
+      setActiveBotCount(copies.length);
+      setTodayPnL(dayPnL);
+      setTodayPnLPercent(totalInv > 0 ? (dayPnL / totalInv) * 100 : 0);
+    };
+
+    loadPortfolioStats();
+    const interval = setInterval(loadPortfolioStats, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Load data
   useEffect(() => {
@@ -371,10 +419,10 @@ export default function DashboardV2Page() {
                 <DollarSign className="w-3 h-3" />
                 Portfolio Value
               </div>
-              <div className="text-2xl font-bold text-gradient">$28,456</div>
-              <div className="flex items-center gap-1 text-xs text-green-400 mt-1">
+              <div className="text-2xl font-bold text-gradient">${portfolioValue.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
+              <div className={`flex items-center gap-1 text-xs mt-1 ${portfolioPercent >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                 <TrendingUp className="w-3 h-3" />
-                +8.3% all-time
+                {portfolioPercent >= 0 ? '+' : ''}{portfolioPercent.toFixed(1)}% all-time
               </div>
             </div>
           </Link>
@@ -388,8 +436,8 @@ export default function DashboardV2Page() {
                 <BarChart3 className="w-3 h-3" />
                 Today P/L
               </div>
-              <div className="text-2xl font-bold text-green-400">+$234</div>
-              <div className="text-xs text-dark-400 mt-1">+0.83%</div>
+              <div className={`text-2xl font-bold ${todayPnL >= 0 ? 'text-green-400' : 'text-red-400'}`}>{todayPnL >= 0 ? '+' : ''}${Math.abs(todayPnL).toFixed(0)}</div>
+              <div className="text-xs text-dark-400 mt-1">{todayPnLPercent >= 0 ? '+' : ''}{todayPnLPercent.toFixed(2)}%</div>
             </div>
           </div>
         </motion.div>
@@ -402,8 +450,8 @@ export default function DashboardV2Page() {
                 <Bot className="w-3 h-3" />
                 Active Bots
               </div>
-              <div className="text-2xl font-bold text-white">3</div>
-              <div className="text-xs text-dark-400 mt-1">$23,000 invested</div>
+              <div className="text-2xl font-bold text-white">{activeBotCount}</div>
+              <div className="text-xs text-dark-400 mt-1">${totalInvested.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} invested</div>
             </div>
           </Link>
         </motion.div>
@@ -416,11 +464,8 @@ export default function DashboardV2Page() {
                 <Trophy className="w-3 h-3" />
                 Leaderboard
               </div>
-              <div className="text-2xl font-bold text-white">#198</div>
-              <div className="flex items-center gap-1 text-xs text-green-400 mt-1">
-                <TrendingUp className="w-3 h-3" />
-                +51 this week
-              </div>
+              <div className="text-2xl font-bold text-white">#{calculateLeaderboard(getSocialTraders()).length > 0 ? Math.min(calculateLeaderboard(getSocialTraders()).length, 50) : '-'}</div>
+              <div className="text-xs text-dark-400 mt-1">of {calculateLeaderboard(getSocialTraders()).length} traders</div>
             </div>
           </Link>
         </motion.div>
@@ -560,10 +605,10 @@ export default function DashboardV2Page() {
             <div className="mt-4 p-3 bg-primary-500/10 border border-primary-500/20 rounded-lg">
               <div className="text-xs text-dark-400 mb-1">Your Position</div>
               <div className="flex items-center justify-between">
-                <span className="text-sm font-bold text-white">#198 / {calculateLeaderboard(getSocialTraders()).length}</span>
-                <span className="text-xs font-semibold text-green-400 flex items-center gap-1">
+                <span className="text-sm font-bold text-white">#{Math.min(calculateLeaderboard(getSocialTraders()).length, 50)} / {calculateLeaderboard(getSocialTraders()).length}</span>
+                <span className="text-xs font-semibold text-dark-400 flex items-center gap-1">
                   <ChevronUp className="w-3 h-3" />
-                  +51
+                  --
                 </span>
               </div>
             </div>

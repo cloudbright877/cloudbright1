@@ -4,95 +4,71 @@ import { motion } from 'framer-motion';
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import GlassCard from '@/components/ui/GlassCard';
+import { getUserTransactions, type BalanceTransaction } from '@/lib/balances';
+import { getCurrentUserId } from '@/lib/getCurrentUserId';
 
 type TabType = 'all' | 'accruals' | 'replenishment' | 'withdrawals' | 'referral-bonuses';
 
 interface Transaction {
-  id: number;
+  id: string;
   investmentId?: string;
   type: string;
   amount: number;
   currency: string;
   date: number;
   status: string;
-  planId?: number;
-  planName?: string;
-  hash?: string;
-  referralUser?: string;
-  level?: number;
-  totalProfit?: number;
-  investmentAmount?: number;
-  daysElapsed?: number;
-  totalDays?: number;
-  nextAccrual?: number;
+  relatedEntityId?: string;
 }
 
+/**
+ * Map BalanceTransaction type to display-friendly type name.
+ * BACKEND MIGRATION: These type names should match backend transaction types.
+ */
+function mapTransactionType(tx: BalanceTransaction): string {
+  switch (tx.type) {
+    case 'DEPOSIT': return 'Replenishment';
+    case 'WITHDRAW': return 'Withdrawal';
+    case 'COPY_OPEN': return 'Deduction';
+    case 'COPY_CLOSE': return 'Accrual';
+    case 'PNL_COLLECT': return 'Accrual';
+    case 'REFERRAL_COMMISSION': return 'Referral Bonus';
+    case 'TURNOVER_BONUS': return 'Turnover Bonus';
+    default: return tx.type;
+  }
+}
 
-const SAMPLE_TRANSACTIONS: Transaction[] = [
-  {
-    id: 1,
-    investmentId: '#1001',
-    type: 'Accrual',
-    amount: 125.50,
+function mapBalanceTransaction(tx: BalanceTransaction): Transaction {
+  return {
+    id: tx.id,
+    type: mapTransactionType(tx),
+    amount: tx.amount,
     currency: 'USDT',
-    date: Date.now() - 2 * 60 * 60 * 1000,
+    date: tx.createdAt,
     status: 'completed',
-    planName: 'Premium Plan',
-    totalProfit: 1255.00,
-    daysElapsed: 5,
-    totalDays: 30,
-  },
-  {
-    id: 2,
-    type: 'Referral Bonus',
-    amount: 50.00,
-    currency: 'USDT',
-    date: Date.now() - 5 * 60 * 60 * 1000,
-    status: 'completed',
-    referralUser: 'alice_investor',
-    level: 1,
-  },
-  {
-    id: 3,
-    type: 'Replenishment',
-    amount: 5000.00,
-    currency: 'USDT',
-    date: Date.now() - 24 * 60 * 60 * 1000,
-    status: 'completed',
-    hash: '0x1a2b3c4d...9e8f',
-  },
-  {
-    id: 4,
-    type: 'Withdrawal',
-    amount: 1000.00,
-    currency: 'USDT',
-    date: Date.now() - 48 * 60 * 60 * 1000,
-    status: 'pending',
-  },
-  {
-    id: 5,
-    investmentId: '#1002',
-    type: 'Accrual',
-    amount: 87.30,
-    currency: 'USDT',
-    date: Date.now() - 50 * 60 * 60 * 1000,
-    status: 'completed',
-    planName: 'Standard Plan',
-    totalProfit: 873.00,
-    daysElapsed: 3,
-    totalDays: 20,
-  },
-];
+    relatedEntityId: tx.relatedEntityId,
+  };
+}
 
 function TransactionsPageContent() {
   const searchParams = useSearchParams();
   const tabParam = searchParams?.get('tab') as TabType | null;
 
   const [activeTab, setActiveTab] = useState<TabType>(tabParam || 'all');
-  const [allTransactions, setAllTransactions] = useState<Transaction[]>(SAMPLE_TRANSACTIONS);
-  const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>(SAMPLE_TRANSACTIONS);
+  const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
+  const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const transactionsPerPage = 10;
+
+  // Load real transactions from balance system
+  useEffect(() => {
+    const userId = getCurrentUserId();
+    if (!userId) return;
+
+    getUserTransactions(userId).then((txs) => {
+      const mapped = txs.map(mapBalanceTransaction);
+      setAllTransactions(mapped);
+    });
+  }, []);
 
   // Filter transactions based on active tab
   useEffect(() => {
@@ -305,47 +281,10 @@ function TransactionsPageContent() {
                       {/* Details */}
                       <td className="py-4 px-4">
                         <div className="text-xs text-dark-400 space-y-1">
-                          {tx.investmentId && (
+                          {tx.relatedEntityId && (
                             <div className="flex items-center gap-1">
                               <span>🆔</span>
-                              <span className="font-mono font-bold text-white">{tx.investmentId}</span>
-                            </div>
-                          )}
-                          {tx.planName && (
-                            <div className="flex items-center gap-1">
-                              <span>💼</span>
-                              <span>{tx.planName}</span>
-                            </div>
-                          )}
-                          {tx.totalProfit !== undefined && (
-                            <div className="flex items-center gap-1">
-                              <span>📊</span>
-                              <span>Total profit: {formatNumber(tx.totalProfit)} {tx.currency}</span>
-                            </div>
-                          )}
-                          {tx.daysElapsed !== undefined && tx.totalDays !== undefined && (
-                            <div className="flex items-center gap-1">
-                              <span>📅</span>
-                              <span>Day {tx.daysElapsed}/{tx.totalDays}</span>
-                            </div>
-                          )}
-                          {tx.hash && (
-                            <div className="flex items-center gap-1">
-                              <span>🔗</span>
-                              <span className="font-mono">{tx.hash}</span>
-                            </div>
-                          )}
-                          {tx.referralUser && (
-                            <div className="flex items-center gap-1">
-                              <span>👤</span>
-                              <span>{tx.referralUser}</span>
-                              {tx.level && <span className="text-accent-400">(Level {tx.level})</span>}
-                            </div>
-                          )}
-                          {(tx.type === 'Replenishment' || tx.type === 'Deduction') && (
-                            <div className="flex items-center gap-1">
-                              <span>⛓️</span>
-                              <span className="text-dark-500">Blockchain transaction</span>
+                              <span className="font-mono text-white">{tx.relatedEntityId}</span>
                             </div>
                           )}
                         </div>
