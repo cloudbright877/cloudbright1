@@ -4,23 +4,29 @@ import { motion } from 'framer-motion';
 import { Gauge, TrendingUp, TrendingDown } from 'lucide-react';
 
 interface NetWorthHeroProps {
-  netWorth: number;
   portfolioValue: number;
-  cashBalance: number;
+  totalInvested: number;
+  unrealizedPnL: number;
   totalProfit: number;
   totalProfitPercent: number;
   todayPnL: number;
-  totalOpenPositions: number;
+  activeBots: number;
+  totalBots: number;
+  totalRealizedPnL?: number;
+  totalAvailableToCollect?: number;
 }
 
 export function NetWorthHero({
-  netWorth,
   portfolioValue,
-  cashBalance,
+  totalInvested,
+  unrealizedPnL,
   totalProfit,
   totalProfitPercent,
   todayPnL,
-  totalOpenPositions,
+  activeBots,
+  totalBots,
+  totalRealizedPnL = 0,
+  totalAvailableToCollect = 0,
 }: NetWorthHeroProps) {
   return (
     <motion.div
@@ -40,14 +46,14 @@ export function NetWorthHero({
               <Gauge className="w-7 h-7 text-white" />
             </div>
             <div>
-              <p className="text-sm text-dark-400 font-medium">Net Worth</p>
-              <p className="text-xs text-dark-500">Portfolio + Available Cash</p>
+              <p className="text-sm text-dark-400 font-medium">Portfolio Value</p>
+              <p className="text-xs text-dark-500">Total across all bots</p>
             </div>
           </div>
 
           <div className="mb-8">
             <p className="text-5xl lg:text-6xl font-bold text-white mb-2">
-              ${netWorth.toFixed(2)}
+              ${portfolioValue.toFixed(2)}
             </p>
             <div className="flex items-center gap-2">
               <div className={`flex items-center gap-1 px-3 py-1 rounded-lg ${
@@ -67,15 +73,25 @@ export function NetWorthHero({
           </div>
 
           <div className="mt-auto space-y-4">
+            {/* Three-section: Invested | Realized | Unrealized */}
             <div className="flex items-center justify-between p-4 bg-dark-900/50 backdrop-blur-sm rounded-xl border border-dark-700">
               <div>
-                <p className="text-xs text-dark-400 mb-1">Portfolio Value</p>
-                <p className="text-xl font-bold text-white">${portfolioValue.toLocaleString()}</p>
+                <p className="text-xs text-dark-400 mb-1">Invested</p>
+                <p className="text-lg font-bold text-white">${totalInvested.toLocaleString()}</p>
               </div>
               <div className="w-px h-12 bg-dark-700" />
               <div>
-                <p className="text-xs text-dark-400 mb-1">Cash</p>
-                <p className="text-xl font-bold text-green-400">${cashBalance.toLocaleString()}</p>
+                <p className="text-xs text-dark-400 mb-1">Realized</p>
+                <p className={`text-lg font-bold ${totalRealizedPnL >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  {totalRealizedPnL >= 0 ? '+' : ''}${totalRealizedPnL.toFixed(2)}
+                </p>
+              </div>
+              <div className="w-px h-12 bg-dark-700" />
+              <div>
+                <p className="text-xs text-dark-400 mb-1">Unrealized</p>
+                <p className={`text-lg font-bold ${unrealizedPnL >= 0 ? 'text-cyan-400' : 'text-red-400'}`}>
+                  {unrealizedPnL >= 0 ? '+' : ''}${unrealizedPnL.toFixed(2)}
+                </p>
               </div>
             </div>
 
@@ -87,8 +103,8 @@ export function NetWorthHero({
                 </p>
               </div>
               <div className="flex-1 p-3 bg-purple-500/10 rounded-xl border border-purple-500/30">
-                <p className="text-xs text-purple-400/70 mb-1">Positions</p>
-                <p className="text-lg font-bold text-purple-400">{totalOpenPositions}</p>
+                <p className="text-xs text-purple-400/70 mb-1">Active Bots</p>
+                <p className="text-lg font-bold text-purple-400">{activeBots} <span className="text-xs font-normal text-purple-400/70">/ {totalBots}</span></p>
               </div>
             </div>
           </div>

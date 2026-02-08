@@ -36,6 +36,25 @@ export interface UserCopy {
   closedAt?: number; // Unix timestamp when closed
   finalPnL?: number; // Final P&L in USDT when closed
   finalValue?: number; // investedAmount + finalPnL
+
+  // Capital Reservation fields
+  reservationDays: number; // 30 (set at copy creation)
+  earlyExitFee?: number; // $ amount of penalty at close time
+  earlyExitPenaltyRate?: number; // % rate applied at close time
+  isEarlyExit?: boolean; // true if closed before reservation period
+
+  // Collect P&L fields
+  totalCollectedPnL: number; // total profit already withdrawn by user
+  collectCount: number; // how many times user collected
+  lastCollectAt?: number; // timestamp of last collect (for rate limiting)
+
+  // Concurrency lock (future-proof for Firestore/PostgreSQL)
+  operationInProgress: 'collect' | 'archive' | null;
+
+  // Legacy fields (kept for migration compatibility)
+  lastSettledPnL?: number;
+  lastSettlementAt?: number;
+  settlementCount?: number;
 }
 
 // Storage key
@@ -49,20 +68,30 @@ export function createUserCopy(
   investedAmount: number,
   userId: string = 'user_default'
 ): string {
+  const now = Date.now();
+
   const copy: UserCopy = {
-    id: `copy_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    id: `copy_${now}_${Math.random().toString(36).substr(2, 9)}`,
     userId,
     masterBotId,
     investedAmount,
     status: 'ACTIVE', // Default status
-    createdAt: Date.now(),
+    createdAt: now,
+
+    // Capital Reservation
+    reservationDays: 30,
+
+    // Collect P&L
+    totalCollectedPnL: 0,
+    collectCount: 0,
+    operationInProgress: null,
   };
 
   const copies = getAllUserCopies();
   copies.push(copy);
   localStorage.setItem(USER_COPIES_KEY, JSON.stringify(copies));
 
-  console.log(`[UserCopies] Created copy ${copy.id} of ${masterBotId} (status: ACTIVE)`);
+  console.log(`[UserCopies] Created copy ${copy.id} of ${masterBotId} (status: ACTIVE, reservation: ${copy.reservationDays}d)`);
   return copy.id;
 }
 

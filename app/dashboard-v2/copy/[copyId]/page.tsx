@@ -4,9 +4,10 @@ import { motion } from 'framer-motion';
 import { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { botsApi } from '@/lib/api/botsApi';
 import { getUserCopy } from '@/lib/userCopies';
+import { getUserCopyPnLBreakdown, type PnLBreakdown } from '@/lib/userCopyStats';
 import { getDemoBotById } from '@/lib/demoMarketplace';
 import {
   TrendingUp,
@@ -33,6 +34,10 @@ import {
   TrendingUpDown,
   Copy,
   ExternalLink,
+  X as CloseIcon,
+  Archive,
+  Wallet,
+  CheckCircle2,
 } from 'lucide-react';
 import type {
   BotDetails,
@@ -73,6 +78,7 @@ export interface LivePosition {
 
 export default function UserCopyPage() {
   const params = useParams();
+  const router = useRouter();
   const copyId = params.copyId as string;
 
   // State management
@@ -88,6 +94,15 @@ export default function UserCopyPage() {
   const [masterBotSlug, setMasterBotSlug] = useState<string>('');
   const [investedAmount, setInvestedAmount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
+
+  // P&L Breakdown (from central formula)
+  const [pnlBreakdown, setPnlBreakdown] = useState<PnLBreakdown | null>(null);
+
+  // Collect P&L dialog state
+  const [showCollectDialog, setShowCollectDialog] = useState(false);
+  const [collectLoading, setCollectLoading] = useState(false);
+  const [collectSuccess, setCollectSuccess] = useState(false);
+  const [collectError, setCollectError] = useState<string | null>(null);
 
   // Note: PriceService subscription is handled globally in Dashboard page
   // to avoid duplicate ticks when multiple pages are open
@@ -226,6 +241,10 @@ export default function UserCopyPage() {
 
       setLivePositions(convertedPositions);
       setTradeHistory(convertedTrades);
+
+      // Update P&L breakdown from central formula
+      const breakdown = getUserCopyPnLBreakdown(copyId);
+      if (breakdown) setPnlBreakdown(breakdown);
 
       // Calculate derived values
       const currentValue = investedAmount + stats.totalPnL;
@@ -480,6 +499,28 @@ export default function UserCopyPage() {
   );
 
 
+  // Handle Collect P&L
+  const handleCollect = async () => {
+    setCollectLoading(true);
+    setCollectError(null);
+    try {
+      const result = await botsApi.collectProfit(copyId);
+      if (result.collectedAmount > 0) {
+        setCollectSuccess(true);
+        setTimeout(() => {
+          setCollectSuccess(false);
+          setShowCollectDialog(false);
+        }, 2000);
+      } else {
+        setShowCollectDialog(false);
+      }
+    } catch (err: any) {
+      setCollectError(err.message || 'Failed to collect');
+    } finally {
+      setCollectLoading(false);
+    }
+  };
+
   if (!botDetails || !botStats) {
     return (
       <div className="min-h-screen bg-dark-950 flex items-center justify-center">
@@ -549,34 +590,61 @@ export default function UserCopyPage() {
             </div>
 
             <div className="flex gap-3">
-              {/* User copies don't have settings - controlled by Master Bot */}
+              <Link
+                href={`/dashboard-v2/copy/${copyId}/archive`}
+                className="px-4 py-2 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 hover:border-amber-500/50 rounded-lg font-semibold text-amber-400 hover:text-amber-300 transition-all flex items-center gap-2"
+              >
+                <Archive className="w-4 h-4" />
+                Archive
+              </Link>
             </div>
           </div>
         </motion.div>
 
         {/* Quick Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6">
+          {/* Realized P&L */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
             <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6 hover:border-green-500/50 transition-all">
               <div className="flex items-center justify-between mb-4">
-                <div className={`w-12 h-12 ${botDetails.profit >= 0 ? 'bg-green-500/20 border-green-500/30' : 'bg-red-500/20 border-red-500/30'} border rounded-xl flex items-center justify-center`}>
-                  {botDetails.profit >= 0 ? (
+                <div className={`w-12 h-12 ${(pnlBreakdown?.realizedPnL ?? 0) >= 0 ? 'bg-green-500/20 border-green-500/30' : 'bg-red-500/20 border-red-500/30'} border rounded-xl flex items-center justify-center`}>
+                  {(pnlBreakdown?.realizedPnL ?? 0) >= 0 ? (
                     <TrendingUp className="w-6 h-6 text-green-400" />
                   ) : (
                     <TrendingDown className="w-6 h-6 text-red-400" />
                   )}
                 </div>
                 <div className={`text-xs font-semibold px-2 py-1 rounded ${
-                  botDetails.profit >= 0 ? 'text-green-400 bg-green-500/10' : 'text-red-400 bg-red-500/10'
+                  (pnlBreakdown?.realizedPnL ?? 0) >= 0 ? 'text-green-400 bg-green-500/10' : 'text-red-400 bg-red-500/10'
                 }`}>
-                  {botDetails.profit >= 0 ? '+' : ''}{(botDetails.profitPercent || 0).toFixed(2)}%
+                  Closed trades
                 </div>
               </div>
-              <div className="text-sm text-dark-400 mb-1">Total P&L</div>
-              <div className={`text-2xl font-bold mb-2 ${botDetails.profit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                {botDetails.profit >= 0 ? '+' : ''}${Math.abs(botDetails.profit).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              <div className="text-sm text-dark-400 mb-1">Realized P&L</div>
+              <div className={`text-2xl font-bold mb-2 ${(pnlBreakdown?.realizedPnL ?? 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                {(pnlBreakdown?.realizedPnL ?? 0) >= 0 ? '+' : ''}${Math.abs(pnlBreakdown?.realizedPnL ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </div>
               <div className="text-xs text-dark-400">Running for {botDetails.runningDays} days</div>
+            </div>
+          </motion.div>
+
+          {/* Unrealized P&L */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}>
+            <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6 hover:border-cyan-500/50 transition-all">
+              <div className="flex items-center justify-between mb-4">
+                <div className={`w-12 h-12 ${(pnlBreakdown?.unrealizedPnL ?? 0) >= 0 ? 'bg-cyan-500/20 border-cyan-500/30' : 'bg-red-500/20 border-red-500/30'} border rounded-xl flex items-center justify-center`}>
+                  <Activity className="w-6 h-6 text-cyan-400" />
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse" />
+                  <span className="text-xs font-semibold text-cyan-400">LIVE</span>
+                </div>
+              </div>
+              <div className="text-sm text-dark-400 mb-1">Unrealized P&L</div>
+              <div className={`text-2xl font-bold mb-2 ${(pnlBreakdown?.unrealizedPnL ?? 0) >= 0 ? 'text-cyan-400' : 'text-red-400'}`}>
+                {(pnlBreakdown?.unrealizedPnL ?? 0) >= 0 ? '+' : ''}${Math.abs(pnlBreakdown?.unrealizedPnL ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </div>
+              <div className="text-xs text-dark-400">Open positions</div>
             </div>
           </motion.div>
 
@@ -640,6 +708,116 @@ export default function UserCopyPage() {
             </div>
           </motion.div>
         </div>
+
+        {/* Collect P&L Section */}
+        {pnlBreakdown && (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} className="mb-6">
+            <div className={`bg-gradient-to-r ${pnlBreakdown.availableToCollect > 0 ? 'from-green-500/10 via-emerald-500/5 to-green-500/10 border-green-500/30 hover:border-green-500/50' : 'from-dark-800/95 to-dark-900/95 border-dark-700'} border rounded-2xl p-6 transition-all`}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <Wallet className="w-5 h-5 text-green-400" />
+                    <span className="text-sm text-dark-400">Available to Collect</span>
+                  </div>
+                  <div className={`text-3xl font-bold ${pnlBreakdown.availableToCollect > 0 ? 'text-green-400' : 'text-dark-500'}`}>
+                    +${pnlBreakdown.availableToCollect.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </div>
+                  <div className="text-xs text-dark-400 mt-1">
+                    Already collected: ${pnlBreakdown.totalCollected.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    {pnlBreakdown.collectCount > 0 && ` (${pnlBreakdown.collectCount} time${pnlBreakdown.collectCount !== 1 ? 's' : ''})`}
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    setCollectError(null);
+                    setCollectSuccess(false);
+                    setShowCollectDialog(true);
+                  }}
+                  disabled={pnlBreakdown.availableToCollect <= 0}
+                  className={`px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 ${
+                    pnlBreakdown.availableToCollect > 0
+                      ? 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 text-white shadow-lg shadow-green-500/20'
+                      : 'bg-dark-700 text-dark-500 cursor-not-allowed'
+                  }`}
+                >
+                  <DollarSign className="w-5 h-5" />
+                  Collect P&L
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Collect Confirmation Dialog */}
+        {showCollectDialog && pnlBreakdown && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-dark-800 border border-dark-700 rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-white">Collect P&L</h3>
+                <button onClick={() => setShowCollectDialog(false)} className="text-dark-400 hover:text-white">
+                  <CloseIcon className="w-5 h-5" />
+                </button>
+              </div>
+
+              {collectSuccess ? (
+                <div className="text-center py-6">
+                  <CheckCircle2 className="w-16 h-16 text-green-400 mx-auto mb-3" />
+                  <p className="text-xl font-bold text-green-400">Collected!</p>
+                  <p className="text-sm text-dark-400 mt-1">Funds added to your available balance</p>
+                </div>
+              ) : (
+                <>
+                  <div className="p-4 bg-dark-900/50 rounded-xl border border-dark-700 mb-4">
+                    <div className="text-sm text-dark-400 mb-1">Collect amount</div>
+                    <div className="text-2xl font-bold text-green-400">
+                      +${pnlBreakdown.availableToCollect.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </div>
+                    <div className="text-xs text-dark-500 mt-2">
+                      Funds will be credited to your available balance.
+                    </div>
+                    <div className="text-xs text-dark-500 mt-1">
+                      Referral bonus will be awarded to your referrer by the platform.
+                    </div>
+                  </div>
+
+                  {collectError && (
+                    <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg mb-4">
+                      <p className="text-sm text-red-400">{collectError}</p>
+                    </div>
+                  )}
+
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setShowCollectDialog(false)}
+                      disabled={collectLoading}
+                      className="flex-1 px-4 py-3 bg-dark-700 hover:bg-dark-600 border border-dark-600 rounded-lg text-white font-medium transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleCollect}
+                      disabled={collectLoading}
+                      className="flex-1 px-4 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 rounded-lg text-white font-semibold transition-all flex items-center justify-center gap-2"
+                    >
+                      {collectLoading ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          Collecting...
+                        </>
+                      ) : (
+                        'Confirm'
+                      )}
+                    </button>
+                  </div>
+                </>
+              )}
+            </motion.div>
+          </div>
+        )}
 
         {/* Performance Chart + Bot Info */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 mb-6">
@@ -778,9 +956,30 @@ export default function UserCopyPage() {
                 <div className="p-4 bg-dark-900/50 rounded-xl border border-dark-700/50">
                   <div className="text-xs text-dark-400 mb-1">Current Value</div>
                   <div className={`text-2xl font-bold ${botDetails.profit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                    ${(botDetails.currentValue || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    ${(pnlBreakdown?.currentValue ?? botDetails.currentValue ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </div>
                 </div>
+
+                {pnlBreakdown && (
+                  <div className="p-3 bg-dark-900/50 rounded-xl border border-dark-700/50 space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-xs text-dark-400">Total P&L (historical)</span>
+                      <span className={`text-xs font-semibold ${pnlBreakdown.totalPnL >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                        {pnlBreakdown.totalPnL >= 0 ? '+' : ''}${pnlBreakdown.totalPnL.toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-xs text-dark-400">Collected</span>
+                      <span className="text-xs font-semibold text-white">${pnlBreakdown.totalCollected.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-xs text-dark-400">In Bot (uncollected)</span>
+                      <span className={`text-xs font-semibold ${pnlBreakdown.availableToCollect > 0 ? 'text-green-400' : 'text-dark-400'}`}>
+                        ${pnlBreakdown.availableToCollect.toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+                )}
 
                 <div className="p-3 bg-dark-900/50 rounded-xl border border-dark-700/50">
                   <div className="text-xs text-dark-400 mb-1">Risk Level</div>
@@ -1299,7 +1498,6 @@ export default function UserCopyPage() {
           </div>
         </motion.div>
       </div>
-
     </div>
   );
 }

@@ -66,6 +66,12 @@ const TRANSACTION_CONFIG: Record<
     color: 'text-blue-400',
     bgColor: 'bg-blue-500/10',
   },
+  PNL_COLLECT: {
+    icon: ArrowDownLeft,
+    label: 'P&L Collected',
+    color: 'text-emerald-400',
+    bgColor: 'bg-emerald-500/10',
+  },
 };
 
 export default function TransactionRow({

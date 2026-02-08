@@ -3,6 +3,78 @@ import { getUserCopy, getAllCopiesOfMaster } from './userCopies';
 import type { BotStats, Position, Trade } from './trading/types';
 import type { UserCopy } from './userCopies';
 
+// ============================================================================
+// P&L Breakdown — Single Source of Truth
+// ============================================================================
+
+/**
+ * Complete P&L breakdown for a user copy.
+ * ALL UI pages MUST use getUserCopyPnLBreakdown() — no duplicate calculations.
+ */
+export interface PnLBreakdown {
+  realizedPnL: number;        // sum(closedTrades.pnl) — from trades after copy creation
+  unrealizedPnL: number;      // sum(openPositions.pnl)
+  totalPnL: number;           // realized + unrealized (for leaderboard)
+  totalCollected: number;     // already withdrawn by user via Collect P&L
+  availableToCollect: number; // max(0, realizedPnL - totalCollected)
+  currentValue: number;       // invested + realized - collected + unrealized
+  investedAmount: number;     // original capital
+  collectCount: number;       // number of times user collected
+}
+
+/**
+ * THE source for all P&L numbers everywhere.
+ * Dashboard, copy detail, archive page, wallet — all call this function.
+ */
+export function getUserCopyPnLBreakdown(copyId: string): PnLBreakdown | null {
+  const copy = getUserCopy(copyId);
+  if (!copy) return null;
+
+  const masterBot = botManager.getBot(copy.masterBotId);
+  if (!masterBot) return null;
+
+  const masterStats = masterBot.getStats();
+  const masterConfig = masterBot.getConfig();
+
+  const masterCapital = masterConfig.investedCapital || 1;
+  const ratio = copy.investedAmount / masterCapital;
+
+  if (!isFinite(ratio) || isNaN(ratio) || ratio < 0) return null;
+
+  // Filter trades that happened AFTER copy was created
+  const tradesAfterCopy = masterStats.trades.filter(
+    (t) => new Date(t.closedAt).getTime() >= copy.createdAt
+  );
+
+  // Realized P&L = sum of closed trades (scaled)
+  const rawRealized = tradesAfterCopy.reduce((sum, t) => sum + t.pnl * ratio, 0);
+  const realizedPnL = isFinite(rawRealized) && !isNaN(rawRealized) ? rawRealized : 0;
+
+  // Unrealized P&L = sum of open positions (scaled)
+  const rawUnrealized = masterStats.positions.reduce((sum, p) => sum + p.pnl * ratio, 0);
+  const unrealizedPnL = isFinite(rawUnrealized) && !isNaN(rawUnrealized) ? rawUnrealized : 0;
+
+  const totalPnL = realizedPnL + unrealizedPnL;
+  const totalCollected = copy.totalCollectedPnL || 0;
+  const availableToCollect = Math.max(0, realizedPnL - totalCollected);
+  const currentValue = copy.investedAmount + realizedPnL - totalCollected + unrealizedPnL;
+
+  return {
+    realizedPnL,
+    unrealizedPnL,
+    totalPnL,
+    totalCollected,
+    availableToCollect,
+    currentValue,
+    investedAmount: copy.investedAmount,
+    collectCount: copy.collectCount || 0,
+  };
+}
+
+// ============================================================================
+// Aggregated Stats
+// ============================================================================
+
 /**
  * Aggregated stats for marketplace display
  */

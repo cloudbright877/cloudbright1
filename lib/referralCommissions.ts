@@ -8,8 +8,8 @@
  * - Levels 4-10: 2% each
  * - Total max: 32% of profit
  *
- * Trigger: When a user closes a profitable copy (realized P&L)
- * Payment: Instant credit to upline's available balance
+ * Trigger: When a user collects P&L or archives a copy (realized P&L)
+ * Payment: Instant credit to upline's available balance (platform bonus, not deducted from user)
  */
 
 import { storage } from './storage/LocalStorageAdapter';

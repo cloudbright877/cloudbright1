@@ -4,14 +4,13 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { BotSettingsModal } from '@/components/dashboard-v2/BotSettingsModal';
 import { AddFundsModal } from '@/components/dashboard-v2/AddFundsModal';
-import { ConfirmationModal } from '@/components/dashboard-v2/ConfirmationModal';
 import { NetWorthHero } from '@/components/dashboard-v2/NetWorthHero';
 import { botManager } from '@/lib/BotManager';
 import { priceService } from '@/lib/PriceService';
 import { botsApi } from '@/lib/api/botsApi';
 import { getUserCopy } from '@/lib/userCopies';
+import { getUserCopyPnLBreakdown } from '@/lib/userCopyStats';
 import { getDemoBotById } from '@/lib/demoMarketplace';
 import type { BotStats } from '@/lib/trading/types';
 import {
@@ -19,7 +18,6 @@ import {
   TrendingUp,
   Activity,
   Plus,
-  Settings,
   BarChart3,
   Users,
   Shield,
@@ -31,12 +29,10 @@ import {
   CircleDollarSign,
   Zap,
   Target,
-  Play,
-  Pause,
   X,
   ArrowDownLeft,
   ArrowUpLeft,
-  Trash2,
+  Archive,
 } from 'lucide-react';
 
 interface ActiveBot {
@@ -56,6 +52,8 @@ interface ActiveBot {
   lastTrade: string;
   openPositions: OpenPosition[];
   maxPositions?: number;
+  availableToCollect: number;
+  totalRealizedPnL: number;
 }
 
 interface OpenPosition {
@@ -164,12 +162,14 @@ const mapBotStatsToActiveBot = (stats: BotStats, config: any): ActiveBot => {
     currentValue: config.investedCapital + stats.totalPnL,
     profit: stats.totalPnL,
     profitPercent: config.investedCapital > 0 ? (stats.totalPnL / config.investedCapital) * 100 : 0,
-    status: 'active', // TODO: Add status to BotConfig
+    status: 'active',
     winRate: stats.winRate,
     trades: stats.tradesCount,
     todayPnL,
     lastTrade,
     openPositions,
+    availableToCollect: 0,
+    totalRealizedPnL: 0,
   };
 };
 
@@ -201,6 +201,8 @@ const mockActiveBots: ActiveBot[] = [
       { id: '9', pair: 'UNI/USDT', side: 'SHORT', amount: 25, leverage: 2, entryPrice: 6.8, currentPrice: 6.75, pnl: 12.5, pnlPercent: 0.73, stopLoss: 7.0, takeProfit: 6.5, openedAt: '1 hr ago' },
       { id: '10', pair: 'ATOM/USDT', side: 'LONG', amount: 18, leverage: 2, entryPrice: 9.2, currentPrice: 9.28, pnl: 14.4, pnlPercent: 0.87, stopLoss: 8.9, takeProfit: 9.5, openedAt: '1.5 hr ago' },
     ],
+    availableToCollect: 0,
+    totalRealizedPnL: 0,
   },
   {
     id: '2',
@@ -229,22 +231,18 @@ const mockActiveBots: ActiveBot[] = [
       { id: '19', pair: 'FIL/USDT', side: 'LONG', amount: 12, leverage: 3, entryPrice: 4.2, currentPrice: 4.25, pnl: 15.0, pnlPercent: 1.19, stopLoss: 4.0, takeProfit: 4.4, openedAt: '58 min ago' },
       { id: '20', pair: 'NEAR/USDT', side: 'LONG', amount: 30, leverage: 2, entryPrice: 2.1, currentPrice: 2.12, pnl: 6.0, pnlPercent: 0.95, stopLoss: 2.0, takeProfit: 2.2, openedAt: '1.2 hr ago' },
     ],
+    availableToCollect: 0,
+    totalRealizedPnL: 0,
   },
 ];
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [settingsBotId, setSettingsBotId] = useState<string | null>(null);
   const [addFundsBot, setAddFundsBot] = useState<ActiveBot | null>(null);
   const [bots, setBots] = useState<ActiveBot[]>([]);
   const [closedPositions, setClosedPositions] = useState<ClosedPosition[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Confirmation modals state
-  const [confirmAction, setConfirmAction] = useState<{
-    type: 'pause' | 'resume' | 'remove';
-    bot: ActiveBot;
-  } | null>(null);
 
   // Load bots and connect to price service
   useEffect(() => {
@@ -334,6 +332,9 @@ export default function DashboardPage() {
         const safeProfit = isNaN(stats.totalPnL) || !isFinite(stats.totalPnL) ? 0 : stats.totalPnL;
         const safeProfitPercent = isNaN(profitPercent) || !isFinite(profitPercent) ? 0 : profitPercent;
 
+        // Get P&L breakdown for collect data
+        const pnlBreakdown = getUserCopyPnLBreakdown(stats.id);
+
         return {
           id: stats.id,
           name: stats.name,
@@ -341,7 +342,7 @@ export default function DashboardPage() {
           icon: botIcon,
           risk,
           invested,
-          currentValue,
+          currentValue: pnlBreakdown?.currentValue ?? currentValue,
           profit: safeProfit,
           profitPercent: safeProfitPercent,
           status: 'active' as const,
@@ -350,6 +351,8 @@ export default function DashboardPage() {
           todayPnL,
           lastTrade,
           openPositions,
+          availableToCollect: pnlBreakdown?.availableToCollect ?? 0,
+          totalRealizedPnL: pnlBreakdown?.realizedPnL ?? 0,
         };
       });
       setBots(activeBots);
@@ -407,23 +410,10 @@ export default function DashboardPage() {
   const availableBalance = 0;
   const activeBots = bots.filter(bot => bot.status === 'active').length;
   const todayPnL = bots.reduce((sum, bot) => sum + bot.todayPnL, 0);
-  const totalOpenPositions = bots.reduce((sum, bot) => sum + bot.openPositions.length, 0);
-  const netWorth = totalValue + availableBalance;
-
-  // Mock actions - will be replaced with API calls
-  const handleTogglePause = (botId: string) => {
-    // TODO: Backend API call
-    // await fetch(`/api/bots/${botId}/toggle-pause`, { method: 'POST' });
-
-    setBots(bots.map(bot =>
-      bot.id === botId
-        ? { ...bot, status: bot.status === 'active' ? 'paused' : 'active' as 'active' | 'paused' }
-        : bot
-    ));
-
-    const bot = bots.find(b => b.id === botId);
-    console.log(`[MOCK] ${bot?.status === 'active' ? 'Pausing' : 'Resuming'} bot ${botId}`);
-  };
+  const rawUnrealizedPnL = bots.reduce((sum, bot) => sum + bot.openPositions.reduce((s, p) => s + p.pnl, 0), 0);
+  const unrealizedPnL = isNaN(rawUnrealizedPnL) || !isFinite(rawUnrealizedPnL) ? 0 : rawUnrealizedPnL;
+  const totalRealizedPnL = bots.reduce((sum, bot) => sum + (bot.totalRealizedPnL || 0), 0);
+  const totalAvailableToCollect = bots.reduce((sum, bot) => sum + (bot.availableToCollect || 0), 0);
 
   const handleRemoveBot = (botId: string) => {
     const bot = bots.find(b => b.id === botId);
@@ -498,13 +488,16 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
           {/* Row 1: Hero + Action Cards */}
           <NetWorthHero
-            netWorth={netWorth}
             portfolioValue={totalValue}
-            cashBalance={availableBalance}
+            totalInvested={totalInvested}
+            unrealizedPnL={unrealizedPnL}
             totalProfit={totalProfit}
             totalProfitPercent={totalProfitPercent}
             todayPnL={todayPnL}
-            totalOpenPositions={totalOpenPositions}
+            activeBots={activeBots}
+            totalBots={bots.length}
+            totalRealizedPnL={totalRealizedPnL}
+            totalAvailableToCollect={totalAvailableToCollect}
           />
 
           {/* Quick Start Card */}
@@ -728,31 +721,12 @@ export default function DashboardPage() {
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => setSettingsBotId(bot.id)}
-                        className="p-2 rounded-lg bg-dark-700/50 hover:bg-dark-600 border border-dark-600 hover:border-primary-500/50 transition-all"
+                      <Link
+                        href={`/dashboard-v2/copy/${bot.id}/archive`}
+                        className="p-2 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 hover:border-amber-500/50 text-amber-400 hover:text-amber-300 transition-all"
                       >
-                        <Settings className="w-4 h-4 text-dark-400 hover:text-primary-400 transition-colors" />
-                      </button>
-                      <button
-                        onClick={() => setConfirmAction({
-                          type: bot.status === 'active' ? 'pause' : 'resume',
-                          bot
-                        })}
-                        className={`p-2 rounded-lg border transition-all ${
-                          bot.status === 'active'
-                            ? 'bg-yellow-500/10 hover:bg-yellow-500/20 border-yellow-500/30 text-yellow-400'
-                            : 'bg-green-500/10 hover:bg-green-500/20 border-green-500/30 text-green-400'
-                        }`}
-                      >
-                        {bot.status === 'active' ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                      </button>
-                      <button
-                        onClick={() => setConfirmAction({ type: 'remove', bot })}
-                        className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 hover:border-red-500/50 text-red-400 hover:text-red-300 transition-all"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                        <Archive className="w-4 h-4" />
+                      </Link>
                     </div>
                   </div>
 
@@ -763,21 +737,23 @@ export default function DashboardPage() {
                       <p className="text-base font-bold text-white">${bot.invested.toFixed(2)}</p>
                     </div>
                     <div className="p-3 bg-dark-900/50 rounded-lg border border-dark-700/50">
-                      <p className="text-xs text-dark-400 mb-1">Value</p>
+                      <p className="text-xs text-dark-400 mb-1">Current Value</p>
                       <p className="text-base font-bold text-white">${bot.currentValue.toFixed(2)}</p>
                     </div>
                     <div className={`p-3 bg-gradient-to-br rounded-lg border ${
-                      bot.profit >= 0
+                      bot.availableToCollect > 0
                         ? 'from-green-500/10 to-emerald-500/5 border-green-500/20'
-                        : 'from-red-500/10 to-rose-500/5 border-red-500/20'
+                        : 'from-dark-800/50 to-dark-900/50 border-dark-700/50'
                     }`}>
-                      <p className={`text-xs mb-1 ${bot.profit >= 0 ? 'text-green-400/70' : 'text-red-400/70'}`}>Profit</p>
-                      <p className={`text-base font-bold ${bot.profit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                        {bot.profit >= 0 ? '+' : ''}${bot.profit.toFixed(2)}
+                      <p className={`text-xs mb-1 ${bot.availableToCollect > 0 ? 'text-green-400/70' : 'text-dark-400'}`}>Available</p>
+                      <p className={`text-base font-bold ${bot.availableToCollect > 0 ? 'text-green-400' : 'text-dark-500'}`}>
+                        ${bot.availableToCollect.toFixed(2)}
                       </p>
-                      <p className={`text-xs ${bot.profit >= 0 ? 'text-green-400/60' : 'text-red-400/60'}`}>
-                        {bot.profitPercent >= 0 ? '+' : ''}{bot.profitPercent.toFixed(2)}%
-                      </p>
+                      {bot.profit !== 0 && (
+                        <p className={`text-xs ${bot.profit >= 0 ? 'text-green-400/60' : 'text-red-400/60'}`}>
+                          P&L: {bot.profit >= 0 ? '+' : ''}{bot.profitPercent.toFixed(2)}%
+                        </p>
+                      )}
                     </div>
                   </div>
 
@@ -790,13 +766,17 @@ export default function DashboardPage() {
                       <BarChart3 className="w-4 h-4" />
                       Details
                     </Link>
-                    <button
-                      onClick={() => setAddFundsBot(bot)}
-                      className="px-4 py-2.5 bg-green-500/10 hover:bg-green-500/20 border border-green-500/30 hover:border-green-500/50 rounded-lg font-medium text-green-400 hover:text-green-300 transition-all text-sm flex items-center gap-2"
+                    <Link
+                      href={`/dashboard-v2/copy/${bot.id}`}
+                      className={`px-4 py-2.5 rounded-lg font-medium transition-all text-sm flex items-center gap-2 ${
+                        bot.availableToCollect > 0
+                          ? 'bg-green-500/10 hover:bg-green-500/20 border border-green-500/30 hover:border-green-500/50 text-green-400 hover:text-green-300'
+                          : 'bg-dark-700/50 border border-dark-700 text-dark-500 cursor-default'
+                      }`}
                     >
-                      <Plus className="w-4 h-4" />
-                      Add Funds
-                    </button>
+                      <CircleDollarSign className="w-4 h-4" />
+                      {bot.availableToCollect > 0 ? `Collect $${bot.availableToCollect.toFixed(0)}` : 'Collect'}
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -858,18 +838,6 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Settings Modal */}
-      {settingsBotId && (() => {
-        const botInstance = botManager.getBot(settingsBotId);
-        return botInstance ? (
-          <BotSettingsModal
-            isOpen={true}
-            onClose={() => setSettingsBotId(null)}
-            bot={botInstance}
-          />
-        ) : null;
-      })()}
-
       {/* Add Funds Modal */}
       {addFundsBot && (
         <AddFundsModal
@@ -884,63 +852,6 @@ export default function DashboardPage() {
         />
       )}
 
-      {/* Confirmation Modals */}
-      {confirmAction?.type === 'pause' && (
-        <ConfirmationModal
-          isOpen={true}
-          onClose={() => setConfirmAction(null)}
-          onConfirm={() => handleTogglePause(confirmAction.bot.id)}
-          title={`Pause ${confirmAction.bot.name}?`}
-          description="The bot will stop opening new positions"
-          icon={<Pause className="w-5 h-5 text-yellow-400" />}
-          bulletPoints={[
-            'Current open positions will remain active',
-            'Positions will still be managed by bot (SL/TP)',
-            'You can resume trading anytime',
-            'Your invested funds stay in the bot'
-          ]}
-          confirmText="Pause Bot"
-          confirmButtonClass="from-yellow-500 to-orange-500"
-        />
-      )}
-
-      {confirmAction?.type === 'resume' && (
-        <ConfirmationModal
-          isOpen={true}
-          onClose={() => setConfirmAction(null)}
-          onConfirm={() => handleTogglePause(confirmAction.bot.id)}
-          title={`Resume ${confirmAction.bot.name}?`}
-          description="The bot will continue trading"
-          icon={<Play className="w-5 h-5 text-green-400" />}
-          bulletPoints={[
-            'Bot will start opening new positions',
-            'Uses your current settings (SL/TP)',
-            `Invested funds: $${confirmAction.bot.invested.toLocaleString('en-US')}`
-          ]}
-          confirmText="Resume Bot"
-          confirmButtonClass="from-green-500 to-emerald-500"
-        />
-      )}
-
-      {confirmAction?.type === 'remove' && (
-        <ConfirmationModal
-          isOpen={true}
-          onClose={() => setConfirmAction(null)}
-          onConfirm={() => handleRemoveBot(confirmAction.bot.id)}
-          title={`Remove ${confirmAction.bot.name}?`}
-          description="This will permanently stop the bot"
-          icon={<Trash2 className="w-5 h-5 text-red-400" />}
-          bulletPoints={[
-            `All open positions (${confirmAction.bot.openPositions.length}) will be closed immediately`,
-            `Your invested $${confirmAction.bot.invested.toLocaleString('en-US')} + P&L ($${confirmAction.bot.profit.toLocaleString('en-US')}) will return to Available`,
-            `Total returned: $${confirmAction.bot.currentValue.toLocaleString('en-US')}`,
-            'Bot will be removed from your dashboard'
-          ]}
-          confirmText="Remove Bot"
-          confirmButtonClass="from-red-500 to-orange-500"
-          isDangerous={true}
-        />
-      )}
     </div>
   );
 }

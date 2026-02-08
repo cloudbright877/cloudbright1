@@ -9,8 +9,9 @@
  * Flow:
  * 1. Deposit → Available++
  * 2. Open Copy → Available--, Frozen++
- * 3. Close Copy → Frozen--, Available++ (principal + profit - commissions)
- * 4. Withdraw → Available--
+ * 3. Collect P&L → Available++ (user gets 100% of profit)
+ * 4. Close Copy → Frozen--, Available++ (capital return - early exit fee)
+ * 5. Withdraw → Available--
  */
 
 import { storage } from './storage/LocalStorageAdapter';
@@ -23,6 +24,7 @@ export type BalanceTransactionType =
   | 'WITHDRAW'
   | 'COPY_OPEN'
   | 'COPY_CLOSE'
+  | 'PNL_COLLECT'
   | 'REFERRAL_COMMISSION'
   | 'TURNOVER_BONUS';
 
@@ -286,6 +288,38 @@ export async function creditCommission(
     balanceType: 'available',
     direction: 'IN',
     relatedEntityId: commissionId,
+    balanceBefore,
+    balanceAfter,
+  });
+
+  return updated;
+}
+
+/**
+ * Credit collected P&L to available balance (does NOT touch frozen)
+ */
+export async function creditCollectedPnL(
+  userId: string,
+  amount: number,
+  copyId: string
+): Promise<Balance> {
+  if (amount <= 0) {
+    throw new Error('Collect amount must be positive');
+  }
+
+  const balance = await getBalance(userId);
+  const balanceBefore = balance.available;
+  const balanceAfter = balanceBefore + amount;
+
+  const updated = await updateBalance(userId, { available: balanceAfter });
+
+  await recordTransaction({
+    userId,
+    type: 'PNL_COLLECT',
+    amount,
+    balanceType: 'available',
+    direction: 'IN',
+    relatedEntityId: copyId,
     balanceBefore,
     balanceAfter,
   });

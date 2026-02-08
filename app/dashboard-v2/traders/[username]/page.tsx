@@ -23,7 +23,9 @@ import {
   Trophy,
   Calendar,
   DollarSign,
-  Zap
+  Zap,
+  Archive,
+  Clock
 } from 'lucide-react';
 
 // Social system imports
@@ -32,6 +34,10 @@ import { getTraderByUsername, seedSocialData } from '@/lib/social/mock-seed';
 import { calculateTier } from '@/lib/social/tier-system';
 import { isWhale } from '@/lib/social/whale-detector';
 import { toggleFollow, isFollowing } from '@/lib/social/follow-system';
+
+// User copies system
+import { getClosedUserCopies } from '@/lib/userCopies';
+import type { UserCopy } from '@/lib/userCopies';
 
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
@@ -42,7 +48,7 @@ export default function TraderProfilePage({ params }: { params: Promise<{ userna
 
   const [trader, setTrader] = useState<TraderProfile | null>(null);
   const [isFollowingTrader, setIsFollowingTrader] = useState(false);
-  const [activeTab, setActiveTab] = useState<'overview' | 'bots'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'bots' | 'archived'>('overview');
   const [showCopyModal, setShowCopyModal] = useState(false);
 
   // Load trader data
@@ -278,7 +284,7 @@ export default function TraderProfilePage({ params }: { params: Promise<{ userna
 
       {/* Tabs */}
       <div className="flex gap-2 mb-6 overflow-x-auto">
-        {(['overview', 'bots'] as const).map((tab) => (
+        {(['overview', 'bots', 'archived'] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -300,6 +306,12 @@ export default function TraderProfilePage({ params }: { params: Promise<{ userna
               <>
                 <Bot className="w-4 h-4" />
                 Active Bots
+              </>
+            )}
+            {tab === 'archived' && (
+              <>
+                <Archive className="w-4 h-4" />
+                Archived Bots
               </>
             )}
           </button>
@@ -443,6 +455,117 @@ export default function TraderProfilePage({ params }: { params: Promise<{ userna
                 </div>
               ))}
             </div>
+          </motion.div>
+        )}
+
+        {activeTab === 'archived' && (
+          <motion.div
+            key="archived"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6"
+          >
+            <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
+              <Archive className="w-5 h-5 text-amber-400" />
+              Archived Bots
+            </h3>
+
+            {(() => {
+              const closedCopies = getClosedUserCopies('user_default');
+
+              if (closedCopies.length === 0) {
+                return (
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 bg-dark-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Archive className="w-8 h-8 text-dark-600" />
+                    </div>
+                    <p className="text-dark-400">No archived bots yet</p>
+                  </div>
+                );
+              }
+
+              return (
+                <div className="space-y-4">
+                  {closedCopies.map((copy) => {
+                    const duration = copy.closedAt && copy.createdAt
+                      ? Math.floor((copy.closedAt - copy.createdAt) / (1000 * 60 * 60 * 24))
+                      : 0;
+                    const effectiveReturn = copy.investedAmount > 0
+                      ? ((copy.finalValue || copy.investedAmount) - copy.investedAmount) / copy.investedAmount * 100
+                      : 0;
+                    const earlyExitFeeDisplay = copy.earlyExitFee && copy.earlyExitFee > 0
+                      ? `$${copy.earlyExitFee.toFixed(2)}`
+                      : 'None';
+
+                    return (
+                      <div key={copy.id} className="p-5 bg-dark-900/50 rounded-xl border border-dark-700 hover:border-amber-500/30 transition-all">
+                        <div className="flex items-start justify-between gap-4 mb-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center">
+                              <Archive className="w-6 h-6 text-white" />
+                            </div>
+                            <div>
+                              <h4 className="text-base font-bold text-white mb-1">Bot Copy</h4>
+                              <div className="text-xs text-dark-400">Master Bot: {copy.masterBotId}</div>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-xs text-dark-400 mb-1">Closed</div>
+                            <div className="text-xs text-dark-500">
+                              {copy.closedAt ? new Date(copy.closedAt).toLocaleDateString() : 'Unknown'}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                          <div className="p-3 bg-dark-800/50 rounded-lg border border-dark-700/50">
+                            <div className="text-xs text-dark-400 mb-1">Invested</div>
+                            <div className="text-sm font-bold text-white">
+                              ${copy.investedAmount.toLocaleString()}
+                            </div>
+                          </div>
+                          <div className="p-3 bg-dark-800/50 rounded-lg border border-dark-700/50">
+                            <div className="text-xs text-dark-400 mb-1">Final P&L</div>
+                            <div className={`text-sm font-bold ${
+                              (copy.finalPnL || 0) >= 0 ? 'text-green-400' : 'text-red-400'
+                            }`}>
+                              {(copy.finalPnL || 0) >= 0 ? '+' : ''}${(copy.finalPnL || 0).toFixed(2)}
+                            </div>
+                          </div>
+                          <div className="p-3 bg-dark-800/50 rounded-lg border border-dark-700/50">
+                            <div className="text-xs text-dark-400 mb-1">Duration</div>
+                            <div className="text-sm font-bold text-white flex items-center gap-1">
+                              <Clock className="w-3 h-3" />
+                              {duration} days
+                            </div>
+                          </div>
+                          <div className="p-3 bg-dark-800/50 rounded-lg border border-dark-700/50">
+                            <div className="text-xs text-dark-400 mb-1">Early Exit Fee</div>
+                            <div className={`text-sm font-bold ${
+                              copy.earlyExitFee && copy.earlyExitFee > 0 ? 'text-amber-400' : 'text-green-400'
+                            }`}>
+                              {earlyExitFeeDisplay}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="mt-3 pt-3 border-t border-dark-700/50">
+                          <div className="flex items-center justify-between">
+                            <div className="text-xs text-dark-400">Effective Return</div>
+                            <div className={`text-sm font-bold ${
+                              effectiveReturn >= 0 ? 'text-green-400' : 'text-red-400'
+                            }`}>
+                              {effectiveReturn >= 0 ? '+' : ''}{effectiveReturn.toFixed(2)}%
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })()}
           </motion.div>
         )}
       </AnimatePresence>

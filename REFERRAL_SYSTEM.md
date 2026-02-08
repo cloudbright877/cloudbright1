@@ -1,7 +1,7 @@
 # Referral System - Полная документация
 
-**Версия:** 1.0.0
-**Дата:** 2026-02-07
+**Версия:** 3.0.0
+**Дата:** 2026-02-08
 **Статус:** Production Ready
 **Автор:** Celestian Platform Team
 
@@ -10,15 +10,17 @@
 ## 📋 Содержание
 
 1. [Введение](#введение)
-2. [Архитектура системы](#архитектура-системы)
-3. [Data Models](#data-models)
-4. [Business Logic](#business-logic)
-5. [API Reference](#api-reference)
-6. [UI Components](#ui-components)
-7. [Примеры использования](#примеры-использования)
-8. [Тестирование](#тестирование)
-9. [Deployment](#deployment)
-10. [FAQ](#faq)
+2. [Capital Reservation](#capital-reservation)
+3. [Collect P&L](#collect-pl)
+4. [Архитектура системы](#архитектура-системы)
+5. [Data Models](#data-models)
+6. [Business Logic](#business-logic)
+7. [API Reference](#api-reference)
+8. [UI Components](#ui-components)
+9. [Примеры использования](#примеры-использования)
+10. [Тестирование](#тестирование)
+11. [Deployment](#deployment)
+12. [FAQ](#faq)
 
 ---
 
@@ -31,27 +33,197 @@
 ### Ключевые особенности
 
 - ✅ **10-уровневая реферальная программа** (10%, 5%, 3%, 2%×7)
-- ✅ **Realized P&L Model** - комиссии только при закрытии копии
+- ✅ **Collect P&L Model** - пользователь вручную собирает realized profit
+- ✅ **Capital Reservation** - 30-дневный период с tiered penalties
+- ✅ **Platform Bonus Model** - комиссии оплачиваются платформой, НЕ вычитаются из прибыли пользователя
 - ✅ **Turnover Bonuses** - дополнительные бонусы за командный оборот
 - ✅ **Frozen/Available Balance** - разделение капитала
 - ✅ **Real-time Awards** - мгновенное начисление
-- ✅ **Transparent Breakdown** - детальный расчет комиссий
+- ✅ **Transparent Breakdown** - детальный расчет P&L (realized/unrealized)
 
 ### Бизнес-модель
 
 ```
-Инвестор закрывает копию с прибылью
+Инвестор нажимает "Collect P&L" (или архивирует копию)
     ↓
-Система рассчитывает комиссии (до 32% от прибыли)
+Система рассчитывает realized profit (закрытые сделки)
     ↓
-Распределение по 10-уровневой цепочке
+Инвестор получает 100% realized profit
+    ↓
+Платформа начисляет реферальные бонусы из своих средств (до 32%)
     ↓
 Проверка порогов turnover bonuses
     ↓
-Начисление на available balance
+Бонусы зачисляются на available balance upline
     ↓
-Инвестор получает: Principal + Profit - Commissions
+Инвестор получает: 100% своего profit (комиссии НЕ вычитаются)
 ```
+
+---
+
+## Capital Reservation
+
+### Проблема
+
+**Backwards Incentive:** В стандартной модели (комиссии при закрытии копии):
+1. Пользователь копирует бота, ловит 1 хорошую сделку, закрывается → реферер получает почти ничего
+2. После любого lock period реферер ХОЧЕТ, чтобы пользователь ЗАКРЫЛСЯ (обратная мотивация)
+
+**Решение:** Capital Reservation + Early Exit Fee
+
+### Механизм: Early Exit Fee (Tiered Penalty)
+
+**Концепт:** Penalty за закрытие копии в первые 30 дней (reservation period)
+
+**Tiered Rates:**
+```
+Day 0-10:   20% of invested capital
+Day 11-20:  17% of invested capital
+Day 21-29:  15% of invested capital
+Day 30+:    0% (no penalty)
+```
+
+**Формула:**
+```typescript
+fee = investedCapital * penaltyRate(day)
+userReceives = investedCapital + currentPnL - fee  // Commissions NOT deducted from user
+```
+
+**Примеры:**
+
+```typescript
+// Example 1: Early exit Day 5, profitable copy
+investedCapital: $1,000
+currentPnL: +$50
+daysSinceCopy: 5
+penaltyRate: 20%
+
+fee: $1,000 × 20% = $200
+userReceives: $1,000 + $50 - $200 = $850
+effectiveReturn: -15% (user sees red number)
+// Referral commissions: platform pays bonus on max(0, profit) to uplines
+
+// Example 2: Early exit Day 15, profitable copy
+investedCapital: $1,000
+currentPnL: +$200
+daysSinceCopy: 15
+penaltyRate: 17%
+
+fee: $1,000 × 17% = $170
+userReceives: $1,000 + $200 - $170 = $1,030
+effectiveReturn: +3%
+// Referral commissions: platform pays bonus on $200 profit to uplines
+
+// Example 3: Normal exit Day 45
+investedCapital: $1,000
+currentPnL: +$200
+daysSinceCopy: 45
+penaltyRate: 0%
+
+fee: $0
+userReceives: $1,000 + $200 = $1,200
+effectiveReturn: +20%
+// Referral commissions: platform pays bonus on $200 profit to uplines
+```
+
+**Key Rules:**
+
+1. **Fee calculation:** Always `investedCapital × penaltyRate` (NOT based on profit)
+2. **Fee cap:** User must receive at least $0 (don't create debt)
+3. **Commission model:** Platform pays referral bonus on profit (NOT deducted from user)
+4. **Fee destination:** Platform (NOT distributed to referral chain)
+5. **Referrer incentive:** Referrer benefits from user STAYING (not leaving early)
+
+**UI Warnings:**
+
+When user tries to close before 30 days:
+```
+🚨 Capital Reservation: 15 days remaining
+
+You are closing this copy before the 30-day reservation period.
+An early exit penalty will be applied.
+
+If you close now: -12.5%
+
+Current P&L:     +$50
+Early Exit Fee:  -$200 (20%)
+You receive:     $850
+```
+
+Confirm: Type "CLOSE" to proceed
+
+---
+
+## Collect P&L
+
+### Механизм
+
+**Концепт:** Пользователь вручную собирает (collect) realized profit из активной копии, не закрывая её.
+
+**Цель:** Пользователь может забирать прибыль регулярно, не закрывая позицию. Комиссии реферерам начисляются платформой (не вычитаются из прибыли пользователя).
+
+**Trigger:** Ручное действие пользователя (кнопка "Collect P&L" на странице копии).
+
+**Rate Limiting:** Максимум 1 collect per copy per 10 минут.
+
+**Concurrency Lock:** `operationInProgress` поле на UserCopy предотвращает одновременные операции.
+
+**Формула:**
+```typescript
+availableToCollect = max(0, realizedPnL - totalCollectedPnL)
+
+if (availableToCollect > 0) {
+  // Atomicity rule: update copy BEFORE credit
+  copy.totalCollectedPnL += availableToCollect
+  copy.collectCount++
+  copy.lastCollectAt = Date.now()
+
+  creditCollectedPnL(userId, availableToCollect, copyId)
+  distributeReferralCommissions(userId, copyId, availableToCollect) // Platform bonus
+}
+```
+
+**Пример:**
+
+```typescript
+// Copy created: 2026-01-01, invested $1,000
+
+// Day 15: User clicks "Collect P&L"
+realizedPnL: +$150  // From closed trades
+totalCollectedPnL: $0
+availableToCollect: $150
+→ User receives $150 on available balance
+→ Platform pays referral bonuses on $150
+
+// Day 30: User clicks "Collect P&L" again
+realizedPnL: +$320  // More trades closed
+totalCollectedPnL: $150  // Previously collected
+availableToCollect: $170
+→ User receives $170 on available balance
+→ Platform pays referral bonuses on $170
+
+// Day 45: Market pullback
+realizedPnL: +$320  // No new closed trades with profit
+totalCollectedPnL: $320
+availableToCollect: $0
+→ Nothing to collect
+
+// Day 60: User clicks "Collect P&L"
+realizedPnL: +$400
+totalCollectedPnL: $320
+availableToCollect: $80
+→ User receives $80 on available balance
+→ Platform pays referral bonuses on $80
+```
+
+**Key Rules:**
+
+1. **Only realized P&L:** Only profit from closed trades is collectible (not unrealized/open positions)
+2. **No double-collect:** `availableToCollect = max(0, realizedPnL - totalCollectedPnL)`
+3. **Atomicity:** `totalCollectedPnL` updated BEFORE `creditCollectedPnL()` (prevents double-spend on crash)
+4. **Rate limiting:** 10-minute cooldown between collects per copy
+5. **Auto-collect on archive:** When archiving, remaining profit is auto-collected
+6. **Commission model:** Platform pays referral bonuses (NOT deducted from user's profit)
 
 ---
 
@@ -63,8 +235,8 @@
 ┌─────────────────────────────────────────────────────────┐
 │                    USER INTERFACE                        │
 │  ┌──────────────┬───────────────┬──────────────────┐   │
-│  │  Referrals   │   Balance     │   Close Copy     │   │
-│  │     Page     │     Card      │     Modal        │   │
+│  │  Referrals   │   Balance     │  Copy Detail /   │   │
+│  │     Page     │     Card      │  Archive Page    │   │
 │  └──────────────┴───────────────┴──────────────────┘   │
 └─────────────────────────────────────────────────────────┘
                            │
@@ -72,9 +244,9 @@
 ┌─────────────────────────────────────────────────────────┐
 │                    BUSINESS LOGIC                        │
 │  ┌──────────────────────────────────────────────────┐  │
-│  │  distributeReferralCommissions()                  │  │
-│  │  checkAndAwardTurnoverBonuses()                   │  │
-│  │  closeUserCopy()                                  │  │
+│  │  collectProfit() / closeUserCopy()                 │  │
+│  │  distributeReferralCommissions()                   │  │
+│  │  checkAndAwardTurnoverBonuses()                    │  │
 │  └──────────────────────────────────────────────────┘  │
 └─────────────────────────────────────────────────────────┘
                            │
@@ -110,17 +282,19 @@
 - **BalanceTransaction** - История транзакций
 
 #### 3. Business Logic
-- **referralCommissions.ts** - Распределение комиссий
+- **referralCommissions.ts** - Распределение комиссий (platform bonus)
 - **turnoverBonuses.ts** - Система бонусов
-- **balances.ts** - Управление балансами
+- **balances.ts** - Управление балансами (включая PNL_COLLECT)
 - **users.ts** - Управление пользователями
-- **botsApi.ts** - API для операций с копиями
+- **botsApi.ts** - API для операций с копиями (collectProfit, closeUserCopy)
+- **userCopyStats.ts** - Центральная формула P&L (getUserCopyPnLBreakdown)
+- **capitalReservation.ts** - Early exit fee расчет
 
-#### 4. UI Components
-- **BalanceCard** - Отображение баланса
-- **CommissionHistory** - История комиссий
-- **TurnoverProgress** - Прогресс к бонусам
-- **CloseCopyModal** - Модальное окно закрытия
+#### 4. UI Pages
+- **Copy Detail Page** - P&L breakdown, Collect P&L кнопка
+- **Archive Page** - Архивирование с auto-collect и early exit fee
+- **Dashboard** - Bot cards с quick collect
+- **NetWorthHero** - Invested / Realized / Unrealized
 
 ---
 
@@ -187,7 +361,8 @@ Available: Можно вывести или инвестировать
 Operations:
 - Deposit → Available++
 - Create Copy → Available--, Frozen++
-- Close Copy → Frozen--, Available++ (principal + profit - commissions)
+- Collect P&L → Available++ (realized profit from active copy)
+- Close Copy → Frozen--, Available++ (capital return + uncollected profit)
 - Withdraw → Available--
 ```
 
@@ -212,12 +387,12 @@ Operations:
   updatedAt: 1706880001000
 }
 
-// После закрытия с прибылью +$1,000 (комиссии $180)
+// После закрытия с прибылью +$1,000 (user gets 100%, commissions paid by platform)
 {
   id: 'user_001',
   userId: 'user_001',
   frozen: 0,
-  available: 10820,  // 5000 + 6000 - 180
+  available: 11000,  // 5000 + 5000 (capital) + 1000 (profit)
   updatedAt: 1706880002000
 }
 ```
@@ -237,6 +412,18 @@ interface UserCopy {
   closedAt?: number;             // Время закрытия
   finalPnL?: number;             // Финальный P&L
   finalValue?: number;           // investedAmount + finalPnL
+
+  // Capital Reservation fields
+  reservationDays: number;       // 30 (set at copy creation)
+  earlyExitFee?: number;         // $ amount of penalty at close time
+  earlyExitPenaltyRate?: number; // % rate applied at close time
+  isEarlyExit?: boolean;         // true if closed before reservation period
+
+  // Collect P&L fields
+  totalCollectedPnL: number;     // Total profit collected so far (starts at 0)
+  collectCount: number;          // How many collects completed
+  lastCollectAt?: number;        // Timestamp of last collect (for rate limiting)
+  operationInProgress: 'collect' | 'archive' | null; // Concurrency lock
 }
 ```
 
@@ -417,6 +604,7 @@ type BalanceTransactionType =
   | 'WITHDRAW'
   | 'COPY_OPEN'
   | 'COPY_CLOSE'
+  | 'PNL_COLLECT'
   | 'REFERRAL_COMMISSION'
   | 'TURNOVER_BONUS';
 
@@ -546,7 +734,30 @@ const copyId = await botsApi.createBotCopy('demo-btc-scalper', 5000, userId);
 // After: available = $5,000, frozen = $5,000
 ```
 
-### 3. Close User Copy
+### 3. Collect P&L (NEW)
+
+```typescript
+async function collectProfit(copyId: string): Promise<{
+  collectedAmount: number;
+  totalCollectedPnL: number;
+  collectCount: number;
+}>
+```
+
+**Flow:**
+```
+1. Validate copy is ACTIVE
+2. Check rate limit (10 min cooldown)
+3. Set operationInProgress = 'collect'
+4. Calculate availableToCollect = max(0, realizedPnL - totalCollectedPnL)
+5. IF availableToCollect > 0:
+   a. Update totalCollectedPnL BEFORE credit (atomicity rule)
+   b. Credit profit to available balance (PNL_COLLECT transaction)
+   c. Distribute referral commissions (platform bonus)
+6. Clear operationInProgress
+```
+
+### 4. Close User Copy (Archive)
 
 ```typescript
 async function closeUserCopy(copyId: string): Promise<{
@@ -555,32 +766,58 @@ async function closeUserCopy(copyId: string): Promise<{
   finalValue: number;
   totalCommissions: number;
   investorReceives: number;
+  previouslyCollected: number;
+  autoCollected: number;
+  capitalReturn: number;
+  earlyExitFee: number;
+  isEarlyExit: boolean;
 }>
 ```
 
 **Flow:**
 ```
-1. Mark copy as CLOSING
+1. Set operationInProgress = 'archive', mark as CLOSING
 2. Calculate final P&L from master bot
-3. IF finalPnL > 0:
-   3.1. distributeReferralCommissions()
-   3.2. checkAndAwardTurnoverBonuses() for all uplines
-4. Calculate investor receives (finalValue - totalCommissions)
-5. Unfreeze funds: frozen → available
-6. Record COPY_CLOSE transaction
-7. Mark copy as CLOSED
+3. Calculate early exit fee (if before reservation period)
+4. Auto-collect remaining profit:
+   a. uncollectedProfit = max(0, realizedPnL - totalCollectedPnL)
+   b. IF uncollectedProfit > 0:
+      - Update totalCollectedPnL BEFORE credit (atomicity rule!)
+      - Credit profit to available balance
+      - Distribute referral commissions (platform bonus)
+5. Calculate capital return: investedAmount - earlyExitFee
+6. Unfreeze funds: frozen → available (capital return amount)
+7. Record COPY_CLOSE transaction
+8. Mark copy as CLOSED with early exit info
 ```
 
-**Example:**
+**Example 1: Early Exit (Day 5)**
 ```typescript
-// Copy: invested $5,000, P&L +$1,000
+// Copy: invested $1,000, realized P&L +$50, Day 5
 const result = await botsApi.closeUserCopy('copy_001');
 
 // Result:
-// finalPnL: 1000
-// finalValue: 6000
-// totalCommissions: 180 (10% + 5% + 3% of $1000)
-// investorReceives: 5820 ($6000 - $180)
+// earlyExitFee: 200 (20% of $1,000)
+// autoCollected: 50 (realized profit → user's balance)
+// capitalReturn: 800 ($1,000 - $200 fee)
+// investorReceives: 850 (capitalReturn + autoCollected)
+// isEarlyExit: true
+// Referral commissions: platform pays on $50 profit
+```
+
+**Example 2: Normal Exit (Day 45), previously collected $800**
+```typescript
+// Copy: invested $5,000, realized P&L +$1,000, already collected $800
+const result = await botsApi.closeUserCopy('copy_001');
+
+// Result:
+// earlyExitFee: 0 (no penalty)
+// previouslyCollected: 800
+// autoCollected: 200 ($1,000 - $800 uncollected)
+// capitalReturn: 5000
+// investorReceives: 5200 (capitalReturn + autoCollected)
+// isEarlyExit: false
+// Referral commissions: platform pays on $200 (uncollected portion)
 ```
 
 ### 4. Distribute Referral Commissions
@@ -872,6 +1109,100 @@ getLevelStatuses(userId: string): Promise<Array<{
 
 **Получает статус всех 10 уровней.**
 
+### Capital Reservation API
+
+#### `calculateEarlyExitFee()`
+```typescript
+calculateEarlyExitFee(
+  investedCapital: number,
+  currentPnL: number,
+  daysSinceCopy: number,
+  reservationDays: number = 30
+): {
+  fee: number;
+  penaltyRate: number;
+  isEarlyExit: boolean;
+  effectiveReturn: number;
+  userReceives: number;
+}
+```
+
+**Рассчитывает early exit fee и effective return.**
+
+#### `getEarlyExitPenaltyRate()`
+```typescript
+getEarlyExitPenaltyRate(
+  daysSinceCopy: number,
+  reservationDays: number = 30
+): number
+```
+
+**Получает penalty rate по количеству дней.**
+
+#### `getDaysRemainingInReservation()`
+```typescript
+getDaysRemainingInReservation(
+  createdAt: number,
+  reservationDays: number = 30
+): number
+```
+
+**Получает количество дней до окончания reservation period.**
+
+#### `isWithinReservationPeriod()`
+```typescript
+isWithinReservationPeriod(
+  createdAt: number,
+  reservationDays: number = 30
+): boolean
+```
+
+**Проверяет, находится ли копия в reservation period.**
+
+### Collect P&L API
+
+#### `collectProfit()`
+```typescript
+botsApi.collectProfit(copyId: string): Promise<{
+  collectedAmount: number;
+  totalCollectedPnL: number;
+  collectCount: number;
+}>
+```
+
+**Собирает realized profit из активной копии. Rate limit: 1 per 10 минут.**
+
+#### `getUserCopyPnLBreakdown()`
+```typescript
+getUserCopyPnLBreakdown(copyId: string): PnLBreakdown | null
+```
+
+**Центральная формула расчета P&L (single source of truth).**
+
+```typescript
+interface PnLBreakdown {
+  realizedPnL: number;        // From closed trades
+  unrealizedPnL: number;      // From open positions
+  totalPnL: number;           // realized + unrealized
+  totalCollected: number;     // Previously collected amount
+  availableToCollect: number; // max(0, realizedPnL - totalCollected)
+  currentValue: number;       // invested + realized - collected + unrealized
+  investedAmount: number;
+  collectCount: number;
+}
+```
+
+#### `creditCollectedPnL()`
+```typescript
+creditCollectedPnL(
+  userId: string,
+  amount: number,
+  copyId: string
+): Promise<Balance>
+```
+
+**Зачисляет collected profit на available balance. Записывает PNL_COLLECT транзакцию.**
+
 ### Bots API
 
 #### `createBotCopy()`
@@ -893,10 +1224,15 @@ closeUserCopy(copyId: string): Promise<{
   finalValue: number;
   totalCommissions: number;
   investorReceives: number;
+  previouslyCollected: number;
+  autoCollected: number;
+  capitalReturn: number;
+  earlyExitFee: number;
+  isEarlyExit: boolean;
 }>
 ```
 
-**Закрывает копию с распределением комиссий.**
+**Архивирует копию: auto-collect оставшегося profit, возврат капитала (минус early exit fee).**
 
 ---
 
@@ -981,43 +1317,32 @@ interface TurnoverProgressProps {
 <TurnoverProgress userId="user_001" showAllLevels={false} />
 ```
 
-### CloseCopyModal
+### Copy Detail Page (with Collect P&L)
 
-**Путь:** `components/modals/CloseCopyModal.tsx`
-
-**Props:**
-```typescript
-interface CloseCopyModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  copyId: string;
-  investorUserId: string;
-  investedAmount: number;
-  currentPnL: number;
-  onSuccess?: () => void;
-}
-```
+**Путь:** `app/dashboard-v2/copy/[copyId]/page.tsx`
 
 **Отображает:**
-- Principal invested
-- Current P&L
-- Commission breakdown (Level 1-N)
-- Total commissions
-- Final amount investor receives
-- Confirm/Cancel buttons
+- Realized P&L card (green/red)
+- Unrealized P&L card (cyan/red)
+- Collect P&L section (green bar with amount + button)
+- Confirmation dialog with cancel/confirm
+- P&L breakdown in sidebar (Total P&L, Collected, In Bot)
+- Rate limit enforcement (10 min cooldown)
 
-**Example:**
-```tsx
-<CloseCopyModal
-  isOpen={isOpen}
-  onClose={() => setIsOpen(false)}
-  copyId="copy_001"
-  investorUserId="user_001"
-  investedAmount={5000}
-  currentPnL={1000}
-  onSuccess={() => router.push('/dashboard-v2')}
-/>
-```
+### Archive Bot Page
+
+**Путь:** `app/dashboard-v2/copy/[copyId]/archive/page.tsx`
+
+**Отображает:**
+- Previously collected amount (already on balance)
+- Auto-collect remaining profit
+- Capital return
+- Early exit fee (if applicable)
+- "Credited to your balance now" total
+- "Total received all-time" (including previous collects)
+- Reservation progress bar
+- Confirmation input for early exit ("ARCHIVE")
+- Note: "Referral bonuses are awarded by the platform and not deducted from your profit"
 
 ---
 
@@ -1042,7 +1367,7 @@ const userB = await createUser({
 console.log(userB.referredBy); // userA.id
 ```
 
-### Пример 2: Полный цикл - создание и закрытие копии
+### Пример 2: Полный цикл - создание, collect, архивирование
 
 ```typescript
 // 1. Инвестор пополняет баланс
@@ -1053,36 +1378,47 @@ await deposit(investorId, 10000);
 const copyId = await botsApi.createBotCopy('demo-btc-scalper', 5000, investorId);
 // Available: $5,000, Frozen: $5,000
 
-// 3. Бот торгует... (profit +$1,000)
+// 3. Бот торгует... (realized profit +$500)
 
-// 4. Инвестор закрывает копию
+// 4. Инвестор собирает profit
+const collect = await botsApi.collectProfit(copyId);
+// collect.collectedAmount: 500
+// Available: $5,500, Frozen: $5,000
+
+// 5. Бот продолжает торговать... (realized profit now +$1,000)
+
+// 6. Инвестор архивирует копию
 const result = await botsApi.closeUserCopy(copyId);
-console.log(result);
-// {
-//   finalPnL: 1000,
-//   finalValue: 6000,
-//   totalCommissions: 180,
-//   investorReceives: 5820
-// }
-
-// Available: $10,820, Frozen: $0
+// result.previouslyCollected: 500
+// result.autoCollected: 500 (uncollected portion)
+// result.capitalReturn: 5000
+// result.investorReceives: 5500 (capital + uncollected)
+// Available: $11,000, Frozen: $0
+// Total received: $11,000 ($500 collect + $5,500 archive)
+// Referral commissions: platform pays bonuses on $1,000 total profit
 ```
 
-### Пример 3: Проверка комиссий до закрытия
+### Пример 3: Проверка P&L breakdown
 
 ```typescript
-// Before closing, показать инвестору breakdown
-const expected = await calculateExpectedCommissions(investorId, 1000);
+// Получить breakdown до сбора profit
+const breakdown = getUserCopyPnLBreakdown(copyId);
 
-console.log(expected);
-// [
-//   { level: 1, rate: 0.10, amount: 100, upline: User },
-//   { level: 2, rate: 0.05, amount: 50, upline: User },
-//   { level: 3, rate: 0.03, amount: 30, upline: User }
-// ]
+console.log(breakdown);
+// {
+//   realizedPnL: 1000,
+//   unrealizedPnL: 250,
+//   totalPnL: 1250,
+//   totalCollected: 500,
+//   availableToCollect: 500,  // 1000 - 500
+//   currentValue: 5750,       // 5000 + 1000 - 500 + 250
+//   investedAmount: 5000,
+//   collectCount: 2
+// }
 
-const totalCommissions = expected.reduce((sum, c) => sum + c.amount, 0);
-console.log(`You will pay $${totalCommissions} in commissions`);
+if (breakdown.availableToCollect > 0) {
+  console.log(`You can collect $${breakdown.availableToCollect}`);
+}
 ```
 
 ### Пример 4: Отслеживание прогресса turnover bonuses
@@ -1293,11 +1629,11 @@ CREATE INDEX idx_transactions_user ON balance_transactions(user_id, created_at D
 
 ### Q: Когда начисляются комиссии?
 
-**A:** Комиссии начисляются **только при закрытии User Copy**, когда прибыль реализована. Это называется **Realized P&L Model**.
+**A:** Комиссии начисляются **при Collect P&L или при архивировании копии** — когда пользователь забирает realized profit. Комиссии оплачиваются **платформой** и **НЕ вычитаются** из прибыли пользователя.
 
 **Почему не per-trade?**
 - ✅ Сохраняет compounding эффект (unrealized P&L остается в копии)
-- ✅ Одна транзакция вместо тысяч
+- ✅ Пользователь получает 100% своего profit
 - ✅ Понятная бизнес-логика
 - ✅ Легко проверить (auditable)
 
@@ -1317,7 +1653,7 @@ if (finalPnL <= 0) {
 
 ### Q: Влияют ли комиссии на compounding?
 
-**A:** **Нет!** Unrealized P&L остается в копии и полностью компаундится. Комиссии вычитаются только при закрытии из **realized profit**.
+**A:** **Нет!** Unrealized P&L остается в копии и полностью компаундится. Комиссии оплачиваются платформой и не затрагивают прибыль пользователя.
 
 ---
 
@@ -1459,16 +1795,99 @@ npm run dev
 
 ### Q: Влияют ли штрафы за раннее закрытие на комиссии?
 
-**A:** **Нет!** Комиссии рассчитываются от **full profit BEFORE penalties**.
+**A:** **Нет!** В текущей модели early exit fee применяется к **invested capital**, а комиссии рассчитываются на **realized profit** и оплачиваются платформой.
 
 ```typescript
-// Example:
-investorPnL: $1,000
-commissions: $320 (calculated from $1,000)
-penalty: $200 (early close)
+// Example: Early exit with penalty
+investedCapital: $1,000
+realizedPnL: $50
+earlyExitFee: $200 (20% of invested capital)
 
-investorReceives: $11,000 - $320 - $200 = $10,480
-uplinesReceive: $320 (unaffected by penalty)
+investorReceives: $1,000 + $50 - $200 = $850
+// Platform pays referral commissions on $50 profit to uplines
+```
+
+**Почему так:**
+- Early exit fee — штраф за досрочный выход, идет платформе
+- Комиссии реферерам — отдельный бонус от платформы за привлечение пользователя
+- Referrer мотивирован, чтобы investor STAYED (не закрывался рано)
+
+---
+
+### Q: Как работает Collect P&L?
+
+**A:** Пользователь вручную нажимает "Collect P&L" на странице копии, чтобы забрать realized profit.
+
+```typescript
+// Day 15: User clicks "Collect P&L"
+realizedPnL: $150
+totalCollectedPnL: $0
+availableToCollect: $150
+→ User receives $150
+
+// Day 30: User clicks "Collect P&L" again
+realizedPnL: $320
+totalCollectedPnL: $150
+availableToCollect: $170
+→ User receives $170
+
+// Day 45: No new profit
+realizedPnL: $320
+totalCollectedPnL: $320
+availableToCollect: $0
+→ Nothing to collect
+```
+
+**Benefits:**
+- Пользователь сам решает когда забирать profit
+- Платформа оплачивает реферальные бонусы (user получает 100%)
+- Rate limit 10 мин предотвращает spam
+- Atomicity rule предотвращает double-spend
+
+---
+
+### Q: Что если investor архивирует копию без предварительного Collect?
+
+**A:** Система автоматически собирает (auto-collect) весь uncollected realized profit при архивировании.
+
+```typescript
+// Example: Archive with uncollected profit
+investedCapital: $1,000
+realizedPnL: $200
+totalCollectedPnL: $0 (never collected)
+earlyExitFee: $170 (17% penalty, Day 15)
+
+autoCollected: $200 (full realized profit)
+capitalReturn: $830 ($1,000 - $170 fee)
+investorReceives: $1,030 ($830 + $200)
+// Platform pays referral commissions on $200
+```
+
+---
+
+### Q: Можно ли избежать early exit fee?
+
+**A:** **Да!** Просто держи копию минимум 30 дней. После Day 30 penalty = 0%.
+
+```
+Day 0-10:   20% penalty
+Day 11-20:  17% penalty
+Day 21-29:  15% penalty
+Day 30+:    0% penalty ✅
+```
+
+---
+
+### Q: Куда идет early exit fee?
+
+**A:** **Platform** (НЕ распределяется по referral chain).
+
+```typescript
+earlyExitFee: $200
+→ Platform wallet (not distributed to uplines)
+
+commissions: calculated on profit AFTER fee
+→ Distributed to upline chain (10%, 5%, 3%, 2%×7)
 ```
 
 ---
@@ -1481,6 +1900,6 @@ uplinesReceive: $320 (unaffected by penalty)
 
 ---
 
-**Last Updated:** 2026-02-07
-**Version:** 1.0.0
+**Last Updated:** 2026-02-08
+**Version:** 3.0.0
 **Status:** Production Ready ✅

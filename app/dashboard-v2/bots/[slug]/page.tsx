@@ -46,7 +46,6 @@ import {
 import { TokenIcon } from '@token-icons/react';
 import { getDemoBotBySlug } from '@/lib/demoMarketplace';
 import type { DemoBot } from '@/lib/demoMarketplace';
-import { CopyBotModal } from '@/components/dashboard-v2/CopyBotModal';
 import { botsApi } from '@/lib/api/botsApi';
 import type { BotConfig } from '@/lib/trading/types';
 import type {
@@ -400,7 +399,6 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>('main');
-  const [modalOpen, setModalOpen] = useState(false);
   const [terminalLines, setTerminalLines] = useState<string[]>([]);
   const [cpuUsage, setCpuUsage] = useState(23);
   const [memUsage, setMemUsage] = useState(30);
@@ -1180,13 +1178,13 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                 </div>
               </div>
             </div>
-            <button
-              onClick={() => setModalOpen(true)}
+            <Link
+              href={`/dashboard-v2/bots/${slug}/copy`}
               className="px-6 py-3 rounded-lg text-white font-semibold text-sm bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 transition-all flex items-center gap-2 shadow-lg shadow-primary-500/30"
             >
               <Rocket className="w-4 h-4" />
               Copy This Bot
-            </button>
+            </Link>
           </div>
         </motion.div>
 
@@ -2715,16 +2713,6 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
 
         </AnimatePresence>
       </div>
-
-      {/* Copy Modal */}
-      {masterBotData && (
-        <CopyBotModal
-          isOpen={modalOpen}
-          onClose={() => setModalOpen(false)}
-          demoBot={masterBotData}
-          userBalance={10000} // TODO: Get from user context
-        />
-      )}
 
       <style jsx global>{`
         @keyframes scroll {
