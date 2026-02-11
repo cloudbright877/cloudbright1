@@ -186,7 +186,7 @@ function RegisterForm() {
             <div className="inline-flex items-center gap-3 mb-4">
               <Image
                 src="/logo2.svg"
-                alt="CloudBright"
+                alt="Cloudbright"
                 width={48}
                 height={48}
                 className="h-12 w-12"
@@ -196,7 +196,7 @@ function RegisterForm() {
               </span>
             </div>
             <p className="text-gray-600 dark:text-dark-300">
-              Create your account and join CloudBright
+              Create your account and join Cloudbright
             </p>
           </div>
 

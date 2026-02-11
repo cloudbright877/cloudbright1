@@ -9,6 +9,7 @@ import { AnimatedBorderGrid } from '@/components/animations/AnimatedBorderGrid';
 import { TiltCard } from '@/components/animations/TiltCard';
 import { Spotlight, SpotlightCard } from '@/components/animations/SpotlightCards';
 import { ShieldCheck, Lock, Building2, Building, Check, Globe, ArrowRight } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 
 const values = [
@@ -162,19 +163,10 @@ export default function AboutPage() {
           loop
           muted
           playsInline
-          className="hidden md:block absolute inset-0 w-full h-full object-cover"
-        >
-          <source src="/tooling_hero.mp4" type="video/mp4" />
-        </video>
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="block md:hidden absolute inset-0 w-full h-full object-cover"
-        >
-          <source src="/tooling_hero_mobile.mp4" type="video/mp4" />
-        </video>
+          preload="auto"
+          src="/about-hero-bg.mp4"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
         <div className="absolute inset-0 bg-black/50" />
         <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-dark-900 to-transparent z-[1]" />
         <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-dark-900 to-transparent z-[1]" />
@@ -313,23 +305,18 @@ export default function AboutPage() {
               <div className="relative min-h-[500px] lg:min-h-[720px] hidden lg:block">
                 <div className="absolute top-5 left-[8%] z-[1]">
                   <RevealOnScroll delay={0.2}>
-                    <TiltCard maxTilt={5} className="p-0 border-0 bg-transparent rounded-none">
+                    <TiltCard maxTilt={5} unstyled className="p-0">
                       <div
-                        className="overflow-hidden flex flex-col justify-center items-center p-8"
-                        style={{ width: 340, height: 560, borderRadius: 180, background: 'linear-gradient(145deg, #1a1a2e, #16213e, #0f3460, #1a1a3e)' }}
+                        className="overflow-hidden rounded-2xl"
+                        style={{ width: 340, height: 560 }}
                       >
-                        <svg viewBox="0 0 200 120" className="w-[80%]">
-                          <defs>
-                            <linearGradient id="wwa-grad" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stopColor="rgb(79,70,229)" stopOpacity="0.4" />
-                              <stop offset="100%" stopColor="rgb(79,70,229)" stopOpacity="0" />
-                            </linearGradient>
-                          </defs>
-                          <polyline points="0,100 25,85 50,90 75,50 100,60 130,25 160,40 190,15" fill="none" stroke="rgb(79,70,229)" strokeWidth="3" strokeLinecap="round" opacity="0.9" />
-                          <polyline points="0,100 25,85 50,90 75,50 100,60 130,25 160,40 190,15 200,10 200,120 0,120" fill="url(#wwa-grad)" opacity="0.3" />
-                        </svg>
-                        <p className="text-3xl font-extrabold text-white mt-4 font-mono">+34.2%</p>
-                        <p className="text-xs text-white/40 mt-1">Portfolio Growth</p>
+                        <Image
+                          src="/working-space-1.png"
+                          alt="Cloudbright workspace"
+                          width={340}
+                          height={560}
+                          className="w-full h-full object-cover"
+                        />
                       </div>
                     </TiltCard>
                   </RevealOnScroll>
@@ -338,37 +325,27 @@ export default function AboutPage() {
                 <div className="absolute -top-0.5 -right-0.5 z-[2] pointer-events-none" style={{ width: 196, height: 172, clipPath: 'polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)', background: '#0f172a' }} />
                 <div className="absolute top-1.5 right-1.5 z-[3]">
                   <RevealOnScroll delay={0.35}>
-                    <TiltCard maxTilt={7} className="p-0 border-0 bg-transparent rounded-none">
+                    <TiltCard maxTilt={7} unstyled className="p-0">
                       <div className="flex flex-col justify-center items-center" style={{ width: 180, height: 156, clipPath: 'polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)', background: 'linear-gradient(160deg, #0f172a, #1e293b, #334155, #1e293b)' }}>
                         <Globe className="w-8 h-8 text-primary-400 mb-2" />
-                        <p className="text-[22px] font-extrabold text-white font-mono">85+</p>
-                        <p className="text-[10px] text-white/40 mt-0.5">Countries</p>
+                        <p className="text-[22px] font-extrabold text-white font-mono">40+</p>
+                        <p className="text-[10px] text-white/40 mt-0.5">Employees</p>
                       </div>
                     </TiltCard>
                   </RevealOnScroll>
                 </div>
 
-                <div className="absolute bottom-10 -right-3 z-[2] pointer-events-none" style={{ width: 336, height: 293, clipPath: 'polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)', background: '#0f172a' }} />
                 <div className="absolute bottom-12 -right-1 z-[3]">
                   <RevealOnScroll delay={0.5}>
-                    <TiltCard maxTilt={6} className="p-0 border-0 bg-transparent rounded-none">
-                      <div className="flex flex-col justify-center" style={{ width: 320, height: 277, clipPath: 'polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)', background: 'linear-gradient(160deg, #111827, #1f2937, #374151, #1f2937)', padding: '30px 65px' }}>
-                        <p className="text-[10px] text-white/50 font-bold tracking-[0.15em] uppercase mb-3.5">Top Bots</p>
-                        {[
-                          { name: 'AlphaTrader', roi: '+127%', color: 'from-primary-500 to-orange-500' },
-                          { name: 'CryptoWhale', roi: '+84%', color: 'from-accent-500 to-purple-500' },
-                          { name: 'SwingKing', roi: '+63%', color: 'from-cyan-500 to-blue-500' },
-                        ].map((tr, i) => (
-                          <div key={tr.name} className="flex justify-between items-center py-2" style={{ borderBottom: i < 2 ? '1px solid rgba(255,255,255,0.06)' : 'none' }}>
-                            <div className="flex items-center gap-2.5">
-                              <div className={`w-7 h-7 rounded-full bg-gradient-to-br ${tr.color} flex items-center justify-center`}>
-                                <span className="text-[10px] font-bold text-white">{tr.name[0]}</span>
-                              </div>
-                              <span className="text-white/70 text-[13px] font-medium">{tr.name}</span>
-                            </div>
-                            <span className="text-green-400 text-[13px] font-bold font-mono">{tr.roi}</span>
-                          </div>
-                        ))}
+                    <TiltCard maxTilt={6} unstyled className="p-0">
+                      <div className="overflow-hidden rounded-2xl" style={{ width: 320, height: 277 }}>
+                        <Image
+                          src="/working-space-2.png"
+                          alt="Cloudbright workspace"
+                          width={320}
+                          height={277}
+                          className="w-full h-full object-cover"
+                        />
                       </div>
                     </TiltCard>
                   </RevealOnScroll>

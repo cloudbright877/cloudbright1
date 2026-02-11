@@ -31,7 +31,7 @@ export default function Navbar() {
           <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <Image
               src="/logo2.svg"
-              alt="CloudBright"
+              alt="Cloudbright"
               width={40}
               height={40}
               className="h-10 w-10"

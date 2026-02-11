@@ -17,6 +17,7 @@ const BotCarousel = dynamic(
   { ssr: false, loading: () => <div className="h-[460px]" /> },
 );
 import { AnimatedBorderGrid } from '@/components/animations/AnimatedBorderGrid';
+import { exchangeLogos } from '@/components/ExchangeLogos';
 import {
   Wallet,
   Search,
@@ -35,7 +36,6 @@ import {
   Lock,
   Building2,
   Check,
-  FileCode,
   Share2,
   Zap,
   DollarSign,
@@ -43,16 +43,25 @@ import {
 
 /* ──────────────── PLATFORM FEATURES (marquee) ──────────────── */
 
-const platformFeatures = [
-  { icon: Store, title: 'Bot Marketplace', description: 'Browse, compare, and filter 100+ verified trading bots. Filter by risk level, historical performance, and win rate to find strategies that match your goals.' },
-  { icon: BarChart3, title: 'Deep Bot Analytics', description: 'Every bot has detailed performance data: equity curves, trade history, risk metrics, Sharpe ratio, and max drawdown. Make informed decisions with full transparency.' },
-  { icon: Copy, title: '1-Click Copy Trading', description: 'Copy any bot with one click. Set your investment amount and let algorithms trade for you around the clock.' },
-  { icon: Globe, title: 'Multi-Exchange Support', description: 'Connect to 9+ major exchanges. Trade across Binance, Bybit, OKX, KuCoin, and more from one unified interface.' },
-  { icon: Users, title: 'Social Trading', description: 'Community features: leaderboards, top bots, follow and copy successful strategies. Compete for rankings and learn from the best.' },
-  { icon: Activity, title: 'Real-Time Dashboard', description: 'Live P&L tracking, open positions, equity curves. Monitor everything in real-time from any device.' },
-  { icon: Shield, title: 'Custodial Wallets', description: 'Protected instant wallets for 7+ cryptocurrencies. AES-256 encrypted storage with 2FA and multi-layer security.' },
-  { icon: FileCode, title: 'Smart Contracts', description: 'Blockchain-based infrastructure. Transparent, audited, and trustless architecture for maximum reliability.' },
-  { icon: Share2, title: 'Referral Program', description: 'Earn commissions through a 10-level referral system. Build your network and earn from team performance.' },
+const platformFeatures: {
+  icon: typeof Store;
+  title: string;
+  description: string;
+  span: string;
+  iconGradient: string;
+  iconColor: string;
+  bigNumber?: string;
+  tags?: string[];
+  visual?: 'exchanges' | 'currencies';
+}[] = [
+  { icon: Store, title: 'Bot Marketplace', description: 'Browse, compare, and filter verified trading bots by risk level, performance, and win rate.', span: 'md:col-span-2', iconGradient: 'from-primary-500/15 to-accent-500/15', iconColor: 'text-primary-400', bigNumber: '100+', tags: ['Low Risk', 'Medium Risk', 'High Risk'] },
+  { icon: BarChart3, title: 'Deep Bot Analytics', description: 'Equity curves, trade history, Sharpe ratio, and max drawdown for every bot.', span: '', iconGradient: 'from-blue-500/15 to-cyan-500/15', iconColor: 'text-blue-400', tags: ['Equity Curve', 'Win Rate', 'Sharpe'] },
+  { icon: Copy, title: '1-Click Copy Trading', description: 'Set your amount, tap copy. The bot trades automatically around the clock.', span: '', iconGradient: 'from-violet-500/15 to-purple-500/15', iconColor: 'text-violet-400', bigNumber: '24/7' },
+  { icon: Globe, title: 'Multi-Exchange', description: 'Trade across all major exchanges from one unified interface.', span: '', iconGradient: 'from-cyan-500/15 to-teal-500/15', iconColor: 'text-cyan-400', bigNumber: '9+', visual: 'exchanges' },
+  { icon: Users, title: 'Social Trading', description: 'Leaderboards, whale alerts, public profiles, and community competitions.', span: '', iconGradient: 'from-rose-500/15 to-amber-500/15', iconColor: 'text-rose-400', tags: ['Leaderboards', 'Whale Alerts'] },
+  { icon: Activity, title: 'Real-Time Dashboard', description: 'Live P&L, open positions, equity curves — updated every second on any device.', span: 'md:col-span-2', iconGradient: 'from-emerald-500/15 to-green-500/15', iconColor: 'text-emerald-400', tags: ['Live P&L', 'Positions', 'History'] },
+  { icon: Shield, title: 'Custodial Wallets', description: 'Protected wallets with AES-256 encryption, 2FA, and multi-layer security.', span: 'md:col-span-2', iconGradient: 'from-amber-500/15 to-yellow-500/15', iconColor: 'text-amber-400', bigNumber: '7+', visual: 'currencies' },
+  { icon: Share2, title: 'Referral Program', description: 'Build your network and earn commissions from team performance across multiple levels.', span: 'md:col-span-2', iconGradient: 'from-pink-500/15 to-rose-500/15', iconColor: 'text-pink-400', bigNumber: '10', tags: ['Levels', 'Team Commissions'] },
 ];
 
 /* ──────────────── HEX FLOOR HELPERS ────────────────────── */
@@ -325,10 +334,10 @@ const securityFeatures = [
   },
   {
     icon: Lock,
-    title: 'Flexible Lock-in Periods',
+    title: 'Full Control & Transparency',
     description:
-      'Choose lock-in periods from 7 to 180 days. Longer periods — higher returns. Full transparency over every single transaction.',
-    items: ['Lock-in from 7 to 180 days', 'Higher returns for longer terms', 'Full transaction history', 'Collect profits anytime'],
+      'Choose investment plans from 7 to 180 days. Collect realized profits anytime. Every trade and transaction visible in real time.',
+    items: ['Plans from 7 to 180 days', 'Collect profits on your schedule', 'Full transaction history', 'Withdraw when plan ends'],
   },
   {
     icon: Building2,
@@ -339,6 +348,101 @@ const securityFeatures = [
   },
 ];
 
+/* ──────────────── TESTIMONIALS ──────────────── */
+
+const testimonials = [
+  {
+    name: 'Marcus Thornton',
+    avatar: 'MT',
+    gradient: 'from-blue-500 to-indigo-500',
+    text: 'Switched from manual trading to Cloudbright 4 months ago. The Bybit Market Maker bot has been incredibly consistent — steady returns without me touching anything.',
+    stats: '+18.6% in 4 months',
+  },
+  {
+    name: 'Elena Kowalski',
+    avatar: 'EK',
+    gradient: 'from-emerald-500 to-teal-500',
+    text: 'What sold me is the transparency. I can see every single trade in real time. No black boxes, no hidden fees. The dashboard is genuinely best-in-class.',
+    stats: '3 bots running',
+  },
+  {
+    name: 'David Reyes',
+    avatar: 'DR',
+    gradient: 'from-violet-500 to-purple-500',
+    text: 'Started with just $200 to test it out. The low-risk grid bots are perfect for beginners. Now I have $2,000 across multiple strategies.',
+    stats: 'Started with $200',
+  },
+  {
+    name: 'Sophie Lindqvist',
+    avatar: 'SL',
+    gradient: 'from-amber-500 to-orange-500',
+    text: 'Commission only on profit is the fairest model I\'ve seen. If I don\'t make money, they don\'t make money. That alignment of incentives matters.',
+    stats: '8 months on platform',
+  },
+  {
+    name: 'James Whitfield',
+    avatar: 'JW',
+    gradient: 'from-cyan-500 to-blue-500',
+    text: 'I wanted passive income without learning to trade. The Quick Start wizard recommended a balanced portfolio and I\'ve been earning steadily since day one.',
+    stats: '+12.3% monthly avg',
+  },
+  {
+    name: 'Aisha Morin',
+    avatar: 'AM',
+    gradient: 'from-pink-500 to-rose-500',
+    text: 'The leaderboard feature helped me discover bots I would never have found on my own. The community aspect makes this platform unique.',
+    stats: '5 bots copied',
+  },
+  {
+    name: 'Wei Chen',
+    avatar: 'WC',
+    gradient: 'from-teal-500 to-emerald-500',
+    text: 'Multi-exchange support was the deal-breaker for me. I can diversify across Binance, Bybit, and OKX without managing three separate accounts.',
+    stats: '$8,400 invested',
+  },
+  {
+    name: 'Roberto Ferreira',
+    avatar: 'RF',
+    gradient: 'from-indigo-500 to-violet-500',
+    text: 'The referral program is phenomenal. I invited my team and the commissions from their performance add a nice passive layer on top of bot returns.',
+    stats: '12 referrals',
+  },
+  {
+    name: 'Lina Hoffmann',
+    avatar: 'LH',
+    gradient: 'from-rose-500 to-pink-500',
+    text: 'The $50 minimum let me start small and test things out. The low-risk bots protect my capital while I learn. Great platform for getting started.',
+    stats: 'Started with $50',
+  },
+];
+
+/* ──────────────── BLOG ARTICLES (HOME) ──────────────── */
+
+const homeArticles = [
+  {
+    category: 'Getting Started',
+    title: 'How Copy Trading Works: A Complete Guide for Beginners',
+    excerpt: 'Learn how to pick your first bot, set investment amounts, and start earning passive income — step by step.',
+    readTime: '5 min read',
+    date: 'Feb 2026',
+  },
+  {
+    category: 'Strategy',
+    title: 'Low-Risk vs High-Risk Bots: Which One Fits Your Goals?',
+    excerpt: 'Compare grid trading, market making, and leverage strategies. Understand risk-reward tradeoffs before you invest.',
+    readTime: '7 min read',
+    date: 'Feb 2026',
+  },
+  {
+    category: 'Platform',
+    title: 'Understanding Bot Statistics: Win Rate, Drawdown & Sharpe Ratio',
+    excerpt: 'How to read bot performance data and make informed decisions using the analytics dashboard.',
+    readTime: '6 min read',
+    date: 'Jan 2026',
+  },
+];
+
+
 /* ─────────────────────────── PAGE ─────────────────────────── */
 
 export default function Home() {
@@ -348,6 +452,15 @@ export default function Home() {
       <main>
         {/* ── Hero ── */}
         <Hero />
+
+        {/* ── Supported Exchanges (Marquee) ── */}
+        <div className="bg-dark-900 py-8 border-y border-dark-700/30">
+          <Marquee speed={35}>
+            {exchangeLogos.map(({ key, Component }) => (
+              <Component key={key} className="mx-8 text-dark-400 whitespace-nowrap opacity-50 hover:opacity-100 transition-opacity" />
+            ))}
+          </Marquee>
+        </div>
 
         {/* ── How It Works ── */}
         <section className="relative py-24 bg-dark-900 overflow-hidden">
@@ -409,15 +522,15 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ── Platform Features Marquee ── */}
+        {/* ── Platform Features (Bento Grid) ── */}
         <section className="relative py-20 md:py-28 overflow-hidden">
           <HexFloorBg />
           <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-accent-500/5 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-primary-500/5 rounded-full blur-3xl pointer-events-none" />
 
-          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-14">
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <RevealOnScroll>
-              <div className="text-center">
+              <div className="text-center mb-14">
                 <h2 className="text-3xl sm:text-4xl font-semibold mb-4 text-white">
                   Built for{' '}
                   <span className="text-gradient">Smart Investors</span>
@@ -428,55 +541,163 @@ export default function Home() {
                 </p>
               </div>
             </RevealOnScroll>
+
+            {/* Bento Grid — 4 columns, zigzag spans */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {platformFeatures.map((feature, i) => {
+                const Icon = feature.icon;
+                return (
+                  <RevealOnScroll key={feature.title} delay={i * 0.06}>
+                    <div className={`group relative h-full rounded-2xl bg-gradient-to-br from-dark-800/80 to-dark-900/80 border border-dark-700/50 hover:border-primary-500/30 transition-all duration-500 overflow-hidden p-5 md:p-6 ${feature.span}`}>
+                      <div className="absolute top-0 right-0 w-[160px] h-[160px] bg-primary-500/0 group-hover:bg-primary-500/5 rounded-full blur-[60px] pointer-events-none transition-colors duration-500" />
+
+                      {/* Big number accent */}
+                      {feature.bigNumber && (
+                        <span className="absolute top-3 right-4 text-5xl font-bold text-dark-800/30 select-none pointer-events-none leading-none">
+                          {feature.bigNumber}
+                        </span>
+                      )}
+
+                      <div className="relative z-10">
+                        <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${feature.iconGradient} border border-dark-600/30 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:shadow-lg transition-all duration-300`}>
+                          <Icon className={`w-5 h-5 ${feature.iconColor}`} />
+                        </div>
+                        <h3 className="text-sm font-bold text-white mb-1.5">{feature.title}</h3>
+                        <p className="text-dark-400 text-xs leading-relaxed">{feature.description}</p>
+
+                        {/* Tags */}
+                        {feature.tags && (
+                          <div className="flex flex-wrap gap-1.5 mt-3">
+                            {feature.tags.map((tag) => (
+                              <span key={tag} className="px-2 py-0.5 text-[10px] font-medium rounded-full bg-white/5 text-dark-300 border border-dark-700/50">
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Exchange logos row */}
+                        {feature.visual === 'exchanges' && (
+                          <div className="flex items-center gap-2.5 mt-3 overflow-hidden">
+                            {[
+                              { src: '/exchanges/binance-svgrepo-com.svg', name: 'Binance' },
+                              { src: '/exchanges/bybit-svgrepo-com.svg', name: 'Bybit' },
+                              { src: '/exchanges/okx-logo.svg', name: 'OKX' },
+                              { src: '/exchanges/kucoin-svgrepo-com.svg', name: 'KuCoin' },
+                              { src: '/exchanges/kraken-svgrepo-com.svg', name: 'Kraken' },
+                            ].map((ex) => (
+                              <img key={ex.name} src={ex.src} alt={ex.name} className="w-4 h-4 object-contain opacity-40 group-hover:opacity-70 transition-opacity" title={ex.name} />
+                            ))}
+                            <span className="text-[10px] text-dark-500">+4 more</span>
+                          </div>
+                        )}
+
+                        {/* Currency marquee */}
+                        {feature.visual === 'currencies' && (
+                          <div className="relative mt-3 -mx-5 md:-mx-6 overflow-hidden">
+                            <div className="absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-dark-800/80 to-transparent z-10 pointer-events-none" />
+                            <div className="absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-dark-800/80 to-transparent z-10 pointer-events-none" />
+                            <Marquee speed={18} pauseOnHover={false} gap={20}>
+                              {[
+                                { name: 'USDT', img: '/currency/Tether.svg' },
+                                { name: 'BTC', img: '/currency/Bitcoin.svg' },
+                                { name: 'ETH', img: '/currency/Ethereum.svg' },
+                                { name: 'SOL', img: '/currency/Solana.svg' },
+                                { name: 'BNB', img: '/currency/bnb.svg' },
+                                { name: 'TRX', img: '/currency/Tron.svg' },
+                                { name: 'USDC', img: '/currency/usdc.svg' },
+                              ].map((c) => (
+                                <div key={c.name} className="flex items-center gap-1.5 px-0.5">
+                                  <img src={c.img} alt={c.name} className="w-4 h-4 rounded-full" />
+                                  <span className="text-[10px] font-medium text-dark-400 whitespace-nowrap">{c.name}</span>
+                                </div>
+                              ))}
+                            </Marquee>
+                          </div>
+                        )}
+
+                        {/* Hover line (only for cards without tags/visuals) */}
+                        {!feature.tags && !feature.visual && (
+                          <div className="mt-3 h-0.5 w-0 group-hover:w-full bg-gradient-to-r from-primary-500 to-accent-500 transition-all duration-700 rounded-full" />
+                        )}
+                      </div>
+                    </div>
+                  </RevealOnScroll>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* ── Testimonials (Marquee) ── */}
+        <section className="relative py-20 md:py-28 overflow-hidden">
+          <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-accent-500/5 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-primary-500/5 rounded-full blur-3xl pointer-events-none" />
+
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-14">
+            <RevealOnScroll>
+              <div className="text-center">
+                <h2 className="text-3xl sm:text-4xl font-semibold mb-4 text-white">
+                  Trusted by <span className="text-gradient">Investors</span>
+                </h2>
+                <p className="text-lg text-dark-300 max-w-2xl mx-auto">
+                  Real feedback from our community of active copiers.
+                </p>
+              </div>
+            </RevealOnScroll>
           </div>
 
-          {/* Row 1 — left (4 features) */}
+          {/* Row 1 — left (5 testimonials) */}
           <div className="relative">
             <div className="absolute left-0 top-0 bottom-0 w-[40%] bg-gradient-to-r from-dark-900 via-dark-900/70 to-transparent z-10 pointer-events-none" />
             <div className="absolute right-0 top-0 bottom-0 w-[40%] bg-gradient-to-l from-dark-900 via-dark-900/70 to-transparent z-10 pointer-events-none" />
-            <Marquee speed={35} direction="left" gap={0}>
-              {platformFeatures.slice(0, 4).map((feature, i) => {
-                const Icon = feature.icon;
-                return (
-                  <div
-                    key={feature.title}
-                    className={`group w-[340px] px-8 py-6 border-r border-dark-700/40 transition-colors duration-300 hover:bg-primary-500/[0.04] ${i === 0 ? 'border-l' : ''}`}
-                  >
-                    <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary-500/15 to-accent-500/15 border border-primary-500/20 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-primary-500/10 transition-all duration-300">
-                      <Icon className="w-5 h-5 text-primary-400" />
+            <Marquee speed={30} direction="left" gap={0}>
+              {testimonials.slice(0, 5).map((t) => (
+                <div key={t.name} className="group w-[360px] px-6 py-5 border-r border-dark-700/40 transition-colors duration-300 hover:bg-primary-500/[0.04]">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${t.gradient} flex items-center justify-center text-xs font-bold text-white shrink-0`}>
+                      {t.avatar}
                     </div>
-                    <h3 className="text-sm font-bold text-white mb-1.5">{feature.title}</h3>
-                    <p className="text-dark-400 text-xs leading-relaxed">{feature.description}</p>
-                    <div className="mt-3 h-0.5 w-0 group-hover:w-full bg-gradient-to-r from-primary-500 to-accent-500 transition-all duration-700 rounded-full" />
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-white truncate">{t.name}</p>
+                      <p className="text-[11px] text-dark-400">Verified Copier</p>
+                    </div>
+                    <div className="ml-auto px-2 py-0.5 bg-green-500/10 border border-green-500/20 rounded-md shrink-0">
+                      <span className="text-[10px] font-semibold text-green-400 whitespace-nowrap">{t.stats}</span>
+                    </div>
                   </div>
-                );
-              })}
+                  <p className="text-dark-400 text-xs leading-relaxed">&ldquo;{t.text}&rdquo;</p>
+                  <div className="mt-3 h-0.5 w-0 group-hover:w-full bg-gradient-to-r from-primary-500 to-accent-500 transition-all duration-700 rounded-full" />
+                </div>
+              ))}
             </Marquee>
           </div>
 
           <div className="border-t border-dark-700/40" />
 
-          {/* Row 2 — right (5 features) */}
+          {/* Row 2 — right (4 testimonials) */}
           <div className="relative">
             <div className="absolute left-0 top-0 bottom-0 w-[40%] bg-gradient-to-r from-dark-900 via-dark-900/70 to-transparent z-10 pointer-events-none" />
             <div className="absolute right-0 top-0 bottom-0 w-[40%] bg-gradient-to-l from-dark-900 via-dark-900/70 to-transparent z-10 pointer-events-none" />
-            <Marquee speed={30} direction="right" gap={0}>
-              {platformFeatures.slice(4, 9).map((feature, i) => {
-                const Icon = feature.icon;
-                return (
-                  <div
-                    key={feature.title}
-                    className={`group w-[340px] px-8 py-6 border-r border-dark-700/40 transition-colors duration-300 hover:bg-primary-500/[0.04] ${i === 0 ? 'border-l' : ''}`}
-                  >
-                    <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary-500/15 to-accent-500/15 border border-primary-500/20 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-primary-500/10 transition-all duration-300">
-                      <Icon className="w-5 h-5 text-primary-400" />
+            <Marquee speed={25} direction="right" gap={0}>
+              {testimonials.slice(5, 9).map((t) => (
+                <div key={t.name} className="group w-[360px] px-6 py-5 border-r border-dark-700/40 transition-colors duration-300 hover:bg-primary-500/[0.04]">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${t.gradient} flex items-center justify-center text-xs font-bold text-white shrink-0`}>
+                      {t.avatar}
                     </div>
-                    <h3 className="text-sm font-bold text-white mb-1.5">{feature.title}</h3>
-                    <p className="text-dark-400 text-xs leading-relaxed">{feature.description}</p>
-                    <div className="mt-3 h-0.5 w-0 group-hover:w-full bg-gradient-to-r from-primary-500 to-accent-500 transition-all duration-700 rounded-full" />
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-white truncate">{t.name}</p>
+                      <p className="text-[11px] text-dark-400">Verified Copier</p>
+                    </div>
+                    <div className="ml-auto px-2 py-0.5 bg-green-500/10 border border-green-500/20 rounded-md shrink-0">
+                      <span className="text-[10px] font-semibold text-green-400 whitespace-nowrap">{t.stats}</span>
+                    </div>
                   </div>
-                );
-              })}
+                  <p className="text-dark-400 text-xs leading-relaxed">&ldquo;{t.text}&rdquo;</p>
+                  <div className="mt-3 h-0.5 w-0 group-hover:w-full bg-gradient-to-r from-primary-500 to-accent-500 transition-all duration-700 rounded-full" />
+                </div>
+              ))}
             </Marquee>
           </div>
         </section>
@@ -490,9 +711,9 @@ export default function Home() {
             playsInline
             className="absolute inset-0 w-full h-full object-cover"
           >
-            <source src="/core_domains.mp4" type="video/mp4" />
+            <source src="/home-bg-2.mp4" type="video/mp4" />
           </video>
-          <div className="absolute inset-0 bg-black/20" />
+          <div className="absolute inset-0 bg-black/50" />
           <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-dark-900 to-transparent z-[1]" />
           <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-dark-900 to-transparent z-[1]" />
 
@@ -538,8 +759,8 @@ export default function Home() {
                     Get Started Free <ArrowRight className="w-5 h-5" />
                   </span>
                 </GlowButton>
-                <GlowButton href="/pricing" variant="secondary" size="lg">
-                  See Pricing
+                <GlowButton href="/services" variant="secondary" size="lg">
+                  How It Works
                 </GlowButton>
               </div>
             </RevealOnScroll>
@@ -602,10 +823,60 @@ export default function Home() {
           </div>
         </section>
 
+
         {/* ── FAQ ── */}
         <div id="faq">
           <FAQ />
         </div>
+        {/* ── Blog / Insights ── */}
+        <section className="relative py-20 bg-dark-900 border-t border-dark-800/50 overflow-hidden">
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <RevealOnScroll>
+              <div className="text-center mb-12">
+                <h2 className="text-3xl sm:text-4xl font-semibold mb-4 text-white">
+                  Latest <span className="text-gradient">Insights</span>
+                </h2>
+                <p className="text-lg text-dark-300 max-w-2xl mx-auto">
+                  Learn about copy trading strategies, bot analytics, and platform tips.
+                </p>
+              </div>
+            </RevealOnScroll>
+
+            <div className="grid md:grid-cols-3 gap-6">
+              {homeArticles.map((article, i) => (
+                <RevealOnScroll key={article.title} delay={i * 0.1}>
+                  <a href="/blog" className="group block h-full">
+                    <div className="h-full p-6 bg-dark-800/50 border border-dark-700/50 rounded-2xl hover:border-primary-500/30 transition-all duration-300 flex flex-col">
+                      <div className="inline-flex self-start px-2.5 py-1 bg-primary-500/10 border border-primary-500/30 rounded-full text-xs font-semibold text-primary-400 mb-4">
+                        {article.category}
+                      </div>
+                      <h3 className="text-base font-bold text-white mb-2 group-hover:text-primary-400 transition-colors line-clamp-2">
+                        {article.title}
+                      </h3>
+                      <p className="text-sm text-dark-300 leading-relaxed flex-1 mb-4 line-clamp-3">
+                        {article.excerpt}
+                      </p>
+                      <div className="flex items-center justify-between text-xs text-dark-500">
+                        <span>{article.date}</span>
+                        <span>{article.readTime}</span>
+                      </div>
+                    </div>
+                  </a>
+                </RevealOnScroll>
+              ))}
+            </div>
+
+            <RevealOnScroll delay={0.3}>
+              <div className="mt-8 text-center">
+                <GlowButton href="/blog" variant="secondary" size="md">
+                  <span className="flex items-center gap-2">
+                    View All Articles <ArrowRight className="w-4 h-4" />
+                  </span>
+                </GlowButton>
+              </div>
+            </RevealOnScroll>
+          </div>
+        </section>
       </main>
       <Footer />
     </>

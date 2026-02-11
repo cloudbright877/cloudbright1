@@ -70,7 +70,7 @@ function LoginForm() {
             <div className="inline-flex items-center gap-3 mb-4">
               <Image
                 src="/logo2.svg"
-                alt="CloudBright"
+                alt="Cloudbright"
                 width={48}
                 height={48}
                 className="h-12 w-12"

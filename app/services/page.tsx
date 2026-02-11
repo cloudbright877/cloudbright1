@@ -412,9 +412,9 @@ export default function PlatformPage() {
             playsInline
             className="absolute inset-0 w-full h-full object-cover"
           >
-            <source src="/wallets_hero.mp4" type="video/mp4" />
+            <source src="/services-bg.mp4" type="video/mp4" />
           </video>
-          <div className="absolute inset-0 bg-black/50" />
+          <div className="absolute inset-0 bg-black/70" />
           <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-dark-900 to-transparent z-[1]" />
           <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-dark-900 to-transparent z-[1]" />
 
@@ -575,11 +575,16 @@ export default function PlatformPage() {
 
         {/* ══════════ SECTION 3: DASHBOARD & PORTFOLIO ══════════ */}
         <section className="relative py-24 overflow-hidden">
-          <div
-            className="absolute inset-0 bg-cover bg-center bg-fixed"
-            style={{ backgroundImage: "url('/cosmic-bg2.PNG')" }}
-          />
-          <div className="absolute inset-0 bg-dark-900/50" />
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover"
+          >
+            <source src="/services-2.mp4" type="video/mp4" />
+          </video>
+          <div className="absolute inset-0 bg-dark-900/60" />
 
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_50%] gap-12 lg:gap-10 items-center">
@@ -632,7 +637,11 @@ export default function PlatformPage() {
 
               {/* Right column: live trading widget */}
               <RevealOnScroll direction="right">
-                <LiveTradingDemo />
+                <div style={{ perspective: '170px' }}>
+                  <div style={{ transform: 'rotateY(-8deg) scale(1.3)', transformOrigin: 'right center' }}>
+                    <LiveTradingDemo />
+                  </div>
+                </div>
               </RevealOnScroll>
             </div>
           </div>

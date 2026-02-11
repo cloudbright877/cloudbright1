@@ -52,7 +52,7 @@ export default function Footer() {
               <div className="flex items-center gap-3 mb-4">
                 <Image
                   src="/logo2.svg"
-                  alt="CloudBright"
+                  alt="Cloudbright"
                   width={48}
                   height={48}
                   className="h-12 w-12"
@@ -146,6 +146,17 @@ export default function Footer() {
             <Building2 className="w-5 h-5 text-primary-400" />
             <span className="text-sm">HK Registered</span>
           </div>
+        </motion.div>
+
+        {/* Risk disclaimer */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.45 }}
+          className="text-dark-500 text-xs text-center mb-6 max-w-3xl mx-auto leading-relaxed"
+        >
+          Trading cryptocurrencies involves significant risk and may not be suitable for all investors. Past performance of trading bots does not guarantee future results. You should carefully consider your financial situation before investing. Only invest funds you can afford to lose.
         </motion.div>
 
         {/* Bottom bar */}
