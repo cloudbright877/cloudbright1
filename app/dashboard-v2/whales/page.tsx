@@ -132,7 +132,7 @@ export default function WhalesPage() {
             Whale Watching
           </h1>
           <p className="text-dark-300">
-            Track and copy the biggest investors on Celestian
+            Track and copy the biggest investors on Cloudbright
           </p>
         </motion.div>
 

@@ -2,38 +2,41 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useRef } from 'react';
-import FloatingShapes from './FloatingShapes';
-
 const faqs = [
   {
-    question: 'How does Celestian generate consistent returns?',
-    answer: 'Our proprietary AI algorithms analyze millions of data points across 25+ cryptocurrency exchanges in real-time. We utilize arbitrage opportunities, market-making strategies, and predictive analytics to generate consistent returns. Our system has been refined over 5 years and manages over $127M in assets.',
+    question: 'How does Cloudbright work?',
+    answer: 'It\'s simple: deposit crypto to your protected wallet, browse 100+ verified trading bots in our marketplace, and copy the one you like with one click. The master bot trades automatically 24/7 with your capital — you just watch the trades, track live stats, and collect profits. Full transparency: see every active trade, trade history, equity curves, and detailed bot statistics in real time.',
     icon: '🤖',
   },
   {
-    question: 'Is my investment safe and secure?',
-    answer: 'Absolutely. We employ bank-level security including cold storage for 95% of assets, multi-signature wallets, insurance coverage up to $100M, and regular third-party security audits. Your funds are protected by industry-leading encryption and our platform has never been hacked.',
+    question: 'Is my money safe with Cloudbright?',
+    answer: 'Yes. Cloudbright is operated by HONG KONG CLOUD BRIGHT SOFTWARE LIMITED, a licensed Hong Kong company registered in Hong Kong. Your funds are protected in encrypted custodial wallets with AES-256 encryption, 2FA authentication, and hardware security modules. We have passed third-party security audits. Every trade and transaction is fully transparent — you can verify everything in real time from your dashboard.',
     icon: '🔒',
   },
   {
-    question: 'What is the minimum investment required?',
-    answer: 'We offer flexible plans starting from just $50 for our Essential plan. This makes our AI-powered trading accessible to everyone. You can start small and scale up as you see consistent results and build confidence in our platform.',
+    question: 'What does it cost to use the platform?',
+    answer: 'Cloudbright is free to use. No monthly subscriptions, no setup fees, no hidden charges. We charge a small commission only when you collect realized profit. If you don\'t profit, you don\'t pay. It\'s that simple.',
     icon: '💰',
   },
   {
-    question: 'Can I withdraw my funds anytime?',
-    answer: 'Your funds are available for withdrawal after the 30-day lock-in period of your investment plan. Withdrawals are processed within 24 hours and you have complete control over your capital. The lock-in period ensures optimal strategy execution.',
-    icon: '⚡',
-  },
-  {
-    question: 'Do I need trading experience to use Celestian?',
-    answer: 'Not at all! Our platform is designed for everyone, from complete beginners to experienced investors. The AI handles all the trading automatically—you simply deposit funds and watch your investment grow. No technical knowledge or trading experience required.',
+    question: 'Do I need any experience?',
+    answer: 'Not at all. Cloudbright is designed for passive income — the bot does all the trading for you. Each bot has transparent performance data: equity curves, trade history, win rate, Sharpe ratio, and max drawdown. Our Quick Start wizard recommends bots based on your goals in just 4 steps. You copy the bot and watch it work — no trading knowledge required.',
     icon: '👤',
   },
   {
-    question: 'How do I get started?',
-    answer: 'Getting started is easy! Simply create an account (takes 2 minutes), verify your email address, deposit funds via cryptocurrency, choose your investment plan, and start earning immediately. Our support team is available 24/7 to help with onboarding.',
-    icon: '🚀',
+    question: 'What are the lock-in periods?',
+    answer: 'When you copy a bot, you choose a lock-in period from 7 to 180 days. Longer lock-in periods typically offer higher potential returns. You can collect realized profits anytime. Once the lock-in period ends, your full investment is available for withdrawal.',
+    icon: '⚡',
+  },
+  {
+    question: 'What is the minimum investment?',
+    answer: 'Minimum investment is $50. We support deposits in USDT, BTC, ETH, BNB, USDC, SOL, TRX, and other major cryptocurrencies. Deposits are credited instantly to your protected wallet. Start small and scale as you grow.',
+    icon: '🌐',
+  },
+  {
+    question: 'What makes Cloudbright different?',
+    answer: 'Full transparency and community. Unlike other platforms, you see everything: every active trade the bot makes, full trade history, live P&L, and detailed statistical data. Plus, Cloudbright is a social copy trading community — follow top bots, compare strategies on leaderboards, and learn from the community. 100+ verified bots, custodial wallets for 7+ cryptocurrencies, and commission only on profit.',
+    icon: '🌟',
   },
 ];
 
@@ -64,14 +67,14 @@ function AnimatedLines() {
       size: number;
     }> = [];
 
-    const particleCount = 40;
+    const particleCount = 60;
     for (let i = 0; i < particleCount; i++) {
       particles.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
-        vx: (Math.random() - 0.5) * 0.3,
-        vy: (Math.random() - 0.5) * 0.3,
-        size: Math.random() * 2 + 1,
+        vx: (Math.random() - 0.5) * 0.4,
+        vy: (Math.random() - 0.5) * 0.4,
+        size: Math.random() * 2.5 + 1,
       });
     }
 
@@ -91,7 +94,7 @@ function AnimatedLines() {
         // Draw particle
         ctx.beginPath();
         ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(217, 70, 239, 0.6)'; // Purple accent
+        ctx.fillStyle = 'rgba(79, 70, 229, 0.8)'; // Primary blue
         ctx.fill();
 
         // Draw lines
@@ -100,12 +103,12 @@ function AnimatedLines() {
           const dy = particle.y - otherParticle.y;
           const distance = Math.sqrt(dx * dx + dy * dy);
 
-          if (distance < 120) {
+          if (distance < 160) {
             ctx.beginPath();
             ctx.moveTo(particle.x, particle.y);
             ctx.lineTo(otherParticle.x, otherParticle.y);
-            const opacity = (1 - distance / 120) * 0.25;
-            ctx.strokeStyle = `rgba(217, 70, 239, ${opacity})`;
+            const opacity = (1 - distance / 160) * 0.4;
+            ctx.strokeStyle = `rgba(79, 70, 229, ${opacity})`;
             ctx.lineWidth = 1;
             ctx.stroke();
           }
@@ -127,7 +130,7 @@ function AnimatedLines() {
     <canvas
       ref={canvasRef}
       className="absolute inset-0 w-full h-full"
-      style={{ opacity: 0.3 }}
+      style={{ opacity: 0.6 }}
     />
   );
 }
@@ -140,58 +143,14 @@ export default function FAQ() {
   };
 
   return (
-    <section className="relative py-16 bg-gradient-to-b from-white dark:from-dark-900 via-gray-50 dark:via-dark-800 to-white dark:to-dark-900 overflow-hidden">
+    <section className="relative py-16 bg-dark-900 overflow-hidden">
       {/* Animated canvas background */}
       <AnimatedLines />
 
-      {/* Floating 3D shapes */}
-      <FloatingShapes
-        shapes={[
-          {
-            src: '/images/glossy-glass-cube.png',
-            size: 100,
-            position: { top: '30%', right: '10%' },
-            rotate: -20,
-          },
-          {
-            src: '/images/glossy-glass-sphere-floating-in.png',
-            size: 150,
-            position: { bottom: '25%', left: '8%' },
-            rotate: 0,
-          },
-        ]}
-      />
-
-      {/* Animated blur orbs */}
-      <div className="absolute inset-0 overflow-hidden">
-        <motion.div
-          className="absolute top-1/4 right-1/4 w-[500px] h-[500px] bg-accent-500/10 rounded-full blur-3xl"
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.2, 0.4, 0.2],
-            x: [0, -40, 0],
-            y: [0, 40, 0],
-          }}
-          transition={{
-            duration: 15,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
-        <motion.div
-          className="absolute bottom-1/4 left-1/4 w-[400px] h-[400px] bg-primary-500/10 rounded-full blur-3xl"
-          animate={{
-            scale: [1.1, 1, 1.1],
-            opacity: [0.3, 0.2, 0.3],
-            x: [0, 30, 0],
-            y: [0, -30, 0],
-          }}
-          transition={{
-            duration: 12,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
+      {/* Ambient glow orbs */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 right-1/4 w-[500px] h-[500px] bg-primary-500/8 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 left-1/4 w-[400px] h-[400px] bg-blue-500/8 rounded-full blur-3xl" />
       </div>
 
       <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -203,11 +162,11 @@ export default function FAQ() {
           transition={{ duration: 0.6 }}
           className="text-center mb-10"
         >
-          <h2 className="text-3xl sm:text-4xl font-bold mb-3 text-gray-900 dark:text-white">
+          <h2 className="text-2xl sm:text-3xl font-semibold mb-3 text-white">
             Frequently Asked <span className="text-gradient">Questions</span>
           </h2>
-          <p className="text-base text-gray-600 dark:text-dark-200">
-            Got questions? We've got answers about investing with Celestian.
+          <p className="text-base text-dark-200">
+            Everything you need to know about copy trading with Cloudbright.
           </p>
         </motion.div>
 
@@ -222,8 +181,8 @@ export default function FAQ() {
               transition={{ duration: 0.4, delay: index * 0.05 }}
               className={`backdrop-blur-sm rounded-xl border overflow-hidden transition-all duration-300 ${
                 openIndex === index
-                  ? 'bg-gray-100 dark:bg-dark-800/80 border-primary-500/50 shadow-lg shadow-primary-500/10'
-                  : 'bg-gray-50 dark:bg-dark-800/50 border-gray-200 dark:border-dark-700/50 hover:border-primary-500/30'
+                  ? 'bg-dark-800/80 border-primary-500/50 shadow-lg shadow-primary-500/10'
+                  : 'bg-dark-800/50 border-dark-700/50 hover:border-primary-500/30'
               }`}
             >
               {/* Question */}
@@ -231,13 +190,13 @@ export default function FAQ() {
                 onClick={() => toggleFAQ(index)}
                 className="w-full px-5 py-3 flex items-center justify-between text-left hover:bg-primary-500/5 transition-all duration-300"
               >
-                <span className="text-base font-medium text-gray-900 dark:text-white pr-4">
+                <span className="text-base font-medium text-white pr-4">
                   {faq.question}
                 </span>
                 <motion.span
                   animate={{ rotate: openIndex === index ? 180 : 0 }}
                   transition={{ duration: 0.3 }}
-                  className="text-xl text-primary-600 dark:text-primary-400 flex-shrink-0"
+                  className="text-xl text-primary-400 font-bold flex-shrink-0"
                 >
                   ↓
                 </motion.span>
@@ -253,7 +212,7 @@ export default function FAQ() {
                     transition={{ duration: 0.3 }}
                     className="overflow-hidden"
                   >
-                    <div className="px-5 pb-3 text-sm text-gray-600 dark:text-dark-200 leading-relaxed border-t border-gray-200 dark:border-dark-700/50 pt-3">
+                    <div className="px-5 pb-3 text-sm text-dark-200 leading-relaxed border-t border-dark-700/50 pt-3">
                       {faq.answer}
                     </div>
                   </motion.div>
@@ -271,15 +230,9 @@ export default function FAQ() {
           transition={{ duration: 0.6, delay: 0.3 }}
           className="mt-10 text-center"
         >
-          <div
-            className="relative p-6 bg-gradient-to-br from-primary-500/10 to-accent-500/10 border border-primary-500/30 rounded-2xl backdrop-blur-sm overflow-hidden bg-cover bg-center"
-            style={{ backgroundImage: 'url(/cosmic-bg.jpeg)' }}
-          >
-            {/* Overlay for better text readability */}
-            <div className="absolute inset-0 bg-dark-900/60 backdrop-blur-sm rounded-2xl"></div>
-
+          <div className="relative p-6 bg-gradient-to-br from-primary-500/10 to-accent-500/10 border border-primary-500/30 rounded-2xl backdrop-blur-sm overflow-hidden">
             <div className="relative z-10">
-              <h3 className="text-xl font-bold mb-2 text-white">
+              <h3 className="text-lg font-semibold mb-2 text-white">
                 Still Have Questions?
               </h3>
               <p className="text-sm text-dark-300 mb-5">

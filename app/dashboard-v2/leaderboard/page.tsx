@@ -84,7 +84,7 @@ export default function LeaderboardPage() {
             Leaderboard
           </h1>
           <p className="text-dark-300">
-            Compete with the best traders on Celestian
+            Compete with the best traders on Cloudbright
           </p>
         </motion.div>
 

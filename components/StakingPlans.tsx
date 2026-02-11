@@ -19,7 +19,7 @@ const benefits = [
   {
     icon: '/icons/light.png',
     title: 'Instant Access',
-    description: 'Withdraw anytime, no lock-up periods',
+    description: 'Lock-in periods from 7 to 180 days',
   },
   {
     icon: '/icons/graph.png',
@@ -56,7 +56,7 @@ const classicPlans = [
       'Perpetual futures with 3-5x leverage',
       'DeFi yield farming optimization',
       'Options selling (covered calls)',
-      'Advanced risk management systems',
+      'Automated trading by verified bots',
     ],
     popular: true,
     gradient: 'from-primary-500 to-accent-500',

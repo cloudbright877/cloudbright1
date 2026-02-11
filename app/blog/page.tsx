@@ -39,7 +39,7 @@ export default function BlogPage() {
     {
       id: 3,
       title: 'Understanding Smart Contract Security: A Beginner\'s Guide',
-      excerpt: 'Learn the fundamentals of smart contract security and how Celestian protects your investments through advanced auditing and encryption.',
+      excerpt: 'Learn the fundamentals of smart contract security and how Cloudbright protects your investments through advanced auditing and encryption.',
       category: 'Education',
       author: 'Emily Rodriguez',
       date: 'December 10, 2024',
@@ -104,7 +104,7 @@ export default function BlogPage() {
     },
     {
       id: 9,
-      title: 'Celestian Platform Update: New Features & Enhancements',
+      title: 'Cloudbright Platform Update: New Features & Enhancements',
       excerpt: 'Announcing our latest platform updates including enhanced security features, improved UI, and new trading pairs.',
       category: 'Platform Updates',
       author: 'Sarah Williams',
@@ -139,7 +139,7 @@ export default function BlogPage() {
               className="text-center"
             >
               <span className="text-primary-500 dark:text-primary-400 font-semibold text-sm uppercase tracking-wide">
-                Celestian Blog
+                Cloudbright Blog
               </span>
               <h1 className="text-4xl md:text-6xl font-black mt-4 mb-6 text-gray-900 dark:text-white">
                 Insights, News & <span className="text-gradient">Education</span>

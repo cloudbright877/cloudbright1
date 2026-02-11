@@ -7,13 +7,15 @@ interface TiltCardProps {
   className?: string;
   maxTilt?: number;
   glare?: boolean;
+  unstyled?: boolean;
 }
 
 export function TiltCard({
   children,
   className = '',
   maxTilt = 10,
-  glare = true,
+  glare = false,
+  unstyled = false,
 }: TiltCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [transform, setTransform] = useState('perspective(1000px) rotateX(0deg) rotateY(0deg)');
@@ -65,11 +67,9 @@ export function TiltCard({
     <div
       ref={cardRef}
       className={`
-        relative overflow-hidden rounded-2xl
-        bg-white/5 dark:bg-white/5
-        backdrop-blur-xl
-        border border-white/10
+        relative overflow-hidden
         transition-all duration-200 ease-out
+        ${unstyled ? '' : 'rounded-2xl bg-white/5 dark:bg-white/5 backdrop-blur-xl border border-white/10'}
         ${className}
       `}
       style={{

@@ -7,3 +7,7 @@ export { Marquee } from './Marquee';
 export { TiltCard } from './TiltCard';
 export { GlowButton } from './GlowButton';
 export { Carousel } from './Carousel';
+export { ExpandingCards } from './ExpandingCards';
+export { ScrollProgressTimeline } from './ScrollProgressTimeline';
+export { AnimatedBorderGrid } from './AnimatedBorderGrid';
+export { HexGrid } from './HexGrid';

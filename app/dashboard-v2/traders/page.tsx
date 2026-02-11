@@ -124,7 +124,7 @@ export default function TradersPage() {
             Top Traders
           </h1>
           <p className="text-dark-300">
-            Discover and follow the best performing traders on Celestian
+            Discover and follow the best performing traders on Cloudbright
           </p>
         </motion.div>
 

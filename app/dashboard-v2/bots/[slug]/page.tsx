@@ -98,7 +98,7 @@ function getTickerData(bot: DemoBot | null | undefined) {
 
 // Reviews data
 const reviewsData: Review[] = [
-  { name: 'John D.', rating: 5, text: 'Amazing bot! Consistent profits every day. Highly recommend for serious traders.', date: '2 days ago', verified: true },
+  { name: 'John D.', rating: 5, text: 'Amazing bot! Consistent profits every day. Highly recommend for serious investors.', date: '2 days ago', verified: true },
   { name: 'Sarah M.', rating: 5, text: 'Been copying for 3 months now. Up 42% total. Best decision I made!', date: '5 days ago', verified: true },
   { name: 'Mike R.', rating: 4, text: 'Very good performance. Had a few losing days but overall very profitable.', date: '1 week ago', verified: false },
   { name: 'Lisa K.', rating: 5, text: 'Love the transparency and consistent results. Customer service is excellent too.', date: '1 week ago', verified: true },
@@ -525,7 +525,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
     return () => clearInterval(interval);
   }, []);
 
-  // Chart options with Celestian colors
+  // Chart options with Cloudbright colors
   // Primary: #4F46E5, Accent: #06B6D4, Dark-700: #334155
   const performanceChartOptions = {
     series: [{ name: 'PnL', data: performanceData }],

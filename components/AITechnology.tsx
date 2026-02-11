@@ -8,7 +8,7 @@ const features = [
   {
     icon: '/icons/icon-neural-network.png',
     title: 'Neural Network Analysis',
-    description: 'Our proprietary AI analyzes 10,000+ market indicators in real-time, identifying profitable opportunities before traditional traders.',
+    description: 'Our proprietary AI analyzes 10,000+ market indicators in real-time, identifying profitable opportunities before traditional methods.',
   },
   {
     icon: '/icons/icon-lightning.png',
@@ -17,8 +17,8 @@ const features = [
   },
   {
     icon: '/icons/icon-shield.png',
-    title: 'Risk Management AI',
-    description: 'Advanced risk protection system that automatically adjusts positions to minimize losses and maximize gains.',
+    title: 'Capital Protection AI',
+    description: 'Advanced protection system that automatically adjusts positions to minimize losses and maximize gains.',
   },
   {
     icon: '/icons/icon-exchange.png',

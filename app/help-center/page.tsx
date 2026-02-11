@@ -58,13 +58,13 @@ export default function HelpCenterPage() {
     // General Questions
     {
       category: 'General Questions',
-      question: 'What is Celestian?',
-      answer: 'Celestian is an AI-powered cryptocurrency investment platform operated by Celestian Limited. We use advanced trading algorithms to generate consistent returns for our investors. Our automated trading bots operate 24/7 across multiple exchanges, utilizing strategies including:\n\n• Arbitrage trading\n• Liquidity provision\n• Market making\n• Options strategies\n• DeFi yield farming\n\nWe focus on delivering stable, predictable returns with minimal risk.',
+      question: 'What is Cloudbright?',
+      answer: 'Cloudbright is an AI-powered cryptocurrency investment platform operated by Cloudbright Limited. We use advanced trading algorithms to generate consistent returns for our investors. Our automated trading bots operate 24/7 across multiple exchanges, utilizing strategies including:\n\n• Arbitrage trading\n• Liquidity provision\n• Market making\n• Options strategies\n• DeFi yield farming\n\nWe focus on delivering stable, predictable returns with minimal risk.',
     },
     {
       category: 'General Questions',
-      question: 'Is Celestian safe and legitimate?',
-      answer: 'Yes! Celestian Limited implements industry-leading security measures:\n\n• Bank-level encryption (256-bit SSL)\n• Two-Factor Authentication (2FA)\n• Withdrawal PIN protection\n• Cold storage for investor funds\n• Regular security audits\n• 100% Insurance Fund\n\nYour funds are protected by our comprehensive security infrastructure.',
+      question: 'Is Cloudbright safe and legitimate?',
+      answer: 'Yes! Cloudbright Limited implements industry-leading security measures:\n\n• Bank-level encryption (256-bit SSL)\n• Two-Factor Authentication (2FA)\n• Withdrawal PIN protection\n• Cold storage for investor funds\n• Regular security audits\n• 100% Insurance Fund\n\nYour funds are protected by our comprehensive security infrastructure.',
     },
     {
       category: 'General Questions',
@@ -74,12 +74,12 @@ export default function HelpCenterPage() {
     {
       category: 'General Questions',
       question: 'Which countries are supported?',
-      answer: 'Celestian accepts investors from most countries worldwide, with a few exceptions due to regulatory restrictions:\n\n✓ Supported: USA, UK, EU countries, Canada, Australia, Singapore, UAE, and 150+ more\n\n✗ Not supported: North Korea, Iran, Syria\n\nCheck your local regulations regarding cryptocurrency investments.',
+      answer: 'Cloudbright accepts investors from most countries worldwide, with a few exceptions due to regulatory restrictions:\n\n✓ Supported: USA, UK, EU countries, Canada, Australia, Singapore, UAE, and 150+ more\n\n✗ Not supported: North Korea, Iran, Syria\n\nCheck your local regulations regarding cryptocurrency investments.',
     },
     {
       category: 'General Questions',
       question: 'How can I contact customer support?',
-      answer: 'Our support team is available 24/7:\n\n• Live Chat: Click the chat icon in the bottom right corner\n• Email: support@celestian.org\n• Telegram: @CelestianSupport\n\nAverage response time: Under 2 hours\n\nFor urgent withdrawal or security issues, please use live chat for fastest response.',
+      answer: 'Our support team is available 24/7:\n\n• Live Chat: Click the chat icon in the bottom right corner\n• Email: support@cloudbright.com\n• Telegram: @CloudBrightSupport\n\nAverage response time: Under 2 hours\n\nFor urgent withdrawal or security issues, please use live chat for fastest response.',
     },
     // Account Management
     {
@@ -110,13 +110,13 @@ export default function HelpCenterPage() {
     {
       category: 'Account Management',
       question: 'How do I delete my account?',
-      answer: 'To delete your account:\n\n1. Withdraw all your funds\n2. Contact support at support@celestian.org\n3. Request account deletion\n4. Confirm your identity with 2FA code\n5. Your account will be deleted within 7 days\n\nNote: This action is permanent and cannot be undone. All data will be deleted as per GDPR regulations.',
+      answer: 'To delete your account:\n\n1. Withdraw all your funds\n2. Contact support at support@cloudbright.com\n3. Request account deletion\n4. Confirm your identity with 2FA code\n5. Your account will be deleted within 7 days\n\nNote: This action is permanent and cannot be undone. All data will be deleted as per GDPR regulations.',
     },
   ];
 
   const popularArticles = [
     {
-      title: 'Complete Guide to Getting Started with Celestian',
+      title: 'Complete Guide to Getting Started with Cloudbright',
       category: 'Tutorial',
       readTime: '10 min',
       icon: '📚',
@@ -241,7 +241,7 @@ export default function HelpCenterPage() {
                 Popular <span className="text-gradient">Articles</span>
               </h2>
               <p className="text-gray-600 dark:text-dark-300">
-                Most helpful guides and tutorials for Celestian users
+                Most helpful guides and tutorials for Cloudbright users
               </p>
             </motion.div>
 
@@ -293,7 +293,7 @@ export default function HelpCenterPage() {
                 Frequently Asked <span className="text-gradient">Questions</span>
               </h2>
               <p className="text-gray-600 dark:text-dark-300">
-                Quick answers to common questions about Celestian platform
+                Quick answers to common questions about Cloudbright platform
               </p>
             </motion.div>
 

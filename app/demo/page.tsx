@@ -4,7 +4,7 @@ export default function DemoPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-dark-900 via-dark-800 to-dark-900 flex items-center justify-center p-4">
       <div className="max-w-2xl w-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-8">
-        <h1 className="text-3xl font-bold text-white mb-2">🚀 Celestian Dashboard Demo</h1>
+        <h1 className="text-3xl font-bold text-white mb-2">🚀 Cloudbright Dashboard Demo</h1>
         <p className="text-dark-300 mb-8">Choose which version to explore</p>
 
         {/* v2 Section */}

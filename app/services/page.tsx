@@ -1,324 +1,1172 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import Navbar from '@/components/Navbar';
-import PageHero from '@/components/PageHero';
-import Footer from '@/components/Footer';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
+import { RevealOnScroll } from '@/components/animations/RevealOnScroll';
+import { TiltCard } from '@/components/animations/TiltCard';
+import { AnimatedCounter } from '@/components/animations/AnimatedCounter';
+import { GlowButton } from '@/components/animations/GlowButton';
+import { Marquee } from '@/components/animations/Marquee';
 
-export default function ServicesPage() {
-  const services = [
-    {
-      icon: '🤖',
-      title: 'AI-Powered Trading',
-      description: 'Advanced machine learning algorithms that analyze market patterns and execute trades 24/7 with millisecond precision.',
-      features: ['Real-time market analysis', 'Automated trade execution', 'Risk management', 'Portfolio optimization'],
-      gradient: 'from-blue-500 to-cyan-500',
-    },
-    {
-      icon: '📊',
-      title: 'Smart Portfolio Management',
-      description: 'Diversified crypto portfolios automatically rebalanced based on market conditions and your risk tolerance.',
-      features: ['Auto-rebalancing', 'Tax-loss harvesting', 'Performance tracking', 'Custom strategies'],
-      gradient: 'from-purple-500 to-pink-500',
-    },
-    {
-      icon: '⚡',
-      title: 'High-Frequency Arbitrage',
-      description: 'Lightning-fast arbitrage across multiple exchanges to capture price inefficiencies before they disappear.',
-      features: ['Multi-exchange trading', 'Low latency execution', 'Profit maximization', '99.9% uptime'],
-      gradient: 'from-orange-500 to-red-500',
-    },
-    {
-      icon: '🛡️',
-      title: 'Risk Protection',
-      description: 'Advanced risk management systems that protect your capital during market volatility and black swan events.',
-      features: ['Stop-loss automation', 'Volatility detection', 'Portfolio hedging', 'Emergency shutdown'],
-      gradient: 'from-green-500 to-emerald-500',
-    },
-  ];
+const LiveTradingDemo = dynamic(
+  () => import('@/components/LiveTradingDemo').then(mod => ({ default: mod.LiveTradingDemo })),
+  { ssr: false, loading: () => <div className="w-full h-[400px] rounded-2xl bg-dark-800/50 animate-pulse" /> }
+);
+import { exchangeLogos } from '@/components/ExchangeLogos';
+import {
+  Wallet,
+  TrendingUp,
+  Users,
+  ArrowRight,
+  CircleDollarSign,
+  Zap,
+  Activity,
+  Copy,
+  Star,
+  Eye,
+  Store,
+  Target,
+  MessageSquare,
+  Trophy,
+  Bell,
+  Gauge,
+  Check,
+} from 'lucide-react';
 
-  const technologies = [
-    { name: 'Machine Learning', percentage: 95 },
-    { name: 'Natural Language Processing', percentage: 88 },
-    { name: 'Deep Neural Networks', percentage: 92 },
-    { name: 'Quantum Computing Research', percentage: 75 },
-  ];
+/* ═══════════════════════════════════════════════════════════════
+   MINI-RENDER PREVIEW COMPONENTS
+   Static dashboard previews following home page pattern
+   (BalancePreview, BotCardPreview, CollectPreview)
+   ═══════════════════════════════════════════════════════════════ */
 
-  const benefits = [
-    { icon: '💰', title: 'Consistent Returns', stat: '2.8% avg daily', description: 'Outperform traditional investment vehicles' },
-    { icon: '⏱️', title: 'Zero Effort', stat: '100% automated', description: 'Set it and forget it - AI does everything' },
-    { icon: '🔒', title: 'Bank-Grade Security', stat: '$100M insured', description: 'Your funds are safe and protected' },
-    { icon: '📱', title: 'Real-Time Access', stat: '24/7 monitoring', description: 'Track performance anytime, anywhere' },
+/* ── Section 2: Dashboard & Portfolio ────────────────────────── */
+
+function NetWorthPreview() {
+  return (
+    <div className="w-full flex-1 flex flex-col rounded-2xl bg-gradient-to-br from-primary-500/10 via-accent-500/5 to-primary-500/10 border border-primary-500/30 p-5 shadow-2xl shadow-primary-500/10">
+      <div className="flex items-center gap-2.5 mb-5">
+        <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-accent-500 rounded-lg flex items-center justify-center">
+          <Gauge className="w-5 h-5 text-white" />
+        </div>
+        <div>
+          <p className="text-xs text-dark-400 font-medium">Net Worth</p>
+          <p className="text-[10px] text-dark-500">Total portfolio value</p>
+        </div>
+      </div>
+      <p className="text-3xl font-bold text-white mb-2">$16,856.40</p>
+      <div className="flex items-center gap-1.5 mb-4">
+        <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-green-500/20 text-green-400">
+          <TrendingUp className="w-3 h-3" />
+          <span className="text-xs font-bold">+$4,856</span>
+        </div>
+        <span className="text-xs text-green-400/70">+40.47%</span>
+      </div>
+      <div className="grid grid-cols-2 gap-2 mb-3">
+        <div className="p-3 bg-dark-900/50 rounded-xl border border-dark-700">
+          <p className="text-[10px] text-dark-400">Invested</p>
+          <p className="text-sm font-bold text-white">$12,000</p>
+        </div>
+        <div className="p-3 bg-dark-900/50 rounded-xl border border-dark-700">
+          <p className="text-[10px] text-dark-400">Realized</p>
+          <p className="text-sm font-bold text-green-400">+$3,240</p>
+        </div>
+        <div className="p-3 bg-dark-900/50 rounded-xl border border-dark-700">
+          <p className="text-[10px] text-dark-400">Unrealized</p>
+          <p className="text-sm font-bold text-cyan-400">+$1,616</p>
+        </div>
+        <div className="p-3 bg-dark-900/50 rounded-xl border border-dark-700">
+          <p className="text-[10px] text-dark-400">Today</p>
+          <p className="text-sm font-bold text-green-400">+$3.30</p>
+        </div>
+      </div>
+      <div className="p-3 bg-dark-900/50 rounded-xl border border-dark-700 mb-3 flex items-center justify-between">
+        <div>
+          <p className="text-[10px] text-dark-400">Active Bots</p>
+          <p className="text-sm font-bold text-white">1 / 1</p>
+        </div>
+        <div className="flex items-center gap-1">
+          <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+          <span className="text-[10px] text-green-400 font-semibold">All Running</span>
+        </div>
+      </div>
+      {/* Equity chart */}
+      <div className="flex-1 flex flex-col justify-end">
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="text-[9px] text-dark-500 uppercase tracking-wider font-semibold">Equity · 30d</span>
+          <span className="text-[10px] text-green-400 font-bold">+40.47%</span>
+        </div>
+        <svg viewBox="0 0 240 60" className="w-full h-12">
+          <defs>
+            <linearGradient id="nw-fill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="rgb(79,70,229)" stopOpacity="0.35" />
+              <stop offset="100%" stopColor="rgb(79,70,229)" stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          <path
+            d="M0,50 C10,48 20,45 35,42 S55,38 70,35 S90,30 105,26 S120,28 135,22 S155,18 170,14 S190,10 210,7 S230,4 240,2 L240,60 L0,60 Z"
+            fill="url(#nw-fill)"
+          />
+          <path
+            d="M0,50 C10,48 20,45 35,42 S55,38 70,35 S90,30 105,26 S120,28 135,22 S155,18 170,14 S190,10 210,7 S230,4 240,2"
+            fill="none"
+            stroke="rgb(79,70,229)"
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
+          {/* Current price dot */}
+          <circle cx="240" cy="2" r="3" fill="rgb(79,70,229)" />
+          <circle cx="240" cy="2" r="5" fill="rgb(79,70,229)" opacity="0.3" />
+        </svg>
+      </div>
+    </div>
+  );
+}
+
+
+/* ── Section 3: Marketplace & Copy Trading ───────────────────── */
+
+function QuickStartPreview() {
+  return (
+    <div className="w-[340px] rounded-2xl bg-gradient-to-br from-violet-500/10 via-purple-500/5 to-violet-500/10 border border-violet-500/30 p-5 shadow-2xl shadow-violet-500/10">
+      <div className="flex items-center gap-2.5 mb-4">
+        <div className="w-9 h-9 bg-gradient-to-br from-violet-500 to-purple-500 rounded-lg flex items-center justify-center">
+          <Zap className="w-4.5 h-4.5 text-white" />
+        </div>
+        <div>
+          <p className="text-xs font-bold text-white">Quick Start</p>
+          <p className="text-[10px] text-dark-500">Portfolio builder</p>
+        </div>
+      </div>
+      <p className="text-[10px] text-dark-400 mb-3 uppercase tracking-wider font-semibold">Select Risk Profile</p>
+      <div className="space-y-2">
+        {[
+          { label: 'Conservative', color: 'green', desc: 'Low risk, steady growth', active: false },
+          { label: 'Balanced', color: 'blue', desc: 'Medium risk, solid returns', active: true },
+          { label: 'Aggressive', color: 'red', desc: 'High risk, max potential', active: false },
+        ].map((opt) => (
+          <div
+            key={opt.label}
+            className={`flex items-center gap-3 p-2.5 rounded-lg border transition-all ${
+              opt.active
+                ? 'border-blue-500/50 bg-blue-500/10'
+                : 'border-dark-700/50 bg-dark-900/40'
+            }`}
+          >
+            <div
+              className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                opt.active ? 'border-blue-400' : 'border-dark-600'
+              }`}
+            >
+              {opt.active && <div className="w-2 h-2 rounded-full bg-blue-400" />}
+            </div>
+            <div>
+              <p className={`text-[11px] font-semibold ${opt.active ? 'text-white' : 'text-dark-300'}`}>
+                {opt.label}
+              </p>
+              <p className="text-[9px] text-dark-500">{opt.desc}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 w-full text-center px-3 py-2 bg-gradient-to-r from-violet-500 to-purple-500 rounded-lg text-[11px] font-semibold text-white">
+        Build My Portfolio
+      </div>
+    </div>
+  );
+}
+
+/* ── Section 5: Social & Community — Orbital Layout ─────────── */
+
+/* ── Section 6: Why Choose ─────────────────────────────────── */
+
+function WalletPreview() {
+  const currencies = [
+    { name: 'USDT', balance: '$8,450.00', img: '/currency/Tether.svg' },
+    { name: 'BTC', balance: '0.2847 BTC', img: '/currency/Bitcoin.svg' },
+    { name: 'ETH', balance: '2.156 ETH', img: '/currency/Ethereum.svg' },
   ];
 
   return (
+    <div className="w-[280px] rounded-2xl bg-gradient-to-br from-emerald-500/10 via-green-500/5 to-emerald-500/10 border border-emerald-500/30 p-5 shadow-2xl shadow-emerald-500/10">
+      <div className="flex items-center gap-2.5 mb-4">
+        <div className="w-9 h-9 bg-gradient-to-br from-emerald-500 to-green-500 rounded-lg flex items-center justify-center">
+          <Wallet className="w-4.5 h-4.5 text-white" />
+        </div>
+        <div>
+          <p className="text-xs font-bold text-white">My Wallets</p>
+          <p className="text-[10px] text-dark-500">3 currencies</p>
+        </div>
+        <span className="ml-auto text-sm font-bold text-green-400">$12,840</span>
+      </div>
+      <div className="space-y-2">
+        {currencies.map((c) => (
+          <div key={c.name} className="flex items-center gap-3 p-2.5 bg-dark-900/50 rounded-lg border border-dark-700/50">
+            <img src={c.img} alt={c.name} className="w-8 h-8 rounded-full" />
+            <div className="flex-1 min-w-0">
+              <p className="text-[11px] font-semibold text-white">{c.name}</p>
+            </div>
+            <span className="text-xs font-bold text-dark-200">{c.balance}</span>
+          </div>
+        ))}
+      </div>
+      <div className="flex gap-2 mt-3">
+        <div className="flex-1 text-center px-3 py-2 bg-emerald-500/20 border border-emerald-500/30 rounded-lg text-[11px] font-semibold text-emerald-400">
+          Deposit
+        </div>
+        <div className="flex-1 text-center px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-[11px] font-semibold text-dark-300">
+          Withdraw
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DashboardPreview() {
+  return (
+    <div className="w-[280px] rounded-2xl bg-dark-800 border border-dark-700 p-5 shadow-2xl">
+      <div className="flex items-center gap-2.5 mb-4">
+        <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-accent-500 rounded-lg flex items-center justify-center">
+          <Gauge className="w-5 h-5 text-white" />
+        </div>
+        <div>
+          <p className="text-xs text-dark-400 font-medium">Net Worth</p>
+          <p className="text-[10px] text-dark-500">Total portfolio value</p>
+        </div>
+      </div>
+      <p className="text-3xl font-bold text-white mb-2">$16,856.40</p>
+      <div className="flex items-center gap-1.5 mb-4">
+        <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-green-500/20 text-green-400">
+          <TrendingUp className="w-3 h-3" />
+          <span className="text-xs font-bold">+$4,856</span>
+        </div>
+        <span className="text-xs text-green-400/70">+40.47%</span>
+      </div>
+      <div className="grid grid-cols-2 gap-2 mb-3">
+        <div className="p-2.5 bg-dark-900 rounded-lg border border-dark-700">
+          <p className="text-[9px] text-dark-400">Invested</p>
+          <p className="text-sm font-bold text-white">$12,000</p>
+        </div>
+        <div className="p-2.5 bg-dark-900 rounded-lg border border-dark-700">
+          <p className="text-[9px] text-dark-400">Realized</p>
+          <p className="text-sm font-bold text-green-400">+$3,240</p>
+        </div>
+      </div>
+      <div className="p-2.5 bg-dark-900 rounded-lg border border-dark-700 mb-3 flex items-center justify-between">
+        <div>
+          <p className="text-[9px] text-dark-400">Active Bots</p>
+          <p className="text-sm font-bold text-white">3 / 3</p>
+        </div>
+        <div className="flex items-center gap-1">
+          <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+          <span className="text-[10px] text-green-400 font-semibold">All Running</span>
+        </div>
+      </div>
+      <div>
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="text-[9px] text-dark-500 uppercase tracking-wider font-semibold">Equity · 30d</span>
+          <span className="text-[10px] text-green-400 font-bold">+40.47%</span>
+        </div>
+        <svg viewBox="0 0 240 50" className="w-full h-10">
+          <defs>
+            <linearGradient id="dash-fill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="rgb(79,70,229)" stopOpacity="0.35" />
+              <stop offset="100%" stopColor="rgb(79,70,229)" stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          <path
+            d="M0,42 C10,40 20,37 35,34 S55,30 70,27 S90,22 105,18 S120,20 135,15 S155,11 170,8 S190,5 210,4 S230,2 240,1 L240,50 L0,50 Z"
+            fill="url(#dash-fill)"
+          />
+          <path
+            d="M0,42 C10,40 20,37 35,34 S55,30 70,27 S90,22 105,18 S120,20 135,15 S155,11 170,8 S190,5 210,4 S230,2 240,1"
+            fill="none"
+            stroke="rgb(79,70,229)"
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
+          <circle cx="240" cy="1" r="3" fill="rgb(79,70,229)" />
+        </svg>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SECTION DATA
+   ═══════════════════════════════════════════════════════════════ */
+
+const marketplaceFeatures = [
+  {
+    number: '01',
+    icon: Store,
+    title: 'Bot Marketplace',
+    description: 'Browse 100+ verified bots ranked by performance, risk level, and copier count. Full stats for every strategy.',
+  },
+  {
+    number: '02',
+    icon: Copy,
+    title: 'One-Click Copy',
+    description: 'Set your amount, tap copy, done. The bot trades 24/7 automatically while you watch live P&L.',
+  },
+  {
+    number: '03',
+    icon: Zap,
+    title: 'Smart Portfolio Builder',
+    description: 'Quick Start wizard picks the best bots for your risk tolerance and investment horizon.',
+  },
+  {
+    number: '04',
+    icon: Target,
+    title: 'Risk-Based Filtering',
+    description: 'Filter by risk level, win rate, max drawdown, and Sharpe ratio. Compare any two bots side by side.',
+  },
+];
+
+const socialFeatures = [
+  {
+    number: '01',
+    icon: Users,
+    title: 'Public Profiles',
+    description: 'Every bot has a public profile with full performance history, level badges, and verification status.',
+  },
+  {
+    number: '02',
+    icon: MessageSquare,
+    title: 'Social Feed',
+    description: 'Follow top bots, see their moves in real time. Like and interact with the community.',
+  },
+  {
+    number: '03',
+    icon: Bell,
+    title: 'Whale Alerts',
+    description: 'Track what the biggest investors are doing. See large investments and profit collections live.',
+  },
+  {
+    number: '04',
+    icon: Trophy,
+    title: 'Leaderboards',
+    description: 'Global rankings by profit, ROI, win rate, and Sharpe ratio. Weekly and monthly competitions.',
+  },
+];
+
+const whyChooseFeatures = [
+  {
+    number: '01',
+    icon: Wallet,
+    title: 'Multi-Currency Wallets',
+    description: 'Hold 7+ cryptocurrencies in protected wallets. Deposit instantly, withdraw copy trading profits anytime.',
+  },
+  {
+    number: '02',
+    icon: CircleDollarSign,
+    title: 'Flexible Profit Collection',
+    description: 'Choose your lock-in period from 7 to 180 days. Longer lock-in — higher returns. Collect profits anytime.',
+  },
+];
+
+/* ═══════════════════════════════════════════════════════════════
+   FEATURE LIST COMPONENT (for split layout sections)
+   ═══════════════════════════════════════════════════════════════ */
+
+function FeatureList({ features }: { features: typeof marketplaceFeatures }) {
+  return (
+    <div className="flex flex-col gap-8">
+      {features.map((feature) => {
+        const Icon = feature.icon;
+        return (
+          <div key={feature.number} className="relative flex items-start gap-4 group">
+            <span className="absolute -left-1 -top-2 text-6xl font-semibold text-dark-800/20 select-none pointer-events-none leading-none">
+              {feature.number}
+            </span>
+            <div className="relative z-10 w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500/15 to-accent-500/15 border border-primary-500/20 flex items-center justify-center shrink-0">
+              <Icon className="w-5 h-5 text-primary-400" />
+            </div>
+            <div className="relative z-10">
+              <h4 className="text-lg font-bold text-white mb-1">{feature.title}</h4>
+              <p className="text-dark-300 text-sm leading-relaxed">{feature.description}</p>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PAGE
+   ═══════════════════════════════════════════════════════════════ */
+
+export default function PlatformPage() {
+  return (
     <>
       <Navbar />
+      <main>
+        {/* ══════════ SECTION 1: HERO ══════════ */}
+        <section className="relative pt-32 pb-20 md:pt-40 md:pb-24 overflow-hidden">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover"
+          >
+            <source src="/wallets_hero.mp4" type="video/mp4" />
+          </video>
+          <div className="absolute inset-0 bg-black/50" />
+          <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-dark-900 to-transparent z-[1]" />
+          <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-dark-900 to-transparent z-[1]" />
 
-      <PageHero
-        videoSrc="/services_hero.mp4"
-        videoSrcMobile="/services_hero_mobile.mp4"
-        title={
-          <span className="text-white drop-shadow-2xl">
-            Intelligent Trading <span className="text-gradient">Powered by AI</span>
-          </span>
-        }
-        subtitle="Our proprietary algorithms process millions of data points per second to identify profitable trading opportunities that human traders simply can't match."
-        badge={{
-          text: '$2.5B+ Traded Monthly Through Our Platform',
-          icon: <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />,
-        }}
-        ctaButtons={[
-          { text: 'Start Trading Now', href: '/register', variant: 'primary' },
-          { text: 'View Performance', href: '/performance', variant: 'secondary' },
-        ]}
-      />
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <RevealOnScroll>
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-500/10 border border-primary-500/30 rounded-full mb-6 md:mb-8 backdrop-blur-sm">
+                <Eye className="w-4 h-4 text-primary-300" />
+                <span className="text-sm font-medium text-primary-300">
+                  Full Platform Overview
+                </span>
+              </div>
 
-      <main className="bg-white dark:bg-dark-900">
-        {/* Services Grid */}
-        <section className="py-24">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="text-center mb-16"
-            >
-              <span className="text-primary-500 dark:text-primary-400 font-semibold text-sm uppercase tracking-wide">
-                Our Services
-              </span>
-              <h2 className="text-4xl md:text-5xl font-black mt-4 mb-6 text-gray-900 dark:text-white">
-                Everything You Need to <span className="text-gradient">Succeed</span>
-              </h2>
-              <p className="text-xl text-gray-600 dark:text-dark-300 max-w-3xl mx-auto">
-                Cutting-edge technology meets proven trading strategies. All automated, all optimized for maximum returns.
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold mb-6 md:mb-8 leading-tight">
+                <span className="text-white drop-shadow-2xl">
+                  The Complete{' '}
+                  <span className="text-gradient">Copy Trading Platform</span>
+                </span>
+              </h1>
+
+              <p className="text-lg sm:text-xl md:text-2xl text-gray-100 mb-8 md:mb-12 max-w-4xl mx-auto leading-relaxed">
+                Dashboard, marketplace, analytics, social trading, and security — everything you need in one place.
               </p>
-            </motion.div>
 
-            <div className="grid md:grid-cols-2 gap-8">
-              {services.map((service, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  className="group relative bg-white dark:bg-dark-800 rounded-3xl p-8 border border-gray-200 dark:border-dark-700 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
-                >
-                  <div className={`absolute inset-0 bg-gradient-to-br ${service.gradient} opacity-0 group-hover:opacity-5 dark:group-hover:opacity-10 transition-opacity duration-500 rounded-3xl`} />
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <GlowButton href="/register" variant="primary" size="lg">
+                  Get Started Free
+                </GlowButton>
+                <GlowButton href="/marketplace" variant="secondary" size="lg">
+                  Browse Marketplace
+                </GlowButton>
+              </div>
+            </RevealOnScroll>
+          </div>
+        </section>
 
-                  <div className="relative z-10">
-                    <div className="text-6xl mb-4">{service.icon}</div>
-                    <h3 className="text-2xl font-black mb-3 text-gray-900 dark:text-white">
-                      {service.title}
-                    </h3>
-                    <p className="text-gray-600 dark:text-dark-300 mb-6 leading-relaxed">
-                      {service.description}
-                    </p>
+        {/* ══════════ SECTION 2: MARKETPLACE & COPY TRADING (Split Layout) ══════════ */}
+        <section className="relative py-24 bg-gradient-to-b from-dark-900 via-dark-800 to-dark-900 overflow-hidden">
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Top row: heading centered */}
+            <div className="text-center mb-12 lg:mb-16">
+              <RevealOnScroll>
+                <div className="flex items-center justify-center gap-3 mb-6">
+                  <div className="w-8 h-0.5 bg-primary-500" />
+                  <span className="text-xs font-bold tracking-[0.25em] uppercase text-primary-400">
+                    Marketplace
+                  </span>
+                  <div className="w-8 h-0.5 bg-primary-500" />
+                </div>
+                <h2 className="text-3xl sm:text-4xl font-bold text-white leading-tight">
+                  Find Your Strategy in{' '}
+                  <span className="text-gradient">Seconds</span>
+                </h2>
+              </RevealOnScroll>
+            </div>
 
-                    <div className="space-y-2">
-                      {service.features.map((feature, idx) => (
-                        <div key={idx} className="flex items-center gap-2 text-gray-700 dark:text-dark-200">
-                          <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                          </svg>
-                          {feature}
+            {/* Bottom row: renders + features */}
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_48%] gap-12 lg:gap-10 items-center">
+              {/* Left: feature list */}
+              <RevealOnScroll delay={0.3}>
+                <FeatureList features={marketplaceFeatures} />
+              </RevealOnScroll>
+
+              {/* Right: overlapping cards */}
+              <div className="relative h-[500px] lg:h-[580px] flex items-center justify-center">
+                <div className="absolute top-0 left-1/2 -translate-x-[30%] z-20">
+                  <RevealOnScroll direction="right" delay={0.2}>
+                    <TiltCard maxTilt={8} unstyled>
+                      <div className="w-[340px] rounded-2xl bg-dark-800 border border-dark-700 p-5 shadow-2xl shadow-purple-500/10">
+                        <div className="flex items-start gap-2.5 mb-3">
+                          <img src="/bots/BybitMarketMakerBot.png" alt="Bot" className="w-9 h-9 object-contain" />
+                          <div className="min-w-0">
+                            <h4 className="text-xs font-bold text-white leading-tight truncate">Bybit Market Maker</h4>
+                            <span className="text-[10px] text-dark-400">Market Making</span>
+                          </div>
                         </div>
+                        <div className="flex items-center gap-1.5 mb-3">
+                          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-semibold border text-green-400 border-green-400/30 bg-green-400/10">
+                            Low Risk
+                          </span>
+                          <span className="inline-flex items-center gap-0.5 text-[10px] text-amber-400">
+                            <Star className="w-2.5 h-2.5 fill-amber-400" />4.9
+                          </span>
+                          <span className="text-[10px] text-primary-400 font-medium">Verified</span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 pt-3 border-t border-white/5">
+                          <div>
+                            <span className="text-[9px] text-dark-400 uppercase tracking-wider">30d Return</span>
+                            <p className="text-sm font-bold text-green-400">+21.4%</p>
+                          </div>
+                          <div>
+                            <span className="text-[9px] text-dark-400 uppercase tracking-wider">Copiers</span>
+                            <p className="text-sm font-bold text-white flex items-center gap-0.5">
+                              <Users className="w-3 h-3 text-dark-400" />5,830
+                            </p>
+                          </div>
+                          <div>
+                            <span className="text-[9px] text-dark-400 uppercase tracking-wider">Win Rate</span>
+                            <p className="text-xs font-semibold text-white">58.1%</p>
+                          </div>
+                          <div>
+                            <span className="text-[9px] text-dark-400 uppercase tracking-wider">Max DD</span>
+                            <p className="text-xs font-semibold text-red-400">-8.2%</p>
+                          </div>
+                        </div>
+                        <div className="mt-3 w-full text-center px-3 py-2 bg-gradient-to-r from-primary-500 to-accent-500 rounded-lg text-xs font-semibold text-white">
+                          Start Copying
+                        </div>
+                      </div>
+                    </TiltCard>
+                  </RevealOnScroll>
+                </div>
+                <div className="absolute bottom-[50px] left-0 z-10">
+                  <RevealOnScroll direction="left" delay={0.4}>
+                    <TiltCard maxTilt={8} unstyled>
+                      <QuickStartPreview />
+                    </TiltCard>
+                  </RevealOnScroll>
+                </div>
+                {/* Gradient glow behind renders */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[450px] h-[450px] bg-primary-500/25 rounded-full blur-[100px] pointer-events-none" />
+                <div className="absolute top-[10%] right-[5%] w-[280px] h-[280px] bg-violet-500/20 rounded-full blur-[80px] pointer-events-none" />
+                <div className="absolute bottom-[15%] left-[5%] w-[220px] h-[220px] bg-accent-500/20 rounded-full blur-[80px] pointer-events-none" />
+                {/* Decorative elements */}
+                <div className="absolute -top-3 -left-3 w-16 h-16 border-2 border-primary-500/10 rounded-2xl pointer-events-none" />
+                <div className="absolute bottom-20 right-10 w-10 h-10 border-2 border-violet-500/10 rounded-full pointer-events-none" />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ══════════ STATS DIVIDER ══════════ */}
+        <div className="bg-dark-900 border-y border-dark-700/30 py-10 md:py-12">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <RevealOnScroll>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-8 md:gap-4">
+                {[
+                  { value: 12400, suffix: '+', label: 'Total Trades', sub: 'Across all bots', Icon: Activity },
+                  { value: 67.3, suffix: '%', label: 'Avg Win Rate', sub: '8,340W / 4,060L', Icon: Target },
+                  { value: 2.18, suffix: '', label: 'Profit Factor', sub: 'Platform average', Icon: TrendingUp },
+                  { value: 23, suffix: 'm', label: 'Avg Hold Time', sub: 'Scalp to intraday', Icon: Zap },
+                  { value: 14, suffix: ' W', label: 'Best Streak', sub: 'Top bot record', Icon: Trophy },
+                ].map((stat) => (
+                  <div key={stat.label} className="text-center group">
+                    <div className="flex items-center justify-center gap-2 mb-1.5">
+                      <stat.Icon className="w-4 h-4 text-primary-400 opacity-60 group-hover:opacity-100 transition-opacity" />
+                      <span className="text-2xl md:text-3xl font-bold text-white">
+                        <AnimatedCounter value={stat.value} suffix={stat.suffix} duration={1400} />
+                      </span>
+                    </div>
+                    <p className="text-xs font-semibold text-dark-300 uppercase tracking-wider">{stat.label}</p>
+                    <p className="text-[10px] text-dark-500 mt-0.5">{stat.sub}</p>
+                  </div>
+                ))}
+              </div>
+            </RevealOnScroll>
+          </div>
+        </div>
+
+        {/* ══════════ SECTION 3: DASHBOARD & PORTFOLIO ══════════ */}
+        <section className="relative py-24 overflow-hidden">
+          <div
+            className="absolute inset-0 bg-cover bg-center bg-fixed"
+            style={{ backgroundImage: "url('/cosmic-bg2.PNG')" }}
+          />
+          <div className="absolute inset-0 bg-dark-900/50" />
+
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_50%] gap-12 lg:gap-10 items-center">
+              {/* Left column: text content */}
+              <div>
+                <RevealOnScroll>
+                  <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+                    Watch Every Trade in{' '}
+                    <span className="text-gradient">Real Time</span>
+                  </h2>
+                  <p className="text-lg text-dark-300 mb-8">
+                    Your entire portfolio on one screen. Real-time P&L, active bots, open positions,
+                    and trade history — all updated live.
+                  </p>
+                </RevealOnScroll>
+
+                <RevealOnScroll delay={0.2}>
+                  <ul className="flex flex-col gap-4 mb-8">
+                    {[
+                      'Real-time P&L, win rate, and live status for every bot',
+                      'Collect profits anytime based on your lock-in period',
+                      'Quick Start wizard builds your portfolio in 4 steps',
+                      'Full trade history, equity curves, and risk metrics',
+                    ].map((text) => (
+                      <li key={text} className="flex items-start gap-3">
+                        <span className="w-2 h-2 rounded-full bg-primary-400 shrink-0 mt-1.5" />
+                        <span className="text-sm text-dark-200 leading-relaxed">{text}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </RevealOnScroll>
+
+                <RevealOnScroll delay={0.3}>
+                  <div className="flex gap-8">
+                    <div className="text-center">
+                      <AnimatedCounter value={26} suffix="K+" className="text-3xl font-bold text-gradient" />
+                      <p className="text-xs text-dark-400 mt-1">Copiers</p>
+                    </div>
+                    <div className="text-center">
+                      <AnimatedCounter value={100} suffix="+" className="text-3xl font-bold text-gradient" />
+                      <p className="text-xs text-dark-400 mt-1">Bot Strategies</p>
+                    </div>
+                    <div className="text-center">
+                      <AnimatedCounter value={9} suffix="+" className="text-3xl font-bold text-gradient" />
+                      <p className="text-xs text-dark-400 mt-1">Exchanges</p>
+                    </div>
+                  </div>
+                </RevealOnScroll>
+              </div>
+
+              {/* Right column: live trading widget */}
+              <RevealOnScroll direction="right">
+                <LiveTradingDemo />
+              </RevealOnScroll>
+            </div>
+          </div>
+        </section>
+
+        {/* ══════════ EXCHANGE MARQUEE ══════════ */}
+        <div className="bg-dark-900 py-8 border-y border-dark-700/30">
+          <Marquee speed={35}>
+            {exchangeLogos.map(({ key, Component }) => (
+              <Component key={key} className="mx-8 text-dark-400 whitespace-nowrap opacity-60 hover:opacity-100 transition-opacity" />
+            ))}
+          </Marquee>
+        </div>
+
+        {/* ══════════ SECTION 5: SOCIAL & COMMUNITY (Orbital Layout) ══════════ */}
+        <section className="relative py-24 bg-gradient-to-b from-dark-900 via-dark-800 to-dark-900 overflow-hidden">
+          <div className="absolute top-0 right-1/3 w-[500px] h-[500px] bg-rose-500/5 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-1/4 w-[400px] h-[400px] bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
+
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Heading — centered */}
+            <div className="text-center mb-16 lg:mb-20">
+              <RevealOnScroll>
+                <div className="flex items-center justify-center gap-3 mb-6">
+                  <div className="w-8 h-0.5 bg-rose-500" />
+                  <span className="text-xs font-bold tracking-[0.25em] uppercase text-rose-400">
+                    Social Trading
+                  </span>
+                  <div className="w-8 h-0.5 bg-rose-500" />
+                </div>
+                <h2 className="text-3xl sm:text-4xl font-bold text-white leading-tight">
+                  Learn from the{' '}
+                  <span className="bg-gradient-to-r from-rose-400 to-amber-400 bg-clip-text text-transparent">
+                    Best Bots
+                  </span>
+                </h2>
+                <p className="text-dark-400 text-[15px] leading-relaxed mt-4 max-w-2xl mx-auto">
+                  Cloudbright is more than a copy trading platform — it&apos;s a community.
+                  Follow top bots, learn from the best, and grow together.
+                </p>
+              </RevealOnScroll>
+            </div>
+
+            {/* Orbital layout: 2 features | orbits | 2 features */}
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-10 lg:gap-6 items-center">
+              {/* Left features */}
+              <div className="flex flex-col gap-10 lg:gap-14">
+                {socialFeatures.slice(0, 2).map((feature) => {
+                  const Icon = feature.icon;
+                  return (
+                    <RevealOnScroll key={feature.title} direction="left">
+                      <div className="flex items-start gap-4 lg:flex-row-reverse lg:text-right max-w-sm lg:ml-auto">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-rose-500/15 to-amber-500/15 border border-rose-500/20 flex items-center justify-center shrink-0">
+                          <Icon className="w-5 h-5 text-rose-400" />
+                        </div>
+                        <div>
+                          <h4 className="text-lg font-bold text-white mb-1">{feature.title}</h4>
+                          <p className="text-dark-300 text-sm leading-relaxed">{feature.description}</p>
+                        </div>
+                      </div>
+                    </RevealOnScroll>
+                  );
+                })}
+              </div>
+
+              {/* Orbital center */}
+              <RevealOnScroll>
+                <div className="relative w-[280px] h-[280px] lg:w-[340px] lg:h-[340px] mx-auto flex items-center justify-center">
+                  {/* Orbit ring 1 — outermost */}
+                  <div
+                    className="absolute inset-0 rounded-full border border-rose-500/[0.12]"
+                    style={{ animation: 'spin 35s linear infinite' }}
+                  >
+                    <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-rose-500/50 shadow-lg shadow-rose-500/30" />
+                    <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-amber-500/40" />
+                    <div className="absolute top-1/2 -left-1 -translate-y-1/2 w-2 h-2 rounded-full bg-pink-500/30" />
+                  </div>
+
+                  {/* Orbit ring 2 — middle */}
+                  <div
+                    className="absolute inset-[42px] lg:inset-[52px] rounded-full border border-amber-500/[0.18]"
+                    style={{ animation: 'spin 22s linear infinite reverse' }}
+                  >
+                    <div className="absolute top-1/2 -right-1.5 -translate-y-1/2 w-3 h-3 rounded-full bg-amber-500/50 shadow-lg shadow-amber-500/30" />
+                    <div className="absolute top-1/2 -left-1 -translate-y-1/2 w-2 h-2 rounded-full bg-rose-500/35" />
+                  </div>
+
+                  {/* Orbit ring 3 — innermost */}
+                  <div
+                    className="absolute inset-[84px] lg:inset-[104px] rounded-full border border-rose-400/[0.22]"
+                    style={{ animation: 'spin 14s linear infinite' }}
+                  >
+                    <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-white/50 shadow-lg shadow-white/20" />
+                  </div>
+
+                  {/* Radial connector lines (subtle dashed) */}
+                  <div className="hidden lg:block absolute top-1/2 left-0 -translate-y-1/2 -translate-x-full w-6 border-t border-dashed border-rose-500/15" />
+                  <div className="hidden lg:block absolute top-1/2 right-0 -translate-y-1/2 translate-x-full w-6 border-t border-dashed border-rose-500/15" />
+                  <div className="hidden lg:block absolute top-[25%] left-0 -translate-x-full w-4 border-t border-dashed border-amber-500/10" />
+                  <div className="hidden lg:block absolute top-[75%] right-0 translate-x-full w-4 border-t border-dashed border-amber-500/10" />
+
+                  {/* Center icon */}
+                  <div className="relative z-10 w-[72px] h-[72px] lg:w-20 lg:h-20 rounded-2xl bg-gradient-to-br from-rose-500 to-amber-500 flex items-center justify-center shadow-2xl shadow-rose-500/30">
+                    <Users className="w-8 h-8 lg:w-10 lg:h-10 text-white" />
+                  </div>
+
+                  {/* Center glow */}
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[180px] h-[180px] bg-rose-500/8 rounded-full blur-[60px] pointer-events-none" />
+                </div>
+              </RevealOnScroll>
+
+              {/* Right features */}
+              <div className="flex flex-col gap-10 lg:gap-14">
+                {socialFeatures.slice(2, 4).map((feature) => {
+                  const Icon = feature.icon;
+                  return (
+                    <RevealOnScroll key={feature.title} direction="right">
+                      <div className="flex items-start gap-4 max-w-sm">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-rose-500/15 to-amber-500/15 border border-rose-500/20 flex items-center justify-center shrink-0">
+                          <Icon className="w-5 h-5 text-rose-400" />
+                        </div>
+                        <div>
+                          <h4 className="text-lg font-bold text-white mb-1">{feature.title}</h4>
+                          <p className="text-dark-300 text-sm leading-relaxed">{feature.description}</p>
+                        </div>
+                      </div>
+                    </RevealOnScroll>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ══════════ SECTION 6: WHY CHOOSE (Bento Grid) ══════════ */}
+        <section className="relative py-24 bg-dark-900 overflow-hidden">
+          {/* Subtle grid lines */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              backgroundImage: 'linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)',
+              backgroundSize: '60px 60px',
+            }}
+          />
+
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Heading — centered */}
+            <RevealOnScroll>
+              <div className="text-center mb-14">
+                <div className="flex items-center justify-center gap-3 mb-6">
+                  <div className="w-8 h-0.5 bg-emerald-500" />
+                  <span className="text-xs font-bold tracking-[0.25em] uppercase text-emerald-400">
+                    Why Choose
+                  </span>
+                  <div className="w-8 h-0.5 bg-emerald-500" />
+                </div>
+                <h2 className="text-3xl sm:text-4xl font-bold text-white leading-tight">
+                  Complete Financial{' '}
+                  <span className="bg-gradient-to-r from-emerald-400 to-green-400 bg-clip-text text-transparent">
+                    Control
+                  </span>
+                </h2>
+                <p className="text-dark-400 text-[15px] leading-relaxed mt-4 max-w-2xl mx-auto">
+                  Your money, your rules. Secure custodial wallets for 7+ cryptocurrencies — all in one place.
+                </p>
+              </div>
+            </RevealOnScroll>
+
+            {/* Bento Grid — 2×2 asymmetric */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-5">
+              {/* Top-left: Wallet render (large) */}
+              <RevealOnScroll delay={0.1}>
+                <div className="group relative rounded-2xl bg-gradient-to-br from-dark-800/80 to-dark-900/80 border border-dark-700/50 p-6 lg:p-8 hover:border-emerald-500/30 transition-all duration-500 overflow-hidden h-full">
+                  <div className="absolute top-0 right-0 w-[200px] h-[200px] bg-emerald-500/5 rounded-full blur-[80px] pointer-events-none group-hover:bg-emerald-500/10 transition-colors duration-500" />
+                  <div className="relative z-10 flex flex-col items-center justify-center min-h-[320px]">
+                    <WalletPreview />
+                  </div>
+                </div>
+              </RevealOnScroll>
+
+              {/* Top-right: Feature 1 — Multi-Currency Wallets */}
+              <RevealOnScroll delay={0.2}>
+                <div className="group relative rounded-2xl bg-gradient-to-br from-dark-800/80 to-dark-900/80 border border-dark-700/50 p-6 lg:p-8 hover:border-emerald-500/30 transition-all duration-500 overflow-hidden h-full flex flex-col justify-center">
+                  <div className="absolute bottom-0 left-0 w-[200px] h-[200px] bg-green-500/5 rounded-full blur-[80px] pointer-events-none group-hover:bg-green-500/10 transition-colors duration-500" />
+                  <div className="relative z-10">
+                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500/15 to-green-500/15 border border-emerald-500/20 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-emerald-500/10 transition-all duration-300">
+                      <Wallet className="w-7 h-7 text-emerald-400" />
+                    </div>
+                    <span className="text-7xl font-bold text-dark-800/30 absolute top-4 right-6 select-none pointer-events-none">01</span>
+                    <h3 className="text-xl font-bold text-white mb-3">Multi-Currency Wallets</h3>
+                    <p className="text-dark-300 leading-relaxed mb-5">
+                      Hold 7+ cryptocurrencies in protected wallets. Deposit instantly, withdraw copy trading profits anytime.
+                    </p>
+                    <div className="relative mt-1 -mx-6 lg:-mx-8 overflow-hidden">
+                      <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-dark-800/80 to-transparent z-10 pointer-events-none" />
+                      <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-dark-800/80 to-transparent z-10 pointer-events-none" />
+                      <Marquee speed={20} pauseOnHover={false} gap={24}>
+                        {[
+                          { name: 'USDT', img: '/currency/Tether.svg' },
+                          { name: 'BTC', img: '/currency/Bitcoin.svg' },
+                          { name: 'ETH', img: '/currency/Ethereum.svg' },
+                          { name: 'SOL', img: '/currency/Solana.svg' },
+                          { name: 'BNB', img: '/currency/bnb.svg' },
+                          { name: 'TRX', img: '/currency/Tron.svg' },
+                          { name: 'USDC', img: '/currency/usdc.svg' },
+                        ].map((c) => (
+                          <div key={c.name} className="flex items-center gap-2 px-1">
+                            <img src={c.img} alt={c.name} className="w-6 h-6 rounded-full" />
+                            <span className="text-xs font-medium text-dark-300 whitespace-nowrap">{c.name}</span>
+                          </div>
+                        ))}
+                      </Marquee>
+                    </div>
+                  </div>
+                </div>
+              </RevealOnScroll>
+
+              {/* Bottom-left: Feature 2 — Flexible Profit Collection */}
+              <RevealOnScroll delay={0.3}>
+                <div className="group relative rounded-2xl bg-gradient-to-br from-dark-800/80 to-dark-900/80 border border-dark-700/50 p-6 lg:p-8 hover:border-emerald-500/30 transition-all duration-500 overflow-hidden h-full flex flex-col justify-center">
+                  <div className="absolute top-0 right-0 w-[200px] h-[200px] bg-emerald-500/5 rounded-full blur-[80px] pointer-events-none group-hover:bg-emerald-500/10 transition-colors duration-500" />
+                  <div className="relative z-10">
+                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500/15 to-green-500/15 border border-emerald-500/20 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-emerald-500/10 transition-all duration-300">
+                      <CircleDollarSign className="w-7 h-7 text-emerald-400" />
+                    </div>
+                    <span className="text-7xl font-bold text-dark-800/30 absolute top-4 right-6 select-none pointer-events-none">02</span>
+                    <h3 className="text-xl font-bold text-white mb-3">Flexible Profit Collection</h3>
+                    <p className="text-dark-300 leading-relaxed mb-5">
+                      Lock-in periods from 7 to 180 days. Longer terms offer higher potential returns. Collect profits anytime.
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {['7-180 Day Lock-in', 'Collect Anytime', 'From $50', 'Higher Returns'].map((tag) => (
+                        <span key={tag} className="px-3 py-1 text-[11px] font-medium rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                          {tag}
+                        </span>
                       ))}
                     </div>
-
-                    <div className={`mt-6 h-1 w-0 group-hover:w-full bg-gradient-to-r ${service.gradient} transition-all duration-700 rounded-full`} />
                   </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Technology Stack */}
-        <section className="py-24 bg-gray-50 dark:bg-dark-800/50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid lg:grid-cols-2 gap-16 items-center">
-              <motion.div
-                initial={{ opacity: 0, x: -50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8 }}
-              >
-                <span className="text-primary-500 dark:text-primary-400 font-semibold text-sm uppercase tracking-wide">
-                  Technology Stack
-                </span>
-                <h2 className="text-4xl md:text-5xl font-black mt-4 mb-6 text-gray-900 dark:text-white">
-                  Powered by <span className="text-gradient">Next-Gen AI</span>
-                </h2>
-                <p className="text-lg text-gray-700 dark:text-dark-200 mb-8 leading-relaxed">
-                  We invest millions in research and development to stay ahead of the curve. Our technology stack combines proven algorithms with cutting-edge innovations.
-                </p>
-
-                <div className="space-y-6">
-                  {technologies.map((tech, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, x: -20 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.6, delay: index * 0.1 }}
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-semibold text-gray-900 dark:text-white">{tech.name}</span>
-                        <span className="text-sm font-bold text-primary-500">{tech.percentage}%</span>
-                      </div>
-                      <div className="h-3 bg-gray-200 dark:bg-dark-700 rounded-full overflow-hidden">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          whileInView={{ width: `${tech.percentage}%` }}
-                          viewport={{ once: true }}
-                          transition={{ duration: 1, delay: index * 0.1 }}
-                          className="h-full bg-gradient-to-r from-primary-500 to-accent-500 rounded-full"
-                        />
-                      </div>
-                    </motion.div>
-                  ))}
                 </div>
-              </motion.div>
+              </RevealOnScroll>
 
-              <motion.div
-                initial={{ opacity: 0, x: 50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8 }}
-                className="bg-gradient-to-br from-primary-500/10 to-accent-500/10 dark:from-primary-500/20 dark:to-accent-500/20 rounded-3xl p-12 border border-primary-500/20"
-              >
-                <h3 className="text-2xl font-black mb-6 text-gray-900 dark:text-white">
-                  Why Our AI Outperforms
-                </h3>
-                <ul className="space-y-4">
-                  <li className="flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center flex-shrink-0 mt-1">
-                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                    <p className="text-gray-700 dark:text-dark-200">
-                      <strong>Real-time Learning:</strong> Our AI adapts to market changes in milliseconds
-                    </p>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center flex-shrink-0 mt-1">
-                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                    <p className="text-gray-700 dark:text-dark-200">
-                      <strong>Sentiment Analysis:</strong> Analyzes news, social media, and market sentiment
-                    </p>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center flex-shrink-0 mt-1">
-                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                    <p className="text-gray-700 dark:text-dark-200">
-                      <strong>Pattern Recognition:</strong> Identifies complex patterns invisible to humans
-                    </p>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center flex-shrink-0 mt-1">
-                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                    <p className="text-gray-700 dark:text-dark-200">
-                      <strong>Multi-Asset Strategy:</strong> Trades across 50+ cryptocurrencies simultaneously
-                    </p>
-                  </li>
-                </ul>
-              </motion.div>
-            </div>
-          </div>
-        </section>
-
-        {/* Benefits Section */}
-        <section className="py-24">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="text-center mb-16"
-            >
-              <span className="text-primary-500 dark:text-primary-400 font-semibold text-sm uppercase tracking-wide">
-                The Celestian Advantage
-              </span>
-              <h2 className="text-4xl md:text-5xl font-black mt-4 mb-6 text-gray-900 dark:text-white">
-                Why Investors <span className="text-gradient">Choose Us</span>
-              </h2>
-            </motion.div>
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {benefits.map((benefit, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  className="text-center"
-                >
-                  <div className="text-5xl mb-4">{benefit.icon}</div>
-                  <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">
-                    {benefit.title}
-                  </h3>
-                  <div className="text-3xl font-black text-gradient mb-2">
-                    {benefit.stat}
+              {/* Bottom-right: Dashboard render (large) */}
+              <RevealOnScroll delay={0.4}>
+                <div className="group relative rounded-2xl bg-gradient-to-br from-dark-800/80 to-dark-900/80 border border-dark-700/50 p-6 lg:p-8 hover:border-emerald-500/30 transition-all duration-500 overflow-hidden h-full">
+                  <div className="absolute bottom-0 left-0 w-[200px] h-[200px] bg-primary-500/5 rounded-full blur-[80px] pointer-events-none group-hover:bg-primary-500/10 transition-colors duration-500" />
+                  <div className="relative z-10 flex flex-col items-center justify-center min-h-[320px]">
+                    <DashboardPreview />
                   </div>
-                  <p className="text-gray-600 dark:text-dark-300">
-                    {benefit.description}
-                  </p>
-                </motion.div>
-              ))}
+                </div>
+              </RevealOnScroll>
             </div>
           </div>
         </section>
 
-        {/* CTA Section */}
-        <section className="py-24 bg-gradient-to-br from-primary-500 to-accent-500">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-            >
-              <h2 className="text-4xl md:text-5xl font-black mb-6 text-white">
-                Ready to Experience AI Trading?
-              </h2>
-              <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-                Join 150,000+ investors who trust our AI to grow their wealth. Start with as little as $100.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link
-                  href="/register"
-                  className="px-8 py-4 bg-white text-primary-600 rounded-full font-semibold hover:shadow-2xl transition-all duration-300 hover:scale-105"
-                >
-                  Create Free Account
-                </Link>
-                <Link
-                  href="/contact"
-                  className="px-8 py-4 bg-white/10 backdrop-blur-md border-2 border-white rounded-full font-semibold text-white hover:bg-white/20 transition-all duration-300 hover:scale-105"
-                >
-                  Talk to an Expert
-                </Link>
+        {/* ══════════ SECTION 8: OUR TECHNOLOGY (commitment.jsx pattern) ══════════ */}
+        <section className="relative py-24 bg-dark-900 overflow-hidden">
+          {/* Dot grid */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px)',
+              backgroundSize: '28px 28px',
+            }}
+          />
+          {/* Decorative circle */}
+          <div className="absolute top-8 left-8 w-12 h-12 rounded-full border-2 border-white/5 pointer-events-none" />
+
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* 3-column grid: narrow strip | text | large image */}
+            <div className="grid grid-cols-1 lg:grid-cols-[80px_1fr_55%] gap-6 lg:gap-10 items-stretch">
+
+              {/* Col 1: Narrow vertical strip */}
+              <div className="hidden lg:block">
+                <RevealOnScroll>
+                  <TiltCard maxTilt={4} unstyled className="h-full">
+                    <div
+                      className="w-20 h-full min-h-[520px] rounded-2xl overflow-hidden relative"
+                      style={{ background: 'linear-gradient(180deg, #1a1a2e, #16213e, #0f3460, #334155, #1e293b)' }}
+                    >
+                      <div className="absolute inset-0 flex flex-col justify-center items-center gap-3 p-3">
+                        {[...Array(5)].map((_, i) => (
+                          <div key={i} className="w-full h-[3px] rounded-full" style={{ background: `rgba(255,255,255,${0.04 + i * 0.02})` }} />
+                        ))}
+                        <svg viewBox="0 0 60 100" className="w-[85%] mt-2">
+                          <polyline points="5,90 15,70 25,75 35,40 45,55 55,20" fill="none" stroke="rgb(79,70,229)" strokeWidth="2" strokeLinecap="round" opacity="0.7" />
+                          <polyline points="5,90 15,70 25,75 35,40 45,55 55,20 60,15 60,100 0,100" fill="url(#strip-fill)" opacity="0.15" />
+                          <defs>
+                            <linearGradient id="strip-fill" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="rgb(79,70,229)" />
+                              <stop offset="100%" stopColor="transparent" />
+                            </linearGradient>
+                          </defs>
+                        </svg>
+                        {[...Array(4)].map((_, i) => (
+                          <div key={`b${i}`} className="w-full h-[3px] rounded-full" style={{ background: `rgba(255,255,255,${0.03 + i * 0.015})` }} />
+                        ))}
+                      </div>
+                    </div>
+                  </TiltCard>
+                </RevealOnScroll>
               </div>
-            </motion.div>
+
+              {/* Col 2: Text content */}
+              <div className="flex flex-col justify-end">
+                {/* Label */}
+                <RevealOnScroll>
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-8 h-0.5 bg-primary-500" />
+                    <span className="text-xs font-bold tracking-[0.25em] uppercase text-primary-400">
+                      Our Technology
+                    </span>
+                  </div>
+                </RevealOnScroll>
+
+                {/* Heading */}
+                <RevealOnScroll delay={0.08}>
+                  <h2 className="text-3xl md:text-4xl font-semibold text-white leading-[1.1] tracking-tight uppercase mb-7">
+                    Built for Speed and Reliability
+                  </h2>
+                </RevealOnScroll>
+
+                {/* Description */}
+                <RevealOnScroll delay={0.15}>
+                  <p className="text-dark-400 text-sm leading-[1.75] mb-4 max-w-[440px]">
+                    Every millisecond counts in trading. Our infrastructure processes signals,
+                    validates risk parameters, and executes trades across 9+ exchanges in under 50ms —
+                    24 hours a day, 365 days a year.
+                  </p>
+                  <p className="text-dark-400 text-sm leading-[1.75] mb-7 max-w-[440px]">
+                    Real-time WebSocket connections keep your dashboard, positions, and P&L
+                    synchronized to the second. No refresh needed, no data lag.
+                  </p>
+                </RevealOnScroll>
+
+                {/* Checklist */}
+                <RevealOnScroll delay={0.2}>
+                  <div className="flex flex-col gap-3.5 mb-8">
+                    {[
+                      'Sub-50ms trade execution across all exchanges',
+                      '99.9% uptime with multi-region failover',
+                    ].map((item) => (
+                      <div key={item} className="flex items-center gap-3">
+                        <Check className="w-4 h-4 text-primary-400 shrink-0" />
+                        <span className="text-dark-200 text-sm font-medium">{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                </RevealOnScroll>
+
+                {/* CTA */}
+                <RevealOnScroll delay={0.25}>
+                  <GlowButton href="/register" variant="primary" size="md">
+                    <span className="flex items-center gap-2">
+                      Start Copying <ArrowRight className="w-4 h-4" />
+                    </span>
+                  </GlowButton>
+                </RevealOnScroll>
+              </div>
+
+              {/* Col 3: Large dashboard mockup */}
+              <div className="relative">
+                <RevealOnScroll delay={0.2}>
+                  <TiltCard maxTilt={4} unstyled>
+                    <div
+                      className="w-full rounded-2xl overflow-hidden relative"
+                      style={{
+                        height: 520,
+                        background: 'linear-gradient(135deg, #0f172a, #1e293b, #334155, #1e293b)',
+                        border: '1px solid rgba(255,255,255,0.06)',
+                      }}
+                    >
+                      <div className="absolute inset-5 rounded-xl overflow-hidden border border-white/5">
+                        {/* Top bar */}
+                        <div className="h-9 bg-white/[0.03] flex items-center px-3.5 gap-2">
+                          <span className="w-2.5 h-2.5 rounded-full bg-red-500" />
+                          <span className="w-2.5 h-2.5 rounded-full bg-yellow-500" />
+                          <span className="w-2.5 h-2.5 rounded-full bg-green-500" />
+                          <span className="ml-auto text-white/25 text-[10px] font-mono">analytics.cloudbright.com</span>
+                        </div>
+
+                        {/* Period selector */}
+                        <div className="flex items-center gap-2 px-4 pt-4 pb-2">
+                          {['7D', '30D', '90D', '1Y'].map((p, i) => (
+                            <span
+                              key={p}
+                              className={`text-[10px] font-bold px-3 py-1 rounded-full ${
+                                i === 1
+                                  ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30'
+                                  : 'text-white/30'
+                              }`}
+                            >
+                              {p}
+                            </span>
+                          ))}
+                          <span className="ml-auto text-green-400 text-sm font-bold font-mono">+$47,830</span>
+                        </div>
+
+                        {/* Chart */}
+                        <div className="px-4">
+                          <svg viewBox="0 0 500 140" className="w-full">
+                            <defs>
+                              <linearGradient id="cmt-fill" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="rgb(79,70,229)" stopOpacity="0.3" />
+                                <stop offset="100%" stopColor="rgb(79,70,229)" stopOpacity="0" />
+                              </linearGradient>
+                            </defs>
+                            {[0, 35, 70, 105, 140].map((y) => (
+                              <line key={y} x1="0" y1={y} x2="500" y2={y} stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
+                            ))}
+                            <path
+                              d="M0,120 Q40,110 80,105 T160,70 T240,80 T320,45 T400,50 T480,20 L500,15 L500,140 L0,140 Z"
+                              fill="url(#cmt-fill)"
+                            />
+                            <path
+                              d="M0,120 Q40,110 80,105 T160,70 T240,80 T320,45 T400,50 T480,20 L500,15"
+                              fill="none" stroke="rgb(79,70,229)" strokeWidth="2.5" strokeLinecap="round"
+                            />
+                            <circle cx="500" cy="15" r="4" fill="rgb(79,70,229)" />
+                            <circle cx="500" cy="15" r="8" fill="rgb(79,70,229)" opacity="0.2" />
+                          </svg>
+                        </div>
+
+                        {/* Metrics row */}
+                        <div className="flex gap-2.5 px-4 pt-3">
+                          {[
+                            { label: 'Total Profit', val: '+$47,830', color: 'text-green-400' },
+                            { label: 'Win Rate', val: '61.3%', color: 'text-white/70' },
+                            { label: 'Sharpe Ratio', val: '2.14', color: 'text-white/70' },
+                            { label: 'Max Drawdown', val: '-8.2%', color: 'text-red-400' },
+                          ].map((s) => (
+                            <div key={s.label} className="flex-1 bg-white/[0.02] rounded-lg p-2.5">
+                              <div className="text-white/30 text-[8px] mb-1">{s.label}</div>
+                              <div className={`text-xs font-bold font-mono ${s.color}`}>{s.val}</div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Trade distribution */}
+                        <div className="px-4 pt-3">
+                          <div className="text-white/40 text-[9px] font-semibold tracking-wider uppercase mb-2">Trade Distribution</div>
+                          <div className="flex gap-1 h-5 rounded-lg overflow-hidden">
+                            <div className="bg-green-500/40 rounded-l-md" style={{ width: '61%' }} />
+                            <div className="bg-red-500/40 rounded-r-md" style={{ width: '39%' }} />
+                          </div>
+                          <div className="flex justify-between mt-1">
+                            <span className="text-[9px] text-green-400/70">Won 61.3%</span>
+                            <span className="text-[9px] text-red-400/70">Lost 38.7%</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Slider dots */}
+                      <div className="absolute bottom-5 right-5 flex flex-col gap-1.5">
+                        {[0, 1, 2, 3].map((i) => (
+                          <div key={i} className={`w-2 h-2 rounded-full ${i === 0 ? 'bg-primary-500' : 'bg-white/15'}`} />
+                        ))}
+                      </div>
+                    </div>
+                  </TiltCard>
+                </RevealOnScroll>
+
+                {/* Overlay CTA card */}
+                <RevealOnScroll delay={0.4}>
+                  <div className="absolute bottom-5 left-5 z-10 bg-gradient-to-r from-primary-500 to-accent-500 rounded-2xl p-5 flex items-center gap-5 max-w-[380px] shadow-2xl shadow-primary-500/20">
+                    <div className="flex-1">
+                      <h3 className="text-white text-lg font-extrabold leading-tight mb-3">
+                        See It In Action — Start Free
+                      </h3>
+                      <Link href="/register" className="flex items-center gap-2.5 group">
+                        <div className="w-9 h-9 rounded-full bg-black/15 flex items-center justify-center">
+                          <ArrowRight className="w-4 h-4 text-white group-hover:translate-x-0.5 transition-transform" />
+                        </div>
+                        <span className="text-white text-xs font-bold tracking-wider uppercase">Create Account</span>
+                      </Link>
+                    </div>
+                    <div className="w-14 h-14 rounded-2xl bg-white/15 flex items-center justify-center shrink-0">
+                      <Activity className="w-7 h-7 text-white" />
+                    </div>
+                  </div>
+                </RevealOnScroll>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        {/* ══════════ SECTION 7: CTA BLOCK ══════════ */}
+        <section className="relative py-24 overflow-hidden">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover"
+          >
+            <source src="/bg_section_random.mp4" type="video/mp4" />
+          </video>
+          <div className="absolute inset-0 bg-black/50" />
+          <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-dark-900 to-transparent z-[1]" />
+          <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-dark-900 to-transparent z-[1]" />
+
+          <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <RevealOnScroll>
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 border border-primary-500/20 rounded-full mb-8 backdrop-blur-sm">
+                <CircleDollarSign className="w-4 h-4 text-primary-400" />
+                <span className="text-sm font-medium text-white/90">
+                  Zero fees until you profit
+                </span>
+              </div>
+
+              <h2 className="text-3xl sm:text-4xl font-semibold mb-6 text-white">
+                Start Copying in{' '}
+                <span className="text-gradient">3 Minutes</span>
+              </h2>
+
+              <p className="text-xl text-dark-200 mb-10 max-w-2xl mx-auto leading-relaxed">
+                Join 26,000+ investors who earn passively with battle-tested algorithms.
+                Set up once, collect profits on your schedule.
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <GlowButton href="/register" variant="primary" size="lg">
+                  <span className="flex items-center gap-2">
+                    Get Started Free <ArrowRight className="w-5 h-5" />
+                  </span>
+                </GlowButton>
+                <GlowButton href="/marketplace" variant="secondary" size="lg">
+                  Browse Bots
+                </GlowButton>
+              </div>
+            </RevealOnScroll>
           </div>
         </section>
       </main>
-
       <Footer />
     </>
   );

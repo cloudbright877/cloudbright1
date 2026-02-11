@@ -37,9 +37,9 @@ const articles = [
     image: '🚀',
   },
   {
-    category: 'Risk Management',
+    category: 'Capital Protection',
     title: 'How Our AI Protects Your Capital in Volatile Markets',
-    excerpt: 'Deep dive into our sophisticated risk management algorithms that have protected investors through every market downturn.',
+    excerpt: 'Deep dive into our sophisticated capital protection algorithms that have protected investors through every market downturn.',
     readTime: '8 min read',
     date: 'Nov 10, 2024',
     image: '🛡️',

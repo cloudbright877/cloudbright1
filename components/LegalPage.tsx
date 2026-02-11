@@ -91,7 +91,7 @@ export default function LegalPage({ title, lastUpdated, effectiveDate, sections 
             </p>
             <div className="space-y-2 text-gray-700 dark:text-dark-200">
               <p>
-                <strong>Email:</strong> support@celestian.org
+                <strong>Email:</strong> support@cloudbright.com
               </p>
             </div>
           </motion.div>

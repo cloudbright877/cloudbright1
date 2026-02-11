@@ -10,7 +10,7 @@ import { Shield, Lock, Key, Server, Globe, ShieldCheck } from 'lucide-react';
 
 export default function SecurityPage() {
   const stats = [
-    { value: '0', label: 'Funds Held by CLOUDBRIGHT', isText: true },
+    { value: '7+', label: 'Supported Cryptocurrencies', isText: true },
     { value: 'AES-256', label: 'Encryption Standard', isText: true },
     { numericValue: 24, suffix: '/7', label: 'Security Monitoring', isText: false },
     { value: '2FA', label: 'Authentication Support', isText: true },
@@ -19,27 +19,27 @@ export default function SecurityPage() {
   const coreFeatures = [
     {
       icon: Shield,
-      title: 'Non-Custodial Architecture',
+      title: 'Protected Custodial Wallets',
       description:
-        'Your funds never leave your exchange. CLOUDBRIGHT connects via API keys with limited permissions. We physically cannot withdraw your funds.',
+        'Your funds are secured in encrypted custodial wallets with multi-layer protection. AES-256 encryption, 2FA, and continuous monitoring safeguard every transaction.',
       features: [
-        'Funds stay on your exchange at all times',
-        'No deposit or withdrawal capability',
-        'You maintain full control of your assets',
-        'Revoke access anytime from your exchange',
+        'AES-256 encrypted wallet storage',
+        'Instant deposits for 7+ cryptocurrencies',
+        '2FA authentication required',
+        '24/7 continuous security monitoring',
       ],
       gradient: 'from-blue-500 to-cyan-500',
     },
     {
       icon: Lock,
-      title: 'API Key Encryption',
+      title: 'Wallet Encryption',
       description:
-        'All API keys are encrypted with AES-256 before storage. Keys are never stored in plaintext. Only minimal permissions are required — trade-only, no withdrawal.',
+        'All wallet data is encrypted with AES-256 at rest and in transit. Private keys are stored in hardware security modules. Multi-signature authorization for all withdrawals.',
       features: [
-        'AES-256 encryption at rest',
-        'Keys never stored in plaintext',
-        'Trade-only permissions required',
-        'No withdrawal permission needed',
+        'AES-256 encryption at rest and in transit',
+        'Hardware security module key storage',
+        'Multi-signature withdrawal authorization',
+        'Cold storage for reserve funds',
       ],
       gradient: 'from-purple-500 to-pink-500',
     },
@@ -98,48 +98,48 @@ export default function SecurityPage() {
     },
     {
       icon: Shield,
-      title: 'Rate Limiting & IP Whitelisting',
+      title: 'Rate Limiting & Access Control',
       description:
-        'API rate limiting prevents abuse. IP whitelisting on exchange API keys adds another layer of protection for your account.',
+        'API rate limiting prevents abuse. IP whitelisting and device verification add additional layers of protection for your account.',
     },
     {
       icon: Lock,
       title: 'Encrypted Data Storage',
       description:
-        'All sensitive data including API keys and personal information is encrypted at rest using industry-standard encryption.',
+        'All sensitive data including wallet keys and personal information is encrypted at rest using industry-standard encryption.',
     },
   ];
 
   const howItWorksSteps = [
     {
       step: 1,
-      title: 'Keep Funds on YOUR Exchange',
+      title: 'Create Account & Verify',
       description:
-        'Your crypto stays on your exchange account — Binance, Bybit, OKX, or any supported platform. CLOUDBRIGHT never holds your money.',
+        'Sign up and complete identity verification. Your account is protected with AES-256 encryption and 2FA from day one.',
     },
     {
       step: 2,
-      title: 'Create Trade-Only API Keys',
+      title: 'Deposit to Your Wallet',
       description:
-        'Generate API keys on your exchange with trade-only permission. Withdrawal permission is never required or requested.',
+        'Deposit USDT, BTC, ETH, or any of 7+ supported cryptocurrencies. Funds are credited instantly to your protected custodial wallet.',
     },
     {
       step: 3,
-      title: 'Bots Execute Trades via API',
+      title: 'Choose a Bot & Lock-in Period',
       description:
-        'CLOUDBRIGHT bots use your API keys to execute trading strategies on your behalf, directly on your exchange account.',
+        'Browse 100+ verified bots, select your strategy, and choose a lock-in period from 7 to 180 days. Longer periods offer higher potential returns.',
     },
     {
       step: 4,
-      title: 'Profits Stay in YOUR Wallet',
+      title: 'Bot Trades Automatically',
       description:
-        'All profits from trades remain in your exchange wallet. You see every trade in your exchange history in real time.',
+        'The bot executes trades 24/7 on your behalf across 9+ exchanges. Watch every trade in real time from your dashboard.',
     },
     {
       step: 5,
-      title: 'Revoke Access Anytime',
+      title: 'Collect Your Profits',
       description:
-        'You can delete or disable API keys from your exchange at any time, instantly cutting off bot access. You are always in control.',
+        'Collect realized profits on schedule. Once your lock-in period ends, your full investment is available for withdrawal. Full transparency at every step.',
     },
   ];
 
@@ -152,11 +152,11 @@ export default function SecurityPage() {
         videoSrcMobile="/security_hero_mobile.mp4"
         title={
           <span className="text-white drop-shadow-2xl">
-            Non-Custodial by Design —{' '}
-            <span className="text-gradient">Your Keys, Your Crypto</span>
+            Bank-Grade Security —{' '}
+            <span className="text-gradient">Your Funds, Fully Protected</span>
           </span>
         }
-        subtitle="CLOUDBRIGHT never holds your funds. Our non-custodial architecture means your crypto stays on your exchange, protected by your own security settings. We connect via encrypted, trade-only API keys."
+        subtitle="Cloudbright protects your funds with AES-256 encrypted custodial wallets, 2FA authentication, and continuous security monitoring. Instant deposits for 7+ cryptocurrencies."
         badge={{
           text: 'Security Audits Passed',
           icon: (
@@ -178,7 +178,7 @@ export default function SecurityPage() {
               {stats.map((stat, index) => (
                 <RevealOnScroll key={index} delay={index * 0.1}>
                   <div className="text-center">
-                    <div className="text-4xl md:text-5xl font-black text-gradient mb-2">
+                    <div className="text-3xl sm:text-4xl font-semibold text-gradient mb-2">
                       {stat.isText ? (
                         stat.value
                       ) : (
@@ -206,14 +206,14 @@ export default function SecurityPage() {
                 <span className="text-primary-500 dark:text-primary-400 font-semibold text-sm uppercase tracking-wide">
                   Security Architecture
                 </span>
-                <h2 className="text-4xl md:text-5xl font-black mt-4 mb-6 text-gray-900 dark:text-white">
+                <h2 className="text-3xl sm:text-4xl font-semibold mt-4 mb-6 text-gray-900 dark:text-white">
                   Core Security{' '}
                   <span className="text-gradient">Architecture</span>
                 </h2>
                 <p className="text-xl text-gray-600 dark:text-dark-300 max-w-3xl mx-auto">
-                  Built from the ground up on non-custodial principles. Your
-                  funds remain on your exchange — we never have access to
-                  withdraw them.
+                  Built from the ground up with bank-grade security. Your
+                  funds are protected by multi-layer encryption and continuous
+                  monitoring.
                 </p>
               </div>
             </RevealOnScroll>
@@ -238,7 +238,7 @@ export default function SecurityPage() {
                         >
                           <IconComponent className="w-8 h-8 text-white" />
                         </div>
-                        <h3 className="text-2xl font-black mb-3 text-gray-900 dark:text-white">
+                        <h3 className="text-2xl font-semibold mb-3 text-gray-900 dark:text-white">
                           {feature.title}
                         </h3>
                         <p className="text-gray-600 dark:text-dark-300 mb-6 leading-relaxed">
@@ -289,7 +289,7 @@ export default function SecurityPage() {
                 <span className="text-primary-500 dark:text-primary-400 font-semibold text-sm uppercase tracking-wide">
                   Defense in Depth
                 </span>
-                <h2 className="text-4xl md:text-5xl font-black mt-4 mb-6 text-gray-900 dark:text-white">
+                <h2 className="text-3xl sm:text-4xl font-semibold mt-4 mb-6 text-gray-900 dark:text-white">
                   Additional{' '}
                   <span className="text-gradient">Security Measures</span>
                 </h2>
@@ -323,7 +323,7 @@ export default function SecurityPage() {
           </div>
         </section>
 
-        {/* How Non-Custodial Works */}
+        {/* How Secure Trading Works */}
         <section className="py-24">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <RevealOnScroll>
@@ -331,15 +331,14 @@ export default function SecurityPage() {
                 <span className="text-primary-500 dark:text-primary-400 font-semibold text-sm uppercase tracking-wide">
                   How It Works
                 </span>
-                <h2 className="text-4xl md:text-5xl font-black mt-4 mb-6 text-gray-900 dark:text-white">
+                <h2 className="text-3xl sm:text-4xl font-semibold mt-4 mb-6 text-gray-900 dark:text-white">
                   How{' '}
-                  <span className="text-gradient">Non-Custodial</span>{' '}
+                  <span className="text-gradient">Secure</span>{' '}
                   Trading Works
                 </h2>
                 <p className="text-xl text-gray-600 dark:text-dark-300 max-w-3xl mx-auto">
-                  You stay in control from start to finish. Here is how
-                  CLOUDBRIGHT connects to your exchange without ever touching
-                  your funds.
+                  Your funds are protected at every step. Here is how
+                  Cloudbright secures your investments and executes trades.
                 </p>
               </div>
             </RevealOnScroll>
@@ -358,7 +357,7 @@ export default function SecurityPage() {
                     )}
 
                     {/* Step number */}
-                    <div className="shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white text-xl font-black shadow-lg shadow-primary-500/25">
+                    <div className="shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white text-xl font-semibold shadow-lg shadow-primary-500/25">
                       {step.step}
                     </div>
 
@@ -386,7 +385,7 @@ export default function SecurityPage() {
                 <span className="text-primary-500 dark:text-primary-400 font-semibold text-sm uppercase tracking-wide">
                   Trust & Transparency
                 </span>
-                <h2 className="text-4xl md:text-5xl font-black mt-4 mb-6 text-gray-900 dark:text-white">
+                <h2 className="text-3xl sm:text-4xl font-semibold mt-4 mb-6 text-gray-900 dark:text-white">
                   Audit &{' '}
                   <span className="text-gradient">Compliance</span>
                 </h2>
@@ -399,7 +398,7 @@ export default function SecurityPage() {
                   <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center mb-6">
                     <ShieldCheck className="w-7 h-7 text-white" />
                   </div>
-                  <h3 className="text-2xl font-black mb-4 text-gray-900 dark:text-white">
+                  <h3 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">
                     Security Audits
                   </h3>
                   <div className="space-y-4">
@@ -438,14 +437,14 @@ export default function SecurityPage() {
                   <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mb-6">
                     <Globe className="w-7 h-7 text-white" />
                   </div>
-                  <h3 className="text-2xl font-black mb-4 text-gray-900 dark:text-white">
+                  <h3 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">
                     Company & Compliance
                   </h3>
                   <div className="space-y-4">
                     {[
                       'Hong Kong registered company (HKCBS Limited)',
                       'Crypto-friendly HK regulatory environment',
-                      'Non-custodial model — no fund holding license required',
+                      'Custodial wallet model with full regulatory compliance',
                       'Transparent business operations',
                     ].map((item, idx) => (
                       <div
@@ -515,14 +514,14 @@ export default function SecurityPage() {
         <section className="py-24 bg-gradient-to-br from-primary-500/10 to-accent-500/10 dark:from-primary-500/20 dark:to-accent-500/20">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <RevealOnScroll>
-              <h2 className="text-4xl md:text-5xl font-black mb-6 text-gray-900 dark:text-white">
+              <h2 className="text-3xl sm:text-4xl font-semibold mb-6 text-gray-900 dark:text-white">
                 Your Security is Our{' '}
                 <span className="text-gradient">Priority</span>
               </h2>
               <p className="text-xl text-gray-700 dark:text-dark-200 mb-8 max-w-2xl mx-auto">
-                Start trading with confidence. Non-custodial, encrypted, and
-                fully transparent — your crypto stays on your exchange where it
-                belongs.
+                Start earning with confidence. Bank-grade encryption, custodial
+                wallets, and fully transparent — your investments are always
+                protected.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link

@@ -106,7 +106,7 @@ export function StepResults({ allocations, totalAmount, onConfirm, isProcessing 
         disabled={isProcessing}
         className="w-full px-6 py-4 bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 disabled:from-dark-700 disabled:to-dark-700 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all shadow-lg shadow-primary-500/30"
       >
-        {isProcessing ? 'Creating Portfolio...' : 'Start Trading'}
+        {isProcessing ? 'Creating Portfolio...' : 'Start Copying'}
       </button>
     </div>
   );

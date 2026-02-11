@@ -42,7 +42,7 @@ export default function ContactPage() {
     {
       icon: '📧',
       title: 'Email Us',
-      details: 'support@celestian.org',
+      details: 'support@cloudbright.com',
       subDetails: 'We reply within 24 hours',
       gradient: 'from-blue-500 to-cyan-500',
     },
@@ -89,7 +89,7 @@ export default function ContactPage() {
     },
     {
       question: 'Do you offer enterprise solutions?',
-      answer: 'Yes! We offer custom enterprise solutions for institutional investors. Contact our sales team at support@celestian.org for more information.',
+      answer: 'Yes! We offer custom enterprise solutions for institutional investors. Contact our sales team at support@cloudbright.com for more information.',
     },
   ];
 
@@ -378,7 +378,7 @@ export default function ContactPage() {
                   <div className="text-6xl mb-4">🇭🇰</div>
                   <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">Hong Kong</h3>
                   <p className="text-gray-600 dark:text-dark-300 mb-2">
-                    <strong className="text-gray-900 dark:text-white">Celestian Limited</strong>
+                    <strong className="text-gray-900 dark:text-white">Cloudbright Limited</strong>
                   </p>
                 </div>
               </div>
