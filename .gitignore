@@ -78,6 +78,11 @@ nul
 claude.exe
 *.exe
 
+# Spreadsheets
+*.xlsx
+*.xls
+~$*
+
 # Test files
 *.test.ts
 *.test.tsx
