@@ -3,7 +3,6 @@
 import { motion } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import Link from 'next/link';
 import { RevealOnScroll } from '@/components/animations/RevealOnScroll';
 import { GlowButton } from '@/components/animations/GlowButton';
 import { NeonGridLines, hexGridBg } from '@/components/animations/NeonGridLines';
@@ -131,10 +130,10 @@ export default function AffiliatePage() {
         </div>
       </section>
 
-      <main className="bg-dark-900">
+      <main className="bg-white dark:bg-dark-900">
 
         {/* ══════════ COMMISSION STRUCTURE (Apple-style) ══════════ */}
-        <section id="commission" className="relative py-16 sm:py-24 bg-dark-900 overflow-hidden">
+        <section id="commission" className="relative py-16 sm:py-24 bg-white dark:bg-dark-900 overflow-hidden">
           <div
             className="absolute inset-0 pointer-events-none"
             style={hexGridBg}
@@ -151,13 +150,13 @@ export default function AffiliatePage() {
                   </span>
                   <div className="w-8 h-0.5 bg-emerald-500" />
                 </div>
-                <h2 className="text-3xl sm:text-4xl font-semibold text-white leading-tight">
+                <h2 className="text-3xl sm:text-4xl font-semibold text-gray-900 dark:text-white leading-tight">
                   5-Level{' '}
                   <span className="bg-gradient-to-r from-emerald-400 to-green-400 bg-clip-text text-transparent">
                     Referral Program
                   </span>
                 </h2>
-                <p className="text-base sm:text-lg text-dark-300 mt-3 sm:mt-4 max-w-2xl mx-auto">
+                <p className="text-base sm:text-lg text-gray-600 dark:text-dark-300 mt-3 sm:mt-4 max-w-2xl mx-auto">
                   Earn commissions from your entire network — up to 5 levels deep. Commission is credited instantly in USDT every time a referral activates a bot.
                 </p>
               </div>
@@ -167,10 +166,10 @@ export default function AffiliatePage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-5">
               {/* Left: Commission Table */}
               <RevealOnScroll delay={0.1}>
-                <div className="group relative rounded-2xl bg-gradient-to-br from-dark-800/80 to-dark-900/80 border border-dark-700/50 p-6 lg:p-8 hover:border-emerald-500/30 transition-all duration-500 overflow-hidden h-full">
+                <div className="group relative rounded-2xl bg-gradient-to-br from-white/80 to-gray-50/80 dark:from-dark-800/80 dark:to-dark-900/80 border border-gray-200/50 dark:border-dark-700/50 p-6 lg:p-8 hover:border-emerald-500/30 transition-all duration-500 overflow-hidden h-full">
                   <div className="absolute top-0 right-0 w-[200px] h-[200px] bg-emerald-500/5 rounded-full blur-[80px] pointer-events-none group-hover:bg-emerald-500/10 transition-colors duration-500" />
                   <div className="relative z-10">
-                    <h3 className="text-xl font-semibold text-white mb-6">Commission per Level</h3>
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Commission per Level</h3>
                     <div className="space-y-3">
                       {referralLevels.map((level) => (
                         <div
@@ -178,24 +177,24 @@ export default function AffiliatePage() {
                           className={`flex items-center justify-between p-4 rounded-xl border transition-all duration-300 ${
                             level.highlight
                               ? 'bg-emerald-500/10 border-emerald-500/30'
-                              : 'bg-dark-900/50 border-dark-700/50 hover:border-dark-600/50'
+                              : 'bg-gray-50/50 dark:bg-dark-900/50 border-gray-200/50 dark:border-dark-700/50 hover:border-gray-300/50 dark:hover:border-dark-600/50'
                           }`}
                         >
                           <div className="flex items-center gap-3">
                             <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold ${
                               level.highlight
                                 ? 'bg-emerald-500/20 text-emerald-400'
-                                : 'bg-dark-800 text-dark-300'
+                                : 'bg-gray-100 dark:bg-dark-800 text-gray-600 dark:text-dark-300'
                             }`}>
                               L{level.level}
                             </span>
                             <div>
-                              <p className="text-sm font-semibold text-white">Level {level.level}</p>
-                              <p className="text-xs text-dark-400">{level.description}</p>
+                              <p className="text-sm font-semibold text-gray-900 dark:text-white">Level {level.level}</p>
+                              <p className="text-xs text-gray-500 dark:text-dark-400">{level.description}</p>
                             </div>
                           </div>
                           <span className={`text-lg font-bold ${
-                            level.highlight ? 'text-emerald-400' : 'text-white'
+                            level.highlight ? 'text-emerald-400' : 'text-gray-900 dark:text-white'
                           }`}>
                             {level.commission}
                           </span>
@@ -209,15 +208,15 @@ export default function AffiliatePage() {
               {/* Right: Features grid */}
               <div className="grid grid-rows-2 gap-4 lg:gap-5">
                 <RevealOnScroll delay={0.2}>
-                  <div className="group relative rounded-2xl bg-gradient-to-br from-dark-800/80 to-dark-900/80 border border-dark-700/50 p-6 lg:p-8 hover:border-emerald-500/30 transition-all duration-500 overflow-hidden h-full flex flex-col justify-center">
+                  <div className="group relative rounded-2xl bg-gradient-to-br from-white/80 to-gray-50/80 dark:from-dark-800/80 dark:to-dark-900/80 border border-gray-200/50 dark:border-dark-700/50 p-6 lg:p-8 hover:border-emerald-500/30 transition-all duration-500 overflow-hidden h-full flex flex-col justify-center">
                     <div className="absolute bottom-0 left-0 w-[200px] h-[200px] bg-green-500/5 rounded-full blur-[80px] pointer-events-none group-hover:bg-green-500/10 transition-colors duration-500" />
                     <div className="relative z-10">
                       <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500/15 to-green-500/15 border border-emerald-500/20 flex items-center justify-center mb-5 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-emerald-500/10 transition-all duration-300">
                         <Zap className="w-7 h-7 text-emerald-400" />
                       </div>
-                      <span className="text-7xl font-bold text-dark-800/30 absolute top-4 right-6 select-none pointer-events-none">01</span>
-                      <h3 className="text-xl font-semibold text-white mb-3">Instant Payout</h3>
-                      <p className="text-dark-300 leading-relaxed">
+                      <span className="text-7xl font-bold text-gray-200/40 dark:text-dark-800/30 absolute top-4 right-6 select-none pointer-events-none">01</span>
+                      <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">Instant Payout</h3>
+                      <p className="text-gray-600 dark:text-dark-300 leading-relaxed">
                         Commission is credited to your USDT balance the moment your referral activates any trading bot. No delays, no minimum thresholds.
                       </p>
                     </div>
@@ -225,15 +224,15 @@ export default function AffiliatePage() {
                 </RevealOnScroll>
 
                 <RevealOnScroll delay={0.3}>
-                  <div className="group relative rounded-2xl bg-gradient-to-br from-dark-800/80 to-dark-900/80 border border-dark-700/50 p-6 lg:p-8 hover:border-emerald-500/30 transition-all duration-500 overflow-hidden h-full flex flex-col justify-center">
+                  <div className="group relative rounded-2xl bg-gradient-to-br from-white/80 to-gray-50/80 dark:from-dark-800/80 dark:to-dark-900/80 border border-gray-200/50 dark:border-dark-700/50 p-6 lg:p-8 hover:border-emerald-500/30 transition-all duration-500 overflow-hidden h-full flex flex-col justify-center">
                     <div className="absolute top-0 right-0 w-[200px] h-[200px] bg-emerald-500/5 rounded-full blur-[80px] pointer-events-none group-hover:bg-emerald-500/10 transition-colors duration-500" />
                     <div className="relative z-10">
                       <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500/15 to-green-500/15 border border-emerald-500/20 flex items-center justify-center mb-5 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-emerald-500/10 transition-all duration-300">
                         <Shield className="w-7 h-7 text-emerald-400" />
                       </div>
-                      <span className="text-7xl font-bold text-dark-800/30 absolute top-4 right-6 select-none pointer-events-none">02</span>
-                      <h3 className="text-xl font-semibold text-white mb-3">No Deposit Required</h3>
-                      <p className="text-dark-300 leading-relaxed">
+                      <span className="text-7xl font-bold text-gray-200/40 dark:text-dark-800/30 absolute top-4 right-6 select-none pointer-events-none">02</span>
+                      <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">No Deposit Required</h3>
+                      <p className="text-gray-600 dark:text-dark-300 leading-relaxed">
                         You don&apos;t need an active deposit to earn affiliate commissions. Simply share your link and start building your network.
                       </p>
                     </div>
@@ -337,7 +336,7 @@ export default function AffiliatePage() {
         </section>
 
         {/* ══════════ CASHFLOW LEVELS IMPACT (Violet) ══════════ */}
-        <section className="relative py-16 sm:py-24 bg-dark-900 overflow-hidden">
+        <section className="relative py-16 sm:py-24 bg-white dark:bg-dark-900 overflow-hidden">
           <div className="absolute top-0 left-1/4 w-[400px] h-[400px] bg-violet-500/5 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute bottom-0 right-1/4 w-[350px] h-[350px] bg-purple-500/5 rounded-full blur-3xl pointer-events-none" />
 
@@ -346,14 +345,14 @@ export default function AffiliatePage() {
               {/* Left: Text */}
               <RevealOnScroll>
                 <div>
-                  <h2 className="text-3xl sm:text-4xl font-semibold text-white leading-tight mb-2">
+                  <h2 className="text-3xl sm:text-4xl font-semibold text-gray-900 dark:text-white leading-tight mb-2">
                     Cashflow
                   </h2>
                   <h2 className="text-3xl sm:text-4xl font-semibold leading-tight mb-6">
-                    <span className="text-white">Levels </span>
+                    <span className="text-gray-900 dark:text-white">Levels </span>
                     <span className="bg-gradient-to-r from-violet-400 to-purple-400 bg-clip-text text-transparent">Impact</span>
                   </h2>
-                  <p className="text-base sm:text-lg text-dark-300 leading-relaxed max-w-md">
+                  <p className="text-base sm:text-lg text-gray-600 dark:text-dark-300 leading-relaxed max-w-md">
                     Each level of your affiliate structure has a different impact on your cashflow. The closer the referral, the higher the turnover contribution.
                   </p>
                   <div className="mt-8 space-y-3">
@@ -364,7 +363,7 @@ export default function AffiliatePage() {
                     ].map((text) => (
                       <div key={text} className="flex items-start gap-3">
                         <Check className="w-4 h-4 text-violet-400 shrink-0 mt-0.5" />
-                        <span className="text-sm text-dark-200 leading-relaxed">{text}</span>
+                        <span className="text-sm text-gray-700 dark:text-dark-200 leading-relaxed">{text}</span>
                       </div>
                     ))}
                   </div>
@@ -373,17 +372,17 @@ export default function AffiliatePage() {
 
               {/* Right: Table */}
               <RevealOnScroll direction="right">
-                <div className="rounded-2xl border border-violet-500/20 overflow-hidden bg-dark-800/50 backdrop-blur-sm">
+                <div className="rounded-2xl border border-violet-500/20 overflow-hidden overflow-x-auto bg-white/80 dark:bg-dark-800/50 backdrop-blur-sm">
                   {/* Header */}
-                  <div className="grid grid-cols-5 bg-violet-500/[0.06]">
+                  <div className="grid grid-cols-5 bg-violet-500/[0.06] min-w-[400px]">
                     {cashflowLevels.map((l) => (
                       <div key={l.level} className="px-4 py-4 text-center border-r border-violet-500/10 last:border-r-0">
-                        <span className="text-xs text-dark-400 font-medium">Level {l.level}</span>
+                        <span className="text-xs text-gray-500 dark:text-dark-400 font-medium">Level {l.level}</span>
                       </div>
                     ))}
                   </div>
                   {/* Impact row */}
-                  <div className="grid grid-cols-5 border-t border-violet-500/10">
+                  <div className="grid grid-cols-5 border-t border-violet-500/10 min-w-[400px]">
                     {cashflowLevels.map((l, i) => (
                       <motion.div
                         key={l.level}
@@ -394,7 +393,7 @@ export default function AffiliatePage() {
                         className="px-4 py-6 text-center border-r border-violet-500/10 last:border-r-0"
                       >
                         <span className={`text-2xl sm:text-3xl font-bold ${
-                          i === 0 ? 'text-violet-400' : 'text-white'
+                          i === 0 ? 'text-violet-400' : 'text-gray-900 dark:text-white'
                         }`}>
                           {l.impact}
                         </span>
@@ -402,10 +401,10 @@ export default function AffiliatePage() {
                     ))}
                   </div>
                   {/* Label row */}
-                  <div className="grid grid-cols-5 border-t border-violet-500/10">
+                  <div className="grid grid-cols-5 border-t border-violet-500/10 min-w-[400px]">
                     {cashflowLevels.map((l) => (
                       <div key={l.level} className="px-4 py-3 text-center border-r border-violet-500/10 last:border-r-0">
-                        <span className="text-[10px] text-dark-500 uppercase tracking-wider">Impact</span>
+                        <span className="text-[10px] text-gray-400 dark:text-dark-500 uppercase tracking-wider">Impact</span>
                       </div>
                     ))}
                   </div>
@@ -416,14 +415,14 @@ export default function AffiliatePage() {
         </section>
 
         {/* ══════════ TURNOVER CASH BONUSES (Orbital Design — Compact) ══════════ */}
-        <section className="relative py-12 bg-dark-900 overflow-hidden">
+        <section className="relative py-12 bg-white dark:bg-dark-900 overflow-hidden">
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <RevealOnScroll>
               <div className="text-center mb-8">
-                <h2 className="text-3xl sm:text-4xl font-semibold text-white">
+                <h2 className="text-3xl sm:text-4xl font-semibold text-gray-900 dark:text-white">
                   Cash <span className="bg-gradient-to-r from-violet-400 to-purple-400 bg-clip-text text-transparent">bonuses</span>
                 </h2>
-                <p className="text-base sm:text-lg text-dark-300 mt-3 max-w-xl mx-auto">
+                <p className="text-base sm:text-lg text-gray-600 dark:text-dark-300 mt-3 max-w-xl mx-auto">
                   Reach turnover milestones — get rewarded in USDT.
                 </p>
               </div>
@@ -431,7 +430,7 @@ export default function AffiliatePage() {
 
             {/* Orbital Layout — Compact */}
             <RevealOnScroll>
-              <div className="relative w-full max-w-[720px] mx-auto p-[56px] lg:p-[72px]">
+              <div className="relative w-full max-w-[720px] mx-auto p-4 sm:p-8 md:p-[56px] lg:p-[72px]">
                 <div className="relative w-full" style={{ aspectRatio: '1 / 1' }}>
                   {/* Orbit rings */}
                   <div className="absolute inset-[12%] rounded-full border border-violet-500/[0.07]" />
@@ -488,8 +487,8 @@ export default function AffiliatePage() {
                           viewport={{ once: true }}
                           transition={{ duration: 0.5, delay: i * 0.07 }}
                         >
-                          <div className="group flex flex-col items-center gap-0.5 p-2.5 lg:p-3 rounded-xl bg-dark-800/90 border border-dark-700/60 backdrop-blur-sm hover:border-violet-500/40 hover:bg-dark-800 transition-all duration-300 w-[96px] lg:w-[108px]">
-                            <span className="text-[10px] lg:text-[11px] text-dark-500 font-semibold uppercase tracking-wider">LVL {bonus.lvl}</span>
+                          <div className="group flex flex-col items-center gap-0.5 p-2.5 lg:p-3 rounded-xl bg-white/90 dark:bg-dark-800/90 border border-gray-200/60 dark:border-dark-700/60 backdrop-blur-sm hover:border-violet-500/40 hover:bg-gray-50 dark:hover:bg-dark-800 transition-all duration-300 w-[96px] lg:w-[108px]">
+                            <span className="text-[10px] lg:text-[11px] text-gray-400 dark:text-dark-500 font-semibold uppercase tracking-wider">LVL {bonus.lvl}</span>
                             <span className="text-base lg:text-lg font-bold text-violet-400">{bonus.amount}</span>
                           </div>
                         </motion.div>
@@ -503,7 +502,7 @@ export default function AffiliatePage() {
         </section>
 
         {/* ══════════ HOW TURNOVER WORKS ══════════ */}
-        <section className="relative py-24 bg-gradient-to-b from-dark-900 via-dark-800 to-dark-900 overflow-hidden">
+        <section className="relative py-24 bg-gradient-to-b from-white via-gray-50 to-white dark:from-dark-900 dark:via-dark-800 dark:to-dark-900 overflow-hidden">
           <div className="absolute top-0 left-1/3 w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
 
@@ -517,14 +516,14 @@ export default function AffiliatePage() {
                   </span>
                   <div className="w-8 h-0.5 bg-blue-500" />
                 </div>
-                <h2 className="text-3xl sm:text-4xl font-semibold text-white">
+                <h2 className="text-3xl sm:text-4xl font-semibold text-gray-900 dark:text-white">
                   How{' '}
                   <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
                     Turnover
                   </span>{' '}
                   Works
                 </h2>
-                <p className="text-base sm:text-lg text-dark-300 mt-3 sm:mt-4 max-w-2xl mx-auto">
+                <p className="text-base sm:text-lg text-gray-600 dark:text-dark-300 mt-3 sm:mt-4 max-w-2xl mx-auto">
                   Your turnover grows as your network activates bots. Reach milestones — unlock cash bonuses in USDT.
                 </p>
               </RevealOnScroll>
@@ -555,17 +554,17 @@ export default function AffiliatePage() {
                 const Icon = item.icon;
                 return (
                   <RevealOnScroll key={item.step} delay={i * 0.1}>
-                    <div className="group relative rounded-2xl bg-gradient-to-br from-dark-800/80 to-dark-900/80 border border-dark-700/50 p-6 lg:p-8 hover:border-blue-500/30 transition-all duration-500 overflow-hidden h-full">
+                    <div className="group relative rounded-2xl bg-gradient-to-br from-white/80 to-gray-50/80 dark:from-dark-800/80 dark:to-dark-900/80 border border-gray-200/50 dark:border-dark-700/50 p-6 lg:p-8 hover:border-blue-500/30 transition-all duration-500 overflow-hidden h-full">
                       <div className="absolute top-0 right-0 w-[150px] h-[150px] bg-blue-500/5 rounded-full blur-[60px] pointer-events-none group-hover:bg-blue-500/10 transition-colors duration-500" />
                       <div className="relative z-10">
                         <div className="flex items-center gap-3 mb-4">
                           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500/15 to-cyan-500/15 border border-blue-500/20 flex items-center justify-center">
                             <Icon className="w-5 h-5 text-blue-400" />
                           </div>
-                          <span className="text-7xl font-bold text-dark-800/20 absolute top-4 right-6 select-none pointer-events-none">{item.step}</span>
+                          <span className="text-7xl font-bold text-gray-200/40 dark:text-dark-800/20 absolute top-4 right-6 select-none pointer-events-none">{item.step}</span>
                         </div>
-                        <h3 className="text-lg font-semibold text-white mb-2">{item.title}</h3>
-                        <p className="text-dark-300 text-sm leading-relaxed">{item.desc}</p>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{item.title}</h3>
+                        <p className="text-gray-600 dark:text-dark-300 text-sm leading-relaxed">{item.desc}</p>
                       </div>
                     </div>
                   </RevealOnScroll>
@@ -575,7 +574,7 @@ export default function AffiliatePage() {
 
             {/* Example calculation bento card below */}
             <RevealOnScroll delay={0.2}>
-              <div className="group relative rounded-2xl bg-gradient-to-br from-dark-800/80 to-dark-900/80 border border-dark-700/50 p-6 lg:p-8 hover:border-blue-500/30 transition-all duration-500 overflow-hidden">
+              <div className="group relative rounded-2xl bg-gradient-to-br from-white/80 to-gray-50/80 dark:from-dark-800/80 dark:to-dark-900/80 border border-gray-200/50 dark:border-dark-700/50 p-6 lg:p-8 hover:border-blue-500/30 transition-all duration-500 overflow-hidden">
                 <div className="absolute top-0 right-0 w-[250px] h-[250px] bg-blue-500/5 rounded-full blur-[80px] pointer-events-none group-hover:bg-blue-500/10 transition-colors duration-500" />
 
                 <div className="relative z-10">
@@ -584,15 +583,15 @@ export default function AffiliatePage() {
                       <Activity className="w-5 h-5 text-blue-400" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold text-white">Example Calculation</h3>
-                      <p className="text-xs text-dark-500">41 referrals across 5 levels</p>
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Example Calculation</h3>
+                      <p className="text-xs text-gray-400 dark:text-dark-500">41 referrals across 5 levels</p>
                     </div>
                   </div>
 
                   {/* Table header */}
                   <div className="grid grid-cols-5 gap-2 px-3 mb-2">
                     {['Level', 'Referrals', 'Bots', 'Impact', 'Turnover'].map((label) => (
-                      <span key={label} className={`text-[9px] text-dark-500 uppercase tracking-wider font-semibold ${label === 'Turnover' ? 'text-right' : label === 'Level' ? '' : 'text-center'}`}>
+                      <span key={label} className={`text-[9px] text-gray-400 dark:text-dark-500 uppercase tracking-wider font-semibold ${label === 'Turnover' ? 'text-right' : label === 'Level' ? '' : 'text-center'}`}>
                         {label}
                       </span>
                     ))}
@@ -610,24 +609,24 @@ export default function AffiliatePage() {
                       <div
                         key={i}
                         className={`grid grid-cols-5 items-center gap-2 p-3 rounded-xl ${
-                          i === 0 ? 'bg-blue-500/10 border border-blue-500/20' : 'bg-dark-900/50 border border-dark-700/30'
+                          i === 0 ? 'bg-blue-500/10 border border-blue-500/20' : 'bg-gray-50/50 dark:bg-dark-900/50 border border-gray-200/30 dark:border-dark-700/30'
                         }`}
                       >
-                        <span className={`text-sm font-semibold ${i === 0 ? 'text-blue-400' : 'text-white'}`}>{row.level}</span>
-                        <span className="text-xs text-dark-400 text-center">{row.users}</span>
-                        <span className="text-xs text-dark-300 text-center">{row.bots}</span>
-                        <span className={`text-xs font-medium text-center ${i === 0 ? 'text-blue-400' : 'text-dark-400'}`}>&times;{row.impact}</span>
-                        <span className={`text-sm font-bold text-right ${i === 0 ? 'text-blue-400' : 'text-white'}`}>{row.result}</span>
+                        <span className={`text-sm font-semibold ${i === 0 ? 'text-blue-400' : 'text-gray-900 dark:text-white'}`}>{row.level}</span>
+                        <span className="text-xs text-gray-500 dark:text-dark-400 text-center">{row.users}</span>
+                        <span className="text-xs text-gray-600 dark:text-dark-300 text-center">{row.bots}</span>
+                        <span className={`text-xs font-medium text-center ${i === 0 ? 'text-blue-400' : 'text-gray-500 dark:text-dark-400'}`}>&times;{row.impact}</span>
+                        <span className={`text-sm font-bold text-right ${i === 0 ? 'text-blue-400' : 'text-gray-900 dark:text-white'}`}>{row.result}</span>
                       </div>
                     ))}
                   </div>
 
                   {/* Total */}
                   <div className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20">
-                    <span className="text-sm font-semibold text-dark-200">Your Total Turnover</span>
+                    <span className="text-sm font-semibold text-gray-700 dark:text-dark-200">Your Total Turnover</span>
                     <div className="flex items-center gap-3">
                       <span className="text-2xl font-bold text-blue-400">$18,500</span>
-                      <span className="text-[10px] text-dark-400 hidden sm:inline">LVL 4 bonus unlocked</span>
+                      <span className="text-[10px] text-gray-500 dark:text-dark-400 hidden sm:inline">LVL 4 bonus unlocked</span>
                     </div>
                   </div>
                 </div>

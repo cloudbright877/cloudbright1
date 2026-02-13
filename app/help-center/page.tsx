@@ -31,7 +31,7 @@ export default function HelpCenterPage() {
     <>
       <Navbar />
 
-      <main className="bg-dark-900 pt-20">
+      <main className="bg-white dark:bg-dark-900 pt-20">
         {/* ══════════ HERO ══════════ */}
         <section className="relative py-20 overflow-hidden">
           {/* Animated particles canvas */}
@@ -58,10 +58,10 @@ export default function HelpCenterPage() {
                 <div className="w-8 h-0.5 bg-primary-500" />
               </div>
 
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold mb-6 text-white">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold mb-6 text-gray-900 dark:text-white">
                 How Can We <span className="text-gradient">Help You?</span>
               </h1>
-              <p className="text-base sm:text-lg text-dark-300 max-w-2xl mx-auto mb-10">
+              <p className="text-base sm:text-lg text-gray-700 dark:text-dark-300 max-w-2xl mx-auto mb-10">
                 Find answers to common questions about copy trading with Cloudbright.
               </p>
 
@@ -73,10 +73,10 @@ export default function HelpCenterPage() {
                     placeholder="Search questions..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full px-6 py-4 pl-14 bg-dark-800 border border-dark-700 rounded-2xl text-white placeholder-dark-400 focus:outline-none focus:border-primary-500/50 transition-colors"
+                    className="w-full px-6 py-4 pl-14 bg-white dark:bg-dark-800 border border-gray-300 dark:border-dark-700 rounded-2xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-dark-400 focus:outline-none focus:border-primary-500/50 transition-colors"
                   />
                   <svg
-                    className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400"
+                    className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-dark-400"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -86,7 +86,7 @@ export default function HelpCenterPage() {
                   {searchQuery && (
                     <button
                       onClick={() => setSearchQuery('')}
-                      className="absolute right-5 top-1/2 -translate-y-1/2 text-dark-400 hover:text-white transition-colors"
+                      className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-dark-400 hover:text-gray-900 dark:hover:text-white transition-colors"
                     >
                       ✕
                     </button>
@@ -119,7 +119,7 @@ export default function HelpCenterPage() {
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
                     selectedCategory === category
                       ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white shadow-lg shadow-primary-500/20'
-                      : 'bg-dark-800 text-dark-300 border border-dark-700 hover:border-primary-500/30 hover:text-white'
+                      : 'bg-gray-100 dark:bg-dark-800 text-gray-500 dark:text-dark-300 border border-gray-200 dark:border-dark-700 hover:border-primary-500/30 hover:text-gray-900 dark:hover:text-white'
                   }`}
                 >
                   {category}
@@ -136,10 +136,10 @@ export default function HelpCenterPage() {
                   className="text-center py-16"
                 >
                   <div className="text-5xl mb-4">🔍</div>
-                  <h3 className="text-xl font-semibold mb-2 text-white">
+                  <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">
                     No results found
                   </h3>
-                  <p className="text-dark-400">
+                  <p className="text-gray-600 dark:text-dark-400">
                     Try adjusting your search or browse a different category.
                   </p>
                 </motion.div>
@@ -153,8 +153,8 @@ export default function HelpCenterPage() {
                     transition={{ duration: 0.4, delay: index * 0.05 }}
                     className={`rounded-xl border overflow-hidden transition-all duration-300 ${
                       openFaqIndex === index
-                        ? 'bg-dark-800/80 border-primary-500/50 shadow-lg shadow-primary-500/10'
-                        : 'bg-dark-800/50 border-dark-700/50 hover:border-primary-500/30'
+                        ? 'bg-white/80 dark:bg-dark-800/80 border-primary-500/50 shadow-lg shadow-primary-500/10'
+                        : 'bg-white/50 dark:bg-dark-800/50 border-gray-200/50 dark:border-dark-700/50 hover:border-primary-500/30'
                     }`}
                   >
                     <button
@@ -165,7 +165,7 @@ export default function HelpCenterPage() {
                         <span className="text-[10px] font-bold tracking-[0.15em] uppercase text-primary-400/70 block mb-1">
                           {faq.category}
                         </span>
-                        <span className="text-base font-medium text-white block">
+                        <span className="text-base font-medium text-gray-900 dark:text-white block">
                           {faq.question}
                         </span>
                       </div>
@@ -187,7 +187,7 @@ export default function HelpCenterPage() {
                           transition={{ duration: 0.3 }}
                           className="overflow-hidden"
                         >
-                          <div className="px-6 pb-4 text-sm text-dark-200 leading-relaxed border-t border-dark-700/50 pt-4">
+                          <div className="px-6 pb-4 text-sm text-gray-700 dark:text-dark-200 leading-relaxed border-t border-gray-200/50 dark:border-dark-700/50 pt-4">
                             {faq.answer}
                           </div>
                         </motion.div>

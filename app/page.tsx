@@ -69,17 +69,17 @@ const platformFeatures: {
 
 function BalancePreview() {
   return (
-    <div className="w-[280px] rounded-2xl bg-gradient-to-br from-primary-500/10 via-accent-500/5 to-primary-500/10 border border-primary-500/30 p-5 shadow-2xl shadow-primary-500/10">
+    <div className="w-full max-w-[280px] rounded-2xl bg-gradient-to-br from-primary-500/10 via-accent-500/5 to-primary-500/10 border border-primary-500/30 p-5 shadow-2xl shadow-primary-500/10">
       <div className="flex items-center gap-2.5 mb-5">
         <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-accent-500 rounded-lg flex items-center justify-center">
           <Wallet className="w-5 h-5 text-white" />
         </div>
         <div>
-          <p className="text-xs text-dark-400 font-medium">Total Balance</p>
-          <p className="text-[10px] text-dark-500">Available + Frozen</p>
+          <p className="text-xs text-gray-500 dark:text-dark-400 font-medium">Total Balance</p>
+          <p className="text-[10px] text-gray-400 dark:text-dark-500">Available + Frozen</p>
         </div>
       </div>
-      <p className="text-3xl font-bold text-white mb-2">$12,485.00</p>
+      <p className="text-3xl font-bold text-gray-900 dark:text-white mb-2">$12,485.00</p>
       <div className="flex items-center gap-1.5 mb-4">
         <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-green-500/20 text-green-400">
           <TrendingUp className="w-3 h-3" />
@@ -87,19 +87,19 @@ function BalancePreview() {
         </div>
         <span className="text-xs text-green-400/70">+2.80%</span>
       </div>
-      <div className="p-3 bg-dark-900/50 rounded-xl border border-dark-700">
+      <div className="p-3 bg-gray-100 dark:bg-dark-900/50 rounded-xl border border-gray-200 dark:border-dark-700">
         <div className="flex items-center justify-between mb-2">
           <div>
-            <p className="text-[10px] text-dark-400">Available</p>
+            <p className="text-[10px] text-gray-500 dark:text-dark-400">Available</p>
             <p className="text-sm font-bold text-green-400">$4,485.00</p>
           </div>
-          <div className="w-px h-8 bg-dark-700" />
+          <div className="w-px h-8 bg-gray-200 dark:bg-dark-700" />
           <div>
-            <p className="text-[10px] text-dark-400">Frozen</p>
+            <p className="text-[10px] text-gray-500 dark:text-dark-400">Frozen</p>
             <p className="text-sm font-bold text-yellow-400">$8,000.00</p>
           </div>
         </div>
-        <div className="h-1.5 bg-dark-700 rounded-full overflow-hidden">
+        <div className="h-1.5 bg-gray-200 dark:bg-dark-700 rounded-full overflow-hidden">
           <div className="h-full w-[36%] bg-gradient-to-r from-green-500 to-emerald-500 rounded-full" />
         </div>
       </div>
@@ -109,12 +109,12 @@ function BalancePreview() {
 
 function BotCardPreview() {
   return (
-    <div className="w-[240px] rounded-2xl bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 p-5 shadow-2xl shadow-purple-500/10">
+    <div className="w-full max-w-[240px] rounded-2xl bg-gradient-to-br from-white/95 to-gray-50/95 dark:from-dark-800/95 dark:to-dark-900/95 border border-gray-200 dark:border-dark-700 p-5 shadow-2xl shadow-purple-500/10">
       <div className="flex items-start gap-2.5 mb-3">
         <img src="/bots/BybitMarketMakerBot.png" alt="Bot" className="w-9 h-9 object-contain" />
         <div className="min-w-0">
-          <h4 className="text-xs font-bold text-white leading-tight truncate">Bybit Market Maker</h4>
-          <span className="text-[10px] text-dark-400">Market Making</span>
+          <h4 className="text-xs font-bold text-gray-900 dark:text-white leading-tight truncate">Bybit Market Maker</h4>
+          <span className="text-[10px] text-gray-500 dark:text-dark-400">Market Making</span>
         </div>
       </div>
       <div className="flex items-center gap-1.5 mb-3">
@@ -126,23 +126,23 @@ function BotCardPreview() {
         </span>
         <span className="text-[10px] text-primary-400 font-medium">Verified</span>
       </div>
-      <div className="grid grid-cols-2 gap-2 pt-3 border-t border-white/5">
+      <div className="grid grid-cols-2 gap-2 pt-3 border-t border-gray-200/50 dark:border-white/5">
         <div>
-          <span className="text-[9px] text-dark-400 uppercase tracking-wider">30d Return</span>
+          <span className="text-[9px] text-gray-500 dark:text-dark-400 uppercase tracking-wider">30d Return</span>
           <p className="text-sm font-bold text-green-400">+21.4%</p>
         </div>
         <div>
-          <span className="text-[9px] text-dark-400 uppercase tracking-wider">Copiers</span>
-          <p className="text-sm font-bold text-white flex items-center gap-0.5">
-            <Users className="w-3 h-3 text-dark-400" />5,830
+          <span className="text-[9px] text-gray-500 dark:text-dark-400 uppercase tracking-wider">Copiers</span>
+          <p className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-0.5">
+            <Users className="w-3 h-3 text-gray-500 dark:text-dark-400" />5,830
           </p>
         </div>
         <div>
-          <span className="text-[9px] text-dark-400 uppercase tracking-wider">Win Rate</span>
-          <p className="text-xs font-semibold text-white">58.1%</p>
+          <span className="text-[9px] text-gray-500 dark:text-dark-400 uppercase tracking-wider">Win Rate</span>
+          <p className="text-xs font-semibold text-gray-900 dark:text-white">58.1%</p>
         </div>
         <div>
-          <span className="text-[9px] text-dark-400 uppercase tracking-wider">Max DD</span>
+          <span className="text-[9px] text-gray-500 dark:text-dark-400 uppercase tracking-wider">Max DD</span>
           <p className="text-xs font-semibold text-red-400">-8.2%</p>
         </div>
       </div>
@@ -155,17 +155,17 @@ function BotCardPreview() {
 
 function CollectPreview() {
   return (
-    <div className="w-[280px] rounded-2xl bg-gradient-to-br from-green-500/10 via-emerald-500/5 to-green-500/10 border border-green-500/30 p-5 shadow-2xl shadow-emerald-500/10">
+    <div className="w-full max-w-[280px] rounded-2xl bg-gradient-to-br from-green-500/10 via-emerald-500/5 to-green-500/10 border border-green-500/30 p-5 shadow-2xl shadow-emerald-500/10">
       <div className="flex items-center gap-2.5 mb-5">
         <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg flex items-center justify-center">
           <Gauge className="w-5 h-5 text-white" />
         </div>
         <div>
-          <p className="text-xs text-dark-400 font-medium">Portfolio Value</p>
-          <p className="text-[10px] text-dark-500">Total across all bots</p>
+          <p className="text-xs text-gray-500 dark:text-dark-400 font-medium">Portfolio Value</p>
+          <p className="text-[10px] text-gray-400 dark:text-dark-500">Total across all bots</p>
         </div>
       </div>
-      <p className="text-3xl font-bold text-white mb-2">$16,856.40</p>
+      <p className="text-3xl font-bold text-gray-900 dark:text-white mb-2">$16,856.40</p>
       <div className="flex items-center gap-1.5 mb-4">
         <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-green-500/20 text-green-400">
           <TrendingUp className="w-3 h-3" />
@@ -173,19 +173,19 @@ function CollectPreview() {
         </div>
         <span className="text-xs text-green-400/70">+40.47%</span>
       </div>
-      <div className="flex items-center justify-between p-3 bg-dark-900/50 rounded-xl border border-dark-700 mb-3">
+      <div className="flex items-center justify-between p-3 bg-gray-100 dark:bg-dark-900/50 rounded-xl border border-gray-200 dark:border-dark-700 mb-3">
         <div>
-          <p className="text-[10px] text-dark-400">Invested</p>
-          <p className="text-sm font-bold text-white">$12,000</p>
+          <p className="text-[10px] text-gray-500 dark:text-dark-400">Invested</p>
+          <p className="text-sm font-bold text-gray-900 dark:text-white">$12,000</p>
         </div>
-        <div className="w-px h-8 bg-dark-700" />
+        <div className="w-px h-8 bg-gray-200 dark:bg-dark-700" />
         <div>
-          <p className="text-[10px] text-dark-400">Realized</p>
+          <p className="text-[10px] text-gray-500 dark:text-dark-400">Realized</p>
           <p className="text-sm font-bold text-green-400">+$3,240</p>
         </div>
-        <div className="w-px h-8 bg-dark-700" />
+        <div className="w-px h-8 bg-gray-200 dark:bg-dark-700" />
         <div>
-          <p className="text-[10px] text-dark-400">Unrealized</p>
+          <p className="text-[10px] text-gray-500 dark:text-dark-400">Unrealized</p>
           <p className="text-sm font-bold text-cyan-400">+$1,616</p>
         </div>
       </div>
@@ -365,16 +365,16 @@ export default function Home() {
         <Hero />
 
         {/* ── Supported Exchanges (Marquee) ── */}
-        <div className="bg-dark-900 py-8 border-y border-dark-700/30">
+        <div className="bg-gray-50 dark:bg-dark-900 py-8 border-y border-gray-200/30 dark:border-dark-700/30">
           <Marquee speed={35}>
             {exchangeLogos.map(({ key, Component }) => (
-              <Component key={key} className="mx-8 text-dark-400 whitespace-nowrap opacity-50 hover:opacity-100 transition-opacity" />
+              <Component key={key} className="mx-8 text-gray-500 dark:text-dark-400 whitespace-nowrap opacity-50 hover:opacity-100 transition-opacity" />
             ))}
           </Marquee>
         </div>
 
         {/* ── How It Works ── */}
-        <section className="relative py-16 sm:py-24 bg-dark-900 overflow-hidden">
+        <section className="relative py-16 sm:py-24 bg-white dark:bg-dark-900 overflow-hidden">
           <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-violet-500/5 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
           {/* Tilted hex grid floor */}
@@ -394,10 +394,10 @@ export default function Home() {
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <RevealOnScroll>
               <div className="text-center mb-10 sm:mb-16">
-                <h2 className="text-3xl sm:text-4xl font-semibold mb-3 sm:mb-4 text-white">
+                <h2 className="text-3xl sm:text-4xl font-semibold mb-3 sm:mb-4 text-gray-900 dark:text-white">
                   Start in <span className="text-gradient">3 Steps</span>
                 </h2>
-                <p className="text-base sm:text-lg text-dark-300 max-w-2xl mx-auto">
+                <p className="text-base sm:text-lg text-gray-600 dark:text-dark-300 max-w-2xl mx-auto">
                   No coding, no complex setup, no learning curve.
                   Top up, choose, and earn.
                 </p>
@@ -414,6 +414,7 @@ export default function Home() {
             className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: "url('/3d-model-minimalist-abstract-horizon-perspective.webp')" }}
           />
+          <div className="absolute inset-0 bg-gradient-to-b from-dark-900/60 via-transparent to-dark-900/60" />
 
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <RevealOnScroll>
@@ -446,7 +447,7 @@ export default function Home() {
         </section>
 
         {/* ── Platform Features (Bento Grid) ── */}
-        <section className="relative py-16 sm:py-20 md:py-28 overflow-hidden bg-dark-900">
+        <section className="relative py-16 sm:py-20 md:py-28 overflow-hidden bg-gray-50 dark:bg-dark-900">
           <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-violet-500/5 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
           <NeonGridLines />
@@ -454,11 +455,11 @@ export default function Home() {
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <RevealOnScroll>
               <div className="text-center mb-10 sm:mb-14">
-                <h2 className="text-3xl sm:text-4xl font-semibold mb-3 sm:mb-4 text-white">
+                <h2 className="text-3xl sm:text-4xl font-semibold mb-3 sm:mb-4 text-gray-900 dark:text-white">
                   Built for{' '}
                   <span className="text-gradient">Smart Investors</span>
                 </h2>
-                <p className="text-base sm:text-lg text-dark-300 max-w-2xl mx-auto">
+                <p className="text-base sm:text-lg text-gray-600 dark:text-dark-300 max-w-2xl mx-auto">
                   From bot discovery to transparent statistics and social copy trading — passive income
                   without the complexity.
                 </p>
@@ -471,28 +472,28 @@ export default function Home() {
                 const Icon = feature.icon;
                 return (
                   <RevealOnScroll key={feature.title} delay={i * 0.06}>
-                    <div className={`group relative h-full rounded-2xl bg-gradient-to-br from-dark-800/80 to-dark-900/80 border border-dark-700/50 hover:border-primary-500/30 transition-all duration-500 overflow-hidden p-5 md:p-6 ${feature.span}`}>
+                    <div className={`group relative h-full rounded-2xl bg-gradient-to-br from-white/80 to-gray-50/80 dark:from-dark-800/80 dark:to-dark-900/80 border border-gray-200/50 dark:border-dark-700/50 hover:border-primary-500/30 transition-all duration-500 overflow-hidden p-5 md:p-6 ${feature.span}`}>
                       <div className="absolute top-0 right-0 w-[160px] h-[160px] bg-primary-500/0 group-hover:bg-primary-500/5 rounded-full blur-[60px] pointer-events-none transition-colors duration-500" />
 
                       {/* Big number accent */}
                       {feature.bigNumber && (
-                        <span className="absolute top-3 right-4 text-5xl font-bold text-dark-800/30 select-none pointer-events-none leading-none">
+                        <span className="absolute top-3 right-4 text-5xl font-bold text-gray-200/40 dark:text-dark-800/30 select-none pointer-events-none leading-none">
                           {feature.bigNumber}
                         </span>
                       )}
 
                       <div className="relative z-10">
-                        <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${feature.iconGradient} border border-dark-600/30 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:shadow-lg transition-all duration-300`}>
+                        <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${feature.iconGradient} border border-gray-200/30 dark:border-dark-600/30 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:shadow-lg transition-all duration-300`}>
                           <Icon className={`w-5 h-5 ${feature.iconColor}`} />
                         </div>
-                        <h3 className="text-sm font-semibold text-white mb-1.5">{feature.title}</h3>
-                        <p className="text-dark-400 text-xs leading-relaxed">{feature.description}</p>
+                        <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-1.5">{feature.title}</h3>
+                        <p className="text-gray-500 dark:text-dark-400 text-xs leading-relaxed">{feature.description}</p>
 
                         {/* Tags */}
                         {feature.tags && (
                           <div className="flex flex-wrap gap-1.5 mt-3">
                             {feature.tags.map((tag) => (
-                              <span key={tag} className="px-2 py-0.5 text-[10px] font-medium rounded-full bg-white/5 text-dark-300 border border-dark-700/50">
+                              <span key={tag} className="px-2 py-0.5 text-[10px] font-medium rounded-full bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-dark-300 border border-gray-200 dark:border-dark-700/50">
                                 {tag}
                               </span>
                             ))}
@@ -518,8 +519,8 @@ export default function Home() {
                         {/* Currency marquee */}
                         {feature.visual === 'currencies' && (
                           <div className="relative mt-3 -mx-5 md:-mx-6 overflow-hidden">
-                            <div className="absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-dark-800/80 to-transparent z-10 pointer-events-none" />
-                            <div className="absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-dark-800/80 to-transparent z-10 pointer-events-none" />
+                            <div className="absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-white/80 dark:from-dark-800/80 to-transparent z-10 pointer-events-none" />
+                            <div className="absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-white/80 dark:from-dark-800/80 to-transparent z-10 pointer-events-none" />
                             <Marquee speed={18} pauseOnHover={false} gap={20}>
                               {[
                                 { name: 'USDT', img: '/currency/Tether.svg' },
@@ -532,7 +533,7 @@ export default function Home() {
                               ].map((c) => (
                                 <div key={c.name} className="flex items-center gap-1.5 px-0.5">
                                   <img src={c.img} alt={c.name} className="w-4 h-4 rounded-full" />
-                                  <span className="text-[10px] font-medium text-dark-400 whitespace-nowrap">{c.name}</span>
+                                  <span className="text-[10px] font-medium text-gray-500 dark:text-dark-400 whitespace-nowrap">{c.name}</span>
                                 </div>
                               ))}
                             </Marquee>
@@ -560,10 +561,10 @@ export default function Home() {
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10 sm:mb-14">
             <RevealOnScroll>
               <div className="text-center">
-                <h2 className="text-3xl sm:text-4xl font-semibold mb-3 sm:mb-4 text-white">
+                <h2 className="text-3xl sm:text-4xl font-semibold mb-3 sm:mb-4 text-gray-900 dark:text-white">
                   Trusted by <span className="text-gradient">Investors</span>
                 </h2>
-                <p className="text-base sm:text-lg text-dark-300 max-w-2xl mx-auto">
+                <p className="text-base sm:text-lg text-gray-600 dark:text-dark-300 max-w-2xl mx-auto">
                   Real feedback from our community of active copiers.
                 </p>
               </div>
@@ -572,52 +573,52 @@ export default function Home() {
 
           {/* Row 1 — left (5 testimonials) */}
           <div className="relative">
-            <div className="absolute left-0 top-0 bottom-0 w-[40%] bg-gradient-to-r from-dark-900 via-dark-900/70 to-transparent z-10 pointer-events-none" />
-            <div className="absolute right-0 top-0 bottom-0 w-[40%] bg-gradient-to-l from-dark-900 via-dark-900/70 to-transparent z-10 pointer-events-none" />
+            <div className="absolute left-0 top-0 bottom-0 w-[40%] bg-gradient-to-r from-white dark:from-dark-900 via-white/70 dark:via-dark-900/70 to-transparent z-10 pointer-events-none" />
+            <div className="absolute right-0 top-0 bottom-0 w-[40%] bg-gradient-to-l from-white dark:from-dark-900 via-white/70 dark:via-dark-900/70 to-transparent z-10 pointer-events-none" />
             <Marquee speed={30} direction="left" gap={0}>
               {testimonials.slice(0, 5).map((t) => (
-                <div key={t.name} className="group w-[360px] px-6 py-5 border-r border-dark-700/40 transition-colors duration-300 hover:bg-primary-500/[0.04]">
+                <div key={t.name} className="group w-[360px] px-6 py-5 border-r border-gray-200/40 dark:border-dark-700/40 transition-colors duration-300 hover:bg-primary-500/[0.04]">
                   <div className="flex items-center gap-3 mb-3">
                     <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${t.gradient} flex items-center justify-center text-xs font-bold text-white shrink-0`}>
                       {t.avatar}
                     </div>
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-white truncate">{t.name}</p>
-                      <p className="text-[11px] text-dark-400">Verified Copier</p>
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{t.name}</p>
+                      <p className="text-[11px] text-gray-500 dark:text-dark-400">Verified Copier</p>
                     </div>
                     <div className="ml-auto px-2 py-0.5 bg-green-500/10 border border-green-500/20 rounded-md shrink-0">
                       <span className="text-[10px] font-semibold text-green-400 whitespace-nowrap">{t.stats}</span>
                     </div>
                   </div>
-                  <p className="text-dark-400 text-xs leading-relaxed">&ldquo;{t.text}&rdquo;</p>
+                  <p className="text-gray-500 dark:text-dark-400 text-xs leading-relaxed">&ldquo;{t.text}&rdquo;</p>
                   <div className="mt-3 h-0.5 w-0 group-hover:w-full bg-gradient-to-r from-primary-500 to-accent-500 transition-all duration-700 rounded-full" />
                 </div>
               ))}
             </Marquee>
           </div>
 
-          <div className="border-t border-dark-700/40" />
+          <div className="border-t border-gray-200/40 dark:border-dark-700/40" />
 
           {/* Row 2 — right (4 testimonials) */}
           <div className="relative">
-            <div className="absolute left-0 top-0 bottom-0 w-[40%] bg-gradient-to-r from-dark-900 via-dark-900/70 to-transparent z-10 pointer-events-none" />
-            <div className="absolute right-0 top-0 bottom-0 w-[40%] bg-gradient-to-l from-dark-900 via-dark-900/70 to-transparent z-10 pointer-events-none" />
+            <div className="absolute left-0 top-0 bottom-0 w-[40%] bg-gradient-to-r from-white dark:from-dark-900 via-white/70 dark:via-dark-900/70 to-transparent z-10 pointer-events-none" />
+            <div className="absolute right-0 top-0 bottom-0 w-[40%] bg-gradient-to-l from-white dark:from-dark-900 via-white/70 dark:via-dark-900/70 to-transparent z-10 pointer-events-none" />
             <Marquee speed={25} direction="right" gap={0}>
               {testimonials.slice(5, 9).map((t) => (
-                <div key={t.name} className="group w-[360px] px-6 py-5 border-r border-dark-700/40 transition-colors duration-300 hover:bg-primary-500/[0.04]">
+                <div key={t.name} className="group w-[360px] px-6 py-5 border-r border-gray-200/40 dark:border-dark-700/40 transition-colors duration-300 hover:bg-primary-500/[0.04]">
                   <div className="flex items-center gap-3 mb-3">
                     <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${t.gradient} flex items-center justify-center text-xs font-bold text-white shrink-0`}>
                       {t.avatar}
                     </div>
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-white truncate">{t.name}</p>
-                      <p className="text-[11px] text-dark-400">Verified Copier</p>
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{t.name}</p>
+                      <p className="text-[11px] text-gray-500 dark:text-dark-400">Verified Copier</p>
                     </div>
                     <div className="ml-auto px-2 py-0.5 bg-green-500/10 border border-green-500/20 rounded-md shrink-0">
                       <span className="text-[10px] font-semibold text-green-400 whitespace-nowrap">{t.stats}</span>
                     </div>
                   </div>
-                  <p className="text-dark-400 text-xs leading-relaxed">&ldquo;{t.text}&rdquo;</p>
+                  <p className="text-gray-500 dark:text-dark-400 text-xs leading-relaxed">&ldquo;{t.text}&rdquo;</p>
                   <div className="mt-3 h-0.5 w-0 group-hover:w-full bg-gradient-to-r from-primary-500 to-accent-500 transition-all duration-700 rounded-full" />
                 </div>
               ))}
@@ -691,7 +692,7 @@ export default function Home() {
         </section>
 
         {/* ── Security & Trust ── */}
-        <section className="relative py-16 sm:py-24 bg-dark-900 overflow-hidden">
+        <section className="relative py-16 sm:py-24 bg-white dark:bg-dark-900 overflow-hidden">
           <div className="absolute inset-0 pointer-events-none">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary-500/5 rounded-full blur-3xl" />
           </div>
@@ -706,10 +707,10 @@ export default function Home() {
                   </span>
                   <div className="w-8 h-0.5 bg-primary-500" />
                 </div>
-                <h2 className="text-3xl sm:text-4xl font-semibold mb-3 sm:mb-4 text-white">
+                <h2 className="text-3xl sm:text-4xl font-semibold mb-3 sm:mb-4 text-gray-900 dark:text-white">
                   Built for <span className="text-gradient">Trust</span>
                 </h2>
-                <p className="text-base sm:text-lg text-dark-300 max-w-2xl mx-auto">
+                <p className="text-base sm:text-lg text-gray-600 dark:text-dark-300 max-w-2xl mx-auto">
                   Enterprise-grade security with full transparency.
                   Your investments are always protected.
                 </p>
@@ -728,11 +729,11 @@ export default function Home() {
                     <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-500/15 to-accent-500/15 border border-primary-500/20 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-primary-500/10 transition-all duration-300">
                       <Icon className="w-7 h-7 text-primary-400" />
                     </div>
-                    <h3 className="text-xl font-semibold text-white mb-3">{feature.title}</h3>
-                    <p className="text-dark-300 leading-relaxed mb-4">{feature.description}</p>
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">{feature.title}</h3>
+                    <p className="text-gray-600 dark:text-dark-300 leading-relaxed mb-4">{feature.description}</p>
                     <ul className="space-y-2">
                       {feature.items.map((item) => (
-                        <li key={item} className="flex items-center gap-2 text-sm text-dark-200">
+                        <li key={item} className="flex items-center gap-2 text-sm text-gray-700 dark:text-dark-200">
                           <Check className="w-4 h-4 text-green-400 shrink-0" />
                           {item}
                         </li>
@@ -752,14 +753,14 @@ export default function Home() {
           <FAQ limit={5} />
         </div>
         {/* ── Blog / Insights ── */}
-        <section className="relative py-16 sm:py-20 bg-dark-900 border-t border-dark-800/50 overflow-hidden">
+        <section className="relative py-16 sm:py-20 bg-gray-50 dark:bg-dark-900 border-t border-gray-100 dark:border-dark-800/50 overflow-hidden">
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <RevealOnScroll>
               <div className="text-center mb-10 sm:mb-12">
-                <h2 className="text-3xl sm:text-4xl font-semibold mb-3 sm:mb-4 text-white">
+                <h2 className="text-3xl sm:text-4xl font-semibold mb-3 sm:mb-4 text-gray-900 dark:text-white">
                   Latest <span className="text-gradient">Insights</span>
                 </h2>
-                <p className="text-base sm:text-lg text-dark-300 max-w-2xl mx-auto">
+                <p className="text-base sm:text-lg text-gray-600 dark:text-dark-300 max-w-2xl mx-auto">
                   Learn about copy trading strategies, bot analytics, and platform tips.
                 </p>
               </div>
@@ -769,17 +770,17 @@ export default function Home() {
               {homeArticles.map((article, i) => (
                 <RevealOnScroll key={article.title} delay={i * 0.1}>
                   <a href="/blog" className="group block h-full">
-                    <div className="h-full p-6 bg-dark-800/50 border border-dark-700/50 rounded-2xl hover:border-primary-500/30 transition-all duration-300 flex flex-col">
+                    <div className="h-full p-6 bg-white/80 dark:bg-dark-800/50 border border-gray-200/50 dark:border-dark-700/50 rounded-2xl hover:border-primary-500/30 transition-all duration-300 flex flex-col">
                       <div className="inline-flex self-start px-2.5 py-1 bg-primary-500/10 border border-primary-500/30 rounded-full text-xs font-semibold text-primary-400 mb-4">
                         {article.category}
                       </div>
-                      <h3 className="text-base font-bold text-white mb-2 group-hover:text-primary-400 transition-colors line-clamp-2">
+                      <h3 className="text-base font-bold text-gray-900 dark:text-white mb-2 group-hover:text-primary-400 transition-colors line-clamp-2">
                         {article.title}
                       </h3>
-                      <p className="text-sm text-dark-300 leading-relaxed flex-1 mb-4 line-clamp-3">
+                      <p className="text-sm text-gray-600 dark:text-dark-300 leading-relaxed flex-1 mb-4 line-clamp-3">
                         {article.excerpt}
                       </p>
-                      <div className="flex items-center justify-between text-xs text-dark-500">
+                      <div className="flex items-center justify-between text-xs text-gray-400 dark:text-dark-500">
                         <span>{article.date}</span>
                         <span>{article.readTime}</span>
                       </div>

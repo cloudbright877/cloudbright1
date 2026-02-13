@@ -136,7 +136,7 @@ export function LivePositionTicker({ startIndex = 0 }: { startIndex?: number }) 
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -30 }}
               transition={{ duration: 0.4, ease: 'easeOut' }}
-              className="backdrop-blur-sm bg-dark-800/60 border border-dark-700/50 rounded-xl pt-4 px-4 overflow-hidden"
+              className="backdrop-blur-sm bg-white/90 dark:bg-dark-800/60 border border-gray-200/50 dark:border-dark-700/50 rounded-xl pt-4 px-4 overflow-hidden"
             >
               {/* Header: LIVE · Bot Name */}
               <div className="flex items-center gap-2 mb-3">
@@ -145,8 +145,8 @@ export function LivePositionTicker({ startIndex = 0 }: { startIndex?: number }) 
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-green-400" />
                 </span>
                 <span className="text-xs font-semibold text-green-400 uppercase tracking-wider">Live</span>
-                <span className="text-dark-500 text-xs">·</span>
-                <span className="text-xs text-dark-300 font-medium">{botName}</span>
+                <span className="text-gray-300 dark:text-dark-500 text-xs">·</span>
+                <span className="text-xs text-gray-500 dark:text-dark-300 font-medium">{botName}</span>
               </div>
 
               {/* Side/Leverage + Pair + Duration */}
@@ -159,19 +159,19 @@ export function LivePositionTicker({ startIndex = 0 }: { startIndex?: number }) 
                   }`}>
                     {position.side} ×{position.leverage}
                   </div>
-                  <span className="font-bold text-white text-sm">{position.pair}</span>
+                  <span className="font-bold text-gray-900 dark:text-white text-sm">{position.pair}</span>
                 </div>
-                <div className="flex items-center gap-1 text-xs text-dark-400">
+                <div className="flex items-center gap-1 text-xs text-gray-400 dark:text-dark-400">
                   <Clock className="w-3 h-3" />
                   {formatDuration(elapsed)}
                 </div>
               </div>
 
               {/* Entry → Current price */}
-              <div className="flex items-center justify-between mb-2 text-xs">
+              <div className="flex items-center justify-between mb-2 text-xs text-gray-900 dark:text-white">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-dark-400">Entry</span>
-                  <span className="font-mono text-white">${formatPrice(position.entryPrice)}</span>
+                  <span className="text-gray-400 dark:text-dark-400">Entry</span>
+                  <span className="font-mono text-gray-900 dark:text-white">${formatPrice(position.entryPrice)}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   {isPositive ? (
@@ -179,17 +179,15 @@ export function LivePositionTicker({ startIndex = 0 }: { startIndex?: number }) 
                   ) : (
                     <ArrowDownRight className="w-3 h-3 text-red-400" />
                   )}
-                  <span className="text-dark-400">Current</span>
+                  <span className="text-gray-400 dark:text-dark-400">Current</span>
                   <motion.span
                     key={`price-${posIndex}-${priceKeyRef.current}`}
                     className="font-mono"
-                    initial={{ color: 'rgb(255, 255, 255)' }}
-                    animate={{ color: [
-                      'rgb(255, 255, 255)',
-                      priceDirection === 'up' ? 'rgb(74, 222, 128)' : 'rgb(248, 113, 113)',
-                      priceDirection === 'up' ? 'rgb(74, 222, 128)' : 'rgb(248, 113, 113)',
-                      'rgb(255, 255, 255)',
-                    ]}}
+                    animate={{
+                      color: priceDirection === 'up'
+                        ? ['currentColor', 'rgb(74, 222, 128)', 'rgb(74, 222, 128)', 'currentColor']
+                        : ['currentColor', 'rgb(248, 113, 113)', 'rgb(248, 113, 113)', 'currentColor'],
+                    }}
                     transition={{ duration: 1.5, times: [0, 0.2, 0.8, 1], ease: 'easeInOut' }}
                   >
                     ${formatPrice(currentPrice)}
@@ -200,12 +198,12 @@ export function LivePositionTicker({ startIndex = 0 }: { startIndex?: number }) 
               {/* SL · TP */}
               <div className="flex items-center gap-3 mb-3 text-xs">
                 <div className="flex items-center gap-1">
-                  <span className="text-dark-500">SL</span>
+                  <span className="text-gray-400 dark:text-dark-500">SL</span>
                   <span className="font-mono text-red-400/80">${formatPrice(position.stopLoss)}</span>
                 </div>
-                <span className="text-dark-600">·</span>
+                <span className="text-gray-300 dark:text-dark-600">·</span>
                 <div className="flex items-center gap-1">
-                  <span className="text-dark-500">TP</span>
+                  <span className="text-gray-400 dark:text-dark-500">TP</span>
                   <span className="font-mono text-green-400/80">${formatPrice(position.takeProfit)}</span>
                 </div>
               </div>
@@ -213,7 +211,7 @@ export function LivePositionTicker({ startIndex = 0 }: { startIndex?: number }) 
               {/* P&L */}
               <motion.div
                 key={`pnl-${posIndex}-${priceKeyRef.current}`}
-                className="mt-3 -mx-4 px-4 py-3 border-t border-dark-700/50"
+                className="mt-3 -mx-4 px-4 py-3 border-t border-gray-200/50 dark:border-dark-700/50"
                 initial={{ backgroundColor: 'rgba(0,0,0,0)' }}
                 animate={{ backgroundColor: [
                   'rgba(0,0,0,0)',
@@ -224,7 +222,7 @@ export function LivePositionTicker({ startIndex = 0 }: { startIndex?: number }) 
                 transition={{ duration: 1.5, times: [0, 0.2, 0.8, 1], ease: 'easeInOut' }}
               >
                 <div className="flex items-center justify-center gap-3">
-                  <span className="text-xs text-dark-400">P&L</span>
+                  <span className="text-xs text-gray-400 dark:text-dark-400">P&L</span>
                   <span className={`font-mono text-sm font-bold ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
                     {isPositive ? '+' : '-'}${Math.abs(livePnl.pnl).toFixed(2)}
                   </span>

@@ -127,8 +127,8 @@ export default function MarketplacePage() {
             {/* Filters */}
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-10">
               <div className="flex items-center gap-2">
-                <SlidersHorizontal className="w-4 h-4 text-dark-400" />
-                <span className="text-sm text-dark-400 mr-2">Risk:</span>
+                <SlidersHorizontal className="w-4 h-4 text-gray-500 dark:text-dark-400" />
+                <span className="text-sm text-gray-500 dark:text-dark-400 mr-2">Risk:</span>
                 {['all', 'low', 'medium', 'high'].map((risk) => (
                   <button
                     key={risk}
@@ -145,7 +145,7 @@ export default function MarketplacePage() {
               </div>
 
               <div className="flex items-center gap-2">
-                <span className="text-sm text-dark-400 mr-2">Sort:</span>
+                <span className="text-sm text-gray-500 dark:text-dark-400 mr-2">Sort:</span>
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as SortOption)}
@@ -170,12 +170,12 @@ export default function MarketplacePage() {
                       <div className="p-6 h-full flex flex-col">
                         {/* Header */}
                         <div className="flex items-start gap-3 mb-3">
-                          <div className="w-10 h-10 rounded-lg bg-dark-700/50 overflow-hidden flex-shrink-0">
+                          <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-dark-700/50 overflow-hidden flex-shrink-0">
                             <Image src={bot.icon} alt={bot.name} width={40} height={40} className="rounded-lg" />
                           </div>
                           <div className="min-w-0">
-                            <h3 className="text-sm font-bold text-white leading-tight truncate">{bot.name}</h3>
-                            <span className="text-xs text-dark-400">{bot.tags[0]}</span>
+                            <h3 className="text-sm font-bold text-gray-900 dark:text-white leading-tight truncate">{bot.name}</h3>
+                            <span className="text-xs text-gray-500 dark:text-dark-400">{bot.tags[0]}</span>
                           </div>
                         </div>
 
@@ -195,24 +195,24 @@ export default function MarketplacePage() {
                         </div>
 
                         {/* Metrics */}
-                        <div className="grid grid-cols-2 gap-3 pt-3 border-t border-white/5 mt-auto">
+                        <div className="grid grid-cols-2 gap-3 pt-3 border-t border-gray-100 dark:border-white/5 mt-auto">
                           <div>
-                            <span className="text-[11px] text-dark-400 uppercase tracking-wider">30d Return</span>
+                            <span className="text-[11px] text-gray-500 dark:text-dark-400 uppercase tracking-wider">30d Return</span>
                             <p className="text-lg font-bold text-green-400">+{bot.stats.return30d}%</p>
                           </div>
                           <div>
-                            <span className="text-[11px] text-dark-400 uppercase tracking-wider">Copiers</span>
-                            <p className="text-lg font-bold text-white flex items-center gap-1">
-                              <Users className="w-3.5 h-3.5 text-dark-400" />
+                            <span className="text-[11px] text-gray-500 dark:text-dark-400 uppercase tracking-wider">Copiers</span>
+                            <p className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-1">
+                              <Users className="w-3.5 h-3.5 text-gray-500 dark:text-dark-400" />
                               {bot.stats.copiers.toLocaleString()}
                             </p>
                           </div>
                           <div>
-                            <span className="text-[11px] text-dark-400 uppercase tracking-wider">Win Rate</span>
-                            <p className="text-sm font-semibold text-white">{bot.stats.winRate}%</p>
+                            <span className="text-[11px] text-gray-500 dark:text-dark-400 uppercase tracking-wider">Win Rate</span>
+                            <p className="text-sm font-semibold text-gray-900 dark:text-white">{bot.stats.winRate}%</p>
                           </div>
                           <div>
-                            <span className="text-[11px] text-dark-400 uppercase tracking-wider">Max DD</span>
+                            <span className="text-[11px] text-gray-500 dark:text-dark-400 uppercase tracking-wider">Max DD</span>
                             <p className="text-sm font-semibold text-red-400">{bot.stats.maxDD}%</p>
                           </div>
                         </div>
@@ -232,7 +232,7 @@ export default function MarketplacePage() {
             </div>
 
             {/* Disclaimer */}
-            <p className="text-center text-xs text-dark-500 mt-8 max-w-xl mx-auto">
+            <p className="text-center text-xs text-gray-400 dark:text-dark-500 mt-8 max-w-xl mx-auto">
               Past performance does not guarantee future results. All metrics shown are historical and may change.
             </p>
           </div>

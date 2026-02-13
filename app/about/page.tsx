@@ -7,9 +7,8 @@ import { RevealOnScroll } from '@/components/animations/RevealOnScroll';
 import { GlowButton } from '@/components/animations/GlowButton';
 import { AnimatedBorderGrid } from '@/components/animations/AnimatedBorderGrid';
 import { TiltCard } from '@/components/animations/TiltCard';
-import { ShieldCheck, Lock, Building2, Building, Check, Globe, ArrowRight, Smartphone, Sparkles, Users, Layers, Landmark, Rocket, Shield, Zap } from 'lucide-react';
+import { ShieldCheck, Lock, Building2, Building, Check, Globe, ArrowRight, Smartphone, Sparkles, Users, Layers, Landmark, Shield, Zap } from 'lucide-react';
 import Image from 'next/image';
-import Link from 'next/link';
 
 const trustSignals = [
   {
@@ -255,7 +254,7 @@ export default function AboutPage() {
 
       <main className="bg-white dark:bg-dark-900">
         {/* ══════════ WHO WE ARE ══════════ */}
-        <section className="relative py-16 sm:py-24 bg-gradient-to-b from-dark-900 via-dark-800 to-dark-900 overflow-hidden">
+        <section className="relative py-16 sm:py-24 bg-gradient-to-b from-white via-gray-50 to-white dark:from-dark-900 dark:via-dark-800 dark:to-dark-900 overflow-hidden">
           {/* Dot grid background */}
           <div
             className="absolute inset-0 pointer-events-none"
@@ -282,13 +281,13 @@ export default function AboutPage() {
 
                 <RevealOnScroll delay={0.1}>
                   <div className="w-2.5 h-2.5 rounded-full bg-primary-500 mb-3" />
-                  <h2 className="text-3xl sm:text-4xl font-semibold text-white leading-[1.05] tracking-tight mb-5">
+                  <h2 className="text-3xl sm:text-4xl font-semibold text-gray-900 dark:text-white leading-[1.05] tracking-tight mb-5">
                     Leading Global Copy Trading Platform
                   </h2>
                 </RevealOnScroll>
 
                 <RevealOnScroll delay={0.15}>
-                  <p className="text-dark-400 text-[15px] leading-[1.7] mb-8 max-w-[520px]">
+                  <p className="text-gray-500 dark:text-dark-400 text-[15px] leading-[1.7] mb-8 max-w-[520px]">
                     After years of building institutional trading systems, our team launched Cloudbright
                     to give everyday investors access to the same automated strategies used by hedge funds
                     and professional institutions.
@@ -306,21 +305,21 @@ export default function AboutPage() {
                         <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center shrink-0">
                           <Check className="w-3.5 h-3.5 text-white" />
                         </div>
-                        <span className="text-white text-[15px] font-bold">{item}</span>
+                        <span className="text-gray-900 dark:text-white text-[15px] font-bold">{item}</span>
                       </div>
                     ))}
                   </div>
                 </RevealOnScroll>
 
                 <RevealOnScroll delay={0.25}>
-                  <div className="bg-dark-800/50 rounded-2xl p-6 grid grid-cols-[1fr_auto] gap-5 items-center mb-9 max-w-[520px] border border-dark-700/30">
-                    <p className="text-dark-300 text-sm leading-relaxed italic">
+                  <div className="bg-white/80 dark:bg-dark-800/50 rounded-2xl p-6 grid grid-cols-[1fr_auto] gap-5 items-center mb-9 max-w-[520px] border border-gray-200/50 dark:border-dark-700/30">
+                    <p className="text-gray-600 dark:text-dark-300 text-sm leading-relaxed italic">
                       &ldquo;We believe every investor deserves access to professional trading strategies.
                       Our platform levels the playing field.&rdquo;
                     </p>
                     <div className="text-center">
                       <div className="text-primary-400 text-sm font-extrabold tracking-wider uppercase">Cloud Bright</div>
-                      <div className="text-dark-500 text-xs mt-0.5">Software Limited</div>
+                      <div className="text-gray-400 dark:text-dark-500 text-xs mt-0.5">Software Limited</div>
                       <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center mx-auto mt-2.5">
                         <span className="text-lg font-bold text-white">CB</span>
                       </div>
@@ -340,21 +339,21 @@ export default function AboutPage() {
                         <Globe className="w-5 h-5 text-white" />
                       </div>
                       <div>
-                        <div className="text-dark-500 text-xs">Crypto never sleeps</div>
-                        <div className="text-white text-base font-extrabold">24/7 Trading</div>
+                        <div className="text-gray-400 dark:text-dark-500 text-xs">Crypto never sleeps</div>
+                        <div className="text-gray-900 dark:text-white text-base font-extrabold">24/7 Trading</div>
                       </div>
                     </div>
                   </div>
                 </RevealOnScroll>
               </div>
 
-              {/* Right column: overlapping shapes */}
+              {/* Right column: overlapping shapes — desktop */}
               <div className="relative min-h-[500px] lg:min-h-[720px] hidden lg:block">
                 <div className="absolute top-5 left-[8%] z-[1]">
                   <RevealOnScroll delay={0.2}>
                     <TiltCard maxTilt={5} unstyled className="p-0">
                       <div
-                        className="overflow-hidden rounded-2xl"
+                        className="overflow-hidden rounded-2xl max-w-full"
                         style={{ width: 340, height: 560 }}
                       >
                         <Image
@@ -369,23 +368,11 @@ export default function AboutPage() {
                   </RevealOnScroll>
                 </div>
 
-                <div className="absolute -top-0.5 -right-0.5 z-[2] pointer-events-none" style={{ width: 196, height: 172, clipPath: 'polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)', background: '#0f172a' }} />
-                <div className="absolute top-1.5 right-1.5 z-[3]">
-                  <RevealOnScroll delay={0.35}>
-                    <TiltCard maxTilt={7} unstyled className="p-0">
-                      <div className="flex flex-col justify-center items-center" style={{ width: 180, height: 156, clipPath: 'polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)', background: 'linear-gradient(160deg, #0f172a, #1e293b, #334155, #1e293b)' }}>
-                        <Globe className="w-8 h-8 text-primary-400 mb-2" />
-                        <p className="text-[22px] font-extrabold text-white font-mono">40+</p>
-                        <p className="text-[10px] text-white/40 mt-0.5">Employees</p>
-                      </div>
-                    </TiltCard>
-                  </RevealOnScroll>
-                </div>
 
                 <div className="absolute bottom-12 -right-1 z-[3]">
                   <RevealOnScroll delay={0.5}>
                     <TiltCard maxTilt={6} unstyled className="p-0">
-                      <div className="overflow-hidden rounded-2xl" style={{ width: 320, height: 277 }}>
+                      <div className="overflow-hidden rounded-2xl max-w-full" style={{ width: 320, height: 277 }}>
                         <Image
                           src="/working-space-2.png"
                           alt="Cloudbright workspace"
@@ -398,27 +385,53 @@ export default function AboutPage() {
                   </RevealOnScroll>
                 </div>
               </div>
+
+              {/* Right column: mobile version */}
+              <div className="lg:hidden">
+                <RevealOnScroll delay={0.2}>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="overflow-hidden rounded-2xl">
+                      <Image
+                        src="/working-space-1.png"
+                        alt="Cloudbright workspace"
+                        width={340}
+                        height={560}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="overflow-hidden rounded-2xl self-end">
+                      <Image
+                        src="/working-space-2.png"
+                        alt="Cloudbright workspace"
+                        width={320}
+                        height={277}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </div>
+                </RevealOnScroll>
+              </div>
             </div>
           </div>
         </section>
 
         {/* Why Investors Choose Cloudbright */}
         <section
-          className="relative py-16 sm:py-24 overflow-hidden bg-fixed bg-cover bg-center"
+          className="relative py-16 sm:py-24 overflow-hidden bg-gray-50 dark:bg-fixed dark:bg-cover dark:bg-center"
           style={{ backgroundImage: 'url(/why-us2.webp)' }}
         >
-          <div className="absolute inset-0 bg-dark-900/70" />
-          <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-dark-900 to-transparent z-[1]" />
-          <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-dark-900 to-transparent z-[1]" />
+          <div className="absolute inset-0 bg-white dark:bg-dark-900/70" />
+          <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-white dark:from-dark-900 to-transparent z-[1]" />
+          <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white dark:from-dark-900 to-transparent z-[1]" />
 
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <RevealOnScroll>
               <div className="text-center mb-10 sm:mb-16">
-                <h2 className="text-3xl sm:text-4xl font-semibold mb-3 sm:mb-4 text-white">
+                <h2 className="text-3xl sm:text-4xl font-semibold mb-3 sm:mb-4 text-gray-900 dark:text-white">
                   Why Investors Choose{' '}
                   <span className="text-gradient">Cloudbright</span>
                 </h2>
-                <p className="text-base sm:text-lg text-dark-300 max-w-2xl mx-auto">
+                <p className="text-base sm:text-lg text-gray-600 dark:text-dark-300 max-w-2xl mx-auto">
                   We built the platform we&apos;d want to invest through ourselves.
                   Transparent, safe, and aligned with your success.
                 </p>
@@ -437,8 +450,8 @@ export default function AboutPage() {
                     <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-500/15 to-accent-500/15 border border-primary-500/20 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-primary-500/10 transition-all duration-300">
                       <Icon className="w-7 h-7 text-primary-400" />
                     </div>
-                    <h3 className="text-lg font-semibold text-white mb-3">{signal.title}</h3>
-                    <p className="text-dark-300 leading-relaxed">{signal.description}</p>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">{signal.title}</h3>
+                    <p className="text-gray-600 dark:text-dark-300 leading-relaxed">{signal.description}</p>
                     <div className="mt-4 h-0.5 w-0 group-hover:w-full bg-gradient-to-r from-primary-500 to-accent-500 transition-all duration-700 rounded-full" />
                   </AnimatedBorderGrid.Cell>
                 );
@@ -448,7 +461,7 @@ export default function AboutPage() {
         </section>
 
         {/* Team Section */}
-        <section className="relative py-16 sm:py-24 bg-dark-900 overflow-hidden">
+        <section className="relative py-16 sm:py-24 bg-white dark:bg-dark-900 overflow-hidden">
           <div
             className="absolute inset-0 pointer-events-none"
             style={{
@@ -470,11 +483,11 @@ export default function AboutPage() {
                   </span>
                   <div className="w-8 h-0.5 bg-primary-500" />
                 </div>
-                <h2 className="text-3xl sm:text-4xl font-semibold mb-3 sm:mb-4 text-white">
+                <h2 className="text-3xl sm:text-4xl font-semibold mb-3 sm:mb-4 text-gray-900 dark:text-white">
                   <span className="text-gradient">40+ Professionals</span> Across Four
                   Departments
                 </h2>
-                <p className="text-base sm:text-lg text-dark-300 max-w-2xl mx-auto">
+                <p className="text-base sm:text-lg text-gray-600 dark:text-dark-300 max-w-2xl mx-auto">
                   A multidisciplinary team of engineers, quants, security experts, and
                   community builders — united by the goal of making passive crypto income
                   accessible to everyone.
@@ -484,7 +497,7 @@ export default function AboutPage() {
 
             {/* CEO — featured card */}
             <RevealOnScroll delay={0.1}>
-              <div className="relative rounded-2xl border border-dark-700/50 bg-dark-800/50 backdrop-blur-sm overflow-hidden mb-10">
+              <div className="relative rounded-2xl border border-gray-200/50 dark:border-dark-700/50 bg-white/80 dark:bg-dark-800/50 backdrop-blur-sm overflow-hidden mb-10">
                 <div className="grid md:grid-cols-[320px_1fr] items-stretch">
                   {/* Photo */}
                   <div className="relative aspect-square md:aspect-auto md:min-h-[420px]">
@@ -501,24 +514,24 @@ export default function AboutPage() {
                     <span className="text-xs font-bold tracking-[0.25em] uppercase text-primary-400 mb-2">
                       {ceo.role}
                     </span>
-                    <h3 className="text-3xl sm:text-4xl font-semibold text-white mb-5">
+                    <h3 className="text-3xl sm:text-4xl font-semibold text-gray-900 dark:text-white mb-5">
                       {ceo.name}
                     </h3>
 
                     <div className="w-12 h-px bg-gradient-to-r from-primary-500 to-accent-500 mb-5" />
 
-                    <p className="text-dark-300 text-[15px] leading-[1.75] mb-4">
+                    <p className="text-gray-600 dark:text-dark-300 text-[15px] leading-[1.75] mb-4">
                       {ceo.bio}
                     </p>
-                    <p className="text-dark-300 text-[15px] leading-[1.75] mb-8">
+                    <p className="text-gray-600 dark:text-dark-300 text-[15px] leading-[1.75] mb-8">
                       {ceo.bio2}
                     </p>
 
                     <div className="grid grid-cols-2 gap-4">
                       {ceo.highlights.map((h) => (
-                        <div key={h.label} className="bg-dark-900/60 rounded-xl p-4 border border-dark-700/30">
-                          <div className="text-[11px] text-dark-500 uppercase tracking-wider mb-1">{h.label}</div>
-                          <div className="text-white text-sm font-medium">{h.value}</div>
+                        <div key={h.label} className="bg-gray-50/60 dark:bg-dark-900/60 rounded-xl p-4 border border-gray-200/30 dark:border-dark-700/30">
+                          <div className="text-[11px] text-gray-400 dark:text-dark-500 uppercase tracking-wider mb-1">{h.label}</div>
+                          <div className="text-gray-900 dark:text-white text-sm font-medium">{h.value}</div>
                         </div>
                       ))}
                     </div>
@@ -530,7 +543,7 @@ export default function AboutPage() {
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               {teamMembers.map((member, index) => (
                 <RevealOnScroll key={index} delay={index * 0.1}>
-                  <div className="relative h-full rounded-2xl border border-dark-700/50 bg-dark-800/50 backdrop-blur-sm overflow-hidden">
+                  <div className="relative h-full rounded-2xl border border-gray-200/50 dark:border-dark-700/50 bg-white/80 dark:bg-dark-800/50 backdrop-blur-sm overflow-hidden">
                     {/* Photo */}
                     <div className="relative w-full aspect-square">
                       <Image
@@ -543,19 +556,19 @@ export default function AboutPage() {
 
                     {/* Info */}
                     <div className="p-6 flex flex-col items-center text-center">
-                      <h3 className="text-lg font-semibold text-white mb-1">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
                         {member.name}
                       </h3>
                       <span className="text-sm font-medium text-primary-400 mb-1">
                         {member.role}
                       </span>
-                      <span className="text-[11px] text-dark-500 uppercase tracking-wider mb-4">
+                      <span className="text-[11px] text-gray-400 dark:text-dark-500 uppercase tracking-wider mb-4">
                         {member.department}
                       </span>
 
                       <div className="w-10 h-px bg-gradient-to-r from-primary-500/40 to-accent-500/40 mb-4" />
 
-                      <p className="text-dark-300 text-sm leading-relaxed">
+                      <p className="text-gray-600 dark:text-dark-300 text-sm leading-relaxed">
                         {member.description}
                       </p>
                     </div>
@@ -694,7 +707,7 @@ export default function AboutPage() {
         </section>
 
         {/* ══════════ ROADMAP — Fixed-height scrollable timeline ══════════ */}
-        <section className="relative h-screen max-h-[900px] min-h-[600px] bg-dark-900 flex flex-col overflow-hidden">
+        <section className="relative h-screen max-h-[900px] min-h-[450px] sm:min-h-[600px] bg-white dark:bg-dark-900 flex flex-col overflow-hidden">
           {/* Background glows */}
           <div className="absolute inset-0 pointer-events-none">
             <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[600px] h-[600px] bg-primary-500/5 rounded-full blur-3xl" />
@@ -706,10 +719,10 @@ export default function AboutPage() {
             <span className="text-primary-400 font-semibold text-sm uppercase tracking-wide">
               Our Journey &amp; What&apos;s Next
             </span>
-            <h2 className="text-3xl sm:text-4xl font-semibold mt-4 mb-3 sm:mb-4 text-white">
+            <h2 className="text-3xl sm:text-4xl font-semibold mt-4 mb-3 sm:mb-4 text-gray-900 dark:text-white">
               <span className="text-gradient">Roadmap</span>
             </h2>
-            <p className="text-base sm:text-lg text-dark-300 max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg text-gray-600 dark:text-dark-300 max-w-2xl mx-auto">
               From founding to the future — every milestone on our path to
               building the leading copy-trading platform.
             </p>
@@ -718,7 +731,7 @@ export default function AboutPage() {
           {/* Scrollable timeline area */}
           <div className="relative z-10 flex-1 min-h-0">
             {/* Bottom fade */}
-            <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-dark-900 to-transparent z-30 pointer-events-none" />
+            <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white dark:from-dark-900 to-transparent z-30 pointer-events-none" />
 
             <div className="h-full max-w-2xl mx-auto overflow-y-auto scrollbar-thin scrollbar-thumb-dark-700 scrollbar-track-transparent">
               <div className="relative pt-8 pb-16 px-4">
@@ -728,7 +741,7 @@ export default function AboutPage() {
                 {roadmapTimeline.map((yearGroup) => (
                   <div key={yearGroup.year} className="relative mb-4">
                     {/* Sticky year label */}
-                    <h3 className="sticky top-0 z-20 text-[1.1rem] md:text-[1.25rem] font-extralight tracking-[0.2em] text-dark-500 mb-8 select-none py-2">
+                    <h3 className="sticky top-0 z-20 text-[1.1rem] md:text-[1.25rem] font-extralight tracking-[0.2em] text-gray-400 dark:text-dark-500 mb-8 select-none py-2">
                       {yearGroup.year}
                     </h3>
 
@@ -749,10 +762,10 @@ export default function AboutPage() {
                           <div
                             className={`absolute left-[21px] md:left-[25px] top-[6px] w-[14px] h-[14px] rounded-full z-[2] group-hover:scale-125 transition-transform duration-300 ${
                               isCompleted
-                                ? 'bg-green-500 ring-[3px] ring-dark-900'
+                                ? 'bg-green-500 ring-[3px] ring-white dark:ring-dark-900'
                                 : isCurrent
                                 ? 'bg-primary-400 ring-[3px] ring-primary-400/30 animate-pulse'
-                                : 'bg-gradient-to-br from-primary-500/60 to-accent-500/60 ring-[3px] ring-dark-900'
+                                : 'bg-gradient-to-br from-primary-500/60 to-accent-500/60 ring-[3px] ring-white dark:ring-dark-900'
                             }`}
                           />
 
@@ -762,7 +775,7 @@ export default function AboutPage() {
                               <Icon className="w-5 h-5 text-primary-400" />
                             </div>
                             <div className="flex items-center gap-2.5 flex-wrap">
-                              <h4 className="text-lg font-semibold text-white">
+                              <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
                                 {item.title}
                               </h4>
                               {isCompleted && (
@@ -784,9 +797,9 @@ export default function AboutPage() {
                             {item.features.map((feature) => (
                               <li
                                 key={feature}
-                                className="flex items-start gap-2.5 text-dark-300 text-[0.95rem] leading-relaxed"
+                                className="flex items-start gap-2.5 text-gray-600 dark:text-dark-300 text-[0.95rem] leading-relaxed"
                               >
-                                <span className="text-dark-500 mt-[7px] text-[6px] flex-shrink-0">
+                                <span className="text-gray-400 dark:text-dark-500 mt-[7px] text-[6px] flex-shrink-0">
                                   ●
                                 </span>
                                 {feature}
@@ -795,7 +808,7 @@ export default function AboutPage() {
                           </ul>
 
                           {/* Quarter label */}
-                          <span className="text-dark-600 text-xs font-medium tracking-wide mt-3 block">
+                          <span className="text-gray-400 dark:text-dark-600 text-xs font-medium tracking-wide mt-3 block">
                             {item.quarter}
                           </span>
                         </motion.div>

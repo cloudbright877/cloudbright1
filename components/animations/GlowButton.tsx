@@ -44,7 +44,7 @@ export function GlowButton({
   const secondaryClasses = `
     bg-transparent
     border-2 border-primary-500/50
-    text-primary-400
+    text-primary-600 dark:text-primary-400
     hover:bg-primary-500/10
     hover:border-primary-400
   `;

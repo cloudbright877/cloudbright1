@@ -191,9 +191,16 @@ function hexPoints(cx: number, cy: number) {
     .join(' ');
 }
 
-const hexSvg = `<svg xmlns='http://www.w3.org/2000/svg' width='${HEX_W}' height='${HEX_PAT_H}'><polygon points='${hexPoints(HEX_W / 2, HEX_R)}' fill='none' stroke='rgba(139,92,246,0.06)' stroke-width='0.8'/><polygon points='${hexPoints(0, HEX_R * 2.5)}' fill='none' stroke='rgba(139,92,246,0.06)' stroke-width='0.8'/><polygon points='${hexPoints(HEX_W, HEX_R * 2.5)}' fill='none' stroke='rgba(139,92,246,0.06)' stroke-width='0.8'/></svg>`;
+const hexSvgDark = `<svg xmlns='http://www.w3.org/2000/svg' width='${HEX_W}' height='${HEX_PAT_H}'><polygon points='${hexPoints(HEX_W / 2, HEX_R)}' fill='none' stroke='rgba(139,92,246,0.06)' stroke-width='0.8'/><polygon points='${hexPoints(0, HEX_R * 2.5)}' fill='none' stroke='rgba(139,92,246,0.06)' stroke-width='0.8'/><polygon points='${hexPoints(HEX_W, HEX_R * 2.5)}' fill='none' stroke='rgba(139,92,246,0.06)' stroke-width='0.8'/></svg>`;
+
+const hexSvgLight = `<svg xmlns='http://www.w3.org/2000/svg' width='${HEX_W}' height='${HEX_PAT_H}'><polygon points='${hexPoints(HEX_W / 2, HEX_R)}' fill='none' stroke='rgba(139,92,246,0.12)' stroke-width='0.8'/><polygon points='${hexPoints(0, HEX_R * 2.5)}' fill='none' stroke='rgba(139,92,246,0.12)' stroke-width='0.8'/><polygon points='${hexPoints(HEX_W, HEX_R * 2.5)}' fill='none' stroke='rgba(139,92,246,0.12)' stroke-width='0.8'/></svg>`;
 
 export const hexGridBg = {
-  backgroundImage: `url("data:image/svg+xml,${encodeURIComponent(hexSvg)}")`,
+  backgroundImage: `url("data:image/svg+xml,${encodeURIComponent(hexSvgDark)}")`,
+  backgroundSize: `${HEX_W}px ${HEX_PAT_H}px`,
+} as const;
+
+export const hexGridBgLight = {
+  backgroundImage: `url("data:image/svg+xml,${encodeURIComponent(hexSvgLight)}")`,
   backgroundSize: `${HEX_W}px ${HEX_PAT_H}px`,
 } as const;

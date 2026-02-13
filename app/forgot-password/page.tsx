@@ -8,7 +8,7 @@ export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-dark-950 via-dark-900 to-dark-950 flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950 flex items-center justify-center px-4 py-12">
       {/* Background effects */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary-500/10 rounded-full blur-3xl animate-pulse" />
@@ -21,7 +21,7 @@ export default function ForgotPasswordPage() {
         className="w-full max-w-md relative z-10"
       >
         {/* Card */}
-        <div className="bg-dark-900/80 backdrop-blur-xl border-2 border-dark-700 rounded-2xl shadow-2xl p-8">
+        <div className="bg-white/80 dark:bg-dark-900/80 backdrop-blur-xl border-2 border-gray-200 dark:border-dark-700 rounded-2xl shadow-2xl p-8">
           {/* Header */}
           <div className="text-center mb-8">
             <motion.div
@@ -32,8 +32,8 @@ export default function ForgotPasswordPage() {
             >
               🔐
             </motion.div>
-            <h1 className="text-3xl font-bold text-white mb-2">Forgot Password?</h1>
-            <p className="text-dark-300">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Forgot Password?</h1>
+            <p className="text-gray-600 dark:text-dark-300">
               Enter your email address and we'll send you a link to reset your password.
             </p>
           </div>
@@ -41,7 +41,7 @@ export default function ForgotPasswordPage() {
           {/* Form */}
           <div className="space-y-6">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-dark-300 mb-2">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-2">
                 Email Address
               </label>
               <input
@@ -50,7 +50,7 @@ export default function ForgotPasswordPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="your@email.com"
-                className="w-full px-4 py-3 bg-dark-800 border-2 border-dark-700 rounded-xl text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none transition-colors"
+                className="w-full px-4 py-3 bg-white dark:bg-dark-800 border-2 border-gray-300 dark:border-dark-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-dark-500 focus:border-primary-500 focus:outline-none transition-colors"
                 required
               />
             </div>
@@ -75,7 +75,7 @@ export default function ForgotPasswordPage() {
         </div>
 
         {/* Footer */}
-        <p className="text-center text-dark-500 text-sm mt-6">
+        <p className="text-center text-gray-500 dark:text-dark-500 text-sm mt-6">
           Remember your password?{' '}
           <Link href="/login" className="text-primary-400 hover:text-primary-300 transition-colors">
             Sign in here

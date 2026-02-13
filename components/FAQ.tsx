@@ -166,7 +166,7 @@ export default function FAQ({ limit }: { limit?: number }) {
   };
 
   return (
-    <section className="relative py-16 sm:py-20 bg-dark-900 overflow-hidden">
+    <section className="relative py-16 sm:py-20 bg-white dark:bg-dark-900 overflow-hidden">
       {/* Animated canvas background */}
       <AnimatedLines />
 
@@ -185,10 +185,10 @@ export default function FAQ({ limit }: { limit?: number }) {
           transition={{ duration: 0.6 }}
           className="text-center mb-10"
         >
-          <h2 className="text-3xl sm:text-4xl font-semibold mb-3 sm:mb-4 text-white">
+          <h2 className="text-3xl sm:text-4xl font-semibold mb-3 sm:mb-4 text-gray-900 dark:text-white">
             Frequently Asked <span className="text-gradient">Questions</span>
           </h2>
-          <p className="text-base sm:text-lg text-dark-300">
+          <p className="text-base sm:text-lg text-gray-600 dark:text-dark-300">
             Everything you need to know about copy trading with Cloudbright.
           </p>
         </motion.div>
@@ -204,8 +204,8 @@ export default function FAQ({ limit }: { limit?: number }) {
               transition={{ duration: 0.4, delay: index * 0.05 }}
               className={`backdrop-blur-sm rounded-xl border overflow-hidden transition-all duration-300 ${
                 openIndex === index
-                  ? 'bg-dark-800/80 border-primary-500/50 shadow-lg shadow-primary-500/10'
-                  : 'bg-dark-800/50 border-dark-700/50 hover:border-primary-500/30'
+                  ? 'bg-white/80 dark:bg-dark-800/80 border-primary-500/50 shadow-lg shadow-primary-500/10'
+                  : 'bg-gray-50/50 dark:bg-dark-800/50 border-gray-200/50 dark:border-dark-700/50 hover:border-primary-500/30'
               }`}
             >
               {/* Question */}
@@ -213,7 +213,7 @@ export default function FAQ({ limit }: { limit?: number }) {
                 onClick={() => toggleFAQ(index)}
                 className="w-full px-5 py-3 flex items-center justify-between text-left hover:bg-primary-500/5 transition-all duration-300"
               >
-                <span className="text-base font-medium text-white pr-4">
+                <span className="text-base font-medium text-gray-900 dark:text-white pr-4">
                   {faq.question}
                 </span>
                 <motion.span
@@ -235,7 +235,7 @@ export default function FAQ({ limit }: { limit?: number }) {
                     transition={{ duration: 0.3 }}
                     className="overflow-hidden"
                   >
-                    <div className="px-5 pb-3 text-sm text-dark-200 leading-relaxed border-t border-dark-700/50 pt-3">
+                    <div className="px-5 pb-3 text-sm text-gray-700 dark:text-dark-200 leading-relaxed border-t border-gray-200/50 dark:border-dark-700/50 pt-3">
                       {faq.answer}
                     </div>
                   </motion.div>
@@ -255,10 +255,10 @@ export default function FAQ({ limit }: { limit?: number }) {
         >
           <div className="relative p-6 bg-gradient-to-br from-primary-500/10 to-accent-500/10 border border-primary-500/30 rounded-2xl backdrop-blur-sm overflow-hidden">
             <div className="relative z-10">
-              <h3 className="text-lg font-semibold mb-2 text-white">
+              <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white">
                 Still Have Questions?
               </h3>
-              <p className="text-sm text-dark-300 mb-5">
+              <p className="text-sm text-gray-600 dark:text-dark-300 mb-5">
                 Browse our complete FAQ library or contact our 24/7 support team
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">

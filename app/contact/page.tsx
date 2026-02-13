@@ -134,23 +134,23 @@ export default function ContactPage() {
                 const Icon = info.icon;
                 return (
                   <RevealOnScroll key={index} delay={index * 0.1}>
-                    <div className="relative p-6 rounded-2xl border border-dark-700/50 bg-dark-800/50 backdrop-blur-sm text-center">
+                    <div className="relative p-6 rounded-2xl border border-gray-200/50 dark:border-dark-700/50 bg-white/80 dark:bg-dark-800/50 backdrop-blur-sm text-center">
                       <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-500/15 to-accent-500/15 border border-primary-500/20 flex items-center justify-center mx-auto mb-4">
                         <Icon className="w-6 h-6 text-primary-400" />
                       </div>
-                      <h3 className="text-lg font-semibold text-white mb-2">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                         {info.title}
                       </h3>
                       {info.href ? (
-                        <a href={info.href} className="text-white font-medium mb-1 hover:text-primary-400 transition-colors block">
+                        <a href={info.href} className="text-gray-900 dark:text-white font-medium mb-1 hover:text-primary-400 transition-colors block">
                           {info.details}
                         </a>
                       ) : (
-                        <p className="text-white font-medium mb-1">
+                        <p className="text-gray-900 dark:text-white font-medium mb-1">
                           {info.details}
                         </p>
                       )}
-                      <p className="text-sm text-dark-400">
+                      <p className="text-sm text-gray-500 dark:text-dark-400">
                         {info.subDetails}
                       </p>
                     </div>
@@ -161,7 +161,7 @@ export default function ContactPage() {
           </div>
         </section>
 
-      <main className="bg-dark-900">
+      <main className="bg-white dark:bg-dark-900">
         {/* Contact Form & Info */}
         <section className="relative py-16 sm:py-24 overflow-hidden">
           <AnimatedLines />
@@ -173,16 +173,16 @@ export default function ContactPage() {
             <div className="grid lg:grid-cols-2 gap-16">
               {/* Contact Form */}
               <RevealOnScroll>
-                <h2 className="text-3xl sm:text-4xl font-semibold mb-4 text-white">
+                <h2 className="text-3xl sm:text-4xl font-semibold mb-4 text-gray-900 dark:text-white">
                   Send Us a <span className="text-gradient">Message</span>
                 </h2>
-                <p className="text-dark-300 mb-8">
+                <p className="text-gray-700 dark:text-dark-300 mb-8">
                   Fill out the form below and our team will get back to you within 24 hours.
                 </p>
 
                 <form onSubmit={handleSubmit} className="space-y-5">
                   <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-dark-300 mb-2">
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-2">
                       Full Name *
                     </label>
                     <input
@@ -192,13 +192,13 @@ export default function ContactPage() {
                       value={formData.name}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-3 bg-dark-800 border border-dark-700 rounded-xl text-white placeholder-dark-500 focus:outline-none focus:border-primary-500 transition-colors"
+                      className="w-full px-4 py-3 bg-white dark:bg-dark-800 border border-gray-300 dark:border-dark-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-dark-500 focus:outline-none focus:border-primary-500 transition-colors"
                       placeholder="John Doe"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-dark-300 mb-2">
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-2">
                       Email Address *
                     </label>
                     <input
@@ -208,13 +208,13 @@ export default function ContactPage() {
                       value={formData.email}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-3 bg-dark-800 border border-dark-700 rounded-xl text-white placeholder-dark-500 focus:outline-none focus:border-primary-500 transition-colors"
+                      className="w-full px-4 py-3 bg-white dark:bg-dark-800 border border-gray-300 dark:border-dark-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-dark-500 focus:outline-none focus:border-primary-500 transition-colors"
                       placeholder="john@example.com"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="subject" className="block text-sm font-medium text-dark-300 mb-2">
+                    <label htmlFor="subject" className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-2">
                       Subject *
                     </label>
                     <select
@@ -223,7 +223,7 @@ export default function ContactPage() {
                       value={formData.subject}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-3 bg-dark-800 border border-dark-700 rounded-xl text-white focus:outline-none focus:border-primary-500 transition-colors"
+                      className="w-full px-4 py-3 bg-white dark:bg-dark-800 border border-gray-300 dark:border-dark-700 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:border-primary-500 transition-colors"
                     >
                       <option value="">Select a department</option>
                       {departments.map((dept) => (
@@ -235,7 +235,7 @@ export default function ContactPage() {
                   </div>
 
                   <div>
-                    <label htmlFor="message" className="block text-sm font-medium text-dark-300 mb-2">
+                    <label htmlFor="message" className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-2">
                       Message *
                     </label>
                     <textarea
@@ -245,7 +245,7 @@ export default function ContactPage() {
                       onChange={handleChange}
                       required
                       rows={6}
-                      className="w-full px-4 py-3 bg-dark-800 border border-dark-700 rounded-xl text-white placeholder-dark-500 focus:outline-none focus:border-primary-500 transition-colors resize-none"
+                      className="w-full px-4 py-3 bg-white dark:bg-dark-800 border border-gray-300 dark:border-dark-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-dark-500 focus:outline-none focus:border-primary-500 transition-colors resize-none"
                       placeholder="Tell us how we can help you..."
                     />
                   </div>
@@ -280,11 +280,11 @@ export default function ContactPage() {
               <div className="space-y-6">
                 {/* Social Links */}
                 <RevealOnScroll delay={0.1}>
-                  <div className="p-6 rounded-2xl border border-dark-700/50 bg-dark-800/50">
-                    <h3 className="text-xl font-semibold text-white mb-3">
+                  <div className="p-6 rounded-2xl border border-gray-200/50 dark:border-dark-700/50 bg-white/80 dark:bg-dark-800/50">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
                       Connect With Us
                     </h3>
-                    <p className="text-dark-300 text-sm mb-5">
+                    <p className="text-gray-700 dark:text-dark-300 text-sm mb-5">
                       Follow us on social media for the latest updates, market insights, and community discussions.
                     </p>
                     <div className="flex flex-wrap gap-3">
@@ -309,29 +309,29 @@ export default function ContactPage() {
 
                 {/* Office Hours */}
                 <RevealOnScroll delay={0.15}>
-                  <div className="p-6 rounded-2xl border border-dark-700/50 bg-dark-800/50">
+                  <div className="p-6 rounded-2xl border border-gray-200/50 dark:border-dark-700/50 bg-white/80 dark:bg-dark-800/50">
                     <div className="flex items-center gap-3 mb-4">
                       <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500/15 to-accent-500/15 border border-primary-500/20 flex items-center justify-center">
                         <Clock className="w-5 h-5 text-primary-400" />
                       </div>
-                      <h3 className="text-xl font-semibold text-white">
+                      <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
                         Office Hours
                       </h3>
                     </div>
                     <div className="space-y-3">
                       <div className="flex justify-between items-center">
-                        <span className="text-dark-200 font-medium text-sm">Monday - Friday</span>
-                        <span className="text-dark-400 text-sm">9:00 AM - 6:00 PM</span>
+                        <span className="text-gray-700 dark:text-dark-200 font-medium text-sm">Monday - Friday</span>
+                        <span className="text-gray-600 dark:text-dark-400 text-sm">9:00 AM - 6:00 PM</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-dark-200 font-medium text-sm">Saturday</span>
-                        <span className="text-dark-400 text-sm">10:00 AM - 4:00 PM</span>
+                        <span className="text-gray-700 dark:text-dark-200 font-medium text-sm">Saturday</span>
+                        <span className="text-gray-600 dark:text-dark-400 text-sm">10:00 AM - 4:00 PM</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-dark-200 font-medium text-sm">Sunday</span>
-                        <span className="text-dark-400 text-sm">Closed</span>
+                        <span className="text-gray-700 dark:text-dark-200 font-medium text-sm">Sunday</span>
+                        <span className="text-gray-600 dark:text-dark-400 text-sm">Closed</span>
                       </div>
-                      <div className="pt-3 mt-1 border-t border-dark-700/50">
+                      <div className="pt-3 mt-1 border-t border-gray-200/50 dark:border-dark-700/50">
                         <div className="flex items-center gap-2 text-green-400">
                           <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                           <span className="font-medium text-sm">Live Chat: 24/7 Available</span>
@@ -343,17 +343,17 @@ export default function ContactPage() {
 
                 {/* Quick FAQs */}
                 <RevealOnScroll delay={0.2}>
-                  <div className="p-6 rounded-2xl border border-dark-700/50 bg-dark-800/50">
-                    <h3 className="text-xl font-semibold text-white mb-4">
+                  <div className="p-6 rounded-2xl border border-gray-200/50 dark:border-dark-700/50 bg-white/80 dark:bg-dark-800/50">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
                       Quick Answers
                     </h3>
                     <div className="space-y-4">
                       {faqs.map((faq, index) => (
-                        <div key={index} className="pb-4 border-b border-dark-700/50 last:border-0 last:pb-0">
-                          <h4 className="font-medium text-white mb-1.5 text-sm">
+                        <div key={index} className="pb-4 border-b border-gray-200/50 dark:border-dark-700/50 last:border-0 last:pb-0">
+                          <h4 className="font-medium text-gray-900 dark:text-white mb-1.5 text-sm">
                             {faq.question}
                           </h4>
-                          <p className="text-dark-400 text-sm leading-relaxed">
+                          <p className="text-gray-600 dark:text-dark-400 text-sm leading-relaxed">
                             {faq.answer}
                           </p>
                         </div>
@@ -364,14 +364,14 @@ export default function ContactPage() {
 
                 {/* Location */}
                 <RevealOnScroll delay={0.25}>
-                  <div className="p-6 rounded-2xl border border-dark-700/50 bg-dark-800/50">
+                  <div className="p-6 rounded-2xl border border-gray-200/50 dark:border-dark-700/50 bg-white/80 dark:bg-dark-800/50">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500/15 to-accent-500/15 border border-primary-500/20 flex items-center justify-center">
                         <MapPin className="w-5 h-5 text-primary-400" />
                       </div>
                       <div>
-                        <h3 className="text-lg font-semibold text-white">Cloudbright Limited</h3>
-                        <p className="text-dark-400 text-sm">Hong Kong SAR</p>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Cloudbright Limited</h3>
+                        <p className="text-gray-600 dark:text-dark-400 text-sm">Hong Kong SAR</p>
                       </div>
                     </div>
                   </div>

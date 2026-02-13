@@ -69,7 +69,7 @@ export function TiltCard({
       className={`
         relative overflow-hidden
         transition-all duration-200 ease-out
-        ${unstyled ? '' : 'rounded-2xl bg-white/5 dark:bg-white/5 backdrop-blur-xl border border-white/10'}
+        ${unstyled ? '' : 'rounded-2xl bg-white dark:bg-white/5 backdrop-blur-xl border border-gray-200 dark:border-white/10'}
         ${className}
       `}
       style={{

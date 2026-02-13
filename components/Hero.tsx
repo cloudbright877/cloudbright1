@@ -8,9 +8,9 @@ export default function Hero() {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* 3D Hex Grid Background */}
-      <div className="absolute inset-0 bg-dark-900">
+      <div className="absolute inset-0 bg-gray-50 dark:bg-dark-900">
         <HexGrid />
-        <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-transparent via-dark-900/20 to-dark-900/60" />
+        <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-transparent via-gray-50/20 to-gray-50/60 dark:via-dark-900/20 dark:to-dark-900/60" />
       </div>
 
       {/* Animated glow orbs — CSS only */}
@@ -33,14 +33,14 @@ export default function Hero() {
             style={{ animation: 'hero-fade-down 0.6s ease-out both' }}
           >
             <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-            <span className="text-sm font-medium text-primary-200">
+            <span className="text-sm font-medium text-primary-600 dark:text-primary-200">
               Commission Only on Profit
             </span>
           </div>
 
           {/* Main headline */}
           <h1
-            className="text-3xl sm:text-4xl lg:text-5xl font-semibold mb-6 leading-tight text-white"
+            className="text-3xl sm:text-4xl lg:text-5xl font-semibold mb-6 leading-tight text-gray-900 dark:text-white"
             style={{ animation: 'hero-fade-in 0.6s ease-out 0.2s both' }}
           >
             Copy the Best Bots.
@@ -50,11 +50,11 @@ export default function Hero() {
 
           {/* Subheadline */}
           <p
-            className="text-base sm:text-lg text-dark-200 mb-8 sm:mb-10 max-w-3xl mx-auto leading-relaxed"
+            className="text-base sm:text-lg text-gray-700 dark:text-dark-200 mb-8 sm:mb-10 max-w-3xl mx-auto leading-relaxed"
             style={{ animation: 'hero-fade-in 0.6s ease-out 0.4s both' }}
           >
             Top up your balance, copy a verified bot, and earn passive income automatically.{' '}
-            <span className="text-white font-semibold">
+            <span className="text-gray-900 dark:text-white font-semibold">
               No monthly fees &mdash; pay only when you profit.
             </span>
           </p>

@@ -1,7 +1,8 @@
-import { BookOpen, TrendingUp, Cpu, Newspaper, Rocket, GraduationCap } from 'lucide-react';
+import { BookOpen, TrendingUp, Cpu, Newspaper, Rocket, GraduationCap, Building2 } from 'lucide-react';
 
 export const categories = [
   { label: 'All', icon: BookOpen },
+  { label: 'Company', icon: Building2 },
   { label: 'AI Trading', icon: Cpu },
   { label: 'Market Analysis', icon: TrendingUp },
   { label: 'Crypto News', icon: Newspaper },
@@ -10,6 +11,65 @@ export const categories = [
 ];
 
 export const blogPosts = [
+  /* ═══════════════════════════════════════════════════════════════
+     COMPANY POSTS — Pre-launch corporate story
+     ═══════════════════════════════════════════════════════════════ */
+  {
+    id: 15,
+    title: 'Cloudbright Is Live: What to Expect on Launch Day',
+    excerpt: 'After three months of development, security audits, and meticulous testing, Cloudbright is officially open to the public. Here\'s everything available from day one.',
+    category: 'Company',
+    author: 'Anyun Yang',
+    date: 'Feb 13, 2026',
+    readTime: '5 min',
+    gradient: 'from-fuchsia-500 to-purple-500',
+    content: [
+      {
+        type: 'paragraph' as const,
+        text: 'Today is the day. After three months of building, testing, auditing, and refining, Cloudbright is officially open to the public. What started as a vision to democratize professional trading strategies is now a live platform — and we couldn\'t be more excited to welcome our first users.',
+      },
+      {
+        type: 'heading' as const,
+        text: 'What\'s Available at Launch',
+      },
+      {
+        type: 'paragraph' as const,
+        text: 'Starting today, you can create a free account and access the full Cloudbright platform: a marketplace with 100+ verified trading bots across multiple strategies and risk levels, one-click copy trading with real-time performance tracking, custodial wallets supporting 7+ cryptocurrencies, and a comprehensive analytics dashboard with live P&L, equity curves, and detailed trade history.',
+      },
+      {
+        type: 'paragraph' as const,
+        text: 'Every bot on our marketplace has passed our multi-stage verification pipeline — 12+ months of backtesting and 3 months of live paper trading. You can filter by risk level, win rate, drawdown, and Sharpe ratio to find strategies that match your investment goals. The minimum investment starts at just $50.',
+      },
+      {
+        type: 'heading' as const,
+        text: 'Social Trading Features',
+      },
+      {
+        type: 'paragraph' as const,
+        text: 'Cloudbright isn\'t just a copy trading tool — it\'s a community. From day one, you\'ll have access to public bot profiles, global leaderboards ranked by profit and ROI, whale alerts that show what the biggest investors are doing, and a social feed where you can follow top performers and interact with the community. We believe that transparency and social proof make better investors.',
+      },
+      {
+        type: 'heading' as const,
+        text: 'Multi-Exchange Support',
+      },
+      {
+        type: 'paragraph' as const,
+        text: 'We\'re launching with full support for Binance, Bybit, and OKX, with KuCoin, Kraken, and additional exchanges rolling out in the coming weeks. Our unified interface means you can manage all your copy trading across multiple exchanges from a single dashboard — no switching between tabs or managing separate accounts.',
+      },
+      {
+        type: 'heading' as const,
+        text: 'What\'s Next',
+      },
+      {
+        type: 'paragraph' as const,
+        text: 'This is just the beginning. Our roadmap includes a native mobile app for iOS and Android in Q2 2026, an AI Strategy Builder that lets you create custom bots using plain English prompts in Q3, and the first annual Cloudbright Summit in Hong Kong in Q4. Further ahead, we\'re building DEX and DeFi integration, community governance through a DAO, and an institutional suite for professional asset managers.',
+      },
+      {
+        type: 'paragraph' as const,
+        text: 'We built Cloudbright because we believe everyone deserves access to professional trading strategies. Today, that belief becomes reality. Create your free account and start exploring — your portfolio is about to start working for you.',
+      },
+    ],
+  },
   {
     id: 1,
     title: 'How AI is Revolutionizing Cryptocurrency Trading in 2026',
@@ -103,6 +163,66 @@ export const blogPosts = [
       {
         type: 'paragraph' as const,
         text: 'Dollar-cost averaging (DCA) remains the most effective strategy for retail investors during post-halving periods. Combined with diversified bot strategies available on Cloudbright, investors can capture upside while automated risk management handles the inevitable volatility.',
+      },
+    ],
+  },
+  {
+    id: 14,
+    title: 'From Idea to Launch: The Engineering Story Behind Cloudbright',
+    excerpt: 'How a team of 40+ professionals built a full-featured copy trading platform from scratch — architecture decisions, exchange integrations, and the challenges we solved.',
+    category: 'Company',
+    author: 'Alex Rivera',
+    date: 'Feb 5, 2026',
+    readTime: '8 min',
+    gradient: 'from-violet-500 to-indigo-500',
+    content: [
+      {
+        type: 'paragraph' as const,
+        text: 'Building a full-featured copy trading platform from the ground up sounds ambitious. It was. Here\'s how a team of 40+ engineers, quants, and security professionals turned a vision into a live product in just a few months — and the technical decisions that made it possible.',
+      },
+      {
+        type: 'heading' as const,
+        text: 'Architecture Decisions',
+      },
+      {
+        type: 'paragraph' as const,
+        text: 'From the start, we knew we needed a system that could handle real-time data from multiple exchanges simultaneously while maintaining sub-second latency for trade execution. We chose an event-driven microservices architecture that separates the trading engine, portfolio management, analytics, and user-facing dashboard into independent services. This allows each component to scale independently and fail gracefully without taking down the entire platform.',
+      },
+      {
+        type: 'paragraph' as const,
+        text: 'For the frontend, we went with Next.js — its server-side rendering capabilities give us fast page loads and SEO benefits, while React\'s component model let us build a complex real-time dashboard. The result is a platform that feels responsive whether you\'re checking a bot\'s performance metrics or watching live trades execute across multiple exchanges.',
+      },
+      {
+        type: 'heading' as const,
+        text: 'Exchange Integration',
+      },
+      {
+        type: 'paragraph' as const,
+        text: 'Connecting to nine major exchanges — Binance, Bybit, OKX, KuCoin, Kraken, and others — was one of our biggest technical challenges. Each exchange has its own API structure, rate limits, WebSocket formats, and quirks. We built a unified exchange abstraction layer that normalizes data from all sources into a consistent format, so our trading engine and analytics don\'t need to know which exchange a particular bot is trading on.',
+      },
+      {
+        type: 'paragraph' as const,
+        text: 'The copy trading mechanism itself required careful engineering. When a user copies a bot, our system must replicate trades in near real-time while accounting for differences in account size, available balance, and risk settings. We developed a proportional scaling algorithm that adjusts position sizes automatically while respecting user-defined limits.',
+      },
+      {
+        type: 'heading' as const,
+        text: 'The Bot Verification Pipeline',
+      },
+      {
+        type: 'paragraph' as const,
+        text: 'Quality control was non-negotiable. We built a multi-stage verification pipeline that every bot must pass before appearing in our marketplace: 12+ months of backtesting data, 3 months of live paper trading, and performance metrics that meet our minimum thresholds for risk-adjusted returns. The pipeline runs automated statistical analysis to detect curve-fitting, overfitting, and strategies that only work in specific market conditions.',
+      },
+      {
+        type: 'heading' as const,
+        text: 'Shipping Under Pressure',
+      },
+      {
+        type: 'paragraph' as const,
+        text: 'The hardest part of building Cloudbright wasn\'t any single technical challenge — it was maintaining code quality and security standards while moving at startup speed. We enforced strict TypeScript, mandatory code reviews, and automated testing throughout the entire development cycle. There were weeks where the team worked around the clock, but we never cut corners on security or reliability.',
+      },
+      {
+        type: 'paragraph' as const,
+        text: 'Today, the platform processes thousands of operations per minute across all exchanges, with 99.9% uptime and sub-200ms average response times. We\'re proud of what the team built in 90 days — and we\'re even more excited about what comes next.',
       },
     ],
   },
@@ -271,6 +391,58 @@ export const blogPosts = [
     ],
   },
   {
+    id: 13,
+    title: 'Security First: How Cloudbright Passed Independent Security Audits',
+    excerpt: 'In January 2026, Cloudbright completed independent security audits across the entire platform. Here\'s what we tested, what we found, and why security is our foundation.',
+    category: 'Company',
+    author: 'Sarah Kim',
+    date: 'Jan 22, 2026',
+    readTime: '7 min',
+    gradient: 'from-teal-500 to-cyan-500',
+    content: [
+      {
+        type: 'paragraph' as const,
+        text: 'In January 2026, Cloudbright successfully completed independent security audits across our entire platform infrastructure. For a company that handles investor funds and executes trades across multiple exchanges, security isn\'t a feature — it\'s the foundation everything else is built on. Here\'s a transparent look at what we tested and how we protect your investments.',
+      },
+      {
+        type: 'heading' as const,
+        text: 'What We Audited',
+      },
+      {
+        type: 'paragraph' as const,
+        text: 'Our security review covered three critical areas: smart contract integrity, API infrastructure and platform architecture, and cryptographic systems. Independent auditing firms conducted each assessment separately, ensuring no single point of failure in our review process. The scope included everything from our trading engine\'s execution logic to the wallet management system that handles user funds.',
+      },
+      {
+        type: 'heading' as const,
+        text: 'Encryption and Infrastructure',
+      },
+      {
+        type: 'paragraph' as const,
+        text: 'All data on Cloudbright is encrypted with AES-256 — the same standard used by governments and military organizations worldwide. Every connection uses SSL/TLS encryption, and private keys are stored in HSM (Hardware Security Module) devices that are physically tamper-resistant. Our infrastructure includes multi-layer DDoS protection, automated intrusion detection, and 24/7 monitoring by our security operations team.',
+      },
+      {
+        type: 'paragraph' as const,
+        text: 'We also implemented strict access controls internally. No single team member has unilateral access to user funds or private keys. All sensitive operations require multi-signature authorization — a principle we borrowed directly from institutional banking security practices.',
+      },
+      {
+        type: 'heading' as const,
+        text: 'User-Facing Security',
+      },
+      {
+        type: 'paragraph' as const,
+        text: 'For our users, we\'ve implemented mandatory two-factor authentication (2FA), session management with automatic timeouts, and real-time alerts for all account activity. Every transaction — deposits, withdrawals, and bot operations — is logged and visible in your dashboard. We believe that transparency is the best form of security: if you can see everything happening with your funds, anomalies become immediately obvious.',
+      },
+      {
+        type: 'heading' as const,
+        text: 'Continuous Security, Not One-Time Checks',
+      },
+      {
+        type: 'paragraph' as const,
+        text: 'Passing an audit is a milestone, not a destination. We run continuous penetration testing, automated vulnerability scanning, and regular re-audits as we deploy new features. Our bug bounty program invites the broader security community to help identify potential vulnerabilities before they become threats. Security is not something we did once — it\'s something we do every single day.',
+      },
+    ],
+  },
+  {
     id: 7,
     title: 'The Rise of Institutional Crypto Adoption',
     excerpt: 'How major financial institutions are embracing cryptocurrency and what it means for retail investors like you.',
@@ -387,6 +559,170 @@ export const blogPosts = [
       {
         type: 'paragraph' as const,
         text: 'These enhanced requirements mean fewer but higher-quality strategies in our marketplace. Every bot you see has been rigorously tested and verified, giving you greater confidence in your copy trading decisions. We believe quality over quantity is the right approach to protecting our investors.',
+      },
+    ],
+  },
+  {
+    id: 12,
+    title: 'Why We Chose Hong Kong: Building a Fintech Company in Asia\'s Crypto Hub',
+    excerpt: 'Hong Kong\'s progressive crypto regulation, strategic market access, and deep fintech talent pool made it the ideal home for Cloudbright.',
+    category: 'Company',
+    author: 'James Chen',
+    date: 'Jan 10, 2026',
+    readTime: '5 min',
+    gradient: 'from-rose-500 to-pink-500',
+    content: [
+      {
+        type: 'paragraph' as const,
+        text: 'When we decided where to incorporate Cloudbright, the answer was clear. Hong Kong\'s unique position as a global financial center with progressive crypto regulation made it the ideal home for a platform built on transparency and institutional-grade security.',
+      },
+      {
+        type: 'heading' as const,
+        text: 'A Web3-Friendly Regulatory Environment',
+      },
+      {
+        type: 'paragraph' as const,
+        text: 'Hong Kong has taken a deliberately forward-thinking approach to virtual assets. The city\'s Securities and Futures Commission (SFC) has established clear regulatory frameworks for digital asset trading, providing the kind of legal clarity that\'s rare in the crypto world. For a company like Cloudbright that prioritizes compliance and transparency, this regulatory maturity is invaluable.',
+      },
+      {
+        type: 'paragraph' as const,
+        text: 'Operating in a well-regulated environment isn\'t just about following rules — it\'s about building trust with our users. When you invest through Cloudbright, you\'re investing through a properly registered Hong Kong company — HONG KONG CLOUD BRIGHT SOFTWARE LIMITED — that operates under real regulatory oversight.',
+      },
+      {
+        type: 'heading' as const,
+        text: 'Strategic Market Access',
+      },
+      {
+        type: 'paragraph' as const,
+        text: 'Hong Kong sits at the intersection of Asian and global crypto markets. The city\'s timezone overlaps with peak trading hours across China, Japan, South Korea, Singapore, and Australia — the most active crypto trading regions in the world. This gives our platform and our users access to optimal liquidity during the hours when it matters most.',
+      },
+      {
+        type: 'heading' as const,
+        text: 'Fintech Talent and Infrastructure',
+      },
+      {
+        type: 'paragraph' as const,
+        text: 'The city\'s deep pool of financial technology talent was critical to building our team of 40+ professionals. Hong Kong\'s universities produce world-class engineers and finance professionals, and the city attracts top talent from across the Asia-Pacific region. Our team brings experience from Goldman Sachs, HSBC, major fintech startups, and leading crypto exchanges.',
+      },
+      {
+        type: 'paragraph' as const,
+        text: 'Banking infrastructure, legal frameworks, and professional services in Hong Kong are purpose-built for financial innovation. From day one, we had access to the ecosystem needed to build a platform that meets institutional standards while remaining accessible to retail investors.',
+      },
+      {
+        type: 'heading' as const,
+        text: 'Looking Ahead',
+      },
+      {
+        type: 'paragraph' as const,
+        text: 'Hong Kong\'s commitment to becoming a global Web3 hub aligns perfectly with our long-term roadmap. As we expand into DEX integrations, DeFi modules, and eventually community governance, having a home base in a jurisdiction that actively supports blockchain innovation gives us a significant strategic advantage for years to come.',
+      },
+    ],
+  },
+  {
+    id: 11,
+    title: 'The Team Behind Cloudbright: 40+ Professionals, One Goal',
+    excerpt: 'Meet the four departments powering Cloudbright — Engineering, Security, Operations, and Community — and the people who make it all work.',
+    category: 'Company',
+    author: 'David Okafor',
+    date: 'Dec 28, 2025',
+    readTime: '5 min',
+    gradient: 'from-amber-500 to-yellow-500',
+    content: [
+      {
+        type: 'paragraph' as const,
+        text: 'Building a financial platform that people trust with their money requires more than great technology — it requires the right people. Today we\'re pulling back the curtain on the team behind Cloudbright: 40+ professionals organized across four departments, all working toward a single goal — making passive crypto income accessible to everyone.',
+      },
+      {
+        type: 'heading' as const,
+        text: 'Engineering & AI',
+      },
+      {
+        type: 'paragraph' as const,
+        text: 'Our engineering team, led by CTO and co-founder Alex Rivera, is the backbone of the platform. With deep expertise in high-frequency trading systems and machine learning, this department builds and maintains the trading engine, API integrations with major exchanges, and the real-time analytics infrastructure that powers our dashboard. Every feature goes through rigorous internal testing and code review before reaching our users.',
+      },
+      {
+        type: 'heading' as const,
+        text: 'Security & Compliance',
+      },
+      {
+        type: 'paragraph' as const,
+        text: 'Under the leadership of Sarah Kim, our security department operates with a simple philosophy: assume nothing is safe until proven otherwise. The team conducts continuous penetration testing, manages our AES-256 encryption infrastructure, and oversees the HSM integration that protects private keys. They also handle regulatory compliance, ensuring that Cloudbright meets Hong Kong\'s evolving fintech standards and stays ahead of global best practices.',
+      },
+      {
+        type: 'heading' as const,
+        text: 'Operations & Strategy',
+      },
+      {
+        type: 'paragraph' as const,
+        text: 'COO and co-founder James Chen drives day-to-day operations and long-term strategic planning. His team manages exchange partnerships, liquidity relationships, and the bot verification pipeline — the multi-stage process every trading strategy must pass before appearing in our marketplace. Operations also handles financial reporting and ensures our commission model works seamlessly for every user.',
+      },
+      {
+        type: 'heading' as const,
+        text: 'Community & Support',
+      },
+      {
+        type: 'paragraph' as const,
+        text: 'As Head of Community, I\'m proud to lead a team dedicated to connecting investors worldwide. We provide 24/7 support across multiple channels, maintain active communities on Telegram, Discord, and social media, and create educational content to help both beginners and experienced traders get the most out of Cloudbright. Whether it\'s your first trading bot or your tenth, our team is here to guide you every step of the way.',
+      },
+      {
+        type: 'paragraph' as const,
+        text: 'Together, these four departments share one purpose: making Cloudbright the most transparent, secure, and user-friendly copy trading platform in the industry. Every line of code, every security audit, every support conversation moves us closer to that vision. We\'re just getting started — and we\'re building this for you.',
+      },
+    ],
+  },
+  {
+    id: 10,
+    title: 'Meet Cloudbright: Our Mission to Democratize Passive Crypto Income',
+    excerpt: 'Why we founded Cloudbright, what we stand for, and how we\'re making institutional-grade trading strategies accessible to everyone.',
+    category: 'Company',
+    author: 'Anyun Yang',
+    date: 'Dec 15, 2025',
+    readTime: '6 min',
+    gradient: 'from-sky-500 to-indigo-500',
+    content: [
+      {
+        type: 'paragraph' as const,
+        text: 'After 15 years in institutional finance — from Goldman Sachs to HSBC\'s Digital Assets division — I\'ve seen first-hand how powerful automated trading strategies can be. Hedge funds, proprietary trading desks, and institutional investors use sophisticated algorithms to generate consistent returns in all market conditions. But access to these tools has always been locked behind prohibitive minimums, complex onboarding, and opaque fee structures. Cloudbright exists to change that.',
+      },
+      {
+        type: 'heading' as const,
+        text: 'The Gap We Saw',
+      },
+      {
+        type: 'paragraph' as const,
+        text: 'The cryptocurrency market operates 24/7, creating more opportunities than any human trader can possibly capture alone. Institutional players have long used automated systems to trade around the clock — but for the average retail investor, those tools were simply out of reach. Minimum investments of $500,000 or more, complex API setups, and zero transparency into how strategies actually perform created an enormous gap between institutional and retail investors.',
+      },
+      {
+        type: 'paragraph' as const,
+        text: 'We founded Cloudbright to close that gap. Our platform lets anyone — from a first-time investor with $50 to an experienced trader with $50,000 — access the same quality of automated trading strategies that hedge funds rely on. One click to copy, full transparency into every trade, and a minimum investment that\'s accessible to virtually everyone.',
+      },
+      {
+        type: 'heading' as const,
+        text: 'What Cloudbright Stands For',
+      },
+      {
+        type: 'paragraph' as const,
+        text: 'Transparency is our core value. Every bot on our marketplace has fully visible performance history — equity curves, win rates, Sharpe ratios, maximum drawdowns, and complete trade logs. No black boxes. No hidden strategies. If a bot underperforms, you\'ll see it in real time, just as clearly as when it profits. We believe that informed investors make better decisions, and our job is to give you all the information you need.',
+      },
+      {
+        type: 'heading' as const,
+        text: 'Aligned Incentives',
+      },
+      {
+        type: 'paragraph' as const,
+        text: 'Most trading platforms profit from your activity regardless of your results — through spreads, subscriptions, and hidden fees. We deliberately chose a different model: Cloudbright charges a 1-2% commission only when you withdraw profit. If you don\'t make money, we don\'t make money. This means our entire business depends on your success, and that alignment of incentives is exactly how a financial platform should work.',
+      },
+      {
+        type: 'heading' as const,
+        text: 'Building for the Long Term',
+      },
+      {
+        type: 'paragraph' as const,
+        text: 'Cloudbright is not a short-term project. We\'ve assembled a team of 40+ professionals across engineering, security, operations, and community — registered in Hong Kong as a Web3 fintech company and passed independent security audits before opening our doors. Our roadmap extends through 2027 and beyond: mobile applications, AI-powered strategy builders, DEX and DeFi integration, and eventually community governance through a DAO.',
+      },
+      {
+        type: 'paragraph' as const,
+        text: 'This is the beginning of a long journey, and we\'re building it right. We invite you to join us — whether as an investor, a community member, or simply someone who believes that professional trading tools should be available to everyone, not just the privileged few.',
       },
     ],
   },

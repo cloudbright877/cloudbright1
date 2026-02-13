@@ -4,6 +4,8 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState, Suspense } from 'react';
+import { NeonGridLines, hexGridBg } from '@/components/animations/NeonGridLines';
+import { ArrowLeft, Lock, Users, ShieldCheck, Star } from 'lucide-react';
 
 function LoginForm() {
   const [formData, setFormData] = useState({
@@ -12,34 +14,12 @@ function LoginForm() {
     rememberMe: false,
   });
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50 dark:from-dark-900 dark:via-dark-800 dark:to-dark-900 flex items-center justify-center px-4 py-20">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <motion.div
-          className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary-500/10 rounded-full blur-3xl"
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.3, 0.5, 0.3],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
-        <motion.div
-          className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent-500/10 rounded-full blur-3xl"
-          animate={{
-            scale: [1.2, 1, 1.2],
-            opacity: [0.5, 0.3, 0.5],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
-      </div>
+    <div className="relative min-h-screen bg-gray-50 dark:bg-dark-900 flex items-center justify-center px-4 py-20 overflow-hidden">
+      {/* Hex grid background + neon lines */}
+      <div className="absolute inset-0 pointer-events-none" style={hexGridBg} />
+      <NeonGridLines />
+      <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-violet-500/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
 
       <div className="relative z-10 w-full max-w-md">
         {/* Back to home link */}
@@ -51,9 +31,9 @@ function LoginForm() {
         >
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300 transition-colors duration-300"
+            className="inline-flex items-center gap-2 text-primary-400 hover:text-primary-300 transition-colors duration-300"
           >
-            <span>←</span>
+            <ArrowLeft className="w-4 h-4" />
             <span>Back to Home</span>
           </Link>
         </motion.div>
@@ -63,7 +43,7 @@ function LoginForm() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="bg-white dark:bg-gradient-to-br dark:from-dark-800 dark:to-dark-900 rounded-3xl border-2 border-gray-200 dark:border-primary-500/20 p-8 shadow-2xl"
+          className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800 dark:to-dark-900 rounded-3xl border-2 border-primary-500/20 p-8 shadow-2xl"
         >
           {/* Logo and title */}
           <div className="text-center mb-8">
@@ -97,7 +77,7 @@ function LoginForm() {
                 placeholder="you@example.com"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-4 py-3 bg-gray-50 dark:bg-dark-700 border border-gray-300 dark:border-dark-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-dark-400 focus:outline-none focus:border-primary-500 transition-all duration-300"
+                className="w-full px-4 py-3 bg-white dark:bg-dark-700 border border-gray-300 dark:border-dark-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-dark-400 focus:outline-none focus:ring-0 focus:border-primary-500 transition-colors duration-300"
                 required
               />
             </div>
@@ -113,7 +93,7 @@ function LoginForm() {
                 placeholder="••••••••"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="w-full px-4 py-3 bg-gray-50 dark:bg-dark-700 border border-gray-300 dark:border-dark-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-dark-400 focus:outline-none focus:border-primary-500 transition-all duration-300"
+                className="w-full px-4 py-3 bg-white dark:bg-dark-700 border border-gray-300 dark:border-dark-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-dark-400 focus:outline-none focus:ring-0 focus:border-primary-500 transition-colors duration-300"
                 required
               />
             </div>
@@ -125,13 +105,13 @@ function LoginForm() {
                   type="checkbox"
                   checked={formData.rememberMe}
                   onChange={(e) => setFormData({ ...formData, rememberMe: e.target.checked })}
-                  className="w-4 h-4 rounded border-gray-300 dark:border-dark-600 bg-gray-100 dark:bg-dark-700 text-primary-500 focus:ring-primary-500 focus:ring-offset-0"
+                  className="w-4 h-4 rounded border-gray-300 dark:border-dark-600 bg-white dark:bg-dark-700 text-primary-500 focus:ring-primary-500 focus:ring-offset-0"
                 />
                 <span className="text-sm text-gray-600 dark:text-dark-300">Remember me</span>
               </label>
               <Link
                 href="/forgot-password"
-                className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300 transition-colors duration-300"
+                className="text-sm text-primary-400 hover:text-primary-300 transition-colors duration-300"
               >
                 Forgot password?
               </Link>
@@ -149,10 +129,10 @@ function LoginForm() {
           {/* Sign up link */}
           <div className="mt-6 text-center">
             <p className="text-gray-600 dark:text-dark-300">
-              Don't have an account?{' '}
+              Don&apos;t have an account?{' '}
               <Link
                 href="/register"
-                className="text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300 font-semibold transition-colors duration-300"
+                className="text-primary-400 hover:text-primary-300 font-semibold transition-colors duration-300"
               >
                 Create Account
               </Link>
@@ -162,7 +142,7 @@ function LoginForm() {
           {/* Security badge */}
           <div className="mt-6 pt-6 border-t border-gray-200 dark:border-dark-700">
             <div className="flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-dark-400">
-              <span>🔒</span>
+              <Lock className="w-3.5 h-3.5" />
               <span>Protected by 256-bit SSL encryption</span>
             </div>
           </div>
@@ -175,16 +155,16 @@ function LoginForm() {
           transition={{ duration: 0.6, delay: 0.4 }}
           className="mt-8 flex items-center justify-center gap-6 text-sm text-gray-500 dark:text-dark-400"
         >
-          <div className="flex items-center gap-2">
-            <span>✓</span>
+          <div className="flex items-center gap-1.5">
+            <Users className="w-3.5 h-3.5 text-primary-400" />
             <span>15K+ Users</span>
           </div>
-          <div className="flex items-center gap-2">
-            <span>🛡️</span>
+          <div className="flex items-center gap-1.5">
+            <ShieldCheck className="w-3.5 h-3.5 text-primary-400" />
             <span>Bank-Level Security</span>
           </div>
-          <div className="flex items-center gap-2">
-            <span>⭐</span>
+          <div className="flex items-center gap-1.5">
+            <Star className="w-3.5 h-3.5 text-primary-400" />
             <span>4.9/5 Rating</span>
           </div>
         </motion.div>
@@ -196,7 +176,7 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50 dark:from-dark-900 dark:via-dark-800 dark:to-dark-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-dark-900 flex items-center justify-center">
         <div className="text-gray-900 dark:text-white">Loading...</div>
       </div>
     }>

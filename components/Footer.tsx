@@ -36,7 +36,7 @@ const socialLinks = [
 
 export default function Footer() {
   return (
-    <footer className="relative bg-dark-900 border-t border-dark-800 overflow-hidden">
+    <footer className="relative bg-white dark:bg-dark-900 border-t border-gray-200 dark:border-dark-800 overflow-hidden">
       {/* Main footer content */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 mb-12">
@@ -62,7 +62,7 @@ export default function Footer() {
                 </span>
               </div>
 
-              <p className="text-dark-300 mb-6 max-w-sm leading-relaxed">
+              <p className="text-gray-600 dark:text-dark-300 mb-6 max-w-sm leading-relaxed">
                 Copy verified trading bots and earn passive income.
                 Licensed company. Commission only on profit.
               </p>
@@ -105,13 +105,13 @@ export default function Footer() {
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: categoryIndex * 0.1 }}
             >
-              <h3 className="text-white font-bold mb-4">{category}</h3>
+              <h3 className="text-gray-900 dark:text-white font-bold mb-4">{category}</h3>
               <ul className="space-y-2">
                 {links.map((link, index) => (
                   <li key={index}>
                     <a
                       href={link.href}
-                      className="text-dark-300 hover:text-primary-400 transition-colors duration-300"
+                      className="text-gray-600 dark:text-dark-300 hover:text-primary-400 transition-colors duration-300"
                     >
                       {link.name}
                     </a>
@@ -128,22 +128,22 @@ export default function Footer() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.4 }}
-          className="flex flex-wrap items-center justify-center gap-8 mb-12 pb-12 border-b border-dark-800"
+          className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 mb-12 pb-12 border-b border-gray-200 dark:border-dark-800"
         >
-          <div className="flex items-center gap-2 text-dark-400">
-            <Lock className="w-5 h-5 text-primary-400" />
+          <div className="flex items-center gap-2 text-gray-500 dark:text-dark-400">
+            <Lock className="w-5 h-5 text-primary-500 dark:text-primary-400" />
             <span className="text-sm">SSL Secured</span>
           </div>
-          <div className="flex items-center gap-2 text-dark-400">
-            <Landmark className="w-5 h-5 text-primary-400" />
+          <div className="flex items-center gap-2 text-gray-500 dark:text-dark-400">
+            <Landmark className="w-5 h-5 text-primary-500 dark:text-primary-400" />
             <span className="text-sm">Licensed Company</span>
           </div>
-          <div className="flex items-center gap-2 text-dark-400">
-            <ShieldCheck className="w-5 h-5 text-primary-400" />
+          <div className="flex items-center gap-2 text-gray-500 dark:text-dark-400">
+            <ShieldCheck className="w-5 h-5 text-primary-500 dark:text-primary-400" />
             <span className="text-sm">Security Audited</span>
           </div>
-          <div className="flex items-center gap-2 text-dark-400">
-            <Building2 className="w-5 h-5 text-primary-400" />
+          <div className="flex items-center gap-2 text-gray-500 dark:text-dark-400">
+            <Building2 className="w-5 h-5 text-primary-500 dark:text-primary-400" />
             <span className="text-sm">HK Registered</span>
           </div>
         </motion.div>
@@ -154,7 +154,7 @@ export default function Footer() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.45 }}
-          className="text-dark-500 text-xs text-center mb-6 max-w-3xl mx-auto leading-relaxed"
+          className="text-gray-400 dark:text-dark-500 text-xs text-center mb-6 max-w-3xl mx-auto leading-relaxed"
         >
           Trading cryptocurrencies involves significant risk and may not be suitable for all investors. Past performance of trading bots does not guarantee future results. You should carefully consider your financial situation before investing. Only invest funds you can afford to lose.
         </motion.div>
@@ -165,7 +165,7 @@ export default function Footer() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.5 }}
-          className="text-dark-400 text-sm"
+          className="text-gray-500 dark:text-dark-400 text-sm"
         >
           <div className="text-center">
             © {new Date().getFullYear()} HONG KONG CLOUD BRIGHT SOFTWARE LIMITED. All rights reserved.

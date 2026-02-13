@@ -49,7 +49,7 @@ export function AnimatedBorderGrid({
   return (
     <div
       ref={containerRef}
-      className={`relative grid grid-cols-1 ${colsClass} rounded-2xl overflow-hidden border border-dark-700/40 ${className}`}
+      className={`relative grid grid-cols-1 ${colsClass} rounded-2xl overflow-hidden border border-gray-200/40 dark:border-dark-700/40 ${className}`}
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => {
@@ -93,9 +93,9 @@ function Cell({
 }: CellProps) {
   return (
     <div
-      className={`relative z-20 group p-8 md:p-10 bg-dark-900 transition-colors duration-300 hover:bg-primary-500/[0.04]
-        ${borderRight ? 'md:border-r border-dark-700/40' : ''}
-        ${borderBottom ? 'border-b border-dark-700/40' : ''}
+      className={`relative z-20 group p-8 md:p-10 bg-white dark:bg-dark-900 transition-colors duration-300 hover:bg-primary-500/[0.04]
+        ${borderRight ? 'md:border-r border-gray-200/40 dark:border-dark-700/40' : ''}
+        ${borderBottom ? 'border-b border-gray-200/40 dark:border-dark-700/40' : ''}
         ${className}
       `}
     >

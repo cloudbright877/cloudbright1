@@ -4,6 +4,8 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState, Suspense, useEffect } from 'react';
+import { NeonGridLines, hexGridBg } from '@/components/animations/NeonGridLines';
+import { ArrowLeft, Lock, Check, X } from 'lucide-react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { createUser, getUserByReferralCode } from '@/lib/users';
 import { deposit } from '@/lib/balances';
@@ -128,34 +130,12 @@ function RegisterForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50 dark:from-dark-900 dark:via-dark-800 dark:to-dark-900 flex items-center justify-center px-4 py-20">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <motion.div
-          className="absolute top-1/4 right-1/4 w-96 h-96 bg-primary-500/10 rounded-full blur-3xl"
-          animate={{
-            scale: [1, 1.3, 1],
-            opacity: [0.3, 0.5, 0.3],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
-        <motion.div
-          className="absolute bottom-1/3 left-1/3 w-96 h-96 bg-accent-500/10 rounded-full blur-3xl"
-          animate={{
-            scale: [1.2, 1, 1.2],
-            opacity: [0.5, 0.3, 0.5],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
-      </div>
+    <div className="relative min-h-screen bg-gray-50 dark:bg-dark-900 flex items-center justify-center px-4 py-20 overflow-hidden">
+      {/* Hex grid background + neon lines */}
+      <div className="absolute inset-0 pointer-events-none" style={hexGridBg} />
+      <NeonGridLines />
+      <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-violet-500/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
 
       <div className="relative z-10 w-full max-w-md">
         {/* Back to home link */}
@@ -167,9 +147,9 @@ function RegisterForm() {
         >
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300 transition-colors duration-300"
+            className="inline-flex items-center gap-2 text-primary-400 hover:text-primary-300 transition-colors duration-300"
           >
-            <span>←</span>
+            <ArrowLeft className="w-4 h-4" />
             <span>Back to Home</span>
           </Link>
         </motion.div>
@@ -179,7 +159,7 @@ function RegisterForm() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="bg-white dark:bg-gradient-to-br dark:from-dark-800 dark:to-dark-900 rounded-3xl border-2 border-gray-200 dark:border-primary-500/20 p-8 shadow-2xl"
+          className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800 dark:to-dark-900 rounded-3xl border-2 border-primary-500/20 p-8 shadow-2xl"
         >
           {/* Logo and title */}
           <div className="text-center mb-8">
@@ -204,8 +184,8 @@ function RegisterForm() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Error message */}
             {error && (
-              <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
-                <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+              <div className="p-3 bg-red-900/20 border border-red-800 rounded-xl">
+                <p className="text-sm text-red-400">{error}</p>
               </div>
             )}
 
@@ -220,7 +200,7 @@ function RegisterForm() {
                 placeholder="John Doe"
                 value={formData.fullName}
                 onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                className="w-full px-4 py-3 bg-gray-50 dark:bg-dark-700 border border-gray-300 dark:border-dark-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-dark-400 focus:outline-none focus:border-primary-500 transition-all duration-300"
+                className="w-full px-4 py-3 bg-white dark:bg-dark-700 border border-gray-300 dark:border-dark-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-dark-400 focus:outline-none focus:ring-0 focus:border-primary-500 transition-colors duration-300"
                 required
                 disabled={isSubmitting}
               />
@@ -237,13 +217,13 @@ function RegisterForm() {
                 placeholder="you@example.com"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-4 py-3 bg-gray-50 dark:bg-dark-700 border border-gray-300 dark:border-dark-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-dark-400 focus:outline-none focus:border-primary-500 transition-all duration-300"
+                className="w-full px-4 py-3 bg-white dark:bg-dark-700 border border-gray-300 dark:border-dark-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-dark-400 focus:outline-none focus:ring-0 focus:border-primary-500 transition-colors duration-300"
                 required
                 disabled={isSubmitting}
               />
             </div>
 
-            {/* Referral code field (NEW) */}
+            {/* Referral code field */}
             <div>
               <label htmlFor="referralCode" className="block text-sm font-medium text-gray-700 dark:text-dark-200 mb-2">
                 Referral Code <span className="text-gray-500 dark:text-dark-400 font-normal">(Optional)</span>
@@ -255,7 +235,7 @@ function RegisterForm() {
                   placeholder="JOHNDOE123"
                   value={formData.referralCode}
                   onChange={(e) => handleReferralCodeChange(e.target.value)}
-                  className={`w-full px-4 py-3 pr-12 bg-gray-50 dark:bg-dark-700 border rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-dark-400 focus:outline-none transition-all duration-300 ${
+                  className={`w-full px-4 py-3 pr-12 bg-white dark:bg-dark-700 border rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-dark-400 focus:outline-none focus:ring-0 transition-colors duration-300 ${
                     referralCodeStatus === 'valid'
                       ? 'border-green-500 focus:border-green-500'
                       : referralCodeStatus === 'invalid'
@@ -270,21 +250,21 @@ function RegisterForm() {
                     <div className="w-5 h-5 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
                   )}
                   {referralCodeStatus === 'valid' && (
-                    <span className="text-green-500 text-xl">✓</span>
+                    <Check className="w-5 h-5 text-green-500" />
                   )}
                   {referralCodeStatus === 'invalid' && (
-                    <span className="text-red-500 text-xl">✗</span>
+                    <X className="w-5 h-5 text-red-500" />
                   )}
                 </div>
               </div>
               {/* Referrer info */}
               {referralCodeStatus === 'valid' && referrerUsername && (
-                <p className="mt-2 text-sm text-green-600 dark:text-green-400">
+                <p className="mt-2 text-sm text-green-400">
                   Referred by: <span className="font-semibold">{referrerUsername}</span>
                 </p>
               )}
               {referralCodeStatus === 'invalid' && formData.referralCode && (
-                <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+                <p className="mt-2 text-sm text-red-400">
                   Invalid referral code
                 </p>
               )}
@@ -301,7 +281,7 @@ function RegisterForm() {
                 placeholder="••••••••"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="w-full px-4 py-3 bg-gray-50 dark:bg-dark-700 border border-gray-300 dark:border-dark-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-dark-400 focus:outline-none focus:border-primary-500 transition-all duration-300"
+                className="w-full px-4 py-3 bg-white dark:bg-dark-700 border border-gray-300 dark:border-dark-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-dark-400 focus:outline-none focus:ring-0 focus:border-primary-500 transition-colors duration-300"
                 required
                 disabled={isSubmitting}
               />
@@ -319,7 +299,7 @@ function RegisterForm() {
                 placeholder="••••••••"
                 value={formData.confirmPassword}
                 onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                className="w-full px-4 py-3 bg-gray-50 dark:bg-dark-700 border border-gray-300 dark:border-dark-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-dark-400 focus:outline-none focus:border-primary-500 transition-all duration-300"
+                className="w-full px-4 py-3 bg-white dark:bg-dark-700 border border-gray-300 dark:border-dark-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-dark-400 focus:outline-none focus:ring-0 focus:border-primary-500 transition-colors duration-300"
                 required
                 disabled={isSubmitting}
               />
@@ -332,17 +312,17 @@ function RegisterForm() {
                   type="checkbox"
                   checked={formData.agreeToTerms}
                   onChange={(e) => setFormData({ ...formData, agreeToTerms: e.target.checked })}
-                  className="mt-1 w-4 h-4 rounded border-gray-300 dark:border-dark-600 bg-gray-100 dark:bg-dark-700 text-primary-500 focus:ring-primary-500 focus:ring-offset-0"
+                  className="mt-1 w-4 h-4 rounded border-gray-300 dark:border-dark-600 bg-white dark:bg-dark-700 text-primary-500 focus:ring-primary-500 focus:ring-offset-0"
                   required
                   disabled={isSubmitting}
                 />
                 <span className="text-sm text-gray-600 dark:text-dark-300">
                   I agree to the{' '}
-                  <Link href="/terms" className="text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300">
+                  <Link href="/legal/terms" className="text-primary-400 hover:text-primary-300">
                     Terms of Service
                   </Link>
                   {' '}and{' '}
-                  <Link href="/privacy" className="text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300">
+                  <Link href="/legal/privacy" className="text-primary-400 hover:text-primary-300">
                     Privacy Policy
                   </Link>
                 </span>
@@ -372,7 +352,7 @@ function RegisterForm() {
               Already have an account?{' '}
               <Link
                 href="/login"
-                className="text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300 font-semibold transition-colors duration-300"
+                className="text-primary-400 hover:text-primary-300 font-semibold transition-colors duration-300"
               >
                 Sign In
               </Link>
@@ -382,13 +362,11 @@ function RegisterForm() {
           {/* Security badge */}
           <div className="mt-6 pt-6 border-t border-gray-200 dark:border-dark-700">
             <div className="flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-dark-400">
-              <span>🔒</span>
+              <Lock className="w-3.5 h-3.5" />
               <span>Your data is protected by 256-bit SSL encryption</span>
             </div>
           </div>
         </motion.div>
-
-        {/* Trust indicators */}
       </div>
     </div>
   );
@@ -397,7 +375,7 @@ function RegisterForm() {
 export default function RegisterPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50 dark:from-dark-900 dark:via-dark-800 dark:to-dark-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-dark-900 flex items-center justify-center">
         <div className="text-gray-900 dark:text-white text-lg">Loading...</div>
       </div>
     }>

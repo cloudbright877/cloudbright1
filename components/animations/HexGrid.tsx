@@ -59,6 +59,8 @@ export function HexGrid({ className = '' }: { className?: string }) {
 
     const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
+    const isDark = () => document.documentElement.classList.contains('dark');
+
     const buildGrid = () => {
       const cols = Math.ceil(w / COL_W) + 2;
       const rows = Math.ceil(h / ROW_H) + 2;
@@ -73,6 +75,7 @@ export function HexGrid({ className = '' }: { className?: string }) {
       hiG = new Uint8Array(N);
       hiB = new Uint8Array(N);
 
+      const dark = isDark();
       let idx = 0;
       for (let row = -1; row < rows; row++) {
         for (let col = -1; col < cols; col++) {
@@ -81,12 +84,22 @@ export function HexGrid({ className = '' }: { className?: string }) {
           hx[idx] = cx;
           hy[idx] = cy;
           const t = w > 0 ? Math.max(0, Math.min(1, cx / w)) : 0;
-          colR[idx] = lerp(79, 37, t) | 0;
-          colG[idx] = lerp(70, 99, t) | 0;
-          colB[idx] = lerp(229, 235, t) | 0;
-          hiR[idx] = lerp(129, 96, t) | 0;
-          hiG[idx] = lerp(140, 165, t) | 0;
-          hiB[idx] = lerp(248, 250, t) | 0;
+          if (dark) {
+            colR[idx] = lerp(79, 37, t) | 0;
+            colG[idx] = lerp(70, 99, t) | 0;
+            colB[idx] = lerp(229, 235, t) | 0;
+            hiR[idx] = lerp(129, 96, t) | 0;
+            hiG[idx] = lerp(140, 165, t) | 0;
+            hiB[idx] = lerp(248, 250, t) | 0;
+          } else {
+            // Stronger violet-indigo for light theme
+            colR[idx] = lerp(99, 67, t) | 0;
+            colG[idx] = lerp(80, 56, t) | 0;
+            colB[idx] = lerp(245, 202, t) | 0;
+            hiR[idx] = lerp(139, 99, t) | 0;
+            hiG[idx] = lerp(92, 102, t) | 0;
+            hiB[idx] = lerp(246, 241, t) | 0;
+          }
           idx++;
         }
       }
@@ -109,12 +122,21 @@ export function HexGrid({ className = '' }: { className?: string }) {
       }
       // use mid-screen color for base
       const midT = 0.5;
-      const br = lerp(79, 37, midT) | 0;
-      const bg = lerp(70, 99, midT) | 0;
-      const bb = lerp(229, 235, midT) | 0;
-      baseCtx.fillStyle = `rgba(${br},${bg},${bb},0.02)`;
-      baseCtx.fill();
-      baseCtx.strokeStyle = `rgba(${br},${bg},${bb},0.08)`;
+      if (dark) {
+        const br = lerp(79, 37, midT) | 0;
+        const bg = lerp(70, 99, midT) | 0;
+        const bb = lerp(229, 235, midT) | 0;
+        baseCtx.fillStyle = `rgba(${br},${bg},${bb},0.02)`;
+        baseCtx.fill();
+        baseCtx.strokeStyle = `rgba(${br},${bg},${bb},0.08)`;
+      } else {
+        const br = lerp(99, 67, midT) | 0;
+        const bg = lerp(80, 56, midT) | 0;
+        const bb = lerp(245, 202, midT) | 0;
+        baseCtx.fillStyle = `rgba(${br},${bg},${bb},0.04)`;
+        baseCtx.fill();
+        baseCtx.strokeStyle = `rgba(${br},${bg},${bb},0.15)`;
+      }
       baseCtx.lineWidth = 1;
       baseCtx.stroke();
     };
@@ -132,6 +154,17 @@ export function HexGrid({ className = '' }: { className?: string }) {
     };
     resize();
     window.addEventListener('resize', resize);
+
+    // Rebuild grid when theme changes
+    const themeObserver = new MutationObserver((mutations) => {
+      for (const m of mutations) {
+        if (m.attributeName === 'class') {
+          buildGrid();
+          prevMouse.current = { x: -9999, y: -9999 }; // force redraw
+        }
+      }
+    });
+    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
 
     /* ── mouse tracking ── */
     const onMove = (e: MouseEvent) => {
@@ -373,6 +406,7 @@ export function HexGrid({ className = '' }: { className?: string }) {
       document.removeEventListener('mousemove', onMove);
       document.removeEventListener('touchmove', onTouchMove);
       document.removeEventListener('touchend', onTouchEnd);
+      themeObserver.disconnect();
     };
   }, []);
 

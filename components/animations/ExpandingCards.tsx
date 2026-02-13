@@ -68,7 +68,7 @@ export const ExpandingCards = memo(function ExpandingCards({
           const isActive = index === currentActive;
           const borderGradient = isActive && item.activeBorder
             ? `linear-gradient(180deg, ${item.activeBorder} 0%, ${item.activeBorder.replace('0.4)', '0.1)')} 100%)`
-            : 'linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)';
+            : 'linear-gradient(180deg, rgba(128,128,128,0.15) 0%, rgba(128,128,128,0.05) 100%)';
 
           return (
             <div
@@ -97,14 +97,14 @@ export const ExpandingCards = memo(function ExpandingCards({
                 />
 
                 {/* Content */}
-                <div className="relative z-10 flex flex-col h-full p-8 bg-gradient-to-br from-dark-800/95 to-dark-900/95">
+                <div className="relative z-10 flex flex-col h-full p-8 bg-gradient-to-br from-white/95 to-gray-50/95 dark:from-dark-800/95 dark:to-dark-900/95">
                   {/* Top shine — iOS-style highlight */}
                   <div
                     className="absolute top-0 left-0 right-0 h-px"
                     style={{
                       background: isActive && item.activeBorder
                         ? `linear-gradient(90deg, transparent 0%, ${item.activeBorder} 50%, transparent 100%)`
-                        : 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.06) 50%, transparent 100%)',
+                        : 'linear-gradient(90deg, transparent 0%, rgba(128,128,128,0.12) 50%, transparent 100%)',
                       transition: `background 500ms ${EASE}`,
                     }}
                   />
@@ -127,10 +127,10 @@ export const ExpandingCards = memo(function ExpandingCards({
                         : `opacity 400ms ${EASE}, transform 400ms ${EASE}`,
                     }}
                   >
-                    <h3 className="text-2xl font-bold text-white mb-2">
+                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
                       {item.title}
                     </h3>
-                    <p className="text-dark-300 text-sm leading-relaxed max-w-[55%]">
+                    <p className="text-gray-600 dark:text-dark-300 text-sm leading-relaxed max-w-[55%]">
                       {item.description}
                     </p>
                   </div>
@@ -175,7 +175,7 @@ export const ExpandingCards = memo(function ExpandingCards({
                         : `opacity 500ms ${EASE} 400ms`,
                     }}
                   >
-                    <h4 className="text-sm font-semibold text-white/70 truncate">
+                    <h4 className="text-sm font-semibold text-gray-500 dark:text-white/70 truncate">
                       {item.title}
                     </h4>
                   </div>
@@ -217,7 +217,7 @@ const MobileCard = memo(function MobileCard({ item, index }: { item: CardItem; i
       className="relative rounded-[17px]"
       style={{
         padding: '1px',
-        background: 'linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)',
+        background: 'linear-gradient(180deg, rgba(128,128,128,0.15) 0%, rgba(128,128,128,0.05) 100%)',
         opacity: visible ? 1 : 0,
         transform: visible ? 'translateY(0)' : 'translateY(24px)',
         transition: `opacity 500ms ${EASE} ${index * 100}ms, transform 500ms ${EASE} ${index * 100}ms`,
@@ -227,19 +227,19 @@ const MobileCard = memo(function MobileCard({ item, index }: { item: CardItem; i
         <div
           className={`absolute inset-0 bg-gradient-to-br ${item.gradient} opacity-[0.05]`}
         />
-        <div className="relative z-10 p-6 bg-gradient-to-br from-dark-800/95 to-dark-900/95">
+        <div className="relative z-10 p-6 bg-gradient-to-br from-white/95 to-gray-50/95 dark:from-dark-800/95 dark:to-dark-900/95">
           {/* Top shine */}
           <div
             className="absolute top-0 left-0 right-0 h-px"
-            style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.06) 50%, transparent 100%)' }}
+            style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(128,128,128,0.12) 50%, transparent 100%)' }}
           />
           <div
             className={`w-12 h-12 rounded-xl bg-gradient-to-br ${item.gradient} flex items-center justify-center shadow-lg mb-4`}
           >
             {item.icon}
           </div>
-          <h3 className="text-xl font-bold text-white mb-2">{item.title}</h3>
-          <p className="text-dark-300 text-sm leading-relaxed">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{item.title}</h3>
+          <p className="text-gray-600 dark:text-dark-300 text-sm leading-relaxed">
             {item.description}
           </p>
           {item.preview && (
