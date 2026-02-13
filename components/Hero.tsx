@@ -40,7 +40,7 @@ export default function Hero() {
 
           {/* Main headline */}
           <h1
-            className="text-4xl sm:text-5xl lg:text-6xl font-semibold mb-6 leading-tight text-white"
+            className="text-3xl sm:text-4xl lg:text-5xl font-semibold mb-6 leading-tight text-white"
             style={{ animation: 'hero-fade-in 0.6s ease-out 0.2s both' }}
           >
             Copy the Best Bots.
@@ -50,7 +50,7 @@ export default function Hero() {
 
           {/* Subheadline */}
           <p
-            className="text-xl sm:text-2xl text-dark-200 mb-10 max-w-3xl mx-auto leading-relaxed"
+            className="text-base sm:text-lg text-dark-200 mb-8 sm:mb-10 max-w-3xl mx-auto leading-relaxed"
             style={{ animation: 'hero-fade-in 0.6s ease-out 0.4s both' }}
           >
             Top up your balance, copy a verified bot, and earn passive income automatically.{' '}
@@ -72,12 +72,15 @@ export default function Hero() {
             </GlowButton>
           </div>
 
-          {/* Live position ticker */}
+          {/* Live position tickers */}
           <div
-            className="mt-12"
+            className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto"
             style={{ animation: 'hero-fade-in 0.6s ease-out 1s both' }}
           >
-            <LivePositionTicker />
+            <LivePositionTicker startIndex={0} />
+            <div className="hidden md:block">
+              <LivePositionTicker startIndex={4} />
+            </div>
           </div>
 
         </div>

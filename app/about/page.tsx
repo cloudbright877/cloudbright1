@@ -7,89 +7,9 @@ import { RevealOnScroll } from '@/components/animations/RevealOnScroll';
 import { GlowButton } from '@/components/animations/GlowButton';
 import { AnimatedBorderGrid } from '@/components/animations/AnimatedBorderGrid';
 import { TiltCard } from '@/components/animations/TiltCard';
-import { Spotlight, SpotlightCard } from '@/components/animations/SpotlightCards';
-import { ShieldCheck, Lock, Building2, Building, Check, Globe, ArrowRight } from 'lucide-react';
+import { ShieldCheck, Lock, Building2, Building, Check, Globe, ArrowRight, Smartphone, Sparkles, Users, Layers, Landmark, Rocket, Shield, Zap } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-
-const values = [
-  {
-    icon: (
-      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-      </svg>
-    ),
-    title: 'Transparency',
-    description:
-      'Every bot on the platform comes with full, verifiable performance data. No hidden metrics, no inflated numbers — just real results you can audit.',
-    gradient: 'from-blue-500 to-cyan-500',
-  },
-  {
-    icon: (
-      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-      </svg>
-    ),
-    title: 'Security',
-    description:
-      'Bank-grade security by design. Your funds are protected in encrypted custodial wallets with AES-256 encryption, 2FA, and hardware security modules.',
-    gradient: 'from-purple-500 to-pink-500',
-  },
-  {
-    icon: (
-      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
-      </svg>
-    ),
-    title: 'Innovation',
-    description:
-      'Built on Web3 principles with smart contracts and blockchain-based settlement. Cutting-edge technology powering the next generation of passive income.',
-    gradient: 'from-orange-500 to-red-500',
-  },
-  {
-    icon: (
-      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-      </svg>
-    ),
-    title: 'Community',
-    description:
-      'Social copy trading at its core. Follow top-performing bots, share insights, and grow together with a global community of investors.',
-    gradient: 'from-green-500 to-emerald-500',
-  },
-];
-
-const milestones = [
-  {
-    date: 'Dec 2025',
-    event: 'Company Founded',
-    description:
-      'HONG KONG CLOUD BRIGHT SOFTWARE LIMITED established in Hong Kong as a Web3 fintech company.',
-    status: 'completed' as const,
-  },
-  {
-    date: 'Jan 2026',
-    event: 'Security Audits Passed',
-    description:
-      'Completed comprehensive security audits for smart contracts, API infrastructure, and platform architecture.',
-    status: 'completed' as const,
-  },
-  {
-    date: 'Feb 2026',
-    event: 'Platform Launch',
-    description:
-      'Public launch of the bot marketplace and social copy trading platform with support for major exchanges.',
-    status: 'current' as const,
-  },
-  {
-    date: '2026+',
-    event: 'Mobile App & Expansion',
-    description:
-      'Native mobile applications, additional exchange integrations, and expanded bot marketplace.',
-    status: 'upcoming' as const,
-  },
-];
 
 const trustSignals = [
   {
@@ -112,15 +32,28 @@ const trustSignals = [
   },
 ];
 
+const ceo = {
+  name: 'Anyun Yang',
+  role: 'Chief Executive Officer',
+  photo: '/team/Anyun-Yang.webp',
+  bio: 'Anyun brings over 15 years of experience in quantitative finance, fintech, and digital asset management. She began her career at Goldman Sachs in Hong Kong after graduating with a Master of Finance from the London School of Economics, where she specialized in algorithmic trading and derivatives pricing.',
+  bio2: 'After seven years on the institutional trading desk, she moved to lead product at a Series B fintech startup in Singapore, scaling their automated portfolio management platform to $2B+ in AUM. Before founding Cloudbright, Anyun served as VP of Digital Assets at HSBC, overseeing the bank\'s crypto custody and DeFi strategy across the Asia-Pacific region.',
+  highlights: [
+    { label: 'Education', value: 'MSc Finance, London School of Economics' },
+    { label: 'Experience', value: '15+ years in finance & fintech' },
+    { label: 'Previous', value: 'Goldman Sachs, HSBC Digital Assets' },
+    { label: 'Focus', value: 'Quantitative trading & DeFi strategy' },
+  ],
+};
+
 const teamMembers = [
   {
     name: 'James Chen',
-    role: 'CEO & Co-Founder',
-    department: 'Leadership & Strategy',
+    role: 'COO & Co-Founder',
+    department: 'Operations & Strategy',
     description:
-      'Decades of experience in fintech and crypto markets. Setting the vision for accessible passive crypto income.',
-    gradient: 'from-blue-500 to-cyan-500',
-    initials: 'JC',
+      '12+ years in fintech operations and crypto markets. Driving day-to-day execution and platform growth.',
+    photo: '/team-member.webp',
   },
   {
     name: 'Alex Rivera',
@@ -128,8 +61,7 @@ const teamMembers = [
     department: 'Engineering & AI',
     description:
       'Building the core platform and trading engine. Specializes in high-frequency systems and machine learning.',
-    gradient: 'from-purple-500 to-pink-500',
-    initials: 'AR',
+    photo: '/team-member-2.webp',
   },
   {
     name: 'Sarah Kim',
@@ -137,8 +69,7 @@ const teamMembers = [
     department: 'Security & Compliance',
     description:
       'Ensuring platform integrity and regulatory compliance. Continuous auditing to protect every user.',
-    gradient: 'from-orange-500 to-red-500',
-    initials: 'SK',
+    photo: '/team-member.webp',
   },
   {
     name: 'David Okafor',
@@ -146,8 +77,127 @@ const teamMembers = [
     department: 'Community & Support',
     description:
       'Connecting investors worldwide and providing 24/7 assistance. From onboarding to advanced strategy guidance.',
-    gradient: 'from-green-500 to-emerald-500',
-    initials: 'DO',
+    photo: '/team-member-2.webp',
+  },
+];
+
+const roadmapTimeline = [
+  {
+    year: '2025',
+    items: [
+      {
+        quarter: 'Dec 2025',
+        icon: Building,
+        title: 'Company Founded',
+        gradient: 'from-slate-400 to-slate-500',
+        status: 'completed' as const,
+        features: [
+          'HONG KONG CLOUD BRIGHT SOFTWARE LIMITED established',
+          'Registered in Hong Kong as a Web3 fintech company',
+          'Core team assembled — 40+ professionals across four departments',
+        ],
+      },
+    ],
+  },
+  {
+    year: '2026',
+    items: [
+      {
+        quarter: 'Jan 2026',
+        icon: Shield,
+        title: 'Security Audits Passed',
+        gradient: 'from-emerald-400 to-green-500',
+        status: 'completed' as const,
+        features: [
+          'Smart contract audits completed by independent firms',
+          'API infrastructure & platform architecture verified',
+          'AES-256 encryption, 2FA, and HSM integration certified',
+        ],
+      },
+      {
+        quarter: 'Feb 2026',
+        icon: Zap,
+        title: 'Platform Launch',
+        gradient: 'from-primary-400 to-accent-500',
+        status: 'current' as const,
+        features: [
+          'Public launch of bot marketplace & social copy trading',
+          'Support for major exchanges — Binance, Bybit, OKX',
+          'Live performance tracking with transparent statistics',
+        ],
+      },
+      {
+        quarter: 'Q2 2026',
+        icon: Smartphone,
+        title: 'Mobile App Beta',
+        gradient: 'from-blue-500 to-cyan-500',
+        features: [
+          'Native iOS & Android applications',
+          'Real-time portfolio tracking & push notifications',
+          'Copy bots with one tap — trade anywhere, anytime',
+        ],
+      },
+      {
+        quarter: 'Q3 2026',
+        icon: Sparkles,
+        title: 'AI Strategy Builder',
+        gradient: 'from-purple-500 to-pink-500',
+        features: [
+          'Create custom bots using plain English prompts',
+          'Instant backtesting on historical data',
+          'One-click deployment to live markets',
+        ],
+      },
+      {
+        quarter: 'Q4 2026',
+        icon: Users,
+        title: 'Cloudbright Summit HK',
+        gradient: 'from-orange-500 to-red-500',
+        features: [
+          'First annual conference in Hong Kong',
+          'Live trading battles & masterclasses from top bot creators',
+          'Exclusive networking with institutional investors',
+        ],
+      },
+    ],
+  },
+  {
+    year: '2027',
+    items: [
+      {
+        quarter: 'Q1 2027',
+        icon: Layers,
+        title: 'DEX & DeFi Module',
+        gradient: 'from-green-500 to-emerald-500',
+        features: [
+          'Copy trading expands to decentralized exchanges',
+          'On-chain execution with full transparency',
+          'Zero middlemen — direct smart-contract settlement',
+        ],
+      },
+      {
+        quarter: 'Q2 2027',
+        icon: Landmark,
+        title: 'Community DAO',
+        gradient: 'from-yellow-500 to-orange-500',
+        features: [
+          'Platform governance goes fully decentralized',
+          'Token holders vote on features & fee structures',
+          'Community-curated bot marketplace',
+        ],
+      },
+      {
+        quarter: 'H2 2027',
+        icon: Building2,
+        title: 'Institutional Suite',
+        gradient: 'from-indigo-500 to-purple-500',
+        features: [
+          'Enterprise API & white-label solutions',
+          'Compliance tools for hedge funds & asset managers',
+          'Dedicated account management & SLA guarantees',
+        ],
+      },
+    ],
   },
 ];
 
@@ -181,14 +231,14 @@ export default function AboutPage() {
                 </span>
               </div>
 
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold mb-6 md:mb-8 leading-tight">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold mb-6 md:mb-8 leading-tight">
                 <span className="text-white drop-shadow-2xl">
                   Building the Future of{' '}
                   <span className="text-gradient">Passive Crypto Income</span>
                 </span>
               </h1>
 
-              <p className="text-lg sm:text-xl md:text-2xl text-gray-100 mb-8 md:mb-12 max-w-2xl leading-relaxed">
+              <p className="text-base sm:text-lg text-gray-100 mb-8 md:mb-12 max-w-2xl leading-relaxed">
                 Cloudbright is on a mission to make passive income from crypto trading
                 accessible to everyone — with bank-grade security protecting every investment.
               </p>
@@ -196,9 +246,6 @@ export default function AboutPage() {
               <div className="flex flex-col sm:flex-row gap-4">
                 <GlowButton href="/register" variant="primary" size="lg">
                   Get Started
-                </GlowButton>
-                <GlowButton href="/features" variant="secondary" size="lg">
-                  Our Features
                 </GlowButton>
               </div>
             </div>
@@ -208,7 +255,7 @@ export default function AboutPage() {
 
       <main className="bg-white dark:bg-dark-900">
         {/* ══════════ WHO WE ARE ══════════ */}
-        <section className="relative py-24 bg-gradient-to-b from-dark-900 via-dark-800 to-dark-900 overflow-hidden">
+        <section className="relative py-16 sm:py-24 bg-gradient-to-b from-dark-900 via-dark-800 to-dark-900 overflow-hidden">
           {/* Dot grid background */}
           <div
             className="absolute inset-0 pointer-events-none"
@@ -293,8 +340,8 @@ export default function AboutPage() {
                         <Globe className="w-5 h-5 text-white" />
                       </div>
                       <div>
-                        <div className="text-dark-500 text-xs">Serving investors in</div>
-                        <div className="text-white text-base font-extrabold">85+ Countries</div>
+                        <div className="text-dark-500 text-xs">Crypto never sleeps</div>
+                        <div className="text-white text-base font-extrabold">24/7 Trading</div>
                       </div>
                     </div>
                   </div>
@@ -355,73 +402,23 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* Values Section */}
-        <section className="py-24 bg-gray-50 dark:bg-dark-800/50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="text-center mb-16"
-            >
-              <span className="text-primary-500 dark:text-primary-400 font-semibold text-sm uppercase tracking-wide">
-                Our Core Values
-              </span>
-              <h2 className="text-3xl sm:text-4xl font-semibold mt-4 mb-6 text-gray-900 dark:text-white">
-                What We <span className="text-gradient">Stand For</span>
-              </h2>
-              <p className="text-xl text-gray-600 dark:text-dark-300 max-w-3xl mx-auto">
-                Every decision at Cloudbright is guided by four principles that put
-                investors first.
-              </p>
-            </motion.div>
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {values.map((value, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  className="group relative bg-white dark:bg-dark-800 p-8 rounded-2xl border border-gray-200 dark:border-dark-700 hover:shadow-xl transition-all duration-300"
-                >
-                  {/* Gradient hover overlay */}
-                  <div
-                    className={`absolute inset-0 bg-gradient-to-br ${value.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-500 rounded-2xl`}
-                  />
-                  <div
-                    className={`w-14 h-14 rounded-xl bg-gradient-to-br ${value.gradient} flex items-center justify-center text-white mb-5 group-hover:scale-110 transition-transform duration-300`}
-                  >
-                    {value.icon}
-                  </div>
-                  <h3 className="text-xl font-bold mb-3 text-gray-900 dark:text-white">
-                    {value.title}
-                  </h3>
-                  <p className="text-gray-600 dark:text-dark-300 leading-relaxed">
-                    {value.description}
-                  </p>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
-
         {/* Why Investors Choose Cloudbright */}
-        <section className="relative py-24 bg-dark-900 overflow-hidden">
-          <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary-500/5 rounded-full blur-3xl" />
-          </div>
+        <section
+          className="relative py-16 sm:py-24 overflow-hidden bg-fixed bg-cover bg-center"
+          style={{ backgroundImage: 'url(/why-us2.webp)' }}
+        >
+          <div className="absolute inset-0 bg-dark-900/70" />
+          <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-dark-900 to-transparent z-[1]" />
+          <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-dark-900 to-transparent z-[1]" />
 
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <RevealOnScroll>
-              <div className="text-center mb-16">
-                <h2 className="text-3xl sm:text-4xl font-semibold mb-4 text-white">
+              <div className="text-center mb-10 sm:mb-16">
+                <h2 className="text-3xl sm:text-4xl font-semibold mb-3 sm:mb-4 text-white">
                   Why Investors Choose{' '}
                   <span className="text-gradient">Cloudbright</span>
                 </h2>
-                <p className="text-lg text-dark-300 max-w-2xl mx-auto">
+                <p className="text-base sm:text-lg text-dark-300 max-w-2xl mx-auto">
                   We built the platform we&apos;d want to invest through ourselves.
                   Transparent, safe, and aligned with your success.
                 </p>
@@ -450,8 +447,127 @@ export default function AboutPage() {
           </div>
         </section>
 
+        {/* Team Section */}
+        <section className="relative py-16 sm:py-24 bg-dark-900 overflow-hidden">
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px)',
+              backgroundSize: '28px 28px',
+            }}
+          />
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary-500/5 rounded-full blur-3xl" />
+          </div>
+
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <RevealOnScroll>
+              <div className="text-center mb-10 sm:mb-16">
+                <div className="flex items-center justify-center gap-3 mb-5">
+                  <div className="w-8 h-0.5 bg-primary-500" />
+                  <span className="text-xs font-bold tracking-[0.25em] uppercase text-primary-400">
+                    Our Team
+                  </span>
+                  <div className="w-8 h-0.5 bg-primary-500" />
+                </div>
+                <h2 className="text-3xl sm:text-4xl font-semibold mb-3 sm:mb-4 text-white">
+                  <span className="text-gradient">40+ Professionals</span> Across Four
+                  Departments
+                </h2>
+                <p className="text-base sm:text-lg text-dark-300 max-w-2xl mx-auto">
+                  A multidisciplinary team of engineers, quants, security experts, and
+                  community builders — united by the goal of making passive crypto income
+                  accessible to everyone.
+                </p>
+              </div>
+            </RevealOnScroll>
+
+            {/* CEO — featured card */}
+            <RevealOnScroll delay={0.1}>
+              <div className="relative rounded-2xl border border-dark-700/50 bg-dark-800/50 backdrop-blur-sm overflow-hidden mb-10">
+                <div className="grid md:grid-cols-[320px_1fr] items-stretch">
+                  {/* Photo */}
+                  <div className="relative aspect-square md:aspect-auto md:min-h-[420px]">
+                    <Image
+                      src={ceo.photo}
+                      alt={ceo.name}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+
+                  {/* Info */}
+                  <div className="p-8 md:p-10 flex flex-col justify-center">
+                    <span className="text-xs font-bold tracking-[0.25em] uppercase text-primary-400 mb-2">
+                      {ceo.role}
+                    </span>
+                    <h3 className="text-3xl sm:text-4xl font-semibold text-white mb-5">
+                      {ceo.name}
+                    </h3>
+
+                    <div className="w-12 h-px bg-gradient-to-r from-primary-500 to-accent-500 mb-5" />
+
+                    <p className="text-dark-300 text-[15px] leading-[1.75] mb-4">
+                      {ceo.bio}
+                    </p>
+                    <p className="text-dark-300 text-[15px] leading-[1.75] mb-8">
+                      {ceo.bio2}
+                    </p>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      {ceo.highlights.map((h) => (
+                        <div key={h.label} className="bg-dark-900/60 rounded-xl p-4 border border-dark-700/30">
+                          <div className="text-[11px] text-dark-500 uppercase tracking-wider mb-1">{h.label}</div>
+                          <div className="text-white text-sm font-medium">{h.value}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </RevealOnScroll>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {teamMembers.map((member, index) => (
+                <RevealOnScroll key={index} delay={index * 0.1}>
+                  <div className="relative h-full rounded-2xl border border-dark-700/50 bg-dark-800/50 backdrop-blur-sm overflow-hidden">
+                    {/* Photo */}
+                    <div className="relative w-full aspect-square">
+                      <Image
+                        src={member.photo}
+                        alt={member.name}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+
+                    {/* Info */}
+                    <div className="p-6 flex flex-col items-center text-center">
+                      <h3 className="text-lg font-semibold text-white mb-1">
+                        {member.name}
+                      </h3>
+                      <span className="text-sm font-medium text-primary-400 mb-1">
+                        {member.role}
+                      </span>
+                      <span className="text-[11px] text-dark-500 uppercase tracking-wider mb-4">
+                        {member.department}
+                      </span>
+
+                      <div className="w-10 h-px bg-gradient-to-r from-primary-500/40 to-accent-500/40 mb-4" />
+
+                      <p className="text-dark-300 text-sm leading-relaxed">
+                        {member.description}
+                      </p>
+                    </div>
+                  </div>
+                </RevealOnScroll>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* Why Hong Kong Section */}
-        <section className="py-24 relative overflow-hidden">
+        <section className="py-16 sm:py-24 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary-500/5 via-transparent to-accent-500/5 dark:from-primary-500/10 dark:to-accent-500/10" />
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -463,28 +579,12 @@ export default function AboutPage() {
                 transition={{ duration: 0.8 }}
                 className="order-2 lg:order-1"
               >
-                <div className="relative h-[400px] rounded-3xl overflow-hidden bg-gradient-to-br from-dark-800 to-dark-900 dark:from-dark-700 dark:to-dark-800 border border-gray-200 dark:border-dark-700">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center px-8">
-                      <motion.div
-                        className="text-8xl md:text-9xl font-semibold text-gradient opacity-20"
-                        animate={{ opacity: [0.15, 0.25, 0.15] }}
-                        transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-                      >
-                        HK
-                      </motion.div>
-                      <div className="mt-4 text-sm font-semibold text-gray-400 dark:text-dark-400 uppercase tracking-widest">
-                        Hong Kong SAR
-                      </div>
-                    </div>
-                  </div>
-                  {/* Decorative dot grid */}
-                  <div
-                    className="absolute inset-0 opacity-10"
-                    style={{
-                      backgroundImage: 'radial-gradient(circle, rgba(99,102,241,0.4) 1px, transparent 1px)',
-                      backgroundSize: '24px 24px',
-                    }}
+                <div className="relative h-[400px] rounded-3xl overflow-hidden border border-dark-700">
+                  <Image
+                    src="/hong-kong-office.webp"
+                    alt="Hong Kong office"
+                    fill
+                    className="object-cover"
                   />
                 </div>
               </motion.div>
@@ -499,16 +599,16 @@ export default function AboutPage() {
                 <span className="text-primary-500 dark:text-primary-400 font-semibold text-sm uppercase tracking-wide">
                   Our Home Base
                 </span>
-                <h2 className="text-3xl sm:text-4xl font-semibold mt-4 mb-6 text-gray-900 dark:text-white">
+                <h2 className="text-3xl sm:text-4xl font-semibold mt-4 mb-3 sm:mb-4 text-gray-900 dark:text-white">
                   Why <span className="text-gradient">Hong Kong</span>
                 </h2>
-                <p className="text-lg text-gray-700 dark:text-dark-200 mb-6 leading-relaxed">
+                <p className="text-base sm:text-lg text-gray-700 dark:text-dark-200 mb-6 leading-relaxed">
                   Hong Kong is one of the world&apos;s leading fintech hubs with a
                   forward-thinking, Web3-friendly regulatory environment. The city&apos;s
                   progressive approach to virtual asset regulation makes it the ideal
                   home for a blockchain-based trading platform.
                 </p>
-                <p className="text-lg text-gray-700 dark:text-dark-200 mb-6 leading-relaxed">
+                <p className="text-base sm:text-lg text-gray-700 dark:text-dark-200 mb-6 leading-relaxed">
                   Strategically positioned at the crossroads of Asian and global crypto
                   markets, Hong Kong gives Cloudbright direct access to the most active
                   trading hours and liquidity pools in the world.
@@ -530,172 +630,14 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* Milestones Timeline */}
-        <section className="py-24 bg-gray-50 dark:bg-dark-800/50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="text-center mb-16"
-            >
-              <span className="text-primary-500 dark:text-primary-400 font-semibold text-sm uppercase tracking-wide">
-                Our Journey
-              </span>
-              <h2 className="text-3xl sm:text-4xl font-semibold mt-4 mb-6 text-gray-900 dark:text-white">
-                Key <span className="text-gradient">Milestones</span>
-              </h2>
-            </motion.div>
-
-            <div className="relative">
-              {/* Timeline line */}
-              <div className="absolute left-8 md:left-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary-500 to-accent-500" />
-
-              <div className="space-y-12">
-                {milestones.map((milestone, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.6, delay: index * 0.1 }}
-                    className={`relative flex items-center ${
-                      index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'
-                    } flex-col md:gap-16`}
-                  >
-                    {/* Content */}
-                    <div
-                      className={`w-full md:w-1/2 ${
-                        index % 2 === 0 ? 'md:text-right md:pr-8' : 'md:text-left md:pl-8'
-                      }`}
-                    >
-                      <div className="bg-white dark:bg-dark-800 p-6 rounded-xl border border-gray-200 dark:border-dark-700 ml-16 md:ml-0">
-                        <div className="flex items-center gap-3 mb-2">
-                          <div className="text-2xl font-semibold text-gradient">
-                            {milestone.date}
-                          </div>
-                          {milestone.status === 'completed' && (
-                            <span className="px-2 py-0.5 text-xs font-semibold bg-green-500/10 text-green-500 rounded-full border border-green-500/20">
-                              Completed
-                            </span>
-                          )}
-                          {milestone.status === 'current' && (
-                            <span className="px-2 py-0.5 text-xs font-semibold bg-primary-500/10 text-primary-500 rounded-full border border-primary-500/20 flex items-center gap-1">
-                              <span className="w-1.5 h-1.5 bg-primary-500 rounded-full animate-pulse" />
-                              In Progress
-                            </span>
-                          )}
-                          {milestone.status === 'upcoming' && (
-                            <span className="px-2 py-0.5 text-xs font-semibold bg-gray-500/10 text-gray-500 dark:text-dark-400 rounded-full border border-gray-500/20">
-                              Upcoming
-                            </span>
-                          )}
-                        </div>
-                        <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">
-                          {milestone.event}
-                        </h3>
-                        <p className="text-gray-600 dark:text-dark-300">
-                          {milestone.description}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Dot */}
-                    <div
-                      className={`absolute left-8 md:left-1/2 md:transform md:-translate-x-1/2 w-4 h-4 rounded-full border-4 border-white dark:border-dark-900 ${
-                        milestone.status === 'completed'
-                          ? 'bg-green-500'
-                          : milestone.status === 'current'
-                          ? 'bg-gradient-to-br from-primary-500 to-accent-500'
-                          : 'bg-gray-400 dark:bg-dark-500'
-                      }`}
-                    />
-
-                    {/* Empty space on other side */}
-                    <div className="hidden md:block w-1/2" />
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Team Section — Spotlight Cards */}
-        <section className="py-24 bg-dark-900 relative overflow-hidden">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="text-center mb-16"
-            >
-              <span className="text-primary-400 font-semibold text-sm uppercase tracking-wide">
-                Our Team
-              </span>
-              <h2 className="text-3xl sm:text-4xl font-semibold mt-4 mb-6 text-white">
-                <span className="text-gradient">40+ Professionals</span> Across Four
-                Departments
-              </h2>
-              <p className="text-xl text-dark-300 max-w-3xl mx-auto">
-                A multidisciplinary team of engineers, quants, security experts, and
-                community builders — united by the goal of making passive crypto income
-                accessible to everyone.
-              </p>
-            </motion.div>
-
-            <Spotlight className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {teamMembers.map((member, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  className="h-full"
-                >
-                  <SpotlightCard>
-                    <div className="flex flex-col h-full items-center text-center">
-                      {/* Photo placeholder */}
-                      <div className="w-full aspect-[4/3] bg-dark-800 relative overflow-hidden">
-                        <div className={`absolute inset-0 bg-gradient-to-br ${member.gradient} opacity-10`} />
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className={`w-20 h-20 rounded-full bg-gradient-to-br ${member.gradient} flex items-center justify-center shadow-lg`}>
-                            <span className="text-2xl font-bold text-white">{member.initials}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Info */}
-                      <div className="p-6 flex flex-col flex-1">
-                        <h3 className="text-lg font-bold text-white mb-1">
-                          {member.name}
-                        </h3>
-                        <span className={`text-sm font-semibold bg-gradient-to-r ${member.gradient} bg-clip-text text-transparent mb-1`}>
-                          {member.role}
-                        </span>
-                        <span className="text-xs text-dark-400 uppercase tracking-wider mb-4">
-                          {member.department}
-                        </span>
-                        <p className="text-dark-300 text-sm leading-relaxed flex-1">
-                          {member.description}
-                        </p>
-                      </div>
-                    </div>
-                  </SpotlightCard>
-                </motion.div>
-              ))}
-            </Spotlight>
-          </div>
-        </section>
-
         {/* Revenue Model Callout */}
         <section
           className="relative py-16 bg-fixed bg-cover bg-center"
-          style={{ backgroundImage: 'url(/hong-kong-bg.jpg)' }}
+          style={{ backgroundImage: 'url(/how-we-earn.webp)' }}
         >
-          <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px]" />
+          <div className="absolute inset-0 bg-black/20" />
+          <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-dark-900 to-transparent z-[1]" />
+          <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-dark-900 to-transparent z-[1]" />
           <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -707,10 +649,10 @@ export default function AboutPage() {
               <span className="text-primary-400 font-semibold text-sm uppercase tracking-wide">
                 How We Earn
               </span>
-              <h3 className="text-3xl md:text-4xl font-semibold mt-4 mb-4 text-white">
+              <h3 className="text-3xl sm:text-4xl font-semibold mb-3 sm:mb-4 text-white">
                 Aligned With <span className="text-gradient">Your Success</span>
               </h3>
-              <p className="text-lg text-dark-200 max-w-2xl mx-auto mb-8 leading-relaxed">
+              <p className="text-base sm:text-lg text-dark-200 max-w-2xl mx-auto mb-8 leading-relaxed">
                 Cloudbright charges a small 1-2% commission only when you withdraw
                 profit. If you don&apos;t profit, we don&apos;t earn. Our incentives are
                 fully aligned with yours.
@@ -751,35 +693,158 @@ export default function AboutPage() {
           </div>
         </section>
 
+        {/* ══════════ ROADMAP — Fixed-height scrollable timeline ══════════ */}
+        <section className="relative h-screen max-h-[900px] min-h-[600px] bg-dark-900 flex flex-col overflow-hidden">
+          {/* Background glows */}
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[600px] h-[600px] bg-primary-500/5 rounded-full blur-3xl" />
+            <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-[600px] h-[600px] bg-accent-500/5 rounded-full blur-3xl" />
+          </div>
+
+          {/* Header — stays at top */}
+          <div className="relative z-10 pt-16 pb-8 text-center px-4 sm:px-6 lg:px-8 flex-shrink-0">
+            <span className="text-primary-400 font-semibold text-sm uppercase tracking-wide">
+              Our Journey &amp; What&apos;s Next
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-semibold mt-4 mb-3 sm:mb-4 text-white">
+              <span className="text-gradient">Roadmap</span>
+            </h2>
+            <p className="text-base sm:text-lg text-dark-300 max-w-2xl mx-auto">
+              From founding to the future — every milestone on our path to
+              building the leading copy-trading platform.
+            </p>
+          </div>
+
+          {/* Scrollable timeline area */}
+          <div className="relative z-10 flex-1 min-h-0">
+            {/* Bottom fade */}
+            <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-dark-900 to-transparent z-30 pointer-events-none" />
+
+            <div className="h-full max-w-2xl mx-auto overflow-y-auto scrollbar-thin scrollbar-thumb-dark-700 scrollbar-track-transparent">
+              <div className="relative pt-8 pb-16 px-4">
+                {/* Vertical line */}
+                <div className="absolute left-[27px] md:left-[31px] top-0 bottom-0 w-[2px] bg-gradient-to-b from-primary-500/60 via-accent-500/30 to-primary-500/10" />
+
+                {roadmapTimeline.map((yearGroup) => (
+                  <div key={yearGroup.year} className="relative mb-4">
+                    {/* Sticky year label */}
+                    <h3 className="sticky top-0 z-20 text-[1.1rem] md:text-[1.25rem] font-extralight tracking-[0.2em] text-dark-500 mb-8 select-none py-2">
+                      {yearGroup.year}
+                    </h3>
+
+                    {yearGroup.items.map((item, index) => {
+                      const Icon = item.icon;
+                      const isCompleted = 'status' in item && item.status === 'completed';
+                      const isCurrent = 'status' in item && item.status === 'current';
+                      return (
+                        <motion.div
+                          key={item.quarter}
+                          initial={{ opacity: 0, x: -20 }}
+                          whileInView={{ opacity: 1, x: 0 }}
+                          viewport={{ once: true }}
+                          transition={{ duration: 0.5, delay: index * 0.1 }}
+                          className="relative pl-[70px] md:pl-[80px] pb-14 group"
+                        >
+                          {/* Dot on timeline */}
+                          <div
+                            className={`absolute left-[21px] md:left-[25px] top-[6px] w-[14px] h-[14px] rounded-full z-[2] group-hover:scale-125 transition-transform duration-300 ${
+                              isCompleted
+                                ? 'bg-green-500 ring-[3px] ring-dark-900'
+                                : isCurrent
+                                ? 'bg-primary-400 ring-[3px] ring-primary-400/30 animate-pulse'
+                                : 'bg-gradient-to-br from-primary-500/60 to-accent-500/60 ring-[3px] ring-dark-900'
+                            }`}
+                          />
+
+                          {/* Icon + Title + Status */}
+                          <div className="flex items-center gap-3.5 mb-3">
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500/15 to-accent-500/15 border border-primary-500/20 flex items-center justify-center flex-shrink-0">
+                              <Icon className="w-5 h-5 text-primary-400" />
+                            </div>
+                            <div className="flex items-center gap-2.5 flex-wrap">
+                              <h4 className="text-lg font-semibold text-white">
+                                {item.title}
+                              </h4>
+                              {isCompleted && (
+                                <span className="px-2 py-0.5 text-[10px] font-semibold bg-green-500/10 text-green-400 rounded-full border border-green-500/20 uppercase tracking-wide">
+                                  Done
+                                </span>
+                              )}
+                              {isCurrent && (
+                                <span className="px-2 py-0.5 text-[10px] font-semibold bg-primary-500/10 text-primary-400 rounded-full border border-primary-500/20 uppercase tracking-wide flex items-center gap-1">
+                                  <span className="w-1.5 h-1.5 bg-primary-400 rounded-full animate-pulse" />
+                                  Live
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Feature list */}
+                          <ul className="space-y-2 ml-0.5">
+                            {item.features.map((feature) => (
+                              <li
+                                key={feature}
+                                className="flex items-start gap-2.5 text-dark-300 text-[0.95rem] leading-relaxed"
+                              >
+                                <span className="text-dark-500 mt-[7px] text-[6px] flex-shrink-0">
+                                  ●
+                                </span>
+                                {feature}
+                              </li>
+                            ))}
+                          </ul>
+
+                          {/* Quarter label */}
+                          <span className="text-dark-600 text-xs font-medium tracking-wide mt-3 block">
+                            {item.quarter}
+                          </span>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* CTA Section */}
-        <section className="py-24 bg-gradient-to-br from-primary-500/10 to-accent-500/10 dark:from-primary-500/20 dark:to-accent-500/20">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <section className="relative py-16 sm:py-24 overflow-hidden">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover"
+          >
+            <source src="/bg_section_random.mp4" type="video/mp4" />
+          </video>
+          <div className="absolute inset-0 bg-black/50" />
+          <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-dark-900 to-transparent z-[1]" />
+          <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-dark-900 to-transparent z-[1]" />
+          <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              <h2 className="text-3xl sm:text-4xl font-semibold mb-6 text-gray-900 dark:text-white">
-                Ready to <span className="text-gradient">Start Copying</span>?
+              <h2 className="text-3xl sm:text-4xl font-semibold mb-3 sm:mb-4 text-white">
+                Ready to Start Copying?
               </h2>
-              <p className="text-xl text-gray-700 dark:text-dark-200 mb-8 max-w-2xl mx-auto">
-                Pick a bot, choose your lock-in period, and start earning passive income —
+              <p className="text-base sm:text-lg text-dark-200 mb-8 max-w-2xl mx-auto leading-relaxed">
+                Pick a bot, choose your earning plan, and start generating passive income —
                 with your investments fully protected by bank-grade security.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link
-                  href="/register"
-                  className="px-8 py-4 bg-gradient-to-r from-primary-500 to-accent-500 rounded-full font-semibold text-white hover:shadow-2xl hover:shadow-primary-500/50 transition-all duration-300 hover:scale-105"
-                >
-                  Create Free Account
-                </Link>
-                <Link
-                  href="/contact"
-                  className="px-8 py-4 bg-white dark:bg-dark-800 border-2 border-gray-300 dark:border-dark-700 rounded-full font-semibold text-gray-900 dark:text-white hover:border-primary-500 transition-all duration-300 hover:scale-105"
-                >
+                <GlowButton href="/register" variant="primary" size="lg">
+                  <span className="flex items-center gap-2">
+                    Create Free Account <ArrowRight className="w-5 h-5" />
+                  </span>
+                </GlowButton>
+                <GlowButton href="/contact" variant="secondary" size="lg">
                   Contact Us
-                </Link>
+                </GlowButton>
               </div>
             </motion.div>
           </div>

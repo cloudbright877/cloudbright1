@@ -57,10 +57,11 @@ function formatPrice(price: number): string {
   return price.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 });
 }
 
-export function LivePositionTicker() {
-  const [posIndex, setPositionIndex] = useState(0);
-  const [currentPrice, setCurrentPrice] = useState(MOCK_POSITIONS[0].currentPrice);
-  const [elapsed, setElapsed] = useState(MOCK_POSITIONS[0].durationSeconds);
+export function LivePositionTicker({ startIndex = 0 }: { startIndex?: number }) {
+  const initial = startIndex % MOCK_POSITIONS.length;
+  const [posIndex, setPositionIndex] = useState(initial);
+  const [currentPrice, setCurrentPrice] = useState(MOCK_POSITIONS[initial].currentPrice);
+  const [elapsed, setElapsed] = useState(MOCK_POSITIONS[initial].durationSeconds);
   const [priceDirection, setPriceDirection] = useState<'up' | 'down'>('up');
   const [botName, setBotName] = useState(featuredBots[0].name);
   const priceKeyRef = useRef(0);
@@ -127,7 +128,7 @@ export function LivePositionTicker() {
 
   return (
     <div className="flex justify-center">
-      <div className="w-full max-w-lg min-h-[13.5rem]">
+      <div className="w-full max-w-lg md:max-w-none min-h-[13.5rem]">
         <AnimatePresence mode="wait">
             <motion.div
               key={posIndex}

@@ -17,6 +17,7 @@ const BotCarousel = dynamic(
   { ssr: false, loading: () => <div className="h-[460px]" /> },
 );
 import { AnimatedBorderGrid } from '@/components/animations/AnimatedBorderGrid';
+import { NeonGridLines, hexGridBg } from '@/components/animations/NeonGridLines';
 import { exchangeLogos } from '@/components/ExchangeLogos';
 import {
   Wallet,
@@ -54,105 +55,15 @@ const platformFeatures: {
   tags?: string[];
   visual?: 'exchanges' | 'currencies';
 }[] = [
-  { icon: Store, title: 'Bot Marketplace', description: 'Browse, compare, and filter verified trading bots by risk level, performance, and win rate.', span: 'md:col-span-2', iconGradient: 'from-primary-500/15 to-accent-500/15', iconColor: 'text-primary-400', bigNumber: '100+', tags: ['Low Risk', 'Medium Risk', 'High Risk'] },
-  { icon: BarChart3, title: 'Deep Bot Analytics', description: 'Equity curves, trade history, Sharpe ratio, and max drawdown for every bot.', span: '', iconGradient: 'from-blue-500/15 to-cyan-500/15', iconColor: 'text-blue-400', tags: ['Equity Curve', 'Win Rate', 'Sharpe'] },
-  { icon: Copy, title: '1-Click Copy Trading', description: 'Set your amount, tap copy. The bot trades automatically around the clock.', span: '', iconGradient: 'from-violet-500/15 to-purple-500/15', iconColor: 'text-violet-400', bigNumber: '24/7' },
-  { icon: Globe, title: 'Multi-Exchange', description: 'Trade across all major exchanges from one unified interface.', span: '', iconGradient: 'from-cyan-500/15 to-teal-500/15', iconColor: 'text-cyan-400', bigNumber: '9+', visual: 'exchanges' },
-  { icon: Users, title: 'Social Trading', description: 'Leaderboards, whale alerts, public profiles, and community competitions.', span: '', iconGradient: 'from-rose-500/15 to-amber-500/15', iconColor: 'text-rose-400', tags: ['Leaderboards', 'Whale Alerts'] },
-  { icon: Activity, title: 'Real-Time Dashboard', description: 'Live P&L, open positions, equity curves — updated every second on any device.', span: 'md:col-span-2', iconGradient: 'from-emerald-500/15 to-green-500/15', iconColor: 'text-emerald-400', tags: ['Live P&L', 'Positions', 'History'] },
-  { icon: Shield, title: 'Custodial Wallets', description: 'Protected wallets with AES-256 encryption, 2FA, and multi-layer security.', span: 'md:col-span-2', iconGradient: 'from-amber-500/15 to-yellow-500/15', iconColor: 'text-amber-400', bigNumber: '7+', visual: 'currencies' },
-  { icon: Share2, title: 'Referral Program', description: 'Build your network and earn commissions from team performance across multiple levels.', span: 'md:col-span-2', iconGradient: 'from-pink-500/15 to-rose-500/15', iconColor: 'text-pink-400', bigNumber: '10', tags: ['Levels', 'Team Commissions'] },
+  { icon: Store, title: 'Bot Marketplace', description: 'Browse, compare, and filter verified trading bots by risk level, performance, and win rate.', span: 'md:col-span-2', iconGradient: 'from-violet-500/15 to-indigo-500/15', iconColor: 'text-violet-400', bigNumber: '100+', tags: ['Low Risk', 'Medium Risk', 'High Risk'] },
+  { icon: BarChart3, title: 'Deep Bot Analytics', description: 'Equity curves, trade history, Sharpe ratio, and max drawdown for every bot.', span: '', iconGradient: 'from-violet-500/15 to-indigo-500/15', iconColor: 'text-violet-400', tags: ['Equity Curve', 'Win Rate', 'Sharpe'] },
+  { icon: Copy, title: '1-Click Copy Trading', description: 'Set your amount, tap copy. The bot trades automatically around the clock.', span: '', iconGradient: 'from-violet-500/15 to-indigo-500/15', iconColor: 'text-violet-400', bigNumber: '24/7' },
+  { icon: Globe, title: 'Multi-Exchange', description: 'Trade across all major exchanges from one unified interface.', span: '', iconGradient: 'from-violet-500/15 to-indigo-500/15', iconColor: 'text-violet-400', bigNumber: '9+', visual: 'exchanges' },
+  { icon: Users, title: 'Social Trading', description: 'Leaderboards, whale alerts, public profiles, and community competitions.', span: '', iconGradient: 'from-violet-500/15 to-indigo-500/15', iconColor: 'text-violet-400', tags: ['Leaderboards', 'Whale Alerts'] },
+  { icon: Activity, title: 'Real-Time Dashboard', description: 'Live P&L, open positions, equity curves — updated every second on any device.', span: 'md:col-span-2', iconGradient: 'from-violet-500/15 to-indigo-500/15', iconColor: 'text-violet-400', tags: ['Live P&L', 'Positions', 'History'] },
+  { icon: Shield, title: 'Custodial Wallets', description: 'Protected wallets with AES-256 encryption, 2FA, and multi-layer security.', span: 'md:col-span-2', iconGradient: 'from-violet-500/15 to-indigo-500/15', iconColor: 'text-violet-400', bigNumber: '7+', visual: 'currencies' },
+  { icon: Share2, title: 'Referral Program', description: 'Build your network and earn commissions from team performance across multiple levels.', span: 'md:col-span-2', iconGradient: 'from-violet-500/15 to-indigo-500/15', iconColor: 'text-violet-400', bigNumber: '10', tags: ['Levels', 'Team Commissions'] },
 ];
-
-/* ──────────────── HEX FLOOR HELPERS ────────────────────── */
-
-const HF_R = 30;
-const HF_W = +(HF_R * Math.sqrt(3)).toFixed(2);
-const HF_PAT_H = HF_R * 3;
-
-function hfPoints(cx: number, cy: number) {
-  return [0, 60, 120, 180, 240, 300]
-    .map((deg) => {
-      const rad = ((deg - 90) * Math.PI) / 180;
-      return `${(cx + HF_R * Math.cos(rad)).toFixed(2)},${(cy + HF_R * Math.sin(rad)).toFixed(2)}`;
-    })
-    .join(' ');
-}
-
-function HexFloorBg() {
-  return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden">
-      <div
-        style={{
-          width: '100%',
-          height: '100%',
-          maskImage: 'radial-gradient(ellipse 80% 70% at 50% 50%, black 0%, transparent 70%)',
-          WebkitMaskImage: 'radial-gradient(ellipse 80% 70% at 50% 50%, black 0%, transparent 70%)',
-        }}
-      >
-        <svg className="w-full h-full" preserveAspectRatio="none">
-          <defs>
-            <linearGradient id="hfStrokeHome" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="rgb(79,70,229)" stopOpacity="0.12" />
-              <stop offset="50%" stopColor="rgb(59,130,246)" stopOpacity="0.16" />
-              <stop offset="100%" stopColor="rgb(79,70,229)" stopOpacity="0.12" />
-            </linearGradient>
-            <pattern id="hfGridHome" width={HF_W} height={HF_PAT_H} patternUnits="userSpaceOnUse">
-              <polygon points={hfPoints(HF_W / 2, HF_R)} fill="none" stroke="url(#hfStrokeHome)" strokeWidth="0.8" />
-              <polygon points={hfPoints(0, HF_R * 2.5)} fill="none" stroke="url(#hfStrokeHome)" strokeWidth="0.8" />
-              <polygon points={hfPoints(HF_W, HF_R * 2.5)} fill="none" stroke="url(#hfStrokeHome)" strokeWidth="0.8" />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#hfGridHome)" />
-        </svg>
-      </div>
-    </div>
-  );
-}
-
-function IsometricHexFloor() {
-  return (
-    <div
-      className="absolute pointer-events-none"
-      style={{
-        inset: '-50% -30%',
-        perspective: '800px',
-      }}
-    >
-      <div
-        style={{
-          width: '100%',
-          height: '100%',
-          transform: 'rotateX(58deg)',
-          transformOrigin: 'center bottom',
-          maskImage: 'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.1) 15%, rgba(0,0,0,0.4) 35%, rgba(0,0,0,0.8) 60%, black 80%)',
-          WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.1) 15%, rgba(0,0,0,0.4) 35%, rgba(0,0,0,0.8) 60%, black 80%)',
-        }}
-      >
-        <svg className="w-full h-full" preserveAspectRatio="none">
-          <defs>
-            <linearGradient id="hfStroke" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="rgb(79,70,229)" stopOpacity="0.18" />
-              <stop offset="50%" stopColor="rgb(59,130,246)" stopOpacity="0.22" />
-              <stop offset="100%" stopColor="rgb(79,70,229)" stopOpacity="0.18" />
-            </linearGradient>
-            <pattern
-              id="hfGrid"
-              width={HF_W}
-              height={HF_PAT_H}
-              patternUnits="userSpaceOnUse"
-            >
-              <polygon points={hfPoints(HF_W / 2, HF_R)} fill="none" stroke="url(#hfStroke)" strokeWidth="0.8" />
-              <polygon points={hfPoints(0, HF_R * 2.5)} fill="none" stroke="url(#hfStroke)" strokeWidth="0.8" />
-              <polygon points={hfPoints(HF_W, HF_R * 2.5)} fill="none" stroke="url(#hfStroke)" strokeWidth="0.8" />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#hfGrid)" />
-        </svg>
-      </div>
-    </div>
-  );
-}
 
 /* ─────────────────────── STEP PREVIEWS ───────────────────── */
 
@@ -463,18 +374,30 @@ export default function Home() {
         </div>
 
         {/* ── How It Works ── */}
-        <section className="relative py-24 bg-dark-900 overflow-hidden">
-          <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-accent-500/5 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-primary-500/5 rounded-full blur-3xl pointer-events-none" />
-          <IsometricHexFloor />
+        <section className="relative py-16 sm:py-24 bg-dark-900 overflow-hidden">
+          <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-violet-500/5 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
+          {/* Tilted hex grid floor */}
+          <div className="absolute inset-0 pointer-events-none" style={{ perspective: '800px' }}>
+            <div
+              className="absolute inset-0"
+              style={{
+                ...hexGridBg,
+                transform: 'rotateX(58deg) translateY(-20%)',
+                transformOrigin: 'center bottom',
+                maskImage: 'linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 70%)',
+                WebkitMaskImage: 'linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 70%)',
+              }}
+            />
+          </div>
 
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <RevealOnScroll>
-              <div className="text-center mb-16">
-                <h2 className="text-3xl sm:text-4xl font-semibold mb-4 text-white">
+              <div className="text-center mb-10 sm:mb-16">
+                <h2 className="text-3xl sm:text-4xl font-semibold mb-3 sm:mb-4 text-white">
                   Start in <span className="text-gradient">3 Steps</span>
                 </h2>
-                <p className="text-lg text-dark-300 max-w-2xl mx-auto">
+                <p className="text-base sm:text-lg text-dark-300 max-w-2xl mx-auto">
                   No coding, no complex setup, no learning curve.
                   Top up, choose, and earn.
                 </p>
@@ -495,10 +418,10 @@ export default function Home() {
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <RevealOnScroll>
               <div className="text-center mb-8">
-                <h2 className="text-3xl sm:text-4xl font-semibold mb-4 text-white">
+                <h2 className="text-3xl sm:text-4xl font-semibold mb-3 sm:mb-4 text-white">
                   Top Performing <span className="text-gradient">Bots</span>
                 </h2>
-                <p className="text-lg text-dark-300 max-w-2xl mx-auto">
+                <p className="text-base sm:text-lg text-dark-300 max-w-2xl mx-auto">
                   Real strategies with real metrics. Pick your risk level —
                   from conservative grid trading to aggressive leverage plays.
                 </p>
@@ -523,19 +446,19 @@ export default function Home() {
         </section>
 
         {/* ── Platform Features (Bento Grid) ── */}
-        <section className="relative py-20 md:py-28 overflow-hidden">
-          <HexFloorBg />
-          <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-accent-500/5 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-primary-500/5 rounded-full blur-3xl pointer-events-none" />
+        <section className="relative py-16 sm:py-20 md:py-28 overflow-hidden bg-dark-900">
+          <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-violet-500/5 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
+          <NeonGridLines />
 
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <RevealOnScroll>
-              <div className="text-center mb-14">
-                <h2 className="text-3xl sm:text-4xl font-semibold mb-4 text-white">
+              <div className="text-center mb-10 sm:mb-14">
+                <h2 className="text-3xl sm:text-4xl font-semibold mb-3 sm:mb-4 text-white">
                   Built for{' '}
                   <span className="text-gradient">Smart Investors</span>
                 </h2>
-                <p className="text-lg text-dark-300 max-w-2xl mx-auto">
+                <p className="text-base sm:text-lg text-dark-300 max-w-2xl mx-auto">
                   From bot discovery to transparent statistics and social copy trading — passive income
                   without the complexity.
                 </p>
@@ -562,7 +485,7 @@ export default function Home() {
                         <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${feature.iconGradient} border border-dark-600/30 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:shadow-lg transition-all duration-300`}>
                           <Icon className={`w-5 h-5 ${feature.iconColor}`} />
                         </div>
-                        <h3 className="text-sm font-bold text-white mb-1.5">{feature.title}</h3>
+                        <h3 className="text-sm font-semibold text-white mb-1.5">{feature.title}</h3>
                         <p className="text-dark-400 text-xs leading-relaxed">{feature.description}</p>
 
                         {/* Tags */}
@@ -630,17 +553,17 @@ export default function Home() {
         </section>
 
         {/* ── Testimonials (Marquee) ── */}
-        <section className="relative py-20 md:py-28 overflow-hidden">
+        <section className="relative py-16 sm:py-20 md:py-28 overflow-hidden">
           <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-accent-500/5 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-primary-500/5 rounded-full blur-3xl pointer-events-none" />
 
-          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-14">
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10 sm:mb-14">
             <RevealOnScroll>
               <div className="text-center">
-                <h2 className="text-3xl sm:text-4xl font-semibold mb-4 text-white">
+                <h2 className="text-3xl sm:text-4xl font-semibold mb-3 sm:mb-4 text-white">
                   Trusted by <span className="text-gradient">Investors</span>
                 </h2>
-                <p className="text-lg text-dark-300 max-w-2xl mx-auto">
+                <p className="text-base sm:text-lg text-dark-300 max-w-2xl mx-auto">
                   Real feedback from our community of active copiers.
                 </p>
               </div>
@@ -703,7 +626,7 @@ export default function Home() {
         </section>
 
         {/* ── CTA Block ── */}
-        <section className="relative py-24 overflow-hidden">
+        <section className="relative py-16 sm:py-24 overflow-hidden">
           <video
             autoPlay
             loop
@@ -726,11 +649,11 @@ export default function Home() {
                 </span>
               </div>
 
-              <h2 className="text-3xl md:text-4xl font-bold mb-6 text-white">
+              <h2 className="text-3xl sm:text-4xl font-semibold mb-3 sm:mb-4 text-white">
                 Your Portfolio, <span className="text-gradient">Always Working</span>
               </h2>
 
-              <p className="text-xl text-dark-200 mb-8 max-w-2xl mx-auto leading-relaxed">
+              <p className="text-base sm:text-lg text-dark-200 mb-8 max-w-2xl mx-auto leading-relaxed">
                 Join 26,000+ investors who earn passively with battle-tested algorithms.
                 Set up once, collect profits on your schedule.
               </p>
@@ -744,7 +667,7 @@ export default function Home() {
                   <div key={stat.label} className="text-center group">
                     <div className="flex items-center justify-center gap-2 mb-1">
                       <stat.Icon className="w-5 h-5 text-primary-400 opacity-70 group-hover:opacity-100 transition-opacity" />
-                      <div className="text-4xl font-bold text-gradient">
+                      <div className="text-3xl sm:text-4xl font-bold text-gradient">
                         <AnimatedCounter value={stat.value} suffix={stat.suffix} duration={1400} />
                       </div>
                     </div>
@@ -768,14 +691,14 @@ export default function Home() {
         </section>
 
         {/* ── Security & Trust ── */}
-        <section className="relative py-24 bg-dark-900 overflow-hidden">
+        <section className="relative py-16 sm:py-24 bg-dark-900 overflow-hidden">
           <div className="absolute inset-0 pointer-events-none">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary-500/5 rounded-full blur-3xl" />
           </div>
 
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <RevealOnScroll>
-              <div className="text-center mb-16">
+              <div className="text-center mb-10 sm:mb-16">
                 <div className="flex items-center justify-center gap-3 mb-6">
                   <div className="w-8 h-0.5 bg-primary-500" />
                   <span className="text-xs font-bold tracking-[0.25em] uppercase text-primary-400">
@@ -783,10 +706,10 @@ export default function Home() {
                   </span>
                   <div className="w-8 h-0.5 bg-primary-500" />
                 </div>
-                <h2 className="text-4xl sm:text-5xl font-bold mb-4 text-white">
+                <h2 className="text-3xl sm:text-4xl font-semibold mb-3 sm:mb-4 text-white">
                   Built for <span className="text-gradient">Trust</span>
                 </h2>
-                <p className="text-lg text-dark-300 max-w-2xl mx-auto">
+                <p className="text-base sm:text-lg text-dark-300 max-w-2xl mx-auto">
                   Enterprise-grade security with full transparency.
                   Your investments are always protected.
                 </p>
@@ -805,7 +728,7 @@ export default function Home() {
                     <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-500/15 to-accent-500/15 border border-primary-500/20 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-primary-500/10 transition-all duration-300">
                       <Icon className="w-7 h-7 text-primary-400" />
                     </div>
-                    <h3 className="text-xl font-bold text-white mb-3">{feature.title}</h3>
+                    <h3 className="text-xl font-semibold text-white mb-3">{feature.title}</h3>
                     <p className="text-dark-300 leading-relaxed mb-4">{feature.description}</p>
                     <ul className="space-y-2">
                       {feature.items.map((item) => (
@@ -826,17 +749,17 @@ export default function Home() {
 
         {/* ── FAQ ── */}
         <div id="faq">
-          <FAQ />
+          <FAQ limit={5} />
         </div>
         {/* ── Blog / Insights ── */}
-        <section className="relative py-20 bg-dark-900 border-t border-dark-800/50 overflow-hidden">
+        <section className="relative py-16 sm:py-20 bg-dark-900 border-t border-dark-800/50 overflow-hidden">
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <RevealOnScroll>
-              <div className="text-center mb-12">
-                <h2 className="text-3xl sm:text-4xl font-semibold mb-4 text-white">
+              <div className="text-center mb-10 sm:mb-12">
+                <h2 className="text-3xl sm:text-4xl font-semibold mb-3 sm:mb-4 text-white">
                   Latest <span className="text-gradient">Insights</span>
                 </h2>
-                <p className="text-lg text-dark-300 max-w-2xl mx-auto">
+                <p className="text-base sm:text-lg text-dark-300 max-w-2xl mx-auto">
                   Learn about copy trading strategies, bot analytics, and platform tips.
                 </p>
               </div>

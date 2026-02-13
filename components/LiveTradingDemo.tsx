@@ -15,7 +15,7 @@ import {
   ArrowDownRight,
 } from 'lucide-react';
 
-const DEMO_BOT_ID = 'demo_services';
+const DEMO_BOT_PREFIX = 'demo_home_';
 
 interface MappedPosition {
   id: string;
@@ -56,8 +56,9 @@ function safe(v: number) { return isNaN(v) || !isFinite(v) ? 0 : v; }
 /**
  * LiveTradingDemo — self-contained live trading widget.
  * Layout: bot header on top, then a 2-col grid (positions left, trades right).
+ * @param botIndex — which demo bot to use (default 0)
  */
-export function LiveTradingDemo() {
+export function LiveTradingDemo({ botIndex = 0 }: { botIndex?: number }) {
   const botRef = useRef<TradingBot | null>(null);
   const [positions, setPositions] = useState<MappedPosition[]>([]);
   const [trades, setTrades] = useState<MappedTrade[]>([]);
@@ -66,10 +67,11 @@ export function LiveTradingDemo() {
 
   useEffect(() => {
     const demoBots = getAllDemoBots();
-    const demoBot = demoBots[0];
+    const demoBot = demoBots[botIndex];
     if (!demoBot) return;
 
-    const bot = new TradingBot(DEMO_BOT_ID, { ...demoBot.config, investedCapital: 5000 });
+    const botId = `${DEMO_BOT_PREFIX}${botIndex}`;
+    const bot = new TradingBot(botId, { ...demoBot.config, investedCapital: 5000 });
     botRef.current = bot;
 
     priceService.connect();
@@ -110,7 +112,7 @@ export function LiveTradingDemo() {
     return () => { clearInterval(interval); unsubscribe(); };
   }, []);
 
-  const demoBot = getAllDemoBots()[0];
+  const demoBot = getAllDemoBots()[botIndex];
   const pnlPositive = stats.totalPnL >= 0;
 
   return (

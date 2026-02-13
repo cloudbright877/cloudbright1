@@ -103,7 +103,6 @@ export default function MarketplacePage() {
         }}
         ctaButtons={[
           { text: 'Start Free', href: '/register', variant: 'primary' },
-          { text: 'How It Works', href: '/features', variant: 'secondary' },
         ]}
       />
 
@@ -384,12 +383,6 @@ export default function MarketplacePage() {
                     Create Free Account <ArrowRight className="w-5 h-5" />
                   </span>
                 </GlowButton>
-                <Link
-                  href="/features"
-                  className="px-8 py-4 bg-white dark:bg-dark-800 border-2 border-gray-300 dark:border-dark-700 rounded-full font-semibold text-gray-900 dark:text-white hover:border-primary-500 transition-all duration-300 hover:scale-105 inline-flex items-center justify-center"
-                >
-                  How It Works
-                </Link>
               </div>
             </RevealOnScroll>
           </div>

@@ -8,6 +8,7 @@ import { RevealOnScroll } from '@/components/animations/RevealOnScroll';
 import { TiltCard } from '@/components/animations/TiltCard';
 import { AnimatedCounter } from '@/components/animations/AnimatedCounter';
 import { GlowButton } from '@/components/animations/GlowButton';
+import { NeonGridLines, hexGridBg } from '@/components/animations/NeonGridLines';
 import { Marquee } from '@/components/animations/Marquee';
 
 const LiveTradingDemo = dynamic(
@@ -427,14 +428,14 @@ export default function PlatformPage() {
                 </span>
               </div>
 
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold mb-6 md:mb-8 leading-tight">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold mb-6 md:mb-8 leading-tight">
                 <span className="text-white drop-shadow-2xl">
                   The Complete{' '}
                   <span className="text-gradient">Copy Trading Platform</span>
                 </span>
               </h1>
 
-              <p className="text-lg sm:text-xl md:text-2xl text-gray-100 mb-8 md:mb-12 max-w-4xl mx-auto leading-relaxed">
+              <p className="text-base sm:text-lg text-gray-100 mb-8 md:mb-12 max-w-4xl mx-auto leading-relaxed">
                 Dashboard, marketplace, analytics, social trading, and security — everything you need in one place.
               </p>
 
@@ -451,7 +452,7 @@ export default function PlatformPage() {
         </section>
 
         {/* ══════════ SECTION 2: MARKETPLACE & COPY TRADING (Split Layout) ══════════ */}
-        <section className="relative py-24 bg-gradient-to-b from-dark-900 via-dark-800 to-dark-900 overflow-hidden">
+        <section className="relative py-16 sm:py-24 bg-gradient-to-b from-dark-900 via-dark-800 to-dark-900 overflow-hidden">
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Top row: heading centered */}
             <div className="text-center mb-12 lg:mb-16">
@@ -463,7 +464,7 @@ export default function PlatformPage() {
                   </span>
                   <div className="w-8 h-0.5 bg-primary-500" />
                 </div>
-                <h2 className="text-3xl sm:text-4xl font-bold text-white leading-tight">
+                <h2 className="text-3xl sm:text-4xl font-semibold text-white leading-tight">
                   Find Your Strategy in{' '}
                   <span className="text-gradient">Seconds</span>
                 </h2>
@@ -574,7 +575,7 @@ export default function PlatformPage() {
         </div>
 
         {/* ══════════ SECTION 3: DASHBOARD & PORTFOLIO ══════════ */}
-        <section className="relative py-24 overflow-hidden">
+        <section className="relative py-16 sm:py-24 overflow-hidden">
           <video
             autoPlay
             loop
@@ -591,11 +592,11 @@ export default function PlatformPage() {
               {/* Left column: text content */}
               <div>
                 <RevealOnScroll>
-                  <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+                  <h2 className="text-3xl sm:text-4xl font-semibold text-white mb-4">
                     Watch Every Trade in{' '}
                     <span className="text-gradient">Real Time</span>
                   </h2>
-                  <p className="text-lg text-dark-300 mb-8">
+                  <p className="text-base sm:text-lg text-dark-300 mb-8">
                     Your entire portfolio on one screen. Real-time P&L, active bots, open positions,
                     and trade history — all updated live.
                   </p>
@@ -657,13 +658,13 @@ export default function PlatformPage() {
         </div>
 
         {/* ══════════ SECTION 5: SOCIAL & COMMUNITY (Orbital Layout) ══════════ */}
-        <section className="relative py-24 bg-gradient-to-b from-dark-900 via-dark-800 to-dark-900 overflow-hidden">
+        <section className="relative py-16 sm:py-24 bg-gradient-to-b from-dark-900 via-dark-800 to-dark-900 overflow-hidden">
           <div className="absolute top-0 right-1/3 w-[500px] h-[500px] bg-rose-500/5 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute bottom-0 left-1/4 w-[400px] h-[400px] bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
 
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Heading — centered */}
-            <div className="text-center mb-16 lg:mb-20">
+            <div className="text-center mb-10 sm:mb-16 lg:mb-20">
               <RevealOnScroll>
                 <div className="flex items-center justify-center gap-3 mb-6">
                   <div className="w-8 h-0.5 bg-rose-500" />
@@ -672,13 +673,13 @@ export default function PlatformPage() {
                   </span>
                   <div className="w-8 h-0.5 bg-rose-500" />
                 </div>
-                <h2 className="text-3xl sm:text-4xl font-bold text-white leading-tight">
+                <h2 className="text-3xl sm:text-4xl font-semibold text-white leading-tight">
                   Learn from the{' '}
                   <span className="bg-gradient-to-r from-rose-400 to-amber-400 bg-clip-text text-transparent">
-                    Best Bots
+                    Best Investors
                   </span>
                 </h2>
-                <p className="text-dark-400 text-[15px] leading-relaxed mt-4 max-w-2xl mx-auto">
+                <p className="text-base sm:text-lg text-dark-300 mt-3 sm:mt-4 max-w-2xl mx-auto">
                   Cloudbright is more than a copy trading platform — it&apos;s a community.
                   Follow top bots, learn from the best, and grow together.
                 </p>
@@ -773,19 +774,27 @@ export default function PlatformPage() {
                 })}
               </div>
             </div>
+
+            <RevealOnScroll delay={0.3}>
+              <div className="text-center mt-14">
+                <GlowButton href="/register" variant="primary" size="lg">
+                  <span className="flex items-center gap-2">
+                    Join the Community <ArrowRight className="w-5 h-5" />
+                  </span>
+                </GlowButton>
+              </div>
+            </RevealOnScroll>
           </div>
         </section>
 
         {/* ══════════ SECTION 6: WHY CHOOSE (Bento Grid) ══════════ */}
-        <section className="relative py-24 bg-dark-900 overflow-hidden">
-          {/* Subtle grid lines */}
+        <section className="relative py-16 sm:py-24 bg-dark-900 overflow-hidden">
+          {/* Subtle hex grid */}
           <div
             className="absolute inset-0 pointer-events-none"
-            style={{
-              backgroundImage: 'linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)',
-              backgroundSize: '60px 60px',
-            }}
+            style={hexGridBg}
           />
+          <NeonGridLines />
 
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Heading — centered */}
@@ -798,13 +807,13 @@ export default function PlatformPage() {
                   </span>
                   <div className="w-8 h-0.5 bg-emerald-500" />
                 </div>
-                <h2 className="text-3xl sm:text-4xl font-bold text-white leading-tight">
+                <h2 className="text-3xl sm:text-4xl font-semibold text-white leading-tight">
                   Complete Financial{' '}
                   <span className="bg-gradient-to-r from-emerald-400 to-green-400 bg-clip-text text-transparent">
                     Control
                   </span>
                 </h2>
-                <p className="text-dark-400 text-[15px] leading-relaxed mt-4 max-w-2xl mx-auto">
+                <p className="text-base sm:text-lg text-dark-300 mt-3 sm:mt-4 max-w-2xl mx-auto">
                   Your money, your rules. Secure custodial wallets for 7+ cryptocurrencies — all in one place.
                 </p>
               </div>
@@ -831,7 +840,7 @@ export default function PlatformPage() {
                       <Wallet className="w-7 h-7 text-emerald-400" />
                     </div>
                     <span className="text-7xl font-bold text-dark-800/30 absolute top-4 right-6 select-none pointer-events-none">01</span>
-                    <h3 className="text-xl font-bold text-white mb-3">Multi-Currency Wallets</h3>
+                    <h3 className="text-xl font-semibold text-white mb-3">Multi-Currency Wallets</h3>
                     <p className="text-dark-300 leading-relaxed mb-5">
                       Hold 7+ cryptocurrencies in protected wallets. Deposit instantly, withdraw copy trading profits anytime.
                     </p>
@@ -868,7 +877,7 @@ export default function PlatformPage() {
                       <CircleDollarSign className="w-7 h-7 text-emerald-400" />
                     </div>
                     <span className="text-7xl font-bold text-dark-800/30 absolute top-4 right-6 select-none pointer-events-none">02</span>
-                    <h3 className="text-xl font-bold text-white mb-3">Flexible Profit Collection</h3>
+                    <h3 className="text-xl font-semibold text-white mb-3">Flexible Profit Collection</h3>
                     <p className="text-dark-300 leading-relaxed mb-5">
                       Lock-in periods from 7 to 180 days. Longer terms offer higher potential returns. Collect profits anytime.
                     </p>
@@ -896,240 +905,8 @@ export default function PlatformPage() {
           </div>
         </section>
 
-        {/* ══════════ SECTION 8: OUR TECHNOLOGY (commitment.jsx pattern) ══════════ */}
-        <section className="relative py-24 bg-dark-900 overflow-hidden">
-          {/* Dot grid */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px)',
-              backgroundSize: '28px 28px',
-            }}
-          />
-          {/* Decorative circle */}
-          <div className="absolute top-8 left-8 w-12 h-12 rounded-full border-2 border-white/5 pointer-events-none" />
-
-          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            {/* 3-column grid: narrow strip | text | large image */}
-            <div className="grid grid-cols-1 lg:grid-cols-[80px_1fr_55%] gap-6 lg:gap-10 items-stretch">
-
-              {/* Col 1: Narrow vertical strip */}
-              <div className="hidden lg:block">
-                <RevealOnScroll>
-                  <TiltCard maxTilt={4} unstyled className="h-full">
-                    <div
-                      className="w-20 h-full min-h-[520px] rounded-2xl overflow-hidden relative"
-                      style={{ background: 'linear-gradient(180deg, #1a1a2e, #16213e, #0f3460, #334155, #1e293b)' }}
-                    >
-                      <div className="absolute inset-0 flex flex-col justify-center items-center gap-3 p-3">
-                        {[...Array(5)].map((_, i) => (
-                          <div key={i} className="w-full h-[3px] rounded-full" style={{ background: `rgba(255,255,255,${0.04 + i * 0.02})` }} />
-                        ))}
-                        <svg viewBox="0 0 60 100" className="w-[85%] mt-2">
-                          <polyline points="5,90 15,70 25,75 35,40 45,55 55,20" fill="none" stroke="rgb(79,70,229)" strokeWidth="2" strokeLinecap="round" opacity="0.7" />
-                          <polyline points="5,90 15,70 25,75 35,40 45,55 55,20 60,15 60,100 0,100" fill="url(#strip-fill)" opacity="0.15" />
-                          <defs>
-                            <linearGradient id="strip-fill" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stopColor="rgb(79,70,229)" />
-                              <stop offset="100%" stopColor="transparent" />
-                            </linearGradient>
-                          </defs>
-                        </svg>
-                        {[...Array(4)].map((_, i) => (
-                          <div key={`b${i}`} className="w-full h-[3px] rounded-full" style={{ background: `rgba(255,255,255,${0.03 + i * 0.015})` }} />
-                        ))}
-                      </div>
-                    </div>
-                  </TiltCard>
-                </RevealOnScroll>
-              </div>
-
-              {/* Col 2: Text content */}
-              <div className="flex flex-col justify-end">
-                {/* Label */}
-                <RevealOnScroll>
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-8 h-0.5 bg-primary-500" />
-                    <span className="text-xs font-bold tracking-[0.25em] uppercase text-primary-400">
-                      Our Technology
-                    </span>
-                  </div>
-                </RevealOnScroll>
-
-                {/* Heading */}
-                <RevealOnScroll delay={0.08}>
-                  <h2 className="text-3xl md:text-4xl font-semibold text-white leading-[1.1] tracking-tight uppercase mb-7">
-                    Built for Speed and Reliability
-                  </h2>
-                </RevealOnScroll>
-
-                {/* Description */}
-                <RevealOnScroll delay={0.15}>
-                  <p className="text-dark-400 text-sm leading-[1.75] mb-4 max-w-[440px]">
-                    Every millisecond counts in trading. Our infrastructure processes signals,
-                    validates risk parameters, and executes trades across 9+ exchanges in under 50ms —
-                    24 hours a day, 365 days a year.
-                  </p>
-                  <p className="text-dark-400 text-sm leading-[1.75] mb-7 max-w-[440px]">
-                    Real-time WebSocket connections keep your dashboard, positions, and P&L
-                    synchronized to the second. No refresh needed, no data lag.
-                  </p>
-                </RevealOnScroll>
-
-                {/* Checklist */}
-                <RevealOnScroll delay={0.2}>
-                  <div className="flex flex-col gap-3.5 mb-8">
-                    {[
-                      'Sub-50ms trade execution across all exchanges',
-                      '99.9% uptime with multi-region failover',
-                    ].map((item) => (
-                      <div key={item} className="flex items-center gap-3">
-                        <Check className="w-4 h-4 text-primary-400 shrink-0" />
-                        <span className="text-dark-200 text-sm font-medium">{item}</span>
-                      </div>
-                    ))}
-                  </div>
-                </RevealOnScroll>
-
-                {/* CTA */}
-                <RevealOnScroll delay={0.25}>
-                  <GlowButton href="/register" variant="primary" size="md">
-                    <span className="flex items-center gap-2">
-                      Start Copying <ArrowRight className="w-4 h-4" />
-                    </span>
-                  </GlowButton>
-                </RevealOnScroll>
-              </div>
-
-              {/* Col 3: Large dashboard mockup */}
-              <div className="relative">
-                <RevealOnScroll delay={0.2}>
-                  <TiltCard maxTilt={4} unstyled>
-                    <div
-                      className="w-full rounded-2xl overflow-hidden relative"
-                      style={{
-                        height: 520,
-                        background: 'linear-gradient(135deg, #0f172a, #1e293b, #334155, #1e293b)',
-                        border: '1px solid rgba(255,255,255,0.06)',
-                      }}
-                    >
-                      <div className="absolute inset-5 rounded-xl overflow-hidden border border-white/5">
-                        {/* Top bar */}
-                        <div className="h-9 bg-white/[0.03] flex items-center px-3.5 gap-2">
-                          <span className="w-2.5 h-2.5 rounded-full bg-red-500" />
-                          <span className="w-2.5 h-2.5 rounded-full bg-yellow-500" />
-                          <span className="w-2.5 h-2.5 rounded-full bg-green-500" />
-                          <span className="ml-auto text-white/25 text-[10px] font-mono">analytics.cloudbright.com</span>
-                        </div>
-
-                        {/* Period selector */}
-                        <div className="flex items-center gap-2 px-4 pt-4 pb-2">
-                          {['7D', '30D', '90D', '1Y'].map((p, i) => (
-                            <span
-                              key={p}
-                              className={`text-[10px] font-bold px-3 py-1 rounded-full ${
-                                i === 1
-                                  ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30'
-                                  : 'text-white/30'
-                              }`}
-                            >
-                              {p}
-                            </span>
-                          ))}
-                          <span className="ml-auto text-green-400 text-sm font-bold font-mono">+$47,830</span>
-                        </div>
-
-                        {/* Chart */}
-                        <div className="px-4">
-                          <svg viewBox="0 0 500 140" className="w-full">
-                            <defs>
-                              <linearGradient id="cmt-fill" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stopColor="rgb(79,70,229)" stopOpacity="0.3" />
-                                <stop offset="100%" stopColor="rgb(79,70,229)" stopOpacity="0" />
-                              </linearGradient>
-                            </defs>
-                            {[0, 35, 70, 105, 140].map((y) => (
-                              <line key={y} x1="0" y1={y} x2="500" y2={y} stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
-                            ))}
-                            <path
-                              d="M0,120 Q40,110 80,105 T160,70 T240,80 T320,45 T400,50 T480,20 L500,15 L500,140 L0,140 Z"
-                              fill="url(#cmt-fill)"
-                            />
-                            <path
-                              d="M0,120 Q40,110 80,105 T160,70 T240,80 T320,45 T400,50 T480,20 L500,15"
-                              fill="none" stroke="rgb(79,70,229)" strokeWidth="2.5" strokeLinecap="round"
-                            />
-                            <circle cx="500" cy="15" r="4" fill="rgb(79,70,229)" />
-                            <circle cx="500" cy="15" r="8" fill="rgb(79,70,229)" opacity="0.2" />
-                          </svg>
-                        </div>
-
-                        {/* Metrics row */}
-                        <div className="flex gap-2.5 px-4 pt-3">
-                          {[
-                            { label: 'Total Profit', val: '+$47,830', color: 'text-green-400' },
-                            { label: 'Win Rate', val: '61.3%', color: 'text-white/70' },
-                            { label: 'Sharpe Ratio', val: '2.14', color: 'text-white/70' },
-                            { label: 'Max Drawdown', val: '-8.2%', color: 'text-red-400' },
-                          ].map((s) => (
-                            <div key={s.label} className="flex-1 bg-white/[0.02] rounded-lg p-2.5">
-                              <div className="text-white/30 text-[8px] mb-1">{s.label}</div>
-                              <div className={`text-xs font-bold font-mono ${s.color}`}>{s.val}</div>
-                            </div>
-                          ))}
-                        </div>
-
-                        {/* Trade distribution */}
-                        <div className="px-4 pt-3">
-                          <div className="text-white/40 text-[9px] font-semibold tracking-wider uppercase mb-2">Trade Distribution</div>
-                          <div className="flex gap-1 h-5 rounded-lg overflow-hidden">
-                            <div className="bg-green-500/40 rounded-l-md" style={{ width: '61%' }} />
-                            <div className="bg-red-500/40 rounded-r-md" style={{ width: '39%' }} />
-                          </div>
-                          <div className="flex justify-between mt-1">
-                            <span className="text-[9px] text-green-400/70">Won 61.3%</span>
-                            <span className="text-[9px] text-red-400/70">Lost 38.7%</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Slider dots */}
-                      <div className="absolute bottom-5 right-5 flex flex-col gap-1.5">
-                        {[0, 1, 2, 3].map((i) => (
-                          <div key={i} className={`w-2 h-2 rounded-full ${i === 0 ? 'bg-primary-500' : 'bg-white/15'}`} />
-                        ))}
-                      </div>
-                    </div>
-                  </TiltCard>
-                </RevealOnScroll>
-
-                {/* Overlay CTA card */}
-                <RevealOnScroll delay={0.4}>
-                  <div className="absolute bottom-5 left-5 z-10 bg-gradient-to-r from-primary-500 to-accent-500 rounded-2xl p-5 flex items-center gap-5 max-w-[380px] shadow-2xl shadow-primary-500/20">
-                    <div className="flex-1">
-                      <h3 className="text-white text-lg font-extrabold leading-tight mb-3">
-                        See It In Action — Start Free
-                      </h3>
-                      <Link href="/register" className="flex items-center gap-2.5 group">
-                        <div className="w-9 h-9 rounded-full bg-black/15 flex items-center justify-center">
-                          <ArrowRight className="w-4 h-4 text-white group-hover:translate-x-0.5 transition-transform" />
-                        </div>
-                        <span className="text-white text-xs font-bold tracking-wider uppercase">Create Account</span>
-                      </Link>
-                    </div>
-                    <div className="w-14 h-14 rounded-2xl bg-white/15 flex items-center justify-center shrink-0">
-                      <Activity className="w-7 h-7 text-white" />
-                    </div>
-                  </div>
-                </RevealOnScroll>
-              </div>
-
-            </div>
-          </div>
-        </section>
-
         {/* ══════════ SECTION 7: CTA BLOCK ══════════ */}
-        <section className="relative py-24 overflow-hidden">
+        <section className="relative py-16 sm:py-24 overflow-hidden">
           <video
             autoPlay
             loop
@@ -1152,12 +929,12 @@ export default function PlatformPage() {
                 </span>
               </div>
 
-              <h2 className="text-3xl sm:text-4xl font-semibold mb-6 text-white">
+              <h2 className="text-3xl sm:text-4xl font-semibold mb-3 sm:mb-4 text-white">
                 Start Copying in{' '}
                 <span className="text-gradient">3 Minutes</span>
               </h2>
 
-              <p className="text-xl text-dark-200 mb-10 max-w-2xl mx-auto leading-relaxed">
+              <p className="text-base sm:text-lg text-dark-200 mb-8 max-w-2xl mx-auto leading-relaxed">
                 Join 26,000+ investors who earn passively with battle-tested algorithms.
                 Set up once, collect profits on your schedule.
               </p>

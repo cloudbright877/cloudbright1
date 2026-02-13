@@ -100,11 +100,11 @@ export default function WhyChooseSection() {
         position: "absolute", inset: 0, pointerEvents: "none", opacity: 0.4,
         backgroundImage: `url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E")`,
       }} />
-      {/* Subtle grid lines */}
+      {/* Subtle hex grid */}
       <div style={{
         position: "absolute", inset: 0, pointerEvents: "none",
-        backgroundImage: "linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)",
-        backgroundSize: "60px 60px",
+        backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='86.6' height='150'%3E%3Cpolygon points='43.3,0 86.6,25 86.6,75 43.3,100 0,75 0,25' fill='none' stroke='rgba(139,92,246,0.06)' stroke-width='0.8'/%3E%3Cpolygon points='0,100 43.3,125 86.6,100' fill='none' stroke='rgba(139,92,246,0.06)' stroke-width='0.8'/%3E%3Cpolygon points='0,100 0,150 43.3,125' fill='none' stroke='rgba(139,92,246,0.06)' stroke-width='0.8'/%3E%3Cpolygon points='86.6,100 86.6,150 43.3,125' fill='none' stroke='rgba(139,92,246,0.06)' stroke-width='0.8'/%3E%3C/svg%3E\")",
+        backgroundSize: "86.6px 150px",
       }} />
 
       <div style={{ position: "relative", zIndex: 10, maxWidth: 1280, margin: "0 auto" }}>

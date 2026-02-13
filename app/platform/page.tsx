@@ -8,6 +8,7 @@ import { TiltCard } from '@/components/animations/TiltCard';
 import { AnimatedCounter } from '@/components/animations/AnimatedCounter';
 import { AnimatedBorderGrid } from '@/components/animations/AnimatedBorderGrid';
 import { GlowButton } from '@/components/animations/GlowButton';
+import { hexGridBg } from '@/components/animations/NeonGridLines';
 import { Marquee } from '@/components/animations/Marquee';
 import {
   Wallet,
@@ -654,14 +655,14 @@ export default function PlatformPage() {
                 </span>
               </div>
 
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 md:mb-8 leading-tight">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold mb-6 md:mb-8 leading-tight">
                 <span className="text-white drop-shadow-2xl">
                   The Complete{' '}
                   <span className="text-gradient">Copy Trading Platform</span>
                 </span>
               </h1>
 
-              <p className="text-lg sm:text-xl md:text-2xl text-gray-100 mb-8 md:mb-12 max-w-4xl mx-auto leading-relaxed">
+              <p className="text-base sm:text-lg text-gray-100 mb-8 md:mb-12 max-w-4xl mx-auto leading-relaxed">
                 Dashboard, marketplace, analytics, social trading, and security — everything you need in one place.
               </p>
 
@@ -678,7 +679,7 @@ export default function PlatformPage() {
         </section>
 
         {/* ══════════ SECTION 2: MARKETPLACE & COPY TRADING (Split Layout) ══════════ */}
-        <section className="relative py-24 bg-gradient-to-b from-dark-900 via-dark-800 to-dark-900 overflow-hidden">
+        <section className="relative py-16 sm:py-24 bg-gradient-to-b from-dark-900 via-dark-800 to-dark-900 overflow-hidden">
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Top row: heading centered */}
             <div className="text-center mb-12 lg:mb-16">
@@ -690,7 +691,7 @@ export default function PlatformPage() {
                   </span>
                   <div className="w-8 h-0.5 bg-primary-500" />
                 </div>
-                <h2 className="text-4xl md:text-5xl font-bold text-white leading-tight">
+                <h2 className="text-3xl sm:text-4xl font-semibold text-white leading-tight">
                   Find Your Strategy in{' '}
                   <span className="text-gradient">Seconds</span>
                 </h2>
@@ -801,7 +802,7 @@ export default function PlatformPage() {
         </div>
 
         {/* ══════════ SECTION 3: DASHBOARD & PORTFOLIO ══════════ */}
-        <section className="relative py-24 bg-dark-900 overflow-hidden">
+        <section className="relative py-16 sm:py-24 bg-dark-900 overflow-hidden">
           <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-accent-500/5 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-primary-500/5 rounded-full blur-3xl pointer-events-none" />
 
@@ -811,11 +812,11 @@ export default function PlatformPage() {
               {/* Left: text content */}
               <div>
                 <RevealOnScroll>
-                  <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+                  <h2 className="text-3xl sm:text-4xl font-semibold text-white mb-4">
                     Watch Every Trade in{' '}
                     <span className="text-gradient">Real Time</span>
                   </h2>
-                  <p className="text-lg text-dark-300 mb-8">
+                  <p className="text-base sm:text-lg text-dark-300 mb-8">
                     Your entire portfolio on one screen. Real-time P&L, active bots, open positions,
                     and trade history — all updated live.
                   </p>
@@ -880,7 +881,7 @@ export default function PlatformPage() {
         </section>
 
         {/* ══════════ SECTION 5: SOCIAL & COMMUNITY (Split Layout Reversed) ══════════ */}
-        <section className="relative py-24 bg-gradient-to-b from-dark-900 via-dark-800 to-dark-900 overflow-hidden">
+        <section className="relative py-16 sm:py-24 bg-gradient-to-b from-dark-900 via-dark-800 to-dark-900 overflow-hidden">
           <div className="absolute top-0 right-1/3 w-[500px] h-[500px] bg-rose-500/5 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute bottom-0 left-1/4 w-[400px] h-[400px] bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
 
@@ -903,10 +904,10 @@ export default function PlatformPage() {
                       Social Trading
                     </span>
                   </div>
-                  <h2 className="text-4xl md:text-5xl font-bold text-white leading-tight">
+                  <h2 className="text-3xl sm:text-4xl font-semibold text-white leading-tight">
                     Learn from the{' '}
                     <span className="bg-gradient-to-r from-rose-400 to-amber-400 bg-clip-text text-transparent">
-                      Best Bots
+                      Best Investors
                     </span>
                   </h2>
                 </RevealOnScroll>
@@ -941,18 +942,25 @@ export default function PlatformPage() {
                 <div className="absolute bottom-20 left-10 w-10 h-10 border-2 border-amber-500/10 rounded-full pointer-events-none" />
               </div>
             </div>
+
+            <RevealOnScroll delay={0.3}>
+              <div className="text-center mt-14">
+                <GlowButton href="/register" variant="primary" size="lg">
+                  <span className="flex items-center gap-2">
+                    Join the Community <ArrowRight className="w-5 h-5" />
+                  </span>
+                </GlowButton>
+              </div>
+            </RevealOnScroll>
           </div>
         </section>
 
         {/* ══════════ SECTION 6: WHY CHOOSE (Bento Grid) ══════════ */}
-        <section className="relative py-24 bg-dark-900 overflow-hidden">
-          {/* Subtle grid lines */}
+        <section className="relative py-16 sm:py-24 bg-dark-900 overflow-hidden">
+          {/* Subtle hex grid */}
           <div
             className="absolute inset-0 pointer-events-none"
-            style={{
-              backgroundImage: 'linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)',
-              backgroundSize: '60px 60px',
-            }}
+            style={hexGridBg}
           />
 
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -966,13 +974,13 @@ export default function PlatformPage() {
                   </span>
                   <div className="w-8 h-0.5 bg-emerald-500" />
                 </div>
-                <h2 className="text-4xl md:text-5xl font-bold text-white leading-tight">
+                <h2 className="text-3xl sm:text-4xl font-semibold text-white leading-tight">
                   Complete Financial{' '}
                   <span className="bg-gradient-to-r from-emerald-400 to-green-400 bg-clip-text text-transparent">
                     Control
                   </span>
                 </h2>
-                <p className="text-dark-400 text-[15px] leading-relaxed mt-4 max-w-2xl mx-auto">
+                <p className="text-base sm:text-lg text-dark-300 mt-3 sm:mt-4 max-w-2xl mx-auto">
                   Your money, your rules. Multi-currency wallets, instant withdrawals — all in one place.
                 </p>
               </div>
@@ -999,7 +1007,7 @@ export default function PlatformPage() {
                       <Wallet className="w-7 h-7 text-emerald-400" />
                     </div>
                     <span className="text-7xl font-bold text-dark-800/30 absolute top-4 right-6 select-none pointer-events-none">01</span>
-                    <h3 className="text-xl font-bold text-white mb-3">Multi-Currency Wallets</h3>
+                    <h3 className="text-xl font-semibold text-white mb-3">Multi-Currency Wallets</h3>
                     <p className="text-dark-300 leading-relaxed mb-5">
                       Hold USDT, BTC, ETH and more in separate wallets. Deposit and withdraw anytime with zero platform fees.
                     </p>
@@ -1036,7 +1044,7 @@ export default function PlatformPage() {
                       <CircleDollarSign className="w-7 h-7 text-emerald-400" />
                     </div>
                     <span className="text-7xl font-bold text-dark-800/30 absolute top-4 right-6 select-none pointer-events-none">02</span>
-                    <h3 className="text-xl font-bold text-white mb-3">Flexible Profit Collection</h3>
+                    <h3 className="text-xl font-semibold text-white mb-3">Flexible Profit Collection</h3>
                     <p className="text-dark-300 leading-relaxed mb-5">
                       Lock-in periods from 7 to 180 days. Longer terms offer higher potential returns. Collect profits anytime.
                     </p>
@@ -1065,7 +1073,7 @@ export default function PlatformPage() {
         </section>
 
         {/* ══════════ SECTION 8: OUR TECHNOLOGY (commitment.jsx pattern) ══════════ */}
-        <section className="relative py-24 bg-dark-900 overflow-hidden">
+        <section className="relative py-16 sm:py-24 bg-dark-900 overflow-hidden">
           {/* Dot grid */}
           <div
             className="absolute inset-0 pointer-events-none"
@@ -1126,7 +1134,7 @@ export default function PlatformPage() {
 
                 {/* Heading */}
                 <RevealOnScroll delay={0.08}>
-                  <h2 className="text-3xl md:text-4xl font-black text-white leading-[1.1] tracking-tight uppercase mb-7">
+                  <h2 className="text-3xl sm:text-4xl font-semibold text-white mb-7">
                     Built for Speed and Reliability
                   </h2>
                 </RevealOnScroll>
@@ -1297,14 +1305,14 @@ export default function PlatformPage() {
         </section>
 
         {/* ══════════ SECTION 9: SECURITY & TRUST (AnimatedBorderGrid) ══════════ */}
-        <section className="relative py-24 bg-dark-900 overflow-hidden">
+        <section className="relative py-16 sm:py-24 bg-dark-900 overflow-hidden">
           <div className="absolute inset-0 pointer-events-none">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary-500/5 rounded-full blur-3xl" />
           </div>
 
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <RevealOnScroll>
-              <div className="text-center mb-16">
+              <div className="text-center mb-10 sm:mb-16">
                 <div className="flex items-center justify-center gap-3 mb-6">
                   <div className="w-8 h-0.5 bg-primary-500" />
                   <span className="text-xs font-bold tracking-[0.25em] uppercase text-primary-400">
@@ -1312,10 +1320,10 @@ export default function PlatformPage() {
                   </span>
                   <div className="w-8 h-0.5 bg-primary-500" />
                 </div>
-                <h2 className="text-4xl sm:text-5xl font-bold mb-4 text-white">
+                <h2 className="text-3xl sm:text-4xl font-semibold mb-4 text-white">
                   Built for <span className="text-gradient">Trust</span>
                 </h2>
-                <p className="text-lg text-dark-300 max-w-2xl mx-auto">
+                <p className="text-base sm:text-lg text-dark-300 max-w-2xl mx-auto">
                   Enterprise-grade security with full transparency.
                   Your funds stay under your control at all times.
                 </p>
@@ -1334,7 +1342,7 @@ export default function PlatformPage() {
                     <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-500/15 to-accent-500/15 border border-primary-500/20 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-primary-500/10 transition-all duration-300">
                       <Icon className="w-7 h-7 text-primary-400" />
                     </div>
-                    <h3 className="text-xl font-bold text-white mb-3">{feature.title}</h3>
+                    <h3 className="text-xl font-semibold text-white mb-3">{feature.title}</h3>
                     <p className="text-dark-300 leading-relaxed mb-4">{feature.description}</p>
                     <ul className="space-y-2">
                       {feature.items.map((item) => (
@@ -1353,7 +1361,7 @@ export default function PlatformPage() {
         </section>
 
         {/* ══════════ SECTION 7: CTA BLOCK ══════════ */}
-        <section className="relative py-24 overflow-hidden">
+        <section className="relative py-16 sm:py-24 overflow-hidden">
           <video
             autoPlay
             loop
@@ -1376,12 +1384,12 @@ export default function PlatformPage() {
                 </span>
               </div>
 
-              <h2 className="text-4xl md:text-5xl font-black mb-6 text-white">
+              <h2 className="text-3xl sm:text-4xl font-semibold mb-6 text-white">
                 Start Copying in{' '}
                 <span className="text-gradient">3 Minutes</span>
               </h2>
 
-              <p className="text-xl text-dark-200 mb-10 max-w-2xl mx-auto leading-relaxed">
+              <p className="text-base sm:text-lg text-dark-200 mb-8 max-w-2xl mx-auto leading-relaxed">
                 Join 26,000+ investors who earn passively with battle-tested algorithms.
                 Set up once, collect profits on your schedule.
               </p>

@@ -73,9 +73,8 @@ export default function DashboardV2Layout({
           <div
             className="absolute inset-0"
             style={{
-              backgroundImage:
-                'linear-gradient(to right, rgba(14, 165, 233, 0.5) 1px, transparent 1px), linear-gradient(to bottom, rgba(14, 165, 233, 0.5) 1px, transparent 1px)',
-              backgroundSize: '60px 60px',
+              backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='86.6' height='150'%3E%3Cpolygon points='43.3,0 86.6,25 86.6,75 43.3,100 0,75 0,25' fill='none' stroke='rgba(14,165,233,0.5)' stroke-width='0.8'/%3E%3Cpolygon points='0,100 43.3,125 86.6,100' fill='none' stroke='rgba(14,165,233,0.5)' stroke-width='0.8'/%3E%3Cpolygon points='0,100 0,150 43.3,125' fill='none' stroke='rgba(14,165,233,0.5)' stroke-width='0.8'/%3E%3Cpolygon points='86.6,100 86.6,150 43.3,125' fill='none' stroke='rgba(14,165,233,0.5)' stroke-width='0.8'/%3E%3C/svg%3E\")",
+              backgroundSize: '86.6px 150px',
             }}
           />
         </div>

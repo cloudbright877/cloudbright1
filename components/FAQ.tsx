@@ -2,46 +2,68 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useRef } from 'react';
-const faqs = [
+import { GlowButton } from '@/components/animations/GlowButton';
+export const faqs = [
+  // Top 5 — shown on home page
   {
     question: 'How does Cloudbright work?',
     answer: 'It\'s simple: deposit crypto to your protected wallet, browse 100+ verified trading bots in our marketplace, and copy the one you like with one click. The master bot trades automatically 24/7 with your capital — you just watch the trades, track live stats, and collect profits. Full transparency: see every active trade, trade history, equity curves, and detailed bot statistics in real time.',
     icon: '🤖',
+    category: 'Getting Started',
+  },
+  {
+    question: 'Who creates the trading bots?',
+    answer: 'Every bot on Cloudbright is a real trading algorithm developed by our in-house quantitative research team or by verified Strategy Providers — professional traders and quant firms who pass our rigorous vetting process. Our team builds strategies using machine learning, technical analysis, and market microstructure data. External providers must demonstrate a verified track record and meet strict risk management criteria before their strategies are accepted. All bots execute trades automatically across 9+ major exchanges via secure API connections.',
+    icon: '🧠',
+    category: 'Trading Bots',
   },
   {
     question: 'Is my money safe with Cloudbright?',
     answer: 'Yes. Cloudbright is operated by HONG KONG CLOUD BRIGHT SOFTWARE LIMITED, a licensed Hong Kong company registered in Hong Kong. Your funds are protected in encrypted custodial wallets with AES-256 encryption, 2FA authentication, and hardware security modules. We have passed third-party security audits. Every trade and transaction is fully transparent — you can verify everything in real time from your dashboard.',
     icon: '🔒',
+    category: 'Security',
   },
   {
     question: 'What does it cost to use the platform?',
     answer: 'Cloudbright is free to use. No monthly subscriptions, no setup fees, no hidden charges. We charge a small commission only when you collect realized profit. If you don\'t profit, you don\'t pay. It\'s that simple.',
     icon: '💰',
+    category: 'Pricing & Investments',
   },
   {
     question: 'Do I need any experience?',
     answer: 'Not at all. Cloudbright is designed for passive income — the bot does all the trading for you. Each bot has transparent performance data: equity curves, trade history, win rate, Sharpe ratio, and max drawdown. Our Quick Start wizard recommends bots based on your goals in just 4 steps. You copy the bot and watch it work — no trading knowledge required.',
     icon: '👤',
+    category: 'Getting Started',
+  },
+  // Extended — shown in help center
+  {
+    question: 'How are bots verified before entering the marketplace?',
+    answer: 'Every strategy goes through a multi-stage verification pipeline before it reaches users. First, we run 12+ months of historical backtesting across different market conditions — bull runs, corrections, and sideways markets. Next, the strategy undergoes live paper trading to validate real-world execution. Our risk team evaluates max drawdown, Sharpe ratio, and tail risk exposure. Only strategies that pass all stages receive a "Verified" badge. After launch, we continuously monitor performance — if a bot underperforms its risk parameters, it gets flagged or removed from the marketplace.',
+    icon: '✅',
+    category: 'Trading Bots',
   },
   {
     question: 'What are the lock-in periods?',
     answer: 'When you copy a bot, you choose a lock-in period from 7 to 180 days. Longer lock-in periods typically offer higher potential returns. You can collect realized profits anytime. Once the lock-in period ends, your full investment is available for withdrawal.',
     icon: '⚡',
+    category: 'Pricing & Investments',
   },
   {
     question: 'What is the minimum investment?',
     answer: 'Minimum investment is $50. We support deposits in USDT, BTC, ETH, BNB, USDC, SOL, TRX, and other major cryptocurrencies. Deposits are credited instantly to your protected wallet. Start small and scale as you grow.',
     icon: '🌐',
+    category: 'Pricing & Investments',
   },
   {
     question: 'What makes Cloudbright different?',
     answer: 'Full transparency and community. Unlike other platforms, you see everything: every active trade the bot makes, full trade history, live P&L, and detailed statistical data. Plus, Cloudbright is a social copy trading community — follow top bots, compare strategies on leaderboards, and learn from the community. 100+ verified bots, custodial wallets for 7+ cryptocurrencies, and commission only on profit.',
     icon: '🌟',
+    category: 'Getting Started',
   },
 ];
 
 // Animated lines background
-function AnimatedLines() {
+export function AnimatedLines() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -135,15 +157,16 @@ function AnimatedLines() {
   );
 }
 
-export default function FAQ() {
+export default function FAQ({ limit }: { limit?: number }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const displayFaqs = limit ? faqs.slice(0, limit) : faqs;
 
   const toggleFAQ = (index: number) => {
     setOpenIndex(openIndex === index ? null : index);
   };
 
   return (
-    <section className="relative py-16 bg-dark-900 overflow-hidden">
+    <section className="relative py-16 sm:py-20 bg-dark-900 overflow-hidden">
       {/* Animated canvas background */}
       <AnimatedLines />
 
@@ -162,17 +185,17 @@ export default function FAQ() {
           transition={{ duration: 0.6 }}
           className="text-center mb-10"
         >
-          <h2 className="text-2xl sm:text-3xl font-semibold mb-3 text-white">
+          <h2 className="text-3xl sm:text-4xl font-semibold mb-3 sm:mb-4 text-white">
             Frequently Asked <span className="text-gradient">Questions</span>
           </h2>
-          <p className="text-base text-dark-200">
+          <p className="text-base sm:text-lg text-dark-300">
             Everything you need to know about copy trading with Cloudbright.
           </p>
         </motion.div>
 
         {/* FAQ accordion */}
         <div className="space-y-2">
-          {faqs.map((faq, index) => (
+          {displayFaqs.map((faq, index) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, y: 20 }}
@@ -239,15 +262,12 @@ export default function FAQ() {
                 Browse our complete FAQ library or contact our 24/7 support team
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <a
-                  href="/help-center"
-                  className="px-5 py-2.5 bg-gradient-to-r from-primary-500 to-accent-500 rounded-full font-medium text-sm text-white hover:shadow-lg hover:scale-105 transition-all duration-300 text-center"
-                >
+                <GlowButton href="/help-center" variant="primary" size="md">
                   Visit Help Center
-                </a>
-                <button className="px-5 py-2.5 bg-transparent border-2 border-primary-500 rounded-full font-medium text-sm text-primary-400 hover:bg-primary-500/10 transition-all duration-300">
+                </GlowButton>
+                <GlowButton variant="secondary" size="md">
                   Chat with Support
-                </button>
+                </GlowButton>
               </div>
             </div>
           </div>

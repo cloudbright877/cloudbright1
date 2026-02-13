@@ -3,8 +3,11 @@
 import { motion } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { RevealOnScroll } from '@/components/animations/RevealOnScroll';
+import { AnimatedLines } from '@/components/FAQ';
 import Image from 'next/image';
 import { useState } from 'react';
+import { Mail, MapPin, MessageCircle, Clock, Send } from 'lucide-react';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -20,13 +23,10 @@ export default function ContactPage() {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate form submission
     setTimeout(() => {
       setIsSubmitting(false);
       setSubmitStatus('success');
       setFormData({ name: '', email: '', subject: '', message: '' });
-
-      // Reset success message after 5 seconds
       setTimeout(() => setSubmitStatus('idle'), 5000);
     }, 1500);
   };
@@ -40,25 +40,25 @@ export default function ContactPage() {
 
   const contactInfo = [
     {
-      icon: '📧',
+      icon: Mail,
       title: 'Email Us',
       details: 'support@cloudbright.com',
       subDetails: 'We reply within 24 hours',
-      gradient: 'from-blue-500 to-cyan-500',
+      href: 'mailto:support@cloudbright.com',
     },
     {
-      icon: '📍',
+      icon: MapPin,
       title: 'Visit Us',
       details: 'Hong Kong',
       subDetails: 'Visit our office by appointment',
-      gradient: 'from-orange-500 to-red-500',
+      href: '',
     },
     {
-      icon: '💬',
+      icon: MessageCircle,
       title: 'Live Chat',
       details: 'Available 24/7',
       subDetails: 'Instant support via chat',
-      gradient: 'from-green-500 to-emerald-500',
+      href: '',
     },
   ];
 
@@ -97,81 +97,92 @@ export default function ContactPage() {
     <>
       <Navbar />
 
-      <main className="bg-white dark:bg-dark-900 pt-20">
-        {/* Header Section */}
-        <section className="py-20 bg-gradient-to-br from-primary-500/5 to-accent-500/5 dark:from-primary-500/10 dark:to-accent-500/10 border-b border-gray-200 dark:border-dark-800">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="text-center"
-            >
-              <span className="text-primary-500 dark:text-primary-400 font-semibold text-sm uppercase tracking-wide">
+      {/* Hero */}
+      <section className="relative pt-32 pb-32 md:pt-40 md:pb-40 overflow-hidden bg-dark-900">
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: 'url(/contact.webp)' }}
+        />
+        <div className="absolute inset-0 bg-dark-900/70" />
+        <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-dark-900 to-transparent z-[1]" />
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <RevealOnScroll>
+            <div className="flex items-center justify-center gap-3 mb-5">
+              <div className="w-8 h-0.5 bg-primary-500" />
+              <span className="text-xs font-bold tracking-[0.25em] uppercase text-primary-400">
                 Get in Touch
               </span>
-              <h1 className="text-4xl md:text-6xl font-black mt-4 mb-6 text-gray-900 dark:text-white">
-                We're Here to <span className="text-gradient">Help</span>
-              </h1>
-              <p className="text-xl text-gray-600 dark:text-dark-300 max-w-3xl mx-auto">
-                Have questions about our platform? Want to learn more about AI trading? Our team of experts is ready to assist you.
-              </p>
-            </motion.div>
-          </div>
-        </section>
+              <div className="w-8 h-0.5 bg-primary-500" />
+            </div>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold mb-6 text-white leading-tight">
+              We&apos;re Here to <span className="text-gradient">Help</span>
+            </h1>
+            <p className="text-base sm:text-lg text-dark-300 max-w-2xl mx-auto">
+              Have questions about our platform? Want to learn more about copy trading?
+              Our team of experts is ready to assist you.
+            </p>
+          </RevealOnScroll>
+        </div>
+      </section>
 
-        {/* Contact Info Cards */}
-        <section className="py-16 -mt-16 relative z-10">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {contactInfo.map((info, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  className="group bg-white dark:bg-dark-800 rounded-2xl p-6 border border-gray-200 dark:border-dark-700 hover:shadow-xl transition-all duration-300 hover:-translate-y-2"
-                >
-                  <div className={`w-14 h-14 bg-gradient-to-br ${info.gradient} rounded-xl flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition-transform duration-300`}>
-                    {info.icon}
-                  </div>
-                  <h3 className="text-lg font-black mb-2 text-gray-900 dark:text-white">
-                    {info.title}
-                  </h3>
-                  <p className="text-gray-900 dark:text-white font-semibold mb-1">
-                    {info.details}
-                  </p>
-                  <p className="text-sm text-gray-600 dark:text-dark-300">
-                    {info.subDetails}
-                  </p>
-                </motion.div>
-              ))}
+      {/* Contact Info Cards — overlaps between hero and main */}
+      <section className="relative z-20 -mt-20 md:-mt-24 pb-8">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid md:grid-cols-3 gap-6">
+              {contactInfo.map((info, index) => {
+                const Icon = info.icon;
+                return (
+                  <RevealOnScroll key={index} delay={index * 0.1}>
+                    <div className="relative p-6 rounded-2xl border border-dark-700/50 bg-dark-800/50 backdrop-blur-sm text-center">
+                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-500/15 to-accent-500/15 border border-primary-500/20 flex items-center justify-center mx-auto mb-4">
+                        <Icon className="w-6 h-6 text-primary-400" />
+                      </div>
+                      <h3 className="text-lg font-semibold text-white mb-2">
+                        {info.title}
+                      </h3>
+                      {info.href ? (
+                        <a href={info.href} className="text-white font-medium mb-1 hover:text-primary-400 transition-colors block">
+                          {info.details}
+                        </a>
+                      ) : (
+                        <p className="text-white font-medium mb-1">
+                          {info.details}
+                        </p>
+                      )}
+                      <p className="text-sm text-dark-400">
+                        {info.subDetails}
+                      </p>
+                    </div>
+                  </RevealOnScroll>
+                );
+              })}
             </div>
           </div>
         </section>
 
+      <main className="bg-dark-900">
         {/* Contact Form & Info */}
-        <section className="py-24">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="relative py-16 sm:py-24 overflow-hidden">
+          <AnimatedLines />
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute top-1/4 right-1/4 w-[500px] h-[500px] bg-primary-500/8 rounded-full blur-3xl" />
+            <div className="absolute bottom-1/4 left-1/4 w-[400px] h-[400px] bg-blue-500/8 rounded-full blur-3xl" />
+          </div>
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid lg:grid-cols-2 gap-16">
               {/* Contact Form */}
-              <motion.div
-                initial={{ opacity: 0, x: -50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8 }}
-              >
-                <h2 className="text-3xl md:text-4xl font-black mb-6 text-gray-900 dark:text-white">
-                  Send Us a Message
+              <RevealOnScroll>
+                <h2 className="text-3xl sm:text-4xl font-semibold mb-4 text-white">
+                  Send Us a <span className="text-gradient">Message</span>
                 </h2>
-                <p className="text-gray-600 dark:text-dark-300 mb-8">
+                <p className="text-dark-300 mb-8">
                   Fill out the form below and our team will get back to you within 24 hours.
                 </p>
 
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  {/* Name */}
+                <form onSubmit={handleSubmit} className="space-y-5">
                   <div>
-                    <label htmlFor="name" className="block text-sm font-semibold text-gray-700 dark:text-dark-200 mb-2">
+                    <label htmlFor="name" className="block text-sm font-medium text-dark-300 mb-2">
                       Full Name *
                     </label>
                     <input
@@ -181,14 +192,13 @@ export default function ContactPage() {
                       value={formData.name}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-3 bg-white dark:bg-dark-800 border-2 border-gray-200 dark:border-dark-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-dark-400 focus:outline-none focus:border-primary-500 transition-colors"
+                      className="w-full px-4 py-3 bg-dark-800 border border-dark-700 rounded-xl text-white placeholder-dark-500 focus:outline-none focus:border-primary-500 transition-colors"
                       placeholder="John Doe"
                     />
                   </div>
 
-                  {/* Email */}
                   <div>
-                    <label htmlFor="email" className="block text-sm font-semibold text-gray-700 dark:text-dark-200 mb-2">
+                    <label htmlFor="email" className="block text-sm font-medium text-dark-300 mb-2">
                       Email Address *
                     </label>
                     <input
@@ -198,14 +208,13 @@ export default function ContactPage() {
                       value={formData.email}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-3 bg-white dark:bg-dark-800 border-2 border-gray-200 dark:border-dark-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-dark-400 focus:outline-none focus:border-primary-500 transition-colors"
+                      className="w-full px-4 py-3 bg-dark-800 border border-dark-700 rounded-xl text-white placeholder-dark-500 focus:outline-none focus:border-primary-500 transition-colors"
                       placeholder="john@example.com"
                     />
                   </div>
 
-                  {/* Subject */}
                   <div>
-                    <label htmlFor="subject" className="block text-sm font-semibold text-gray-700 dark:text-dark-200 mb-2">
+                    <label htmlFor="subject" className="block text-sm font-medium text-dark-300 mb-2">
                       Subject *
                     </label>
                     <select
@@ -214,7 +223,7 @@ export default function ContactPage() {
                       value={formData.subject}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-3 bg-white dark:bg-dark-800 border-2 border-gray-200 dark:border-dark-700 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:border-primary-500 transition-colors"
+                      className="w-full px-4 py-3 bg-dark-800 border border-dark-700 rounded-xl text-white focus:outline-none focus:border-primary-500 transition-colors"
                     >
                       <option value="">Select a department</option>
                       {departments.map((dept) => (
@@ -225,9 +234,8 @@ export default function ContactPage() {
                     </select>
                   </div>
 
-                  {/* Message */}
                   <div>
-                    <label htmlFor="message" className="block text-sm font-semibold text-gray-700 dark:text-dark-200 mb-2">
+                    <label htmlFor="message" className="block text-sm font-medium text-dark-300 mb-2">
                       Message *
                     </label>
                     <textarea
@@ -237,152 +245,139 @@ export default function ContactPage() {
                       onChange={handleChange}
                       required
                       rows={6}
-                      className="w-full px-4 py-3 bg-white dark:bg-dark-800 border-2 border-gray-200 dark:border-dark-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-dark-400 focus:outline-none focus:border-primary-500 transition-colors resize-none"
+                      className="w-full px-4 py-3 bg-dark-800 border border-dark-700 rounded-xl text-white placeholder-dark-500 focus:outline-none focus:border-primary-500 transition-colors resize-none"
                       placeholder="Tell us how we can help you..."
                     />
                   </div>
 
-                  {/* Submit Button */}
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full px-8 py-4 bg-gradient-to-r from-primary-500 to-accent-500 rounded-full font-semibold text-white hover:shadow-2xl hover:shadow-primary-500/50 transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                    className="w-full px-8 py-4 bg-gradient-to-r from-primary-500 to-accent-500 rounded-xl font-semibold text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
+                    <Send className="w-4 h-4" />
                     {isSubmitting ? 'Sending...' : 'Send Message'}
                   </button>
 
-                  {/* Success Message */}
                   {submitStatus === 'success' && (
                     <motion.div
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl flex items-center gap-3"
+                      className="p-4 bg-green-500/10 border border-green-500/20 rounded-xl flex items-center gap-3"
                     >
-                      <svg className="w-6 h-6 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                      <svg className="w-5 h-5 text-green-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                       </svg>
-                      <p className="text-green-700 dark:text-green-400 font-semibold">
-                        Message sent successfully! We'll get back to you soon.
+                      <p className="text-green-400 font-medium text-sm">
+                        Message sent successfully! We&apos;ll get back to you soon.
                       </p>
                     </motion.div>
                   )}
                 </form>
-              </motion.div>
+              </RevealOnScroll>
 
-              {/* Additional Info */}
-              <motion.div
-                initial={{ opacity: 0, x: 50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8 }}
-                className="space-y-8"
-              >
+              {/* Right column */}
+              <div className="space-y-6">
                 {/* Social Links */}
-                <div className="bg-gradient-to-br from-primary-500/10 to-accent-500/10 dark:from-primary-500/20 dark:to-accent-500/20 rounded-3xl p-8 border border-primary-500/20">
-                  <h3 className="text-2xl font-black mb-4 text-gray-900 dark:text-white">
-                    Connect With Us
-                  </h3>
-                  <p className="text-gray-600 dark:text-dark-300 mb-6">
-                    Follow us on social media for the latest updates, market insights, and community discussions.
-                  </p>
-                  <div className="flex flex-wrap gap-4">
-                    {socialLinks.map((social, index) => (
-                      <a
-                        key={index}
-                        href={social.url}
-                        aria-label={social.name}
-                        className="relative group"
-                      >
-                        {/* Glow effect on hover */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-primary-500/40 to-accent-500/40 rounded-lg blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-
-                        {/* Icon */}
-                        <div className="relative w-10 h-10 flex items-center justify-center">
+                <RevealOnScroll delay={0.1}>
+                  <div className="p-6 rounded-2xl border border-dark-700/50 bg-dark-800/50">
+                    <h3 className="text-xl font-semibold text-white mb-3">
+                      Connect With Us
+                    </h3>
+                    <p className="text-dark-300 text-sm mb-5">
+                      Follow us on social media for the latest updates, market insights, and community discussions.
+                    </p>
+                    <div className="flex flex-wrap gap-3">
+                      {socialLinks.map((social, index) => (
+                        <a
+                          key={index}
+                          href={social.url}
+                          aria-label={social.name}
+                          className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500/15 to-accent-500/15 border border-primary-500/20 flex items-center justify-center hover:border-primary-500/50 transition-colors duration-300"
+                        >
                           <Image
                             src={social.icon}
                             alt={social.name}
-                            width={24}
-                            height={24}
-                            className="transition-all duration-300 group-hover:scale-110"
+                            width={20}
+                            height={20}
                           />
-                        </div>
-                      </a>
-                    ))}
+                        </a>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                </RevealOnScroll>
 
                 {/* Office Hours */}
-                <div className="bg-white dark:bg-dark-800 rounded-3xl p-8 border border-gray-200 dark:border-dark-700">
-                  <h3 className="text-2xl font-black mb-4 text-gray-900 dark:text-white">
-                    Office Hours
-                  </h3>
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-700 dark:text-dark-200 font-semibold">Monday - Friday</span>
-                      <span className="text-gray-600 dark:text-dark-300">9:00 AM - 6:00 PM</span>
+                <RevealOnScroll delay={0.15}>
+                  <div className="p-6 rounded-2xl border border-dark-700/50 bg-dark-800/50">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500/15 to-accent-500/15 border border-primary-500/20 flex items-center justify-center">
+                        <Clock className="w-5 h-5 text-primary-400" />
+                      </div>
+                      <h3 className="text-xl font-semibold text-white">
+                        Office Hours
+                      </h3>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-700 dark:text-dark-200 font-semibold">Saturday</span>
-                      <span className="text-gray-600 dark:text-dark-300">10:00 AM - 4:00 PM</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-700 dark:text-dark-200 font-semibold">Sunday</span>
-                      <span className="text-gray-600 dark:text-dark-300">Closed</span>
-                    </div>
-                    <div className="pt-3 mt-3 border-t border-gray-200 dark:border-dark-700">
-                      <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
-                        <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                        <span className="font-semibold">Live Chat: 24/7 Available</span>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-dark-200 font-medium text-sm">Monday - Friday</span>
+                        <span className="text-dark-400 text-sm">9:00 AM - 6:00 PM</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-dark-200 font-medium text-sm">Saturday</span>
+                        <span className="text-dark-400 text-sm">10:00 AM - 4:00 PM</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-dark-200 font-medium text-sm">Sunday</span>
+                        <span className="text-dark-400 text-sm">Closed</span>
+                      </div>
+                      <div className="pt-3 mt-1 border-t border-dark-700/50">
+                        <div className="flex items-center gap-2 text-green-400">
+                          <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                          <span className="font-medium text-sm">Live Chat: 24/7 Available</span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
+                </RevealOnScroll>
 
                 {/* Quick FAQs */}
-                <div className="bg-white dark:bg-dark-800 rounded-3xl p-8 border border-gray-200 dark:border-dark-700">
-                  <h3 className="text-2xl font-black mb-4 text-gray-900 dark:text-white">
-                    Quick Answers
-                  </h3>
-                  <div className="space-y-4">
-                    {faqs.map((faq, index) => (
-                      <div key={index} className="pb-4 border-b border-gray-200 dark:border-dark-700 last:border-0 last:pb-0">
-                        <h4 className="font-bold text-gray-900 dark:text-white mb-2">
-                          {faq.question}
-                        </h4>
-                        <p className="text-sm text-gray-600 dark:text-dark-300">
-                          {faq.answer}
-                        </p>
-                      </div>
-                    ))}
+                <RevealOnScroll delay={0.2}>
+                  <div className="p-6 rounded-2xl border border-dark-700/50 bg-dark-800/50">
+                    <h3 className="text-xl font-semibold text-white mb-4">
+                      Quick Answers
+                    </h3>
+                    <div className="space-y-4">
+                      {faqs.map((faq, index) => (
+                        <div key={index} className="pb-4 border-b border-dark-700/50 last:border-0 last:pb-0">
+                          <h4 className="font-medium text-white mb-1.5 text-sm">
+                            {faq.question}
+                          </h4>
+                          <p className="text-dark-400 text-sm leading-relaxed">
+                            {faq.answer}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              </motion.div>
-            </div>
-          </div>
-        </section>
+                </RevealOnScroll>
 
-        {/* Map Placeholder Section */}
-        <section className="py-16 bg-gray-50 dark:bg-dark-800/50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-            >
-              <h2 className="text-3xl font-black mb-8 text-center text-gray-900 dark:text-white">
-                Our Office Location
-              </h2>
-              <div className="bg-white dark:bg-dark-800 rounded-3xl p-8 border border-gray-200 dark:border-dark-700">
-                <div className="flex flex-col items-center text-center max-w-xl mx-auto">
-                  <div className="text-6xl mb-4">🇭🇰</div>
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">Hong Kong</h3>
-                  <p className="text-gray-600 dark:text-dark-300 mb-2">
-                    <strong className="text-gray-900 dark:text-white">Cloudbright Limited</strong>
-                  </p>
-                </div>
+                {/* Location */}
+                <RevealOnScroll delay={0.25}>
+                  <div className="p-6 rounded-2xl border border-dark-700/50 bg-dark-800/50">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500/15 to-accent-500/15 border border-primary-500/20 flex items-center justify-center">
+                        <MapPin className="w-5 h-5 text-primary-400" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-white">Cloudbright Limited</h3>
+                        <p className="text-dark-400 text-sm">Hong Kong SAR</p>
+                      </div>
+                    </div>
+                  </div>
+                </RevealOnScroll>
               </div>
-            </motion.div>
+            </div>
           </div>
         </section>
       </main>
