@@ -7,8 +7,19 @@ import { RevealOnScroll } from '@/components/animations/RevealOnScroll';
 import { GlowButton } from '@/components/animations/GlowButton';
 import { AnimatedBorderGrid } from '@/components/animations/AnimatedBorderGrid';
 import { TiltCard } from '@/components/animations/TiltCard';
+import { OfficeSlider } from '@/components/OfficeSlider';
 import { ShieldCheck, Lock, Building2, Building, Check, Globe, ArrowRight, Smartphone, Sparkles, Users, Layers, Landmark, Shield, Zap } from 'lucide-react';
 import Image from 'next/image';
+
+const officeImages = [
+  { src: '/office-slider/1.webp', alt: 'Cloudbright office' },
+  { src: '/office-slider/2.webp', alt: 'Cloudbright workspace' },
+  { src: '/office-slider/3.webp', alt: 'Cloudbright team area' },
+  { src: '/office-slider/4.webp', alt: 'Cloudbright meeting room' },
+  { src: '/office-slider/5.webp', alt: 'Cloudbright development floor' },
+  { src: '/office-slider/6.webp', alt: 'Cloudbright lounge' },
+  { src: '/office-slider/7.webp', alt: 'Cloudbright office view' },
+];
 
 const trustSignals = [
   {
@@ -52,23 +63,23 @@ const teamMembers = [
     department: 'Operations & Strategy',
     description:
       '12+ years in fintech operations and crypto markets. Driving day-to-day execution and platform growth.',
-    photo: '/team-member.webp',
+    photo: '/team/JamesChen.webp',
   },
   {
-    name: 'Alex Rivera',
+    name: 'Dong Aiguo',
     role: 'CTO & Co-Founder',
     department: 'Engineering & AI',
     description:
       'Building the core platform and trading engine. Specializes in high-frequency systems and machine learning.',
-    photo: '/team-member-2.webp',
+    photo: '/team/DongAiguo.webp',
   },
   {
-    name: 'Sarah Kim',
+    name: 'Samarth Ramesh',
     role: 'Head of Security',
     department: 'Security & Compliance',
     description:
       'Ensuring platform integrity and regulatory compliance. Continuous auditing to protect every user.',
-    photo: '/team-member.webp',
+    photo: '/team/Samarth-Ramesh.webp',
   },
   {
     name: 'David Okafor',
@@ -76,7 +87,7 @@ const teamMembers = [
     department: 'Community & Support',
     description:
       'Connecting investors worldwide and providing 24/7 assistance. From onboarding to advanced strategy guidance.',
-    photo: '/team-member-2.webp',
+    photo: '/team/DavidOkafor.webp',
   },
 ];
 
@@ -133,7 +144,7 @@ const roadmapTimeline = [
         features: [
           'Native iOS & Android applications',
           'Real-time portfolio tracking & push notifications',
-          'Copy bots with one tap — trade anywhere, anytime',
+          'Connect a bot with one tap — fully automated trading on the go',
         ],
       },
       {
@@ -142,7 +153,7 @@ const roadmapTimeline = [
         title: 'AI Strategy Builder',
         gradient: 'from-purple-500 to-pink-500',
         features: [
-          'Create custom bots using plain English prompts',
+          'AI-powered strategy selection based on your risk profile',
           'Instant backtesting on historical data',
           'One-click deployment to live markets',
         ],
@@ -267,151 +278,55 @@ export default function AboutPage() {
           <div className="absolute top-40 right-24 w-1.5 h-1.5 rounded-full bg-primary-500 opacity-30" />
 
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-[50px] items-start">
-              {/* Left column: text content */}
-              <div>
-                <RevealOnScroll>
-                  <div className="flex items-center gap-3 mb-5">
-                    <div className="w-8 h-0.5 bg-primary-500" />
-                    <span className="text-xs font-bold tracking-[0.25em] uppercase text-primary-400">
-                      Who We Are
-                    </span>
-                  </div>
-                </RevealOnScroll>
-
-                <RevealOnScroll delay={0.1}>
-                  <div className="w-2.5 h-2.5 rounded-full bg-primary-500 mb-3" />
-                  <h2 className="text-3xl sm:text-4xl font-semibold text-gray-900 dark:text-white leading-[1.05] tracking-tight mb-5">
-                    Leading Global Copy Trading Platform
-                  </h2>
-                </RevealOnScroll>
-
-                <RevealOnScroll delay={0.15}>
-                  <p className="text-gray-500 dark:text-dark-400 text-[15px] leading-[1.7] mb-8 max-w-[520px]">
-                    After years of building institutional trading systems, our team launched Cloudbright
-                    to give everyday investors access to the same automated strategies used by hedge funds
-                    and professional institutions.
-                  </p>
-                </RevealOnScroll>
-
-                <RevealOnScroll delay={0.2}>
-                  <div className="flex flex-col gap-4 mb-10">
-                    {[
-                      'Copy verified bots with real-time trade tracking',
-                      'Automated trading — the bot handles everything',
-                      'Transparent performance metrics across all strategies',
-                    ].map((item) => (
-                      <div key={item} className="flex items-center gap-3.5">
-                        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center shrink-0">
-                          <Check className="w-3.5 h-3.5 text-white" />
-                        </div>
-                        <span className="text-gray-900 dark:text-white text-[15px] font-bold">{item}</span>
-                      </div>
-                    ))}
-                  </div>
-                </RevealOnScroll>
-
-                <RevealOnScroll delay={0.25}>
-                  <div className="bg-white/80 dark:bg-dark-800/50 rounded-2xl p-6 grid grid-cols-[1fr_auto] gap-5 items-center mb-9 max-w-[520px] border border-gray-200/50 dark:border-dark-700/30">
-                    <p className="text-gray-600 dark:text-dark-300 text-sm leading-relaxed italic">
-                      &ldquo;We believe every investor deserves access to professional trading strategies.
-                      Our platform levels the playing field.&rdquo;
-                    </p>
-                    <div className="text-center">
-                      <div className="text-primary-400 text-sm font-extrabold tracking-wider uppercase">Cloud Bright</div>
-                      <div className="text-gray-400 dark:text-dark-500 text-xs mt-0.5">Software Limited</div>
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center mx-auto mt-2.5">
-                        <span className="text-lg font-bold text-white">CB</span>
-                      </div>
-                    </div>
-                  </div>
-                </RevealOnScroll>
-
-                <RevealOnScroll delay={0.3}>
-                  <div className="flex items-center gap-5 flex-wrap">
-                    <GlowButton href="/register" variant="primary" size="md">
-                      <span className="flex items-center gap-2">
-                        Get Started <ArrowRight className="w-4 h-4" />
-                      </span>
-                    </GlowButton>
-                    <div className="flex items-center gap-3.5">
-                      <div className="w-12 h-12 rounded-full bg-primary-500 flex items-center justify-center">
-                        <Globe className="w-5 h-5 text-white" />
-                      </div>
-                      <div>
-                        <div className="text-gray-400 dark:text-dark-500 text-xs">Crypto never sleeps</div>
-                        <div className="text-gray-900 dark:text-white text-base font-extrabold">24/7 Trading</div>
-                      </div>
-                    </div>
-                  </div>
-                </RevealOnScroll>
-              </div>
-
-              {/* Right column: overlapping shapes — desktop */}
-              <div className="relative min-h-[500px] lg:min-h-[720px] hidden lg:block">
-                <div className="absolute top-5 left-[8%] z-[1]">
-                  <RevealOnScroll delay={0.2}>
-                    <TiltCard maxTilt={5} unstyled className="p-0">
-                      <div
-                        className="overflow-hidden rounded-2xl max-w-full"
-                        style={{ width: 340, height: 560 }}
-                      >
-                        <Image
-                          src="/working-space-1.png"
-                          alt="Cloudbright workspace"
-                          width={340}
-                          height={560}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    </TiltCard>
-                  </RevealOnScroll>
+            {/* Text content — centered */}
+            <div className="max-w-3xl mx-auto text-center mb-12 sm:mb-16">
+              <RevealOnScroll>
+                <div className="flex items-center justify-center gap-3 mb-5">
+                  <div className="w-8 h-0.5 bg-primary-500" />
+                  <span className="text-xs font-bold tracking-[0.25em] uppercase text-primary-400">
+                    Who We Are
+                  </span>
+                  <div className="w-8 h-0.5 bg-primary-500" />
                 </div>
+              </RevealOnScroll>
 
+              <RevealOnScroll delay={0.1}>
+                <h2 className="text-3xl sm:text-4xl font-semibold text-gray-900 dark:text-white leading-[1.05] tracking-tight mb-5">
+                  Next-Gen Copy Trading Powered With Social Elements
+                </h2>
+              </RevealOnScroll>
 
-                <div className="absolute bottom-12 -right-1 z-[3]">
-                  <RevealOnScroll delay={0.5}>
-                    <TiltCard maxTilt={6} unstyled className="p-0">
-                      <div className="overflow-hidden rounded-2xl max-w-full" style={{ width: 320, height: 277 }}>
-                        <Image
-                          src="/working-space-2.png"
-                          alt="Cloudbright workspace"
-                          width={320}
-                          height={277}
-                          className="w-full h-full object-cover"
-                        />
+              <RevealOnScroll delay={0.15}>
+                <p className="text-gray-500 dark:text-dark-400 text-[15px] leading-[1.7] mb-8 max-w-[600px] mx-auto">
+                  After years of building institutional trading systems, our team launched Cloudbright
+                  to give everyday investors access to the same automated strategies used by hedge funds
+                  and professional institutions.
+                </p>
+              </RevealOnScroll>
+
+              <RevealOnScroll delay={0.2}>
+                <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-8 mb-10">
+                  {[
+                    'Copy verified bots with real-time trade tracking',
+                    'Automated trading — the bot handles everything',
+                    'Transparent performance metrics across all strategies',
+                  ].map((item) => (
+                    <div key={item} className="flex items-center gap-3">
+                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center shrink-0">
+                        <Check className="w-3.5 h-3.5 text-white" />
                       </div>
-                    </TiltCard>
-                  </RevealOnScroll>
+                      <span className="text-gray-900 dark:text-white text-sm font-bold">{item}</span>
+                    </div>
+                  ))}
                 </div>
-              </div>
+              </RevealOnScroll>
 
-              {/* Right column: mobile version */}
-              <div className="lg:hidden">
-                <RevealOnScroll delay={0.2}>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="overflow-hidden rounded-2xl">
-                      <Image
-                        src="/working-space-1.png"
-                        alt="Cloudbright workspace"
-                        width={340}
-                        height={560}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="overflow-hidden rounded-2xl self-end">
-                      <Image
-                        src="/working-space-2.png"
-                        alt="Cloudbright workspace"
-                        width={320}
-                        height={277}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  </div>
-                </RevealOnScroll>
-              </div>
             </div>
+
+            {/* Office slider — full width */}
+            <RevealOnScroll delay={0.3}>
+              <OfficeSlider images={officeImages} autoPlayInterval={4000} />
+            </RevealOnScroll>
           </div>
         </section>
 
