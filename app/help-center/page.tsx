@@ -8,7 +8,7 @@ import { useState } from 'react';
 import { faqs, AnimatedLines } from '@/components/FAQ';
 import { GlowButton } from '@/components/animations/GlowButton';
 
-const categories = ['All', 'Getting Started', 'Trading Bots', 'Pricing & Investments', 'Security'];
+const categories = ['All', 'Getting Started', 'About Company', 'Trading Bots', 'Pricing & Investments', 'Deposits & Withdrawals', 'Referral Program', 'Security'];
 
 export default function HelpCenterPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -188,7 +188,7 @@ export default function HelpCenterPage() {
                           className="overflow-hidden"
                         >
                           <div className="px-6 pb-4 text-sm text-gray-700 dark:text-dark-200 leading-relaxed border-t border-gray-200/50 dark:border-dark-700/50 pt-4">
-                            {faq.answer}
+                            {faq.content ?? faq.answer}
                           </div>
                         </motion.div>
                       )}

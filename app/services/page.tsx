@@ -180,11 +180,11 @@ export default function PlatformPage() {
               </RevealOnScroll>
 
               {/* Right: overlapping cards */}
-              <div className="relative h-[400px] sm:h-[500px] lg:h-[580px] flex items-center justify-center">
-                <div className="absolute top-0 left-1/2 -translate-x-[30%] z-20">
+              <div className="relative h-[440px] sm:h-[540px] lg:h-[580px] flex items-center justify-center">
+                <div className="absolute top-0 left-1/2 -translate-x-[25%] sm:-translate-x-[30%] z-20">
                   <RevealOnScroll direction="right" delay={0.2}>
                     <TiltCard maxTilt={8} unstyled>
-                      <div className="w-[280px] sm:w-[340px] rounded-2xl bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 p-5 shadow-2xl shadow-purple-500/10">
+                      <div className="w-[260px] sm:w-[340px] rounded-2xl bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 p-5 shadow-2xl shadow-purple-500/10">
                         <div className="flex items-start gap-2.5 mb-3">
                           <img src="/bots/BybitMarketMakerBot.png" alt="Bot" className="w-9 h-9 object-contain" />
                           <div className="min-w-0">
@@ -228,7 +228,7 @@ export default function PlatformPage() {
                     </TiltCard>
                   </RevealOnScroll>
                 </div>
-                <div className="absolute bottom-[50px] left-0 z-10">
+                <div className="absolute bottom-[30px] sm:bottom-[50px] left-0 z-10">
                   <RevealOnScroll direction="left" delay={0.4}>
                     <TiltCard maxTilt={8} unstyled>
                       <QuickStartPreview />
@@ -339,7 +339,7 @@ export default function PlatformPage() {
 
               {/* Right column: live trading widget */}
               <RevealOnScroll direction="right">
-                <div className="overflow-hidden rounded-2xl">
+                <div className="rounded-2xl">
                   <div className="hidden lg:block" style={{ perspective: '170px' }}>
                     <div style={{ transform: 'rotateY(-8deg) scale(1.3)', transformOrigin: 'right center' }}>
                       <LiveTradingDemo />

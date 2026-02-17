@@ -27,11 +27,11 @@ const footerLinks = {
 };
 
 const socialLinks = [
-  { name: 'X (Twitter)', icon: '/social/x.svg', href: '#' },
-  { name: 'Telegram', icon: '/social/telegram-app.svg', href: '#' },
-  { name: 'YouTube', icon: '/social/youtube.svg', href: '#' },
-  { name: 'Instagram', icon: '/social/instagram.svg', href: '#' },
-  { name: 'Facebook', icon: '/social/facebook.svg', href: '#' },
+  { name: 'X (Twitter)', icon: '/social/x.svg', href: 'https://x.com/cloudbright_io' },
+  { name: 'Telegram', icon: '/social/telegram-app.svg', href: 'https://t.me/cloudbright_io_public' },
+  { name: 'YouTube', icon: '/social/youtube.svg', href: 'https://www.youtube.com/@cloudbright_io' },
+  { name: 'Instagram', icon: '/social/instagram.svg', href: 'https://instagram.com/cloudbright.io' },
+  { name: 'Facebook', icon: '/social/facebook.svg', href: 'https://www.facebook.com/cloudbright.io' },
 ];
 
 export default function Footer() {
@@ -57,7 +57,7 @@ export default function Footer() {
                   height={48}
                   className="h-12 w-12"
                 />
-                <span className="text-gradient font-bold tracking-wider" style={{ fontSize: '2rem' }}>
+                <span className="text-gray-900 dark:text-white font-semibold" style={{ fontSize: '1.25rem', letterSpacing: '0.07rem', transform: 'scaleY(0.88)', transformOrigin: 'center' }}>
                   CLOUDBRIGHT
                 </span>
               </div>
@@ -146,17 +146,6 @@ export default function Footer() {
             <Building2 className="w-5 h-5 text-primary-500 dark:text-primary-400" />
             <span className="text-sm">HK Registered</span>
           </div>
-        </motion.div>
-
-        {/* Risk disclaimer */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.45 }}
-          className="text-gray-400 dark:text-dark-500 text-xs text-center mb-6 max-w-3xl mx-auto leading-relaxed"
-        >
-          Trading cryptocurrencies involves significant risk and may not be suitable for all investors. Past performance of trading bots does not guarantee future results. You should carefully consider your financial situation before investing. Only invest funds you can afford to lose.
         </motion.div>
 
         {/* Bottom bar */}

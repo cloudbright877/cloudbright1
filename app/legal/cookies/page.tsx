@@ -11,7 +11,7 @@ export default function CookiePolicy() {
       sections={[
         {
           title: "What Are Cookies",
-          content: `This Cookie Policy explains how Cloudbright Limited uses cookies and similar tracking technologies on our AI-powered cryptocurrency trading platform. This policy should be read in conjunction with our Privacy Policy, which provides additional information about how we collect, use, and protect your personal data.
+          content: `This Cookie Policy explains how HONG KONG CLOUD BRIGHT SOFTWARE LIMITED uses cookies and similar tracking technologies on our AI-powered cryptocurrency trading platform. This policy should be read in conjunction with our Privacy Policy, which provides additional information about how we collect, use, and protect your personal data.
 
 Cookies are small text files that are placed on your computer, smartphone, or other device when you visit a website. They are widely used to make websites work more efficiently, provide a better user experience, and provide information to the website owners. Cookies contain information that is transferred to your device's hard drive and can be used to identify your browser, remember your preferences, and track your activities on the website.
 
@@ -95,11 +95,10 @@ We respect your cookie choices and will only set non-essential cookies for which
           title: "Contact Us",
           content: `If you have any questions, concerns, or requests regarding this Cookie Policy, our use of cookies, or how to manage your cookie preferences, please contact us using the following information:
 
-Email: privacy@cloudbright.com
-Cookie Policy Inquiries: cookies@cloudbright.com
-Business Name: Cloudbright Limited
+Email: support@cloudbright.io
+Business Name: HONG KONG CLOUD BRIGHT SOFTWARE LIMITED
 
-For specific questions about cookie consent, cookie management, or to exercise your rights under applicable data protection laws, you can reach our Data Protection Officer at privacy@cloudbright.com. We will respond to your inquiries within a reasonable timeframe, typically within 30 days, in accordance with applicable privacy regulations.
+For specific questions about cookie consent, cookie management, or to exercise your rights under applicable data protection laws, you can reach our Data Protection Officer at support@cloudbright.io. We will respond to your inquiries within a reasonable timeframe, typically within 30 days, in accordance with applicable privacy regulations.
 
 If you wish to file a complaint about our use of cookies or believe that we have not complied with applicable cookie and privacy laws, you have the right to lodge a complaint with your local data protection authority. For users in the European Economic Area, you can find your data protection authority's contact information at https://edpb.europa.eu/about-edpb/board/members_en. For users in the United Kingdom, you can contact the Information Commissioner's Office (ICO) at https://ico.org.uk/.
 

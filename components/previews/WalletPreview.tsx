@@ -10,7 +10,7 @@ const currencies = [
 
 export function WalletPreview() {
   return (
-    <div className="w-[280px] rounded-2xl bg-white dark:bg-gradient-to-br dark:from-emerald-500/10 dark:via-green-500/5 dark:to-emerald-500/10 border border-gray-200 dark:border-emerald-500/30 p-5 shadow-2xl shadow-emerald-500/10">
+    <div className="w-[280px] rounded-2xl bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 p-5 shadow-2xl shadow-emerald-500/10">
       <div className="flex items-center gap-2.5 mb-4">
         <div className="w-9 h-9 bg-gradient-to-br from-emerald-500 to-green-500 rounded-lg flex items-center justify-center">
           <Wallet className="w-4.5 h-4.5 text-white" />

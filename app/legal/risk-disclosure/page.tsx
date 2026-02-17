@@ -11,7 +11,7 @@ export default function RiskDisclosure() {
       sections={[
         {
           title: "General Trading Risks",
-          content: `This Risk Disclosure Statement is provided by Cloudbright Limited to inform you of the significant risks associated with trading cryptocurrencies and digital assets on our AI-powered platform. Trading cryptocurrencies involves substantial risk of loss and is not suitable for all investors. You should carefully consider whether trading is appropriate for you in light of your experience, objectives, financial resources, and other relevant circumstances.
+          content: `This Risk Disclosure Statement is provided by HONG KONG CLOUD BRIGHT SOFTWARE LIMITED to inform you of the significant risks associated with trading cryptocurrencies and digital assets on our AI-powered platform. Trading cryptocurrencies involves substantial risk of loss and is not suitable for all investors. You should carefully consider whether trading is appropriate for you in light of your experience, objectives, financial resources, and other relevant circumstances.
 
 Cryptocurrency trading is a highly speculative activity that can result in the loss of your entire investment. The value of digital assets can and does fluctuate significantly, and any individual cryptocurrency may become worthless. Past performance is not indicative of future results, and no representation is being made that the use of our AI-powered trading tools or any trading strategy will guarantee profits or prevent losses.
 
@@ -111,7 +111,7 @@ When we present historical performance data for our AI models or trading strateg
         },
         {
           title: "Professional Advice",
-          content: `Cloudbright Limited does not provide investment advice, financial advice, tax advice, or legal advice. The information, tools, and services provided on our platform are for informational and trading execution purposes only and should not be construed as recommendations to buy, sell, or hold any particular cryptocurrency or to pursue any particular investment strategy.
+          content: `HONG KONG CLOUD BRIGHT SOFTWARE LIMITED does not provide investment advice, financial advice, tax advice, or legal advice. The information, tools, and services provided on our platform are for informational and trading execution purposes only and should not be construed as recommendations to buy, sell, or hold any particular cryptocurrency or to pursue any particular investment strategy.
 
 You should not make any investment decision without first conducting your own research and analysis and, where appropriate, consulting with qualified professional advisors. Qualified professionals may include financial advisors, investment advisors, tax professionals, and legal counsel who are familiar with your specific circumstances, objectives, and risk tolerance, as well as the specific legal and tax considerations in your jurisdiction.
 
@@ -121,7 +121,7 @@ Our AI-powered trading tools and features are designed to assist you in executin
 
 If you are uncertain about the risks of cryptocurrency trading, whether cryptocurrency trading is appropriate for your circumstances, the tax implications of cryptocurrency transactions, or any other aspect of using our services, you should seek independent professional advice before proceeding. The risks outlined in this Risk Disclosure Statement are not exhaustive, and there may be additional risks specific to your situation or to particular cryptocurrencies or trading strategies. Professional advisors can help you understand these risks and make informed decisions.
 
-By using the Cloudbright platform, you acknowledge that you are making independent investment decisions and that you are solely responsible for evaluating the merits and risks of any trading activities. You agree that Cloudbright Limited, its officers, directors, employees, and affiliates shall not be liable for any trading losses or adverse consequences resulting from your use of our platform or reliance on any information or tools provided therein.`
+By using the Cloudbright platform, you acknowledge that you are making independent investment decisions and that you are solely responsible for evaluating the merits and risks of any trading activities. You agree that HONG KONG CLOUD BRIGHT SOFTWARE LIMITED, its officers, directors, employees, and affiliates shall not be liable for any trading losses or adverse consequences resulting from your use of our platform or reliance on any information or tools provided therein.`
         }
       ]}
     />

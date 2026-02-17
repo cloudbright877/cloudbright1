@@ -4,7 +4,7 @@ import { Zap } from 'lucide-react';
 
 export function QuickStartPreview() {
   return (
-    <div className="w-full max-w-[340px] rounded-2xl bg-white dark:bg-gradient-to-br dark:from-violet-500/10 dark:via-purple-500/5 dark:to-violet-500/10 border border-gray-200 dark:border-violet-500/30 p-5 shadow-2xl shadow-violet-500/10">
+    <div className="w-[340px] sm:w-[420px] rounded-2xl bg-white dark:bg-dark-800 border border-gray-200 dark:border-violet-500/30 p-5 shadow-2xl shadow-violet-500/10">
       <div className="flex items-center gap-2.5 mb-4">
         <div className="w-9 h-9 bg-gradient-to-br from-violet-500 to-purple-500 rounded-lg flex items-center justify-center">
           <Zap className="w-4.5 h-4.5 text-white" />

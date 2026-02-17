@@ -11,7 +11,7 @@ export default function PrivacyPolicy() {
       sections={[
         {
           title: "Information We Collect",
-          content: `Cloudbright Limited is committed to protecting your privacy and personal data. This Privacy Policy describes how we collect, use, store, and share information about you when you use our AI-powered cryptocurrency trading platform and related services.
+          content: `HONG KONG CLOUD BRIGHT SOFTWARE LIMITED is committed to protecting your privacy and personal data. This Privacy Policy describes how we collect, use, store, and share information about you when you use our AI-powered cryptocurrency trading platform and related services.
 
 We collect several types of information from and about users of our platform, including: (a) Personal Identification Information such as your name, email address, postal address, phone number, date of birth, government-issued identification numbers, and other similar contact data; (b) Financial Information including bank account details, cryptocurrency wallet addresses, transaction history, trading activity, and payment card information; (c) Identity Verification Data such as passport or driver's license scans, utility bills, selfies, and biometric data collected during our KYC verification process.
 
@@ -57,13 +57,13 @@ All sensitive data, including personal identification information and financial 
 
 We maintain secure data centers with physical access controls, 24/7 monitoring, redundant systems, and backup procedures to ensure data availability and integrity. Our infrastructure is regularly tested through penetration testing, vulnerability assessments, and security audits conducted by independent third-party security firms. We also implement multi-factor authentication, regular password rotation policies, and session timeout mechanisms to prevent unauthorized account access.
 
-Despite our security measures, no method of transmission over the internet or electronic storage is completely secure, and we cannot guarantee absolute security. You are responsible for maintaining the confidentiality of your account credentials and for any activities that occur under your account. If you become aware of any unauthorized access to your account or any security breach, you must immediately notify us at security@cloudbright.com so we can take appropriate action.`
+Despite our security measures, no method of transmission over the internet or electronic storage is completely secure, and we cannot guarantee absolute security. You are responsible for maintaining the confidentiality of your account credentials and for any activities that occur under your account. If you become aware of any unauthorized access to your account or any security breach, you must immediately notify us at support@cloudbright.io so we can take appropriate action.`
         },
         {
           title: "Your Rights",
           content: `Depending on your jurisdiction, you may have certain rights regarding your personal data under applicable data protection laws, including the General Data Protection Regulation (GDPR) for users in the European Economic Area, the California Consumer Privacy Act (CCPA) for California residents, and similar privacy laws worldwide.
 
-You have the right to access your personal data and request a copy of the information we hold about you. You can request this information by contacting us at privacy@cloudbright.com, and we will provide it in a structured, commonly used, and machine-readable format within the timeframe required by applicable law, typically within 30 days. You also have the right to rectification, meaning you can request that we correct any inaccurate or incomplete personal data we hold about you.
+You have the right to access your personal data and request a copy of the information we hold about you. You can request this information by contacting us at support@cloudbright.io, and we will provide it in a structured, commonly used, and machine-readable format within the timeframe required by applicable law, typically within 30 days. You also have the right to rectification, meaning you can request that we correct any inaccurate or incomplete personal data we hold about you.
 
 You have the right to erasure (the "right to be forgotten") in certain circumstances, such as when the data is no longer necessary for the purposes for which it was collected, when you withdraw consent, or when the data has been unlawfully processed. However, this right is not absolute, and we may retain certain information where we have a legal obligation to do so, such as for AML/KYC compliance, tax reporting, or fraud prevention.
 
@@ -77,7 +77,7 @@ When we transfer personal data from the European Economic Area (EEA) or the Unit
 
 For transfers from other jurisdictions, we implement similar appropriate safeguards as required by local data protection laws. We conduct transfer impact assessments to ensure that your data receives an adequate level of protection in the destination country and implement supplementary measures where necessary to address any risks identified.
 
-If you are located in the EEA, UK, or other jurisdictions with data transfer restrictions, you can request more information about the safeguards we use for international data transfers by contacting us at privacy@cloudbright.com. We will provide you with information about the relevant safeguard mechanisms and, where applicable, a copy of the Standard Contractual Clauses or other transfer documentation.`
+If you are located in the EEA, UK, or other jurisdictions with data transfer restrictions, you can request more information about the safeguards we use for international data transfers by contacting us at support@cloudbright.io. We will provide you with information about the relevant safeguard mechanisms and, where applicable, a copy of the Standard Contractual Clauses or other transfer documentation.`
         },
         {
           title: "Children's Privacy",
@@ -85,7 +85,7 @@ If you are located in the EEA, UK, or other jurisdictions with data transfer res
 
 If we become aware that we have collected personal information from a child under 18 without verification of parental consent, we will take immediate steps to delete that information from our servers and terminate the associated account. We implement age-gating mechanisms during the account creation process and may request additional verification if we suspect that a user may be under the minimum age requirement.
 
-Parents or legal guardians who believe that their child has provided personal information to Cloudbright should contact us immediately at privacy@cloudbright.com. Upon receiving such notice, we will investigate the matter and, if we determine that we have collected personal information from a child under 18, we will delete such information as quickly as possible and take steps to prevent the child from accessing our services in the future.
+Parents or legal guardians who believe that their child has provided personal information to Cloudbright should contact us immediately at support@cloudbright.io. Upon receiving such notice, we will investigate the matter and, if we determine that we have collected personal information from a child under 18, we will delete such information as quickly as possible and take steps to prevent the child from accessing our services in the future.
 
 The minimum age requirement is in place not only to comply with privacy laws such as the Children's Online Privacy Protection Act (COPPA) in the United States but also due to the sophisticated nature of cryptocurrency trading and the financial risks involved. Cryptocurrency trading requires legal capacity to enter into financial contracts, which minors typically do not possess under most jurisdictions' laws.`
         },
@@ -97,7 +97,7 @@ For material changes that significantly affect your rights or how we process you
 
 We encourage you to review this Privacy Policy periodically to stay informed about how we collect, use, and protect your information. Your continued use of our platform after the effective date of any changes to this Privacy Policy constitutes your acceptance of those changes. If you do not agree with the modified Privacy Policy, you should discontinue use of our platform and contact us to close your account.
 
-If you have questions about changes to this Privacy Policy or would like to understand how specific changes affect you, please contact our Data Protection Officer at privacy@cloudbright.com. We maintain archives of previous versions of our Privacy Policy and can provide you with information about what has changed between versions upon request.`
+If you have questions about changes to this Privacy Policy or would like to understand how specific changes affect you, please contact our Data Protection Officer at support@cloudbright.io. We maintain archives of previous versions of our Privacy Policy and can provide you with information about what has changed between versions upon request.`
         }
       ]}
     />

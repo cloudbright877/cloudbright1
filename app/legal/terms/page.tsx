@@ -127,7 +127,7 @@ Material changes will be effective upon posting or such later date as specified.
           title: "Contact Information",
           content: `If you have any questions, concerns, or complaints regarding these Terms of Service or the Cloudbright platform, please contact us:
 
-Email: legal@cloudbright.com
+Email: support@cloudbright.io
 Company: HONG KONG CLOUD BRIGHT SOFTWARE LIMITED
 
 For general support inquiries, contact our support team through the help center on the platform. We strive to respond to all inquiries within 48 business hours.

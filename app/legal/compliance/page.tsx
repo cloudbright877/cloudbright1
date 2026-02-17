@@ -11,7 +11,7 @@ export default function CompliancePolicy() {
       sections={[
         {
           title: "Regulatory Framework",
-          content: `Cloudbright Limited is committed to operating our AI-powered cryptocurrency trading platform in full compliance with all applicable laws, regulations, and industry standards. This Compliance Policy outlines our commitment to regulatory compliance, describes our compliance framework, and explains the measures we take to ensure adherence to legal and regulatory requirements across all jurisdictions where we operate.
+          content: `HONG KONG CLOUD BRIGHT SOFTWARE LIMITED is committed to operating our AI-powered cryptocurrency trading platform in full compliance with all applicable laws, regulations, and industry standards. This Compliance Policy outlines our commitment to regulatory compliance, describes our compliance framework, and explains the measures we take to ensure adherence to legal and regulatory requirements across all jurisdictions where we operate.
 
 Our compliance program is designed to address the complex and evolving regulatory landscape for cryptocurrency and digital asset services. We recognize that cryptocurrency businesses operate in a highly regulated environment subject to financial services regulations, anti-money laundering (AML) laws, counter-terrorism financing (CTF) requirements, data protection and privacy laws, consumer protection regulations, and securities laws where applicable.
 
@@ -124,14 +124,14 @@ Our training program extends beyond our employees to contractors, vendors, and o
           content: `Cloudbright welcomes questions, concerns, and reports regarding compliance matters. We are committed to maintaining an open dialogue with customers, employees, regulators, and other stakeholders about our compliance program and practices. If you have any compliance-related inquiries or concerns, please contact us through the appropriate channels described below.
 
 For general compliance inquiries, questions about our policies and procedures, or requests for information about our compliance program, please contact our Compliance Department at:
-Email: compliance@cloudbright.com
-Business Name: Cloudbright Limited
+Email: support@cloudbright.io
+Business Name: HONG KONG CLOUD BRIGHT SOFTWARE LIMITED
 
-For specific matters related to AML/KYC verification, account restrictions, or requests for documentation, please contact our KYC team at kyc@cloudbright.com. For data protection and privacy matters, including requests to exercise your data subject rights under GDPR or other privacy laws, please contact our Data Protection Officer at privacy@cloudbright.com.
+For specific matters related to AML/KYC verification, account restrictions, or requests for documentation, please contact our KYC team at support@cloudbright.io. For data protection and privacy matters, including requests to exercise your data subject rights under GDPR or other privacy laws, please contact our Data Protection Officer at support@cloudbright.io.
 
-We maintain a confidential compliance hotline for reporting suspected violations of law, regulations, or our internal policies. This hotline is available to employees, customers, and other parties who wish to report compliance concerns. Reports can be made anonymously where permitted by law, and we prohibit retaliation against anyone who reports compliance concerns in good faith. To report a compliance concern, please email compliance-hotline@cloudbright.com or use the secure reporting portal available through our website.
+We maintain a confidential compliance hotline for reporting suspected violations of law, regulations, or our internal policies. This hotline is available to employees, customers, and other parties who wish to report compliance concerns. Reports can be made anonymously where permitted by law, and we prohibit retaliation against anyone who reports compliance concerns in good faith. To report a compliance concern, please email support@cloudbright.io or use the secure reporting portal available through our website.
 
-Regulatory authorities and law enforcement agencies may contact us regarding investigations, examinations, or information requests. Official inquiries should be directed to our Legal and Compliance Department at legal@cloudbright.com. We will respond promptly to all lawful requests for information and cooperate fully with regulatory and law enforcement investigations.
+Regulatory authorities and law enforcement agencies may contact us regarding investigations, examinations, or information requests. Official inquiries should be directed to our Legal and Compliance Department at support@cloudbright.io. We will respond promptly to all lawful requests for information and cooperate fully with regulatory and law enforcement investigations.
 
 This Compliance Policy is part of our broader framework of policies and procedures designed to ensure we operate lawfully and ethically. For information about how we handle your personal data, please see our Privacy Policy. For information about the risks of cryptocurrency trading, please see our Risk Disclosure Statement. For the terms governing your use of our platform, please see our Terms of Service. Together, these documents reflect our commitment to transparency, compliance, and customer protection.`
         }

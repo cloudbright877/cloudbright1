@@ -42,9 +42,9 @@ export default function ContactPage() {
     {
       icon: Mail,
       title: 'Email Us',
-      details: 'support@cloudbright.com',
+      details: 'support@cloudbright.io',
       subDetails: 'We reply within 24 hours',
-      href: 'mailto:support@cloudbright.com',
+      href: 'mailto:support@cloudbright.io',
     },
     {
       icon: MapPin,
@@ -63,11 +63,11 @@ export default function ContactPage() {
   ];
 
   const socialLinks = [
-    { name: 'X (Twitter)', icon: '/social/x.svg', url: '#' },
-    { name: 'Telegram', icon: '/social/telegram-app.svg', url: '#' },
-    { name: 'YouTube', icon: '/social/youtube.svg', url: '#' },
-    { name: 'Instagram', icon: '/social/instagram.svg', url: '#' },
-    { name: 'Facebook', icon: '/social/facebook.svg', url: '#' },
+    { name: 'X (Twitter)', icon: '/social/x.svg', url: 'https://x.com/cloudbright_io' },
+    { name: 'Telegram', icon: '/social/telegram-app.svg', url: 'https://t.me/cloudbright_io_public' },
+    { name: 'YouTube', icon: '/social/youtube.svg', url: 'https://www.youtube.com/@cloudbright_io' },
+    { name: 'Instagram', icon: '/social/instagram.svg', url: 'https://instagram.com/cloudbright.io' },
+    { name: 'Facebook', icon: '/social/facebook.svg', url: 'https://www.facebook.com/cloudbright.io' },
   ];
 
   const departments = [
@@ -89,7 +89,7 @@ export default function ContactPage() {
     },
     {
       question: 'Do you offer enterprise solutions?',
-      answer: 'Yes! We offer custom enterprise solutions for institutional investors. Contact our sales team at support@cloudbright.com for more information.',
+      answer: 'Yes! We offer custom enterprise solutions for institutional investors. Contact our sales team at support@cloudbright.io for more information.',
     },
   ];
 
@@ -370,8 +370,8 @@ export default function ContactPage() {
                         <MapPin className="w-5 h-5 text-primary-400" />
                       </div>
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Cloudbright Limited</h3>
-                        <p className="text-gray-600 dark:text-dark-400 text-sm">Hong Kong SAR</p>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">HONG KONG CLOUD BRIGHT SOFTWARE LIMITED</h3>
+                        <p className="text-gray-600 dark:text-dark-400 text-sm">470 Yangqu Road, Hong Kong</p>
                       </div>
                     </div>
                   </div>

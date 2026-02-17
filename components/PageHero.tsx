@@ -170,8 +170,8 @@ export default function PageHero({
                   href={button.href}
                   className={
                     button.variant === 'secondary'
-                      ? 'px-8 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30 rounded-full font-semibold text-white transition-all duration-300 hover:scale-105'
-                      : 'px-8 py-4 bg-gradient-to-r from-primary-500 to-accent-500 rounded-full font-semibold text-white hover:shadow-2xl hover:shadow-primary-500/50 transition-all duration-300 hover:scale-105'
+                      ? 'px-8 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30 rounded-xl font-semibold text-white transition-all duration-200 hover:scale-105 active:scale-95'
+                      : 'px-8 py-4 bg-gradient-to-r from-primary-500 to-accent-500 rounded-xl font-semibold text-white hover:shadow-2xl hover:shadow-primary-500/50 transition-all duration-200 hover:scale-105 active:scale-95'
                   }
                 >
                   {button.text}

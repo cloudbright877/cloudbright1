@@ -19,6 +19,7 @@ const officeImages = [
   { src: '/office-slider/5.webp', alt: 'Cloudbright development floor' },
   { src: '/office-slider/6.webp', alt: 'Cloudbright lounge' },
   { src: '/office-slider/7.webp', alt: 'Cloudbright office view' },
+  { src: '/office-slider/8.webp', alt: 'Cloudbright common area' },
 ];
 
 const trustSignals = [

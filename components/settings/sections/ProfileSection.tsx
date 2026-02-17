@@ -150,7 +150,7 @@ export function ProfileSection({ onClose, onSaved }: ProfileSectionProps) {
           prefix="@"
           maxLength={30}
           error={errors.username}
-          hint={`Your public profile URL: cloudbright.com/@${formData.username}`}
+          hint={`Your public profile URL: cloudbright.io/@${formData.username}`}
         />
       </div>
 

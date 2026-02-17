@@ -15,6 +15,86 @@ export const blogPosts = [
      COMPANY POSTS — Pre-launch corporate story
      ═══════════════════════════════════════════════════════════════ */
   {
+    id: 16,
+    title: 'Cloudbright Enters Final Testing Phase Ahead of Public Launch',
+    excerpt: 'Hong Kong-based fintech startup Cloudbright has entered the final phase of closed beta testing, with a public launch expected within one to two weeks.',
+    category: 'Company',
+    author: 'Sarah Lin',
+    date: 'Feb 16, 2026',
+    readTime: '5 min',
+    gradient: 'from-blue-500 to-indigo-500',
+    content: [
+      {
+        type: 'paragraph' as const,
+        text: 'HONG KONG — Cloudbright, a Hong Kong-based fintech startup specializing in AI-powered copy trading, has entered the final phase of closed beta testing ahead of its anticipated public launch within the next one to two weeks, according to company representatives. The platform, which has been in development for over twelve months, aims to bridge the gap between professional algorithmic trading strategies and retail investors by offering a marketplace of verified trading bots that users can copy with a single click.',
+      },
+      {
+        type: 'paragraph' as const,
+        text: 'After completing independent security audits and extensive internal testing, Cloudbright says it is now in the final stretch before opening its doors to the general public. "We\'ve spent the last three months in intensive closed testing with a select group of users," said Anyun Yang, founder and CEO of Cloudbright. "The results have exceeded our expectations. Our bot verification pipeline has processed over 100 strategies, and the infrastructure has been stress-tested to handle thousands of concurrent users. We\'re confident that we\'re ready."',
+      },
+      {
+        type: 'heading' as const,
+        text: 'What Cloudbright Promises to Deliver',
+      },
+      {
+        type: 'paragraph' as const,
+        text: 'At its core, Cloudbright operates as a copy trading marketplace — a model that has gained significant traction in traditional finance but remains relatively underdeveloped in the cryptocurrency space. The platform connects bot developers who create automated trading strategies with retail investors who can subscribe to those strategies and mirror trades in real time.',
+      },
+      {
+        type: 'paragraph' as const,
+        text: 'What sets Cloudbright apart from existing solutions, the company claims, is its approach to transparency and fee structure. Every bot listed on the marketplace undergoes a rigorous verification process that includes performance auditing, risk assessment, and code review. Users have access to complete trading histories, including equity curves, Sharpe ratios, maximum drawdowns, and individual trade logs — no black boxes, no hidden strategies.',
+      },
+      {
+        type: 'paragraph' as const,
+        text: 'The platform\'s revenue model is also notably different from industry norms. Rather than charging subscription fees or taking a cut from trading volume, Cloudbright operates on a profit-sharing basis: the company takes a 1–2% commission only when users withdraw realized profits. If users don\'t make money, neither does Cloudbright. "We deliberately chose this model because it aligns our incentives with our users," Yang explained. "Most platforms profit regardless of whether their customers succeed. We wanted to build something where our survival depends on delivering real results."',
+      },
+      {
+        type: 'heading' as const,
+        text: 'Infrastructure and Security',
+      },
+      {
+        type: 'paragraph' as const,
+        text: 'Security has been a central focus during the development process. The platform completed independent security audits in January 2026, covering infrastructure penetration testing and application security reviews. All user data is encrypted with AES-256, and private keys are stored in hardware security modules. The technical infrastructure includes multi-layer DDoS protection, automated intrusion detection systems, and real-time monitoring.',
+      },
+      {
+        type: 'paragraph' as const,
+        text: 'Cloudbright\'s engineering team, which comprises over 40 professionals across engineering, security, and operations, has built the platform on a modern stack designed for scalability. The system processes market data from multiple sources simultaneously and executes trades with what the company describes as "near-zero latency."',
+      },
+      {
+        type: 'heading' as const,
+        text: 'The Team and Backing',
+      },
+      {
+        type: 'paragraph' as const,
+        text: 'The company is registered in Hong Kong as a Web3 fintech entity, positioning itself within one of Asia\'s most established financial regulatory environments. The founding team includes veterans from quantitative trading, cybersecurity, and financial technology. Anyun Yang, who leads the company, has been the public face of Cloudbright\'s pre-launch communications, regularly publishing technical and strategic updates on the company\'s blog. The team also includes Samarth Ramesh, who has overseen the security audit process.',
+      },
+      {
+        type: 'heading' as const,
+        text: 'Market Context',
+      },
+      {
+        type: 'paragraph' as const,
+        text: 'Cloudbright\'s launch comes at an interesting time for the cryptocurrency industry. Institutional adoption of digital assets has accelerated significantly in 2025–2026, with major financial players integrating crypto products into their offerings. At the same time, retail investors have shown growing appetite for automated trading solutions that can navigate the market\'s notorious volatility.',
+      },
+      {
+        type: 'paragraph' as const,
+        text: 'The copy trading segment, in particular, has seen rapid growth. Platforms like eToro popularized the concept in traditional markets, and several crypto-native players have emerged in recent years. However, the space remains fragmented, with many platforms suffering from opaque performance metrics, unreliable bot quality, and misaligned fee structures — issues that Cloudbright explicitly aims to address. Industry analysts note that success will depend heavily on execution: consistent bot performance, platform reliability, and the ability to build trust with a user base that has grown skeptical after years of high-profile crypto failures.',
+      },
+      {
+        type: 'heading' as const,
+        text: 'What Happens Next',
+      },
+      {
+        type: 'paragraph' as const,
+        text: 'According to the company\'s timeline, Cloudbright expects to open public registration within the next one to two weeks. The launch will include access to the full bot marketplace, custodial wallets supporting multiple cryptocurrencies, a comprehensive analytics dashboard, and social trading features. The company has also outlined an ambitious post-launch roadmap extending through 2027, which includes mobile applications for iOS and Android, AI-powered strategy builders, integration with decentralized exchanges and DeFi protocols, and eventually a transition to community governance through a DAO structure.',
+      },
+      {
+        type: 'paragraph' as const,
+        text: '"We\'re not just building a trading platform," Yang said. "We\'re building the infrastructure for a financial ecosystem where professional-grade tools are available to everyone — not just the privileged few." Whether Cloudbright can deliver on that vision remains to be seen. But with a completed product, passed security audits, and a launch date just days away, the platform is closer than most crypto startups get to turning promises into reality.',
+      },
+    ],
+  },
+  {
     id: 15,
     title: 'Cloudbright Is Live: What to Expect on Launch Day',
     excerpt: 'After three months of development, security audits, and meticulous testing, Cloudbright is officially open to the public. Here\'s everything available from day one.',
@@ -75,7 +155,7 @@ export const blogPosts = [
     title: 'How AI is Revolutionizing Cryptocurrency Trading in 2026',
     excerpt: 'Discover how machine learning algorithms are transforming the crypto trading landscape and delivering unprecedented returns for investors.',
     category: 'AI Trading',
-    author: 'Dr. Michael Chen',
+    author: 'James Chen',
     date: 'Feb 10, 2026',
     readTime: '5 min',
     gradient: 'from-blue-500 to-cyan-500',
@@ -171,7 +251,7 @@ export const blogPosts = [
     title: 'From Idea to Launch: The Engineering Story Behind Cloudbright',
     excerpt: 'How a team of 40+ professionals built a full-featured copy trading platform from scratch — architecture decisions, exchange integrations, and the challenges we solved.',
     category: 'Company',
-    author: 'Alex Rivera',
+    author: 'Dong Aiguo',
     date: 'Feb 5, 2026',
     readTime: '8 min',
     gradient: 'from-violet-500 to-indigo-500',
@@ -315,7 +395,7 @@ export const blogPosts = [
     title: 'DeFi vs Traditional Finance: The Future of Investing',
     excerpt: 'Comparing decentralized finance with traditional banking systems and why DeFi is becoming the preferred choice for savvy investors.',
     category: 'Crypto News',
-    author: 'Dr. Michael Chen',
+    author: 'James Chen',
     date: 'Jan 28, 2026',
     readTime: '8 min',
     gradient: 'from-yellow-500 to-orange-500',
@@ -395,7 +475,7 @@ export const blogPosts = [
     title: 'Security First: How Cloudbright Passed Independent Security Audits',
     excerpt: 'In January 2026, Cloudbright completed independent security audits across the entire platform. Here\'s what we tested, what we found, and why security is our foundation.',
     category: 'Company',
-    author: 'Sarah Kim',
+    author: 'Samarth Ramesh',
     date: 'Jan 22, 2026',
     readTime: '7 min',
     gradient: 'from-teal-500 to-cyan-500',
@@ -638,7 +718,7 @@ export const blogPosts = [
       },
       {
         type: 'paragraph' as const,
-        text: 'Our engineering team, led by CTO and co-founder Alex Rivera, is the backbone of the platform. With deep expertise in high-frequency trading systems and machine learning, this department builds and maintains the trading engine, API integrations with major exchanges, and the real-time analytics infrastructure that powers our dashboard. Every feature goes through rigorous internal testing and code review before reaching our users.',
+        text: 'Our engineering team, led by CTO and co-founder Dong Aiguo, is the backbone of the platform. With deep expertise in high-frequency trading systems and machine learning, this department builds and maintains the trading engine, API integrations with major exchanges, and the real-time analytics infrastructure that powers our dashboard. Every feature goes through rigorous internal testing and code review before reaching our users.',
       },
       {
         type: 'heading' as const,
@@ -646,7 +726,7 @@ export const blogPosts = [
       },
       {
         type: 'paragraph' as const,
-        text: 'Under the leadership of Sarah Kim, our security department operates with a simple philosophy: assume nothing is safe until proven otherwise. The team conducts continuous penetration testing, manages our AES-256 encryption infrastructure, and oversees the HSM integration that protects private keys. They also handle regulatory compliance, ensuring that Cloudbright meets Hong Kong\'s evolving fintech standards and stays ahead of global best practices.',
+        text: 'Under the leadership of Samarth Ramesh, our security department operates with a simple philosophy: assume nothing is safe until proven otherwise. The team conducts continuous penetration testing, manages our AES-256 encryption infrastructure, and oversees the HSM integration that protects private keys. They also handle regulatory compliance, ensuring that Cloudbright meets Hong Kong\'s evolving fintech standards and stays ahead of global best practices.',
       },
       {
         type: 'heading' as const,

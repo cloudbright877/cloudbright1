@@ -136,7 +136,7 @@ export function OfficeSlider({ images, autoPlayInterval = 4000 }: OfficeSliderPr
         {/* Cards container */}
         <div
           className="relative flex-1 max-w-6xl flex items-center justify-center overflow-hidden
-            h-[265px] sm:h-[335px] md:h-[405px] lg:h-[455px]"
+            h-[220px] sm:h-[290px] md:h-[360px] lg:h-[420px]"
           style={{ perspective: '1200px' }}
           onMouseDown={onDown}
           onMouseMove={onMove}
@@ -190,10 +190,11 @@ export function OfficeSlider({ images, autoPlayInterval = 4000 }: OfficeSliderPr
                     <Image
                       src={img.src}
                       alt={img.alt}
-                      width={600}
-                      height={400}
+                      width={1376}
+                      height={768}
+                      quality={90}
                       draggable={false}
-                      className="w-full aspect-[3/2] object-cover pointer-events-none"
+                      className="w-full aspect-[16/9] object-cover pointer-events-none"
                     />
                   </div>
                 </div>

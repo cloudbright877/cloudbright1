@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
@@ -10,6 +11,7 @@ import { GlowButton } from '@/components/animations/GlowButton';
 import { AnimatedCounter } from '@/components/animations/AnimatedCounter';
 import { ExpandingCards } from '@/components/animations/ExpandingCards';
 import { Marquee } from '@/components/animations/Marquee';
+import Image from 'next/image';
 import { featuredBots } from '@/data/bots';
 
 const BotCarousel = dynamic(
@@ -18,7 +20,6 @@ const BotCarousel = dynamic(
 );
 import { AnimatedBorderGrid } from '@/components/animations/AnimatedBorderGrid';
 import { NeonGridLines, hexGridBg } from '@/components/animations/NeonGridLines';
-import { exchangeLogos } from '@/components/ExchangeLogos';
 import {
   Wallet,
   Search,
@@ -40,6 +41,8 @@ import {
   Share2,
   Zap,
   DollarSign,
+  Play,
+  X,
 } from 'lucide-react';
 
 /* ──────────────── PLATFORM FEATURES (marquee) ──────────────── */
@@ -263,66 +266,66 @@ const securityFeatures = [
 
 const testimonials = [
   {
-    name: 'Marcus Thornton',
-    avatar: 'MT',
+    name: 'marc_t',
+    avatar: '/testimonials/marc_t.webp',
     gradient: 'from-blue-500 to-indigo-500',
-    text: 'Switched from manual trading to Cloudbright 4 months ago. The Bybit Market Maker bot has been incredibly consistent — steady returns without me touching anything.',
-    stats: '+18.6% in 4 months',
+    text: 'Set it up once and haven\'t touched it since. The market maker bot just does its thing — quiet, consistent, no drama. Honestly forgot it was running until I checked my balance.',
+    stats: '+18.6% first month',
   },
   {
-    name: 'Elena Kowalski',
-    avatar: 'EK',
+    name: 'Elena K.',
+    avatar: '/testimonials/elena-k.webp',
     gradient: 'from-emerald-500 to-teal-500',
     text: 'What sold me is the transparency. I can see every single trade in real time. No black boxes, no hidden fees. The dashboard is genuinely best-in-class.',
     stats: '3 bots running',
   },
   {
-    name: 'David Reyes',
-    avatar: 'DR',
+    name: 'dreyes',
+    avatar: '/testimonials/dreyes.webp',
     gradient: 'from-violet-500 to-purple-500',
     text: 'Started with just $200 to test it out. The low-risk grid bots are perfect for beginners. Now I have $2,000 across multiple strategies.',
     stats: 'Started with $200',
   },
   {
-    name: 'Sophie Lindqvist',
-    avatar: 'SL',
+    name: 'soph_lin',
+    avatar: '/testimonials/soph_lin.webp',
     gradient: 'from-amber-500 to-orange-500',
     text: 'Commission only on profit is the fairest model I\'ve seen. If I don\'t make money, they don\'t make money. That alignment of incentives matters.',
-    stats: '8 months on platform',
+    stats: 'Early access user',
   },
   {
-    name: 'James Whitfield',
-    avatar: 'JW',
+    name: 'JWhit',
+    avatar: '/testimonials/jwhit.webp',
     gradient: 'from-cyan-500 to-blue-500',
     text: 'I wanted passive income without learning to trade. The Quick Start wizard recommended a balanced portfolio and I\'ve been earning steadily since day one.',
-    stats: '+12.3% monthly avg',
+    stats: '+25% monthly avg',
   },
   {
-    name: 'Aisha Morin',
+    name: 'Aisha M.',
     avatar: 'AM',
     gradient: 'from-pink-500 to-rose-500',
     text: 'The leaderboard feature helped me discover bots I would never have found on my own. The community aspect makes this platform unique.',
     stats: '5 bots copied',
   },
   {
-    name: 'Wei Chen',
-    avatar: 'WC',
+    name: 'nightowl',
+    avatar: '/testimonials/nightowl.webp',
     gradient: 'from-teal-500 to-emerald-500',
-    text: 'Multi-exchange support was the deal-breaker for me. I can diversify across Binance, Bybit, and OKX without managing three separate accounts.',
+    text: 'Tried to build my own strategies for a year — wasted time and money. Here I just picked top-performing bots from the leaderboard and let them do the work. Should have started sooner.',
     stats: '$8,400 invested',
   },
   {
-    name: 'Roberto Ferreira',
-    avatar: 'RF',
+    name: 'Rob F.',
+    avatar: '/testimonials/rob-f.webp',
     gradient: 'from-indigo-500 to-violet-500',
-    text: 'The referral program is phenomenal. I invited my team and the commissions from their performance add a nice passive layer on top of bot returns.',
-    stats: '12 referrals',
+    text: 'The referral program is phenomenal. I invited my team and the commissions from their bot activations add a nice passive layer on top of my own bot returns.',
+    stats: '56 referrals',
   },
   {
-    name: 'Lina Hoffmann',
-    avatar: 'LH',
+    name: 'lina.h',
+    avatar: '/testimonials/lina-h.webp',
     gradient: 'from-rose-500 to-pink-500',
-    text: 'The $50 minimum let me start small and test things out. The low-risk bots protect my capital while I learn. Great platform for getting started.',
+    text: 'You only need $50 to activate your first bot — that let me test things out without risking much. The low-risk bots protect my capital while I learn. Great platform for getting started.',
     stats: 'Started with $50',
   },
 ];
@@ -357,6 +360,9 @@ const homeArticles = [
 /* ─────────────────────────── PAGE ─────────────────────────── */
 
 export default function Home() {
+  const [videoOpen, setVideoOpen] = useState(false);
+  const closeVideo = useCallback(() => setVideoOpen(false), []);
+
   return (
     <>
       <Navbar />
@@ -364,14 +370,95 @@ export default function Home() {
         {/* ── Hero ── */}
         <Hero />
 
-        {/* ── Supported Exchanges (Marquee) ── */}
-        <div className="bg-gray-50 dark:bg-dark-900 py-8 border-y border-gray-200/30 dark:border-dark-700/30">
-          <Marquee speed={35}>
-            {exchangeLogos.map(({ key, Component }) => (
-              <Component key={key} className="mx-8 text-gray-500 dark:text-dark-400 whitespace-nowrap opacity-50 hover:opacity-100 transition-opacity" />
-            ))}
-          </Marquee>
-        </div>
+        {/* ── Video Preview ── */}
+        <section className="py-16 sm:py-24 bg-gray-50 dark:bg-dark-900">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+              {/* Left — text */}
+              <div>
+                <span className="text-primary-500 dark:text-primary-400 font-semibold text-sm uppercase tracking-wider">
+                  About Cloudbright
+                </span>
+                <h2 className="text-3xl sm:text-4xl font-semibold mt-4 mb-6 text-gray-900 dark:text-white">
+                  Real Team. Real Office.{' '}
+                  <span className="text-gradient">Real Results.</span>
+                </h2>
+                <p className="text-base sm:text-lg text-gray-600 dark:text-dark-300 mb-8 leading-relaxed">
+                  We built Cloudbright so anyone can earn from crypto — without staring at charts 24/7.
+                  Our algorithms do the work; you collect the returns.
+                </p>
+
+                <div className="space-y-4 mb-10">
+                  {[
+                    { label: '40+ employees', value: 'across engineering, quant research & support' },
+                    { label: '100+ bot strategies', value: 'verified, all stats public' },
+                  ].map((fact) => (
+                    <div key={fact.label} className="flex items-start gap-3">
+                      <Check className="w-5 h-5 text-primary-500 mt-0.5 shrink-0" />
+                      <div>
+                        <span className="font-semibold text-gray-900 dark:text-white">{fact.label}</span>{' '}
+                        <span className="text-gray-600 dark:text-dark-300">— {fact.value}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <GlowButton href="/about" variant="secondary" size="md">
+                  <span className="flex items-center gap-2">
+                    Learn More About Us <ArrowRight className="w-4 h-4" />
+                  </span>
+                </GlowButton>
+              </div>
+
+              {/* Right — video thumbnail */}
+              <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-indigo-500/10">
+                <Image
+                  src="/hero-bg-about.webp"
+                  alt="Platform overview"
+                  width={1280}
+                  height={720}
+                  className="w-full h-auto block"
+                />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                  <button
+                    onClick={() => setVideoOpen(true)}
+                    className="group relative flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-indigo-500 text-white shadow-2xl shadow-indigo-500/40 hover:scale-110 active:scale-95 transition-all duration-300 cursor-pointer"
+                  >
+                    <span className="absolute inset-0 rounded-full bg-indigo-500 animate-ping opacity-30" />
+                    <span className="absolute -inset-1.5 rounded-full border-2 border-indigo-400/40 animate-pulse" />
+                    <Play className="w-6 h-6 sm:w-7 sm:h-7 fill-white ml-0.5" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* YouTube Modal */}
+        {videoOpen && (
+          <div
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm"
+            onClick={closeVideo}
+          >
+            <div
+              className="relative w-full max-w-4xl mx-4 aspect-video"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={closeVideo}
+                className="absolute -top-10 right-0 text-white/70 hover:text-white transition-colors"
+              >
+                <X className="w-8 h-8" />
+              </button>
+              <iframe
+                src="https://www.youtube.com/embed/sgjEkiD0fZk?autoplay=1&rel=0"
+                allow="autoplay; encrypted-media"
+                allowFullScreen
+                className="w-full h-full rounded-2xl"
+              />
+            </div>
+          </div>
+        )}
 
         {/* ── How It Works ── */}
         <section className="relative py-16 sm:py-24 bg-white dark:bg-dark-900 overflow-hidden">
@@ -579,9 +666,13 @@ export default function Home() {
               {testimonials.slice(0, 5).map((t) => (
                 <div key={t.name} className="group w-[360px] px-6 py-5 border-r border-gray-200/40 dark:border-dark-700/40 transition-colors duration-300 hover:bg-primary-500/[0.04]">
                   <div className="flex items-center gap-3 mb-3">
-                    <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${t.gradient} flex items-center justify-center text-xs font-bold text-white shrink-0`}>
-                      {t.avatar}
-                    </div>
+                    {t.avatar.startsWith('/') ? (
+                      <Image src={t.avatar} alt={t.name} width={36} height={36} className="w-9 h-9 rounded-full object-cover shrink-0" />
+                    ) : (
+                      <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${t.gradient} flex items-center justify-center text-xs font-bold text-white shrink-0`}>
+                        {t.avatar}
+                      </div>
+                    )}
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{t.name}</p>
                       <p className="text-[11px] text-gray-500 dark:text-dark-400">Verified Copier</p>
@@ -607,9 +698,13 @@ export default function Home() {
               {testimonials.slice(5, 9).map((t) => (
                 <div key={t.name} className="group w-[360px] px-6 py-5 border-r border-gray-200/40 dark:border-dark-700/40 transition-colors duration-300 hover:bg-primary-500/[0.04]">
                   <div className="flex items-center gap-3 mb-3">
-                    <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${t.gradient} flex items-center justify-center text-xs font-bold text-white shrink-0`}>
-                      {t.avatar}
-                    </div>
+                    {t.avatar.startsWith('/') ? (
+                      <Image src={t.avatar} alt={t.name} width={36} height={36} className="w-9 h-9 rounded-full object-cover shrink-0" />
+                    ) : (
+                      <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${t.gradient} flex items-center justify-center text-xs font-bold text-white shrink-0`}>
+                        {t.avatar}
+                      </div>
+                    )}
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{t.name}</p>
                       <p className="text-[11px] text-gray-500 dark:text-dark-400">Verified Copier</p>
@@ -655,15 +750,15 @@ export default function Home() {
               </h2>
 
               <p className="text-base sm:text-lg text-dark-200 mb-8 max-w-2xl mx-auto leading-relaxed">
-                Join 26,000+ investors who earn passively with battle-tested algorithms.
+                Join 2,600+ investors who earn passively with battle-tested algorithms.
                 Set up once, collect profits on your schedule.
               </p>
 
               <div className="flex flex-wrap justify-center gap-8 sm:gap-12 mb-12">
                 {[
-                  { value: 26, suffix: 'K+', label: 'Active Copiers', Icon: Users },
-                  { value: 100, suffix: '+', label: 'Bot Strategies', Icon: Zap },
-                  { value: 2, suffix: 'M+', label: 'USDT Paid Out', Icon: DollarSign },
+                  { value: 2.6, suffix: 'K+', label: 'Active Copiers', Icon: Users },
+                  { value: 10, suffix: '+', label: 'Bot Strategies', Icon: Zap },
+                  { value: 200, suffix: 'K+', label: 'USDT Paid Out', Icon: DollarSign },
                 ].map((stat) => (
                   <div key={stat.label} className="text-center group">
                     <div className="flex items-center justify-center gap-2 mb-1">

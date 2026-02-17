@@ -15,7 +15,6 @@ function RegisterForm() {
   const router = useRouter();
 
   const [formData, setFormData] = useState({
-    fullName: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -79,7 +78,7 @@ function RegisterForm() {
     setError(null);
 
     // Validation
-    if (!formData.fullName || !formData.email || !formData.password) {
+    if (!formData.email || !formData.password) {
       setError('Please fill in all required fields');
       return;
     }
@@ -109,7 +108,7 @@ function RegisterForm() {
     try {
       // Create user with referral code (if provided)
       const user = await createUser({
-        username: formData.fullName,
+        username: formData.email.split('@')[0],
         email: formData.email,
         referralCode: formData.referralCode || undefined,
       });
@@ -134,26 +133,27 @@ function RegisterForm() {
       {/* Hex grid background + neon lines */}
       <div className="absolute inset-0 pointer-events-none" style={hexGridBg} />
       <NeonGridLines />
-      <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-violet-500/5 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-[15%] -left-[10%] w-[500px] h-[500px] bg-violet-600/15 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[10%] -right-[10%] w-[500px] h-[500px] bg-indigo-600/15 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-[40%] left-[30%] w-[300px] h-[300px] bg-primary-500/8 rounded-full blur-[100px] pointer-events-none" />
+
+      {/* Back to home link — fixed top-left */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6 }}
+        className="absolute top-6 left-6 z-20"
+      >
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-primary-400 hover:text-primary-300 transition-colors duration-300 text-sm"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Back to Home</span>
+        </Link>
+      </motion.div>
 
       <div className="relative z-10 w-full max-w-md">
-        {/* Back to home link */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="mb-8"
-        >
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-primary-400 hover:text-primary-300 transition-colors duration-300"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Back to Home</span>
-          </Link>
-        </motion.div>
-
         {/* Registration card */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -162,53 +162,36 @@ function RegisterForm() {
           className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800 dark:to-dark-900 rounded-3xl border-2 border-primary-500/20 p-8 shadow-2xl"
         >
           {/* Logo and title */}
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-3 mb-4">
+          <div className="text-center mb-6">
+            <div className="inline-flex items-center gap-3 mb-3">
               <Image
                 src="/logo2.svg"
                 alt="Cloudbright"
-                width={48}
-                height={48}
-                className="h-12 w-12"
+                width={40}
+                height={40}
+                className="h-10 w-10"
               />
-              <span className="text-gradient font-bold tracking-wider" style={{ fontSize: '2rem' }}>
+              <span className="text-gray-900 dark:text-white font-semibold" style={{ fontSize: '1.25rem', letterSpacing: '0.07rem', transform: 'scaleY(0.88)', transformOrigin: 'center' }}>
                 CLOUDBRIGHT
               </span>
             </div>
-            <p className="text-gray-600 dark:text-dark-300">
+            <p className="text-gray-600 dark:text-dark-300 text-sm">
               Create your account and join Cloudbright
             </p>
           </div>
 
           {/* Registration form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3">
             {/* Error message */}
             {error && (
-              <div className="p-3 bg-red-900/20 border border-red-800 rounded-xl">
+              <div className="p-2.5 bg-red-900/20 border border-red-800 rounded-xl">
                 <p className="text-sm text-red-400">{error}</p>
               </div>
             )}
 
-            {/* Full name field */}
-            <div>
-              <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 dark:text-dark-200 mb-2">
-                Full Name
-              </label>
-              <input
-                id="fullName"
-                type="text"
-                placeholder="John Doe"
-                value={formData.fullName}
-                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                className="w-full px-4 py-3 bg-white dark:bg-dark-700 border border-gray-300 dark:border-dark-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-dark-400 focus:outline-none focus:ring-0 focus:border-primary-500 transition-colors duration-300"
-                required
-                disabled={isSubmitting}
-              />
-            </div>
-
             {/* Email field */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-dark-200 mb-2">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-dark-200 mb-1">
                 Email Address
               </label>
               <input
@@ -217,7 +200,7 @@ function RegisterForm() {
                 placeholder="you@example.com"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-4 py-3 bg-white dark:bg-dark-700 border border-gray-300 dark:border-dark-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-dark-400 focus:outline-none focus:ring-0 focus:border-primary-500 transition-colors duration-300"
+                className="w-full px-4 py-2.5 bg-white dark:bg-dark-700 border border-gray-300 dark:border-dark-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-dark-400 focus:outline-none focus:ring-0 focus:border-primary-500 transition-colors duration-300"
                 required
                 disabled={isSubmitting}
               />
@@ -225,7 +208,7 @@ function RegisterForm() {
 
             {/* Referral code field */}
             <div>
-              <label htmlFor="referralCode" className="block text-sm font-medium text-gray-700 dark:text-dark-200 mb-2">
+              <label htmlFor="referralCode" className="block text-sm font-medium text-gray-700 dark:text-dark-200 mb-1">
                 Referral Code <span className="text-gray-500 dark:text-dark-400 font-normal">(Optional)</span>
               </label>
               <div className="relative">
@@ -235,7 +218,7 @@ function RegisterForm() {
                   placeholder="JOHNDOE123"
                   value={formData.referralCode}
                   onChange={(e) => handleReferralCodeChange(e.target.value)}
-                  className={`w-full px-4 py-3 pr-12 bg-white dark:bg-dark-700 border rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-dark-400 focus:outline-none focus:ring-0 transition-colors duration-300 ${
+                  className={`w-full px-4 py-2.5 pr-12 bg-white dark:bg-dark-700 border rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-dark-400 focus:outline-none focus:ring-0 transition-colors duration-300 ${
                     referralCodeStatus === 'valid'
                       ? 'border-green-500 focus:border-green-500'
                       : referralCodeStatus === 'invalid'
@@ -272,7 +255,7 @@ function RegisterForm() {
 
             {/* Password field */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-dark-200 mb-2">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-dark-200 mb-1">
                 Password
               </label>
               <input
@@ -281,7 +264,7 @@ function RegisterForm() {
                 placeholder="••••••••"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="w-full px-4 py-3 bg-white dark:bg-dark-700 border border-gray-300 dark:border-dark-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-dark-400 focus:outline-none focus:ring-0 focus:border-primary-500 transition-colors duration-300"
+                className="w-full px-4 py-2.5 bg-white dark:bg-dark-700 border border-gray-300 dark:border-dark-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-dark-400 focus:outline-none focus:ring-0 focus:border-primary-500 transition-colors duration-300"
                 required
                 disabled={isSubmitting}
               />
@@ -290,7 +273,7 @@ function RegisterForm() {
 
             {/* Confirm password field */}
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-dark-200 mb-2">
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-dark-200 mb-1">
                 Confirm Password
               </label>
               <input
@@ -299,7 +282,7 @@ function RegisterForm() {
                 placeholder="••••••••"
                 value={formData.confirmPassword}
                 onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                className="w-full px-4 py-3 bg-white dark:bg-dark-700 border border-gray-300 dark:border-dark-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-dark-400 focus:outline-none focus:ring-0 focus:border-primary-500 transition-colors duration-300"
+                className="w-full px-4 py-2.5 bg-white dark:bg-dark-700 border border-gray-300 dark:border-dark-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-dark-400 focus:outline-none focus:ring-0 focus:border-primary-500 transition-colors duration-300"
                 required
                 disabled={isSubmitting}
               />
@@ -333,7 +316,7 @@ function RegisterForm() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-4 bg-gradient-to-r from-primary-500 to-accent-500 rounded-xl font-semibold text-lg text-white hover:shadow-2xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              className="w-full py-3 bg-gradient-to-r from-primary-500 to-accent-500 rounded-xl font-semibold text-base text-white hover:shadow-2xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             >
               {isSubmitting ? (
                 <span className="flex items-center justify-center gap-2">

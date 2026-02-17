@@ -20,7 +20,7 @@ const languages: Language[] = [
   { code: 'ru', name: 'Русский', flag: '🇷🇺' },
 ];
 
-export default function LanguageSwitcher() {
+export default function LanguageSwitcher({ variant = 'desktop' }: { variant?: 'desktop' | 'mobile' } = {}) {
   const [currentLang, setCurrentLang] = useState<Language>(languages[0]);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -48,6 +48,60 @@ export default function LanguageSwitcher() {
     // Here you would typically trigger language change logic
     console.log('Language changed to:', lang.code);
   };
+
+  if (variant === 'mobile') {
+    return (
+      <div className="w-full">
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="flex items-center justify-between w-full py-2 text-gray-700 dark:text-dark-200 font-medium transition-colors duration-300"
+          aria-label="Change language"
+        >
+          <div className="flex items-center gap-2">
+            <span className="text-lg">{currentLang.flag}</span>
+            <span className="text-sm">{currentLang.name}</span>
+          </div>
+          <svg
+            className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden"
+            >
+              <div className="grid grid-cols-2 gap-1 pb-2">
+                {languages.map((lang) => (
+                  <button
+                    key={lang.code}
+                    onClick={() => handleLanguageChange(lang)}
+                    className={`flex items-center gap-2 px-3 py-2.5 rounded-lg transition-colors duration-150 ${
+                      currentLang.code === lang.code
+                        ? 'bg-primary-50 dark:bg-primary-500/10 text-primary-500 dark:text-primary-400'
+                        : 'text-gray-600 dark:text-dark-300 hover:bg-gray-50 dark:hover:bg-dark-700'
+                    }`}
+                  >
+                    <span className="text-lg">{lang.flag}</span>
+                    <span className="text-sm font-medium">{lang.name}</span>
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    );
+  }
 
   return (
     <div className="relative" ref={dropdownRef}>
