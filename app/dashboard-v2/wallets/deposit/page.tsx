@@ -3,8 +3,24 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { QRCodeSVG } from 'qrcode.react';
+import {
+  TokenBTC,
+  TokenETH,
+  TokenUSDT,
+  TokenBNB,
+  TokenSOL,
+  TokenTRX,
+} from '@web3icons/react';
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const TOKEN_ICONS: Record<string, any> = {
+  BTC: TokenBTC,
+  ETH: TokenETH,
+  USDT: TokenUSDT,
+  BNB: TokenBNB,
+  SOL: TokenSOL,
+  TRX: TokenTRX,
+};
 import { ChevronLeft, Copy, CheckCircle, AlertTriangle, Info, Clock } from 'lucide-react';
 import Stepper from '@/components/ui/Stepper';
 import CurrencyCard from '@/components/wallet/CurrencyCard';
@@ -126,7 +142,6 @@ export default function DepositPage() {
   return (
     <div className="min-h-screen bg-dark-950 text-white">
       <div className="max-w-[1400px] mx-auto p-4 lg:p-6">
-        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -139,10 +154,6 @@ export default function DepositPage() {
             <ChevronLeft className="w-5 h-5" />
             Back to Wallets
           </Link>
-          <h1 className="text-3xl lg:text-4xl font-bold text-white mb-1">Deposit Funds</h1>
-          <p className="text-dark-400">
-            Select a currency and network to generate your deposit address
-          </p>
         </motion.div>
 
         {/* Stepper */}
@@ -168,7 +179,7 @@ export default function DepositPage() {
             {step === 1 && (
               <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6">
                 <h2 className="text-2xl font-bold text-white mb-6">Select Currency</h2>
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3">
                   {CURRENCIES.map((currency, index) => (
                     <CurrencyCard
                       key={currency.symbol}
@@ -193,51 +204,47 @@ export default function DepositPage() {
                 </h2>
                 <p className="text-dark-400 mb-6">Choose the blockchain network for deposit</p>
 
-                <div className="space-y-4 mb-6">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3 mb-6">
                   {selectedCurrency.networks.map((network, index) => (
                     <motion.button
                       key={network.id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.1 }}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: index * 0.05 }}
                       onClick={() => handleNetworkSelect(network)}
                       className={`
-                        w-full p-6 rounded-2xl border-2 text-left transition-all
+                        relative flex items-center gap-3 px-4 py-3 rounded-xl border-2 text-left transition-all
                         ${
                           selectedNetwork?.id === network.id
-                            ? 'bg-primary-500/10 border-primary-500'
+                            ? 'bg-primary-500/10 border-primary-500 shadow-lg shadow-primary-500/20'
                             : 'bg-dark-800/50 border-dark-700 hover:border-primary-500/50 hover:bg-dark-800'
                         }
                       `}
                     >
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <div className="text-lg font-bold text-white mb-2">{network.name}</div>
-                          <div className="flex items-center gap-4 text-sm text-dark-400">
-                            <span>Fee: {network.fee}</span>
-                            {network.minAmount && parseFloat(network.minAmount) > 0 && (
-                              <>
-                                <span>•</span>
-                                <span>Min: ${network.minAmount}</span>
-                              </>
-                            )}
-                          </div>
-                        </div>
-                        <div
-                          className={`
-                            w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all
-                            ${
-                              selectedNetwork?.id === network.id
-                                ? 'border-primary-500 bg-primary-500'
-                                : 'border-dark-600'
-                            }
-                          `}
-                        >
-                          {selectedNetwork?.id === network.id && (
-                            <CheckCircle className="w-4 h-4 text-white" />
+                      <div className="flex-1 min-w-0">
+                        <div className="font-bold text-white text-sm truncate">{network.networkName}</div>
+                        <div className="text-xs text-dark-400 truncate">{network.name}</div>
+                        <div className="flex items-center gap-2 text-[11px] text-dark-500 mt-0.5">
+                          <span>Fee: {network.fee}</span>
+                          {network.minAmount && parseFloat(network.minAmount) > 0 && (
+                            <>
+                              <span>·</span>
+                              <span>Min: ${network.minAmount}</span>
+                            </>
                           )}
                         </div>
                       </div>
+                      {selectedNetwork?.id === network.id && (
+                        <motion.div
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          className="absolute top-2 right-2 w-5 h-5 bg-gradient-to-br from-primary-500 to-accent-500 rounded-full flex items-center justify-center"
+                        >
+                          <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </motion.div>
+                      )}
                     </motion.button>
                   ))}
                 </div>
@@ -312,13 +319,10 @@ export default function DepositPage() {
                       <div className="p-4 bg-dark-900/50 rounded-xl">
                         <div className="text-xs text-dark-400 mb-1">Currency</div>
                         <div className="flex items-center gap-2">
-                          <Image
-                            src={selectedCurrency.icon}
-                            alt={selectedCurrency.symbol}
-                            width={24}
-                            height={24}
-                            className="w-6 h-6"
-                          />
+                          {(() => {
+                            const Icon = TOKEN_ICONS[selectedCurrency.symbol];
+                            return Icon ? <Icon size={24} variant="branded" /> : <span className="text-white font-bold">{selectedCurrency.symbol.charAt(0)}</span>;
+                          })()}
                           <div className="text-lg font-bold text-white">
                             {selectedCurrency.symbol}
                           </div>

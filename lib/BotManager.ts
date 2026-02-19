@@ -1,4 +1,4 @@
-import { TradingBot } from './trading/TradingBot';
+import { TradingBot, type TradeCloseCallback } from './trading/TradingBot';
 import type { BotConfig, BotStats } from './trading/types';
 
 /**
@@ -12,10 +12,21 @@ import type { BotConfig, BotStats } from './trading/types';
  */
 export class BotManager {
   private bots = new Map<string, TradingBot>();
+  private tradeCloseCallback: TradeCloseCallback | null = null;
 
   constructor() {
     // Auto-load bots from localStorage on initialization
     this.load();
+  }
+
+  /**
+   * Set a global callback for when any bot closes a trade.
+   * Used for auto-crediting profit to user copies.
+   */
+  setOnTradeClose(callback: TradeCloseCallback): void {
+    this.tradeCloseCallback = callback;
+    // Apply to all existing bots
+    this.bots.forEach(bot => bot.setOnTradeClose(callback));
   }
 
   /**
@@ -41,6 +52,9 @@ export class BotManager {
     }
 
     const bot = new TradingBot(id, config);
+    if (this.tradeCloseCallback) {
+      bot.setOnTradeClose(this.tradeCloseCallback);
+    }
     this.bots.set(id, bot);
     this.save();
     return id;
@@ -223,6 +237,9 @@ export class BotManager {
       // Recreate bots from saved configs
       bots.forEach(({ id, config }) => {
         const bot = new TradingBot(id, config);
+        if (this.tradeCloseCallback) {
+          bot.setOnTradeClose(this.tradeCloseCallback);
+        }
         this.bots.set(id, bot);
       });
 

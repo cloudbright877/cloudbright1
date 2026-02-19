@@ -89,7 +89,7 @@ export default function ThemeToggle({ variant = 'desktop' }: { variant?: 'deskto
   return (
     <button
       onClick={toggleTheme}
-      className="p-2 rounded-xl bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/20 hover:bg-gray-200 dark:hover:bg-white/20 transition-all duration-300"
+      className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-white/10 transition-all duration-300"
       aria-label="Toggle theme"
     >
       {theme === 'dark' ? sunIcon : moonIcon}

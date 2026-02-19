@@ -5,8 +5,6 @@ import Link from 'next/link';
 import { useState, useMemo, useEffect, use } from 'react';
 import dynamic from 'next/dynamic';
 import {
-  UserPlus,
-  UserCheck,
   User,
   Shield,
   TrendingUp,
@@ -33,7 +31,7 @@ import type { TraderProfile } from '@/lib/social/types';
 import { getTraderByUsername, seedSocialData } from '@/lib/social/mock-seed';
 import { calculateTier } from '@/lib/social/tier-system';
 import { isWhale } from '@/lib/social/whale-detector';
-import { toggleFollow, isFollowing } from '@/lib/social/follow-system';
+import { getAvatarStyle } from '@/lib/social/tier-utils';
 
 // User copies system
 import { getClosedUserCopies } from '@/lib/userCopies';
@@ -47,7 +45,6 @@ export default function TraderProfilePage({ params }: { params: Promise<{ userna
   const { username } = use(params);
 
   const [trader, setTrader] = useState<TraderProfile | null>(null);
-  const [isFollowingTrader, setIsFollowingTrader] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'bots' | 'archived'>('overview');
   const [showCopyModal, setShowCopyModal] = useState(false);
 
@@ -57,16 +54,7 @@ export default function TraderProfilePage({ params }: { params: Promise<{ userna
     const traderData = getTraderByUsername(username);
     setTrader(traderData);
 
-    if (traderData) {
-      setIsFollowingTrader(isFollowing(traderData.userId));
-    }
   }, [username]);
-
-  const handleFollowToggle = () => {
-    if (!trader) return;
-    const newState = toggleFollow(trader.userId);
-    setIsFollowingTrader(newState);
-  };
 
   // Performance chart - must be before early return to maintain hooks order
   const performanceData = useMemo(() => {
@@ -141,10 +129,10 @@ export default function TraderProfilePage({ params }: { params: Promise<{ userna
         >
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Left: Avatar & Basic Info */}
-          <div className="flex flex-col items-center lg:items-start">
+          <div className="flex flex-col items-center">
             {/* Avatar */}
-            <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-5xl font-bold text-white shadow-2xl mb-4">
-              {trader.avatar}
+            <div className="w-32 h-32 rounded-full flex items-center justify-center text-5xl font-bold text-white shadow-2xl mb-4" style={getAvatarStyle(trader.displayName)}>
+              {trader.avatar || trader.displayName[0]?.toUpperCase()}
             </div>
 
             {/* Verified Badge */}
@@ -164,10 +152,6 @@ export default function TraderProfilePage({ params }: { params: Promise<{ userna
             {/* Quick Stats */}
             <div className="grid grid-cols-2 gap-3 w-full">
               <div className="p-3 bg-dark-900/50 rounded-lg text-center">
-                <div className="text-xs text-dark-400">Followers</div>
-                <div className="text-lg font-bold text-white">{trader.stats.followers.toLocaleString()}</div>
-              </div>
-              <div className="p-3 bg-dark-900/50 rounded-lg text-center">
                 <div className="text-xs text-dark-400">Copiers</div>
                 <div className="text-lg font-bold text-accent-400">{trader.stats.copiers}</div>
               </div>
@@ -175,15 +159,15 @@ export default function TraderProfilePage({ params }: { params: Promise<{ userna
                 <div className="text-xs text-dark-400">Win Rate</div>
                 <div className="text-lg font-bold text-green-400">{trader.stats.winRate}%</div>
               </div>
-              <div className="p-3 bg-dark-900/50 rounded-lg text-center">
-                <div className="text-xs text-dark-400">Rank</div>
-                <div className="text-lg font-bold text-accent-400">#{trader.stats.rank}</div>
+              <div className="p-3 bg-dark-900/50 rounded-lg text-center col-span-2">
+                <div className="text-xs text-dark-400">Invested</div>
+                <div className="text-lg font-bold text-blue-400">${trader.stats.totalInvested.toLocaleString()}</div>
               </div>
             </div>
           </div>
 
           {/* Right: Profile Info & Stats */}
-          <div className="flex-1">
+          <div className="flex-1 flex flex-col justify-between">
             {/* Name & Username */}
             <div className="mb-4">
               <h1 className="text-4xl font-bold text-white mb-2">{trader.displayName}</h1>
@@ -257,65 +241,33 @@ export default function TraderProfilePage({ params }: { params: Promise<{ userna
                 <Copy className="w-5 h-5" />
                 Copy Strategy
               </button>
-              <button
-                onClick={handleFollowToggle}
-                className={`px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 ${
-                  isFollowingTrader
-                    ? 'bg-dark-900/50 border border-dark-700 text-dark-300 hover:border-dark-600'
-                    : 'bg-dark-900/50 border border-primary-500/30 text-primary-400 hover:bg-primary-500/10'
-                }`}
-              >
-                {isFollowingTrader ? (
-                  <>
-                    <UserCheck className="w-5 h-5" />
-                    Following
-                  </>
-                ) : (
-                  <>
-                    <UserPlus className="w-5 h-5" />
-                    Follow
-                  </>
-                )}
-              </button>
             </div>
           </div>
         </div>
       </motion.div>
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-6 overflow-x-auto">
-        {(['overview', 'bots', 'archived'] as const).map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`
-              px-6 py-3 rounded-xl font-semibold text-sm whitespace-nowrap transition-all flex items-center gap-2
-              ${activeTab === tab
-                ? 'bg-primary-500/20 border-2 border-primary-500/30 text-white'
-                : 'bg-dark-800/50 border-2 border-dark-700 text-dark-400 hover:text-white hover:border-dark-600'
-              }
-            `}
-          >
-            {tab === 'overview' && (
-              <>
-                <BarChart3 className="w-4 h-4" />
-                Overview
-              </>
-            )}
-            {tab === 'bots' && (
-              <>
-                <Bot className="w-4 h-4" />
-                Active Bots
-              </>
-            )}
-            {tab === 'archived' && (
-              <>
-                <Archive className="w-4 h-4" />
-                Archived Bots
-              </>
-            )}
-          </button>
-        ))}
+      <div className="mb-6">
+        <div className="flex items-center gap-0.5 rounded-lg bg-dark-900/50 border border-dark-700 p-1.5 inline-flex">
+          {([
+            { key: 'overview', label: 'Overview', icon: <BarChart3 className="w-4 h-4" /> },
+            { key: 'bots', label: 'Active Bots', icon: <Bot className="w-4 h-4" /> },
+            { key: 'archived', label: 'Archived Bots', icon: <Archive className="w-4 h-4" /> },
+          ] as const).map(({ key, label, icon }) => (
+            <button
+              key={key}
+              onClick={() => setActiveTab(key)}
+              className={`px-6 py-3 font-semibold rounded-md text-sm transition-all flex items-center gap-2 ${
+                activeTab === key
+                  ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white shadow-lg shadow-primary-500/30'
+                  : 'text-dark-300 hover:text-white'
+              }`}
+            >
+              {icon}
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Tab Content */}
@@ -368,12 +320,12 @@ export default function TraderProfilePage({ params }: { params: Promise<{ userna
                 </h4>
                 <div className="space-y-3">
                   <div className="flex justify-between">
-                    <span className="text-sm text-dark-400">Followers:</span>
-                    <span className="text-sm font-bold text-white">{trader.stats.followers}</span>
-                  </div>
-                  <div className="flex justify-between">
                     <span className="text-sm text-dark-400">Copiers:</span>
                     <span className="text-sm font-bold text-primary-400">{trader.stats.copiers}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-dark-400">Copiers AUM:</span>
+                    <span className="text-sm font-bold text-white">${(trader.stats.copiersAUM / 1000).toFixed(0)}k</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-dark-400">Rank:</span>
@@ -393,12 +345,8 @@ export default function TraderProfilePage({ params }: { params: Promise<{ userna
                     <span className="text-sm font-bold text-white">{trader.stats.totalTrades}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-dark-400">Copiers AUM:</span>
-                    <span className="text-sm font-bold text-gradient">${(trader.stats.copiersAUM / 1000).toFixed(0)}k</span>
-                  </div>
-                  <div className="flex justify-between">
                     <span className="text-sm text-dark-400">Total Invested:</span>
-                    <span className="text-sm font-bold text-primary-400">${(trader.stats.totalInvested / 1000).toFixed(0)}k</span>
+                    <span className="text-sm font-bold text-blue-400">${trader.stats.totalInvested.toLocaleString()}</span>
                   </div>
                 </div>
               </div>
@@ -494,9 +442,7 @@ export default function TraderProfilePage({ params }: { params: Promise<{ userna
                     const effectiveReturn = copy.investedAmount > 0
                       ? ((copy.finalValue || copy.investedAmount) - copy.investedAmount) / copy.investedAmount * 100
                       : 0;
-                    const earlyExitFeeDisplay = copy.earlyExitFee && copy.earlyExitFee > 0
-                      ? `$${copy.earlyExitFee.toFixed(2)}`
-                      : 'None';
+                    const lockInDays = copy.reservationDays || 30;
 
                     return (
                       <div key={copy.id} className="p-5 bg-dark-900/50 rounded-xl border border-dark-700 hover:border-amber-500/30 transition-all">
@@ -541,11 +487,9 @@ export default function TraderProfilePage({ params }: { params: Promise<{ userna
                             </div>
                           </div>
                           <div className="p-3 bg-dark-800/50 rounded-lg border border-dark-700/50">
-                            <div className="text-xs text-dark-400 mb-1">Early Exit Fee</div>
-                            <div className={`text-sm font-bold ${
-                              copy.earlyExitFee && copy.earlyExitFee > 0 ? 'text-amber-400' : 'text-green-400'
-                            }`}>
-                              {earlyExitFeeDisplay}
+                            <div className="text-xs text-dark-400 mb-1">Lock-in</div>
+                            <div className="text-sm font-bold text-white">
+                              {lockInDays} days
                             </div>
                           </div>
                         </div>

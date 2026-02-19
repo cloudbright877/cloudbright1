@@ -11,18 +11,19 @@ import {
   CalendarDays,
   Infinity,
   DollarSign,
-  TrendingUp,
   Star,
   Shield,
   Gem,
   Award,
-  Search
+  Search,
+  Wallet,
+  Percent
 } from 'lucide-react';
 
 // Social system imports
 import type { LeaderboardEntry, LeaderboardCategory, LeaderboardTimeFrame } from '@/lib/social/types';
 import { calculateLeaderboard, getRankChange } from '@/lib/social/leaderboard';
-import { getTierGradient, getTierIconName } from '@/lib/social/tier-utils';
+import { getTierGradient, getTierIconName, getAvatarStyle } from '@/lib/social/tier-utils';
 import { getSocialTraders, seedSocialData } from '@/lib/social/mock-seed';
 
 
@@ -57,9 +58,9 @@ export default function LeaderboardPage() {
   const currentUserEntry = filteredLeaderboard.find(entry => entry.isCurrentUser);
 
   const getRankBadge = (rank: number) => {
-    if (rank === 1) return <div className="text-yellow-400 font-bold flex items-center justify-center"><Medal className="w-12 h-12" /></div>;
-    if (rank === 2) return <div className="text-gray-400 font-bold flex items-center justify-center"><Medal className="w-12 h-12" /></div>;
-    if (rank === 3) return <div className="text-orange-600 font-bold flex items-center justify-center"><Medal className="w-12 h-12" /></div>;
+    if (rank === 1) return <div className="text-yellow-400 font-bold flex items-center justify-center"><Medal className="w-7 h-7" /></div>;
+    if (rank === 2) return <div className="text-gray-400 font-bold flex items-center justify-center"><Medal className="w-7 h-7" /></div>;
+    if (rank === 3) return <div className="text-orange-600 font-bold flex items-center justify-center"><Medal className="w-7 h-7" /></div>;
     return `#${rank}`;
   };
 
@@ -73,21 +74,6 @@ export default function LeaderboardPage() {
   return (
     <div className="min-h-screen p-4 lg:p-8">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <h1 className="text-3xl lg:text-4xl font-bold text-white mb-2 flex items-center gap-3">
-            <Trophy className="w-8 h-8 text-yellow-400" />
-            Leaderboard
-          </h1>
-          <p className="text-dark-300">
-            Compete with the best traders on Cloudbright
-          </p>
-        </motion.div>
-
         {/* Your Position Card */}
         {currentUserEntry && (
           <motion.div
@@ -103,7 +89,7 @@ export default function LeaderboardPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
               <div className="bg-dark-900/50 rounded-lg p-3">
                 <div className="text-xs text-dark-400 mb-1">Profit</div>
                 <div className="text-lg font-bold text-green-400">
@@ -129,6 +115,13 @@ export default function LeaderboardPage() {
                 <div className="text-xs text-dark-400 mb-1">Trades</div>
                 <div className="text-lg font-bold text-white">
                   {currentUserEntry.stats.trades}
+                </div>
+              </div>
+
+              <div className="bg-dark-900/50 rounded-lg p-3">
+                <div className="text-xs text-dark-400 mb-1">Invested</div>
+                <div className="text-lg font-bold text-blue-400">
+                  ${currentUserEntry.stats.invested.toLocaleString()}
                 </div>
               </div>
 
@@ -213,7 +206,7 @@ export default function LeaderboardPage() {
                       : 'bg-dark-900/50 text-dark-300 hover:text-white border border-dark-700'
                   }`}
                 >
-                  <TrendingUp className="w-4 h-4" />
+                  <Percent className="w-4 h-4" />
                   Return
                 </button>
                 <button
@@ -226,6 +219,17 @@ export default function LeaderboardPage() {
                 >
                   <Star className="w-4 h-4" />
                   Win Rate
+                </button>
+                <button
+                  onClick={() => setCategory('invested')}
+                  className={`flex-1 px-4 py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
+                    category === 'invested'
+                      ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30'
+                      : 'bg-dark-900/50 text-dark-300 hover:text-white border border-dark-700'
+                  }`}
+                >
+                  <Wallet className="w-4 h-4" />
+                  Invested
                 </button>
               </div>
             </div>
@@ -269,75 +273,63 @@ export default function LeaderboardPage() {
                 className="block group"
               >
                 <motion.div
-                  whileHover={{ scale: 1.02, y: -4 }}
-                  className={`bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border-2 rounded-2xl p-6 hover:shadow-2xl transition-all duration-300 ${
+                  whileHover={{ scale: 1.02, y: -3 }}
+                  className={`bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border-2 rounded-2xl p-4 hover:shadow-2xl transition-all duration-300 ${
                     index === 0
                       ? 'border-yellow-500/50 hover:shadow-yellow-500/20'
                       : index === 1
                       ? 'border-gray-400/50 hover:shadow-gray-400/20'
                       : 'border-orange-600/50 hover:shadow-orange-600/20'
                   }`}>
-                  {/* Rank Badge */}
-                  <div className="text-center mb-4">
-                    <div className="text-6xl mb-2">{getRankBadge(entry.rank)}</div>
-                    <div className={`text-sm font-bold ${getRankChange(entry.rank, entry.previousRank).color}`}>
-                      {getRankChange(entry.rank, entry.previousRank).text}
-                    </div>
-                  </div>
-
-                  {/* Avatar */}
-                  <div className="flex justify-center mb-4">
-                    <div className={`w-20 h-20 rounded-xl bg-gradient-to-br ${getTierGradient(entry.tier)} flex items-center justify-center text-white font-bold text-3xl overflow-hidden`}>
+                  {/* Top: Medal + Avatar + Name */}
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="flex-shrink-0">{getRankBadge(entry.rank)}</div>
+                    <div className="w-10 h-10 flex-shrink-0 rounded-lg flex items-center justify-center text-white font-bold text-lg overflow-hidden" style={getAvatarStyle(entry.displayName)}>
                       {entry.avatar ? (
                         <Image
                           src={entry.avatar}
                           alt={entry.username}
-                          width={80}
-                          height={80}
+                          width={40}
+                          height={40}
                           className="w-full h-full object-cover"
                         />
                       ) : (
                         <span>{entry.username[0].toUpperCase()}</span>
                       )}
                     </div>
-                  </div>
-
-                  {/* Info */}
-                  <div className="text-center mb-4">
-                    <div className="flex items-center justify-center gap-2 mb-1">
-                      <h3 className="text-lg font-bold text-white group-hover:text-primary-400 transition-colors">
-                        {entry.displayName}
-                      </h3>
-                      {entry.verified && <Shield className="w-4 h-4 text-accent-400" />}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <h3 className="text-sm font-bold text-white truncate group-hover:text-primary-400 transition-colors">
+                          {entry.displayName}
+                        </h3>
+                        {entry.verified && <Shield className="w-3.5 h-3.5 text-accent-400 flex-shrink-0" />}
+                      </div>
+                      <div className="text-xs text-dark-400">@{entry.username}</div>
                     </div>
-                    <div className="text-sm text-dark-400 mb-2">@{entry.username}</div>
-                    <div className="text-xs text-dark-300 flex items-center justify-center gap-1">
-                      {getTierIcon(entry.tier)}
-                      {entry.tier}
+                    <div className={`text-xs font-bold flex-shrink-0 ${getRankChange(entry.rank, entry.previousRank).color}`}>
+                      {getRankChange(entry.rank, entry.previousRank).text}
                     </div>
                   </div>
 
-                  {/* Stats */}
-                  <div className="space-y-2">
-                    <div className="bg-dark-900/50 rounded-lg p-3">
-                      <div className="text-xs text-dark-400 mb-1">Profit</div>
-                      <div className="text-lg font-bold text-green-400">
-                        ${entry.stats.profit.toLocaleString()}
-                      </div>
+                  {/* Profit highlight */}
+                  <div className="flex items-center justify-between bg-dark-900/50 rounded-lg px-3 py-2 mb-2">
+                    <span className="text-[10px] text-dark-400">Profit</span>
+                    <span className="text-sm font-bold text-green-400">${entry.stats.profit.toLocaleString()}</span>
+                  </div>
+
+                  {/* Stats row */}
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="bg-dark-900/50 rounded-lg px-2 py-1.5 text-center">
+                      <div className="text-[10px] text-dark-400">Return</div>
+                      <div className="text-xs font-bold text-white">+{entry.stats.return}%</div>
                     </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="bg-dark-900/50 rounded-lg p-2">
-                        <div className="text-xs text-dark-400 mb-1">Return</div>
-                        <div className="text-sm font-bold text-white">
-                          +{entry.stats.return}%
-                        </div>
-                      </div>
-                      <div className="bg-dark-900/50 rounded-lg p-2">
-                        <div className="text-xs text-dark-400 mb-1">Win Rate</div>
-                        <div className="text-sm font-bold text-white">
-                          {entry.stats.winRate}%
-                        </div>
-                      </div>
+                    <div className="bg-dark-900/50 rounded-lg px-2 py-1.5 text-center">
+                      <div className="text-[10px] text-dark-400">Win Rate</div>
+                      <div className="text-xs font-bold text-white">{entry.stats.winRate}%</div>
+                    </div>
+                    <div className="bg-dark-900/50 rounded-lg px-2 py-1.5 text-center">
+                      <div className="text-[10px] text-dark-400">Invested</div>
+                      <div className="text-xs font-bold text-blue-400">${entry.stats.invested.toLocaleString()}</div>
                     </div>
                   </div>
                 </motion.div>
@@ -363,6 +355,7 @@ export default function LeaderboardPage() {
                   <th className="text-right text-sm text-dark-400 font-medium p-4">Profit</th>
                   <th className="text-right text-sm text-dark-400 font-medium p-4">Return</th>
                   <th className="text-right text-sm text-dark-400 font-medium p-4">Win Rate</th>
+                  <th className="text-right text-sm text-dark-400 font-medium p-4">Invested</th>
                   <th className="text-right text-sm text-dark-400 font-medium p-4">Copiers</th>
                   <th className="text-center text-sm text-dark-400 font-medium p-4">Change</th>
                 </tr>
@@ -388,7 +381,7 @@ export default function LeaderboardPage() {
                         href={`/dashboard-v2/traders/${entry.username}`}
                         className="flex items-center gap-3 group"
                       >
-                        <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${getTierGradient(entry.tier)} flex items-center justify-center text-white font-bold overflow-hidden`}>
+                        <div className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold overflow-hidden" style={getAvatarStyle(entry.displayName)}>
                           {entry.avatar ? (
                             <Image
                               src={entry.avatar}
@@ -431,6 +424,11 @@ export default function LeaderboardPage() {
                     <td className="p-4 text-right">
                       <div className="text-sm font-medium text-white">
                         {entry.stats.winRate}%
+                      </div>
+                    </td>
+                    <td className="p-4 text-right">
+                      <div className="text-sm font-medium text-blue-400">
+                        ${entry.stats.invested.toLocaleString()}
                       </div>
                     </td>
                     <td className="p-4 text-right">

@@ -16,7 +16,6 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import { botsApi } from '@/lib/api/botsApi';
-import { getEarlyExitPenaltyRate } from '@/lib/capitalReservation';
 import { getDemoBotBySlug } from '@/lib/demoMarketplace';
 import { getBalance } from '@/lib/balances';
 import type { DemoBot } from '@/lib/demoMarketplace';
@@ -58,7 +57,7 @@ export default function CopyBotPage() {
     }
   };
 
-  const minInvestment = bot?.stats.minInvestment || 500;
+  const minInvestment = 50;
   const maxInvestment = userBalance;
 
   const handleAmountChange = (value: string) => {
@@ -165,9 +164,13 @@ export default function CopyBotPage() {
         >
           {/* Header */}
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-14 h-14 bg-gradient-to-br from-primary-500 to-accent-500 rounded-xl flex items-center justify-center text-2xl font-bold text-white shadow-lg">
-              {bot.icon}
-            </div>
+            {typeof bot.icon === 'string' && bot.icon.startsWith('/') ? (
+              <img src={bot.icon} alt={bot.name} className="w-14 h-14 object-contain" />
+            ) : (
+              <div className="w-14 h-14 bg-gradient-to-br from-primary-500 to-accent-500 rounded-xl flex items-center justify-center text-2xl font-bold text-white shadow-lg">
+                {bot.icon}
+              </div>
+            )}
             <div>
               <h1 className="text-2xl lg:text-3xl font-bold text-white">Copy {bot.name}</h1>
               <p className="text-sm text-dark-400 mt-1">{bot.strategy}</p>
@@ -249,7 +252,7 @@ export default function CopyBotPage() {
           {/* Info */}
           <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg mb-6">
             <p className="text-xs text-blue-400 leading-relaxed">
-              Your bot will automatically copy {bot.name}'s trading strategy. You can stop or adjust settings anytime.
+              Your bot will automatically copy {bot.name}'s trading strategy. Profits are credited to your balance as trades close.
             </p>
           </div>
 
@@ -261,7 +264,7 @@ export default function CopyBotPage() {
             >
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-yellow-400" />
-                <span className="text-sm font-semibold text-white">Capital Reservation: 30 Days</span>
+                <span className="text-sm font-semibold text-white">Capital Reservation: {bot.lockInDays} Days</span>
               </div>
               <motion.div
                 animate={{ rotate: showReservationInfo ? 180 : 0 }}
@@ -279,50 +282,27 @@ export default function CopyBotPage() {
                 className="p-4 bg-dark-900/50 border-t border-dark-700 space-y-4"
               >
                 <p className="text-xs text-dark-400 leading-relaxed">
-                  The bot needs at least 30 days to demonstrate its strategy. Early exit incurs a penalty on your invested capital (not on profits or losses).
+                  Your capital will be locked for <strong className="text-white">{bot.lockInDays} days</strong> after activation. During this period you cannot deactivate the bot. This gives the strategy enough time to demonstrate its performance.
                 </p>
 
-                {/* Penalty Table */}
-                <div className="overflow-hidden rounded-lg border border-dark-700">
-                  <table className="w-full text-xs">
-                    <thead>
-                      <tr className="bg-dark-800/50">
-                        <th className="text-left py-2 px-3 text-dark-400 font-semibold">Period</th>
-                        <th className="text-right py-2 px-3 text-dark-400 font-semibold">Penalty</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr className="border-t border-dark-700">
-                        <td className="py-2 px-3 text-dark-300">Day 0-10</td>
-                        <td className="py-2 px-3 text-right font-semibold text-red-400">
-                          {(getEarlyExitPenaltyRate(0) * 100).toFixed(0)}%
-                        </td>
-                      </tr>
-                      <tr className="border-t border-dark-700">
-                        <td className="py-2 px-3 text-dark-300">Day 11-20</td>
-                        <td className="py-2 px-3 text-right font-semibold text-orange-400">
-                          {(getEarlyExitPenaltyRate(11) * 100).toFixed(0)}%
-                        </td>
-                      </tr>
-                      <tr className="border-t border-dark-700">
-                        <td className="py-2 px-3 text-dark-300">Day 21-29</td>
-                        <td className="py-2 px-3 text-right font-semibold text-yellow-400">
-                          {(getEarlyExitPenaltyRate(21) * 100).toFixed(0)}%
-                        </td>
-                      </tr>
-                      <tr className="border-t border-dark-700">
-                        <td className="py-2 px-3 text-dark-300">Day 30+</td>
-                        <td className="py-2 px-3 text-right font-semibold text-green-400">
-                          {(getEarlyExitPenaltyRate(30) * 100).toFixed(0)}%
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
+                <div className="p-3 bg-dark-800/50 border border-dark-700 rounded-lg space-y-2">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-dark-400">Lock-in period</span>
+                    <span className="font-semibold text-white">{bot.lockInDays} days</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-dark-400">Deactivation available</span>
+                    <span className="font-semibold text-green-400">After day {bot.lockInDays}</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-dark-400">Capital return</span>
+                    <span className="font-semibold text-green-400">100%</span>
+                  </div>
                 </div>
 
-                <div className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-                  <p className="text-xs text-yellow-400">
-                    Penalty applies only to your invested capital, not to profits or losses.
+                <div className="p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                  <p className="text-xs text-blue-400">
+                    Profits from closed trades are auto-credited to your available balance throughout the copy period.
                   </p>
                 </div>
               </motion.div>

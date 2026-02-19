@@ -58,18 +58,6 @@ export default function SettingsPage() {
   return (
     <div className="min-h-screen p-4 lg:p-6">
       <div className="max-w-[1800px] mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between mb-8"
-        >
-          <div>
-            <h1 className="text-3xl lg:text-4xl font-bold text-white mb-1">Settings</h1>
-            <p className="text-dark-400">Manage your account settings and preferences</p>
-          </div>
-        </motion.div>
-
         {/* Bento Grid - 12 columns like main dashboard */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4 lg:gap-6">
 

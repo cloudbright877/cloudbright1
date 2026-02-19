@@ -14,14 +14,12 @@ export interface DemoBot {
   description: string;
   verified: boolean;
   trending: boolean;
-  ageMonths: number;
   tags: string[];
   config: BotConfig;
   stats: {
-    rating: number;
-    reviews: number;
     copiers: number;
     minInvestment: number;
+    reservationDays: number;
     return7d: number;
     return30d: number;
     return90d: number;
@@ -30,6 +28,7 @@ export interface DemoBot {
     maxDD: number;
     sharpeRatio: number;
   };
+  lockInDays: number; // Lock-in period (14-180 days) — user cannot deactivate before this
   performanceData: number[]; // 30-day performance data for chart
 }
 
@@ -48,7 +47,8 @@ export const DEMO_BOTS: DemoBot[] = [
     description: 'Lightning-fast market maker with 12 concurrent micro-positions. Extreme safety: 2-3x floating leverage, -3% max DD. Strategy: capture tiny spreads at high volume on BTC/ETH/BNB. 58% win rate with tight 0.3-1.2% wins vs 0.15-0.6% losses.',
     verified: true,
     trending: true,
-    ageMonths: 24,
+
+    lockInDays: 30,
     tags: ['Market Making', 'Ultra-Fast', 'Min DD', 'Multi-Pair', 'Bybit'],
     config: {
       name: 'Bybit Market Maker',
@@ -70,10 +70,10 @@ export const DEMO_BOTS: DemoBot[] = [
       allowedSides: 'BOTH',
     },
     stats: {
-      rating: 4.9,
-      reviews: 2145,
+
       copiers: 5830,
-      minInvestment: 1000,
+      minInvestment: 50,
+      reservationDays: 30,
       return7d: 4.8,
       return30d: 21.4,
       return90d: 68.2,
@@ -96,7 +96,8 @@ export const DEMO_BOTS: DemoBot[] = [
     description: 'Institutional-grade patience strategy: employs advanced technical confluence to identify high-probability setups before executing with 10-15x dynamic leverage. Single-position concentration with asymmetric risk-reward (1:5 ratio). Operates on BTC/ETH majors. Win probability 54% compensated by 6:1 average R:R. Drawdown tolerance: -35%. Designed for sophisticated traders who understand position sizing and volatility cycles.',
     verified: true,
     trending: false,
-    ageMonths: 11,
+
+    lockInDays: 90,
     tags: ['High Leverage', 'Slow Trading', 'Futures', 'Confluence', 'Bitfinex'],
     config: {
       name: 'Bitfinex Leverage x10',
@@ -116,10 +117,10 @@ export const DEMO_BOTS: DemoBot[] = [
       allowedSides: 'BOTH',
     },
     stats: {
-      rating: 4.3,
-      reviews: 687,
+
       copiers: 1840,
-      minInvestment: 2500,
+      minInvestment: 50,
+      reservationDays: 60,
       return7d: 18.2,
       return30d: 78.4,
       return90d: 224.8,
@@ -142,7 +143,8 @@ export const DEMO_BOTS: DemoBot[] = [
     description: 'Volatility harvesting system designed for maximum capital efficiency. Utilizes momentum cascade detection with 18-25x adaptive leverage scaling based on volatility regime. Single-position concentration maximizes R:R asymmetry. Operates on XRP/ADA/DOGE altcoins during explosive breakout phases. Win rate 52% offset by 10:1 best-case R:R. Drawdown ceiling: -55%. Not suitable for weak hands. Requires understanding of Kelly criterion and tail risk management.',
     verified: true,
     trending: true,
-    ageMonths: 8,
+
+    lockInDays: 120,
     tags: ['Breakout', 'Max DD', 'High Risk', 'Altcoins', 'Kraken'],
     config: {
       name: 'Kraken Breakout Trader',
@@ -162,10 +164,10 @@ export const DEMO_BOTS: DemoBot[] = [
       allowedSides: 'BOTH',
     },
     stats: {
-      rating: 4.1,
-      reviews: 423,
+
       copiers: 982,
-      minInvestment: 5000,
+      minInvestment: 50,
+      reservationDays: 90,
       return7d: 32.5,
       return30d: 142.8,
       return90d: 398.4,
@@ -188,7 +190,8 @@ export const DEMO_BOTS: DemoBot[] = [
     description: 'Systematic mean-reversion engine employing 10-layer grid architecture. Deploys 3-4x dynamic leverage with position pyramiding across BTC/ETH/SOL. Win rate 56% through statistical arbitrage of microstructure inefficiencies. Maximum drawdown -5% enforced via strict position sizing. Annual volatility <12%. Ideal for capital preservation with consistent yield generation. Compound annual growth rate: 284%.',
     verified: true,
     trending: false,
-    ageMonths: 16,
+
+    lockInDays: 30,
     tags: ['Grid Trading', 'Min DD', 'Low Risk', 'Multi-Pair', 'OKX'],
     config: {
       name: 'OKX Grid Trading Bot',
@@ -208,10 +211,10 @@ export const DEMO_BOTS: DemoBot[] = [
       allowedSides: 'BOTH',
     },
     stats: {
-      rating: 4.7,
-      reviews: 1834,
+
       copiers: 4240,
-      minInvestment: 1200,
+      minInvestment: 50,
+      reservationDays: 45,
       return7d: 5.8,
       return30d: 25.2,
       return90d: 76.8,
@@ -234,7 +237,8 @@ export const DEMO_BOTS: DemoBot[] = [
     description: 'High-frequency market-making algorithm optimized for latency arbitrage. Executes 320 trades daily across 8 concurrent micro-positions on BTC/ETH/LTC/MATIC. Leverages 2-3x with sub-second holding periods. Exploits cross-exchange price dislocations and funding rate differentials. Win probability 57% with tight 0.25-1.4% profit targets. Maximum drawdown -4.3%. Requires institutional-grade execution infrastructure. Sharpe ratio 3.9 indicates exceptional risk-adjusted returns.',
     verified: true,
     trending: true,
-    ageMonths: 12,
+
+    lockInDays: 14,
     tags: ['Arbitrage', 'Ultra-Fast', 'Min DD', 'Multi-Pair', 'KuCoin'],
     config: {
       name: 'KuCoin Flash Arbitrage',
@@ -254,10 +258,10 @@ export const DEMO_BOTS: DemoBot[] = [
       allowedSides: 'BOTH',
     },
     stats: {
-      rating: 4.6,
-      reviews: 956,
+
       copiers: 3120,
-      minInvestment: 800,
+      minInvestment: 50,
+      reservationDays: 30,
       return7d: 5.1,
       return30d: 22.8,
       return90d: 71.4,
@@ -280,7 +284,8 @@ export const DEMO_BOTS: DemoBot[] = [
     description: 'Momentum-driven scalping framework targeting altcoin volatility expansion phases. Operates with 5-8x adaptive leverage across ETH/BNB/AVAX/LINK. Maintains 3 concurrent positions with dynamic risk allocation. Win rate 55% balanced by 3:1 average risk-reward ratio. Profit range 1.5-7% per trade creates volatile equity curve for maximum compounding. Drawdown tolerance -18%. Daily target 3.2%. Optimal for intermediate traders seeking active portfolio growth.',
     verified: true,
     trending: true,
-    ageMonths: 14,
+
+    lockInDays: 60,
     tags: ['Scalping', 'Medium Risk', 'Altcoins', 'Binance'],
     config: {
       name: 'Binance Altcoin Scalper',
@@ -300,10 +305,10 @@ export const DEMO_BOTS: DemoBot[] = [
       allowedSides: 'BOTH',
     },
     stats: {
-      rating: 4.5,
-      reviews: 1248,
+
       copiers: 2890,
-      minInvestment: 1500,
+      minInvestment: 50,
+      reservationDays: 60,
       return7d: 13.2,
       return30d: 56.8,
       return90d: 168.4,
@@ -326,7 +331,8 @@ export const DEMO_BOTS: DemoBot[] = [
     description: 'Balanced perpetual futures framework employing 4-7x variable leverage allocation. Operates 4 concurrent positions across BTC/ETH/SOL with dynamic hedging. Win rate 54% enhanced by 4:1 average R:R through selective trade filtering. P&L variance 1.2-6.8% creates realistic equity fluctuations. Drawdown cap -22%. Daily yield target 2.8%. Designed for traders seeking moderate leverage exposure without excessive tail risk. Sharpe 2.0 demonstrates strong risk-adjusted performance.',
     verified: true,
     trending: false,
-    ageMonths: 13,
+
+    lockInDays: 60,
     tags: ['Futures', 'Medium Risk', 'Multi-Pair', 'Poloniex'],
     config: {
       name: 'Poloniex Futures x5',
@@ -346,10 +352,10 @@ export const DEMO_BOTS: DemoBot[] = [
       allowedSides: 'BOTH',
     },
     stats: {
-      rating: 4.4,
-      reviews: 892,
+
       copiers: 2340,
-      minInvestment: 1200,
+      minInvestment: 50,
+      reservationDays: 45,
       return7d: 11.8,
       return30d: 49.2,
       return90d: 144.8,
@@ -372,7 +378,8 @@ export const DEMO_BOTS: DemoBot[] = [
     description: 'Catalyst-driven alpha extraction system designed for macroeconomic and sentiment-based volatility events. Deploys 12-18x adaptive leverage calibrated to event magnitude and implied volatility. Low frequency (28 trades/day) reflects selective entry criteria requiring multiple confluence factors. Operates on BTC/ETH during Federal Reserve announcements, CPI releases, and black swan events. Win rate 51% compensated by extreme 8:1 best-case R:R asymmetry. Drawdown tolerance -42% accommodates event-risk tail distribution. Requires sophisticated understanding of market microstructure during news flow.',
     verified: true,
     trending: true,
-    ageMonths: 9,
+
+    lockInDays: 90,
     tags: ['News Trading', 'High Risk', 'Event-Driven', 'Macro', 'Crypto.com'],
     config: {
       name: 'Crypto.com News Reactive',
@@ -392,10 +399,10 @@ export const DEMO_BOTS: DemoBot[] = [
       allowedSides: 'BOTH',
     },
     stats: {
-      rating: 4.2,
-      reviews: 534,
+
       copiers: 1420,
-      minInvestment: 3000,
+      minInvestment: 50,
+      reservationDays: 90,
       return7d: 24.8,
       return30d: 98.4,
       return90d: 284.2,
@@ -418,7 +425,8 @@ export const DEMO_BOTS: DemoBot[] = [
     description: 'Statistical arbitrage system exploiting mean-reversion anomalies through contrarian positioning. Employs 10-15x leverage with Bollinger Band extremes and RSI divergence confirmation. Fades parabolic moves on ETH/BNB/MATIC altcoins. Two concurrent positions maintain portfolio heat at manageable levels. Win rate 53% offset by 5:1 R:R on reversion completions. Extreme P&L variance 3.5-14% generates highly volatile but profitable equity curve. Drawdown ceiling -48%. Designed for traders with deep understanding of volatility cycles and regression to mean principles.',
     verified: true,
     trending: false,
-    ageMonths: 10,
+
+    lockInDays: 90,
     tags: ['Mean Reversion', 'High Risk', 'Counter-Trend', 'Altcoins', 'Huobi'],
     config: {
       name: 'Huobi Mean Reversion',
@@ -438,10 +446,10 @@ export const DEMO_BOTS: DemoBot[] = [
       allowedSides: 'BOTH',
     },
     stats: {
-      rating: 4.0,
-      reviews: 387,
+
       copiers: 1124,
-      minInvestment: 3500,
+      minInvestment: 50,
+      reservationDays: 90,
       return7d: 22.4,
       return30d: 94.8,
       return90d: 268.4,
@@ -464,7 +472,8 @@ export const DEMO_BOTS: DemoBot[] = [
     description: 'Quantitative technical analysis framework centered on Bollinger Band volatility compression/expansion cycles. Deploys 6-10x leverage scaling with band width. Operates on BNB/CAKE/TRX Binance ecosystem tokens. Three concurrent positions enable portfolio diversification while maintaining focused exposure. Win rate 56% through high-confidence band touch entries. P&L distribution 1.8-8.5% creates natural equity variance for realistic compounding. Drawdown limit -25%. Daily yield 3.5%. Ideal for technically-oriented traders who respect statistical edges in volatility mean-reversion.',
     verified: true,
     trending: false,
-    ageMonths: 15,
+
+    lockInDays: 60,
     tags: ['Technical Analysis', 'Medium Risk', 'Bollinger Bands', 'BSC', 'Binance'],
     config: {
       name: 'Binance BNB Bollinger',
@@ -484,10 +493,10 @@ export const DEMO_BOTS: DemoBot[] = [
       allowedSides: 'BOTH',
     },
     stats: {
-      rating: 4.3,
-      reviews: 724,
+
       copiers: 2180,
-      minInvestment: 1800,
+      minInvestment: 50,
+      reservationDays: 60,
       return7d: 14.8,
       return30d: 62.4,
       return90d: 184.2,

@@ -182,7 +182,7 @@ export const masterBotsData: MasterBotData[] = [
     description: 'Consistent low-risk profits with AI-powered scalping. Uses advanced machine learning algorithms to identify micro-trends and execute high-frequency trades with precision.',
     risk: 'low',
     verified: true,
-    ageMonths: 18,
+
 
     // Aggregate Statistics
     totalCopiers: 1247,
@@ -207,8 +207,7 @@ export const masterBotsData: MasterBotData[] = [
 
     // Additional Info
     minInvestment: 500,
-    rating: 4.9,
-    reviews: 234,
+
     tags: ['BTC', 'ETH', 'Scalping', 'AI'],
   },
   {
@@ -220,7 +219,7 @@ export const masterBotsData: MasterBotData[] = [
     description: 'Balanced growth with momentum strategies. Captures medium-term trends using technical analysis and market sentiment indicators.',
     risk: 'medium',
     verified: true,
-    ageMonths: 14,
+
 
     totalCopiers: 892,
     totalInvestedByAll: 1784000,
@@ -241,8 +240,7 @@ export const masterBotsData: MasterBotData[] = [
     equityData: generateEquityData(100, 334.8, 90),
 
     minInvestment: 1000,
-    rating: 4.7,
-    reviews: 187,
+
     tags: ['ETH', 'Swing', 'Momentum'],
   },
   {
@@ -254,7 +252,7 @@ export const masterBotsData: MasterBotData[] = [
     description: 'Aggressive returns for risk-takers. High leverage multi-asset trading with volatility-based entry signals.',
     risk: 'high',
     verified: true,
-    ageMonths: 10,
+
 
     totalCopiers: 543,
     totalInvestedByAll: 1357500,
@@ -275,8 +273,7 @@ export const masterBotsData: MasterBotData[] = [
     equityData: generateEquityData(100, 512.5, 90),
 
     minInvestment: 2500,
-    rating: 4.5,
-    reviews: 145,
+
     tags: ['Multi-asset', 'Aggressive', 'Volatility'],
   },
   {
@@ -288,7 +285,7 @@ export const masterBotsData: MasterBotData[] = [
     description: 'Captures market momentum swings. High-frequency momentum trading with rapid position turnover.',
     risk: 'high',
     verified: false,
-    ageMonths: 4,
+
 
     totalCopiers: 234,
     totalInvestedByAll: 1170000,
@@ -309,8 +306,7 @@ export const masterBotsData: MasterBotData[] = [
     equityData: generateEquityData(100, 585.3, 90),
 
     minInvestment: 5000,
-    rating: 4.3,
-    reviews: 98,
+
     tags: ['Momentum', 'High-frequency', 'New'],
   },
   {
@@ -322,7 +318,7 @@ export const masterBotsData: MasterBotData[] = [
     description: 'Profits from ranging markets. Places buy and sell orders at regular intervals to profit from market oscillations.',
     risk: 'low',
     verified: true,
-    ageMonths: 22,
+
 
     totalCopiers: 678,
     totalInvestedByAll: 339000,
@@ -343,8 +339,7 @@ export const masterBotsData: MasterBotData[] = [
     equityData: generateEquityData(100, 198.7, 90),
 
     minInvestment: 500,
-    rating: 4.8,
-    reviews: 203,
+
     tags: ['Range-trading', 'Sideways', 'Conservative'],
   },
   {
@@ -356,7 +351,7 @@ export const masterBotsData: MasterBotData[] = [
     description: 'Options strategies for steady income. Sells options premium to generate consistent returns with controlled risk.',
     risk: 'medium',
     verified: true,
-    ageMonths: 16,
+
 
     totalCopiers: 445,
     totalInvestedByAll: 1335000,
@@ -377,8 +372,7 @@ export const masterBotsData: MasterBotData[] = [
     equityData: generateEquityData(100, 278.4, 90),
 
     minInvestment: 3000,
-    rating: 4.6,
-    reviews: 156,
+
     tags: ['Options', 'Theta decay', 'Income'],
   },
   {
@@ -390,7 +384,7 @@ export const masterBotsData: MasterBotData[] = [
     description: 'Dollar-cost averaging for long-term growth. Systematic accumulation strategy for building positions over time.',
     risk: 'low',
     verified: true,
-    ageMonths: 28,
+
 
     totalCopiers: 1024,
     totalInvestedByAll: 102400,
@@ -411,8 +405,7 @@ export const masterBotsData: MasterBotData[] = [
     equityData: generateEquityData(100, 184.2, 90),
 
     minInvestment: 100,
-    rating: 4.9,
-    reviews: 287,
+
     tags: ['DCA', 'Long-term', 'Beginner-friendly'],
   },
   {
@@ -424,7 +417,7 @@ export const masterBotsData: MasterBotData[] = [
     description: 'Risk-free profits from price differences. Exploits price discrepancies between centralized and decentralized exchanges.',
     risk: 'low',
     verified: true,
-    ageMonths: 12,
+
 
     totalCopiers: 856,
     totalInvestedByAll: 1712000,
@@ -445,8 +438,7 @@ export const masterBotsData: MasterBotData[] = [
     equityData: generateEquityData(100, 218.7, 90),
 
     minInvestment: 2000,
-    rating: 4.8,
-    reviews: 198,
+
     tags: ['Arbitrage', 'CEX-DEX', 'Low-risk'],
   },
 ];
@@ -480,14 +472,11 @@ export function getBotListItems(): BotListItem[] {
       maxDD: bot.stats.maxDrawdown,
       sharpeRatio: bot.stats.sharpeRatio,
       copiers: bot.totalCopiers,
-      rating: bot.rating,
-      reviews: bot.reviews,
       minInvestment: bot.minInvestment,
     },
     tags: bot.tags,
     trending: index % 3 === 0, // Make every 3rd bot trending
     verified: bot.verified,
-    ageMonths: bot.ageMonths,
     performanceData: bot.equityData.slice(-30).map(point => point.value),
   }));
 }

@@ -65,7 +65,7 @@ export default function BalanceHeroCard({
           </div>
           <div>
             <p className="text-sm text-dark-400 font-medium">Total Balance</p>
-            <p className="text-xs text-dark-500">Available + Frozen</p>
+            <p className="text-xs text-dark-500">Available + In Copies</p>
           </div>
         </div>
 
@@ -124,7 +124,7 @@ export default function BalanceHeroCard({
               </div>
               <div className="w-px h-12 bg-dark-700" />
               <div>
-                <p className="text-xs text-dark-400 mb-1">Frozen</p>
+                <p className="text-xs text-dark-400 mb-1">In Copies</p>
                 <p className="text-xl font-bold text-yellow-400">
                   ${formatNumber(frozenBalance)}
                 </p>
@@ -142,7 +142,7 @@ export default function BalanceHeroCard({
             </div>
             <div className="flex items-center justify-between mt-2 text-xs text-dark-500">
               <span>{formatNumber(availablePercent, 1)}% available</span>
-              <span>{formatNumber(100 - availablePercent, 1)}% frozen</span>
+              <span>{formatNumber(100 - availablePercent, 1)}% in copies</span>
             </div>
           </div>
         </div>

@@ -2,21 +2,18 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import {
   Shield,
-  TrendingUp,
   AlertTriangle,
-  Check,
-  X,
   ArrowLeft,
   BarChart3,
-  Star,
   Users,
-  DollarSign
+  Clock
 } from 'lucide-react';
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Legend } from 'recharts';
-import { getAllDemoBots, type DemoBot } from '@/lib/demoMarketplace';
+import { getAllDemoBots, getDemoBotBySlug, type DemoBot } from '@/lib/demoMarketplace';
 
 interface CompareBot {
   id: string;
@@ -34,8 +31,8 @@ interface CompareBot {
     maxDD: number;
     sharpeRatio: number;
     copiers: number;
-    rating: number;
     minInvestment: number;
+    reservationDays?: number;
   };
   strategy: string;
   description: string;
@@ -60,8 +57,8 @@ function mapDemoBotToCompare(bot: DemoBot): CompareBot {
       maxDD: bot.stats.maxDD,
       sharpeRatio: bot.stats.sharpeRatio,
       copiers: bot.stats.copiers,
-      rating: bot.stats.rating,
       minInvestment: bot.stats.minInvestment,
+      reservationDays: bot.stats.reservationDays,
     },
   };
 }
@@ -70,20 +67,43 @@ function getAvailableBots(): CompareBot[] {
   return getAllDemoBots().map(mapDemoBotToCompare);
 }
 
-export default function BotComparePage() {
-  const availableBots = getAvailableBots();
-  const [selectedBots, setSelectedBots] = useState<CompareBot[]>(() => {
-    const bots = getAvailableBots();
-    return bots.length >= 2 ? [bots[0], bots[1]] : bots.slice(0, 2);
-  });
-  const [showSelector, setShowSelector] = useState(false);
+function BotCompareContent() {
+  const searchParams = useSearchParams();
+  const botsParam = searchParams.get('bots');
 
-  const handleSelectBot = (bot: CompareBot, index: number) => {
-    const newSelected = [...selectedBots];
-    newSelected[index] = bot;
-    setSelectedBots(newSelected);
-    setShowSelector(false);
-  };
+  const [selectedBots, setSelectedBots] = useState<CompareBot[]>(() => {
+    const allBots = getAvailableBots();
+    if (botsParam) {
+      const slugs = botsParam.split(',');
+      const resolved = slugs
+        .map((slug) => {
+          const demoBot = getDemoBotBySlug(slug);
+          return demoBot ? mapDemoBotToCompare(demoBot) : null;
+        })
+        .filter((b): b is CompareBot => b !== null);
+      if (resolved.length >= 2) return resolved;
+    }
+    return allBots.length >= 2 ? [allBots[0], allBots[1]] : allBots.slice(0, 2);
+  });
+
+  // Update selected bots when URL params change
+  useEffect(() => {
+    if (botsParam) {
+      const slugs = botsParam.split(',');
+      const resolved = slugs
+        .map((slug) => {
+          const demoBot = getDemoBotBySlug(slug);
+          return demoBot ? mapDemoBotToCompare(demoBot) : null;
+        })
+        .filter((b): b is CompareBot => b !== null);
+      if (resolved.length >= 2) {
+        setSelectedBots(resolved);
+      }
+    }
+  }, [botsParam]);
+
+  // Build current bots param for select page links
+  const currentBotsParam = selectedBots.map((b) => b.slug).join(',');
 
   const getRiskColor = (risk: string) => {
     if (risk === 'low') return 'text-green-400 bg-green-500/20 border-green-500/30';
@@ -121,7 +141,7 @@ export default function BotComparePage() {
   const radarColors = ['#10b981', '#3b82f6', '#a855f7'];
 
   const formatPercent = (value: number) => {
-    return value >= 0 ? `+${value}%` : `${value}%`;
+    return value >= 0 ? `+${value.toFixed(2)}%` : `${value.toFixed(2)}%`;
   };
 
   const getPercentColor = (value: number) => {
@@ -130,26 +150,6 @@ export default function BotComparePage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 md:pb-6">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-6"
-      >
-        <div className="flex items-center justify-between mb-2">
-          <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Compare Bots</h1>
-            <p className="text-dark-400">Side-by-side comparison of trading bots</p>
-          </div>
-          <Link
-            href="/dashboard-v2/bots"
-            className="px-4 py-2 border border-dark-600 rounded-lg text-dark-300 hover:text-white hover:border-dark-500 transition-all flex items-center gap-2"
-          >
-            <ArrowLeft className="w-4 h-4" /> Back to Bots
-          </Link>
-        </div>
-      </motion.div>
-
       {/* Bot Selectors */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -168,7 +168,11 @@ export default function BotComparePage() {
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="text-2xl">{bot.icon}</div>
+                  {typeof bot.icon === 'string' && bot.icon.startsWith('/') ? (
+                    <img src={bot.icon} alt={bot.name} className="w-10 h-10 object-contain" />
+                  ) : (
+                    <div className="text-2xl">{bot.icon}</div>
+                  )}
                   <div>
                     <div className="font-bold text-white flex items-center gap-2">
                       {bot.name}
@@ -177,22 +181,20 @@ export default function BotComparePage() {
                     <div className="text-xs text-dark-400">{bot.strategy}</div>
                   </div>
                 </div>
-                <button
-                  onClick={() => setShowSelector(true)}
+                <Link
+                  href={`/dashboard-v2/bots/compare/select?slot=${index}&bots=${currentBotsParam}`}
                   className="px-3 py-1 bg-primary-500/20 border border-primary-500/30 rounded-lg text-primary-400 text-sm font-semibold hover:bg-primary-500/30 hover:scale-105 transition-all"
                 >
                   Change
-                </button>
+                </Link>
               </div>
               <div className="flex items-center gap-2 flex-wrap">
                 <span className={`px-3 py-1 rounded-lg text-xs font-bold border ${getRiskColor(bot.risk)}`}>
                   {getRiskBadge(bot.risk)}
                 </span>
                 <span className="flex items-center gap-1 text-xs text-dark-400">
-                  <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
-                  {bot.stats.rating}
-                  <Users className="w-3 h-3 ml-1" />
-                  ({bot.stats.copiers.toLocaleString()})
+                  <Users className="w-3 h-3" />
+                  {bot.stats.copiers.toLocaleString()} copiers
                 </span>
               </div>
             </div>
@@ -201,15 +203,15 @@ export default function BotComparePage() {
 
         {/* Add Bot Button */}
         {selectedBots.length < 3 && (
-          <button
-            onClick={() => setShowSelector(true)}
+          <Link
+            href={`/dashboard-v2/bots/compare/select?slot=${selectedBots.length}&bots=${currentBotsParam}`}
             className="bg-dark-900/50 border-2 border-dashed border-dark-700 rounded-2xl p-6 hover:border-primary-500/50 hover:bg-dark-800/50 transition-all flex items-center justify-center"
           >
             <div className="text-center">
               <div className="text-4xl mb-2">+</div>
               <div className="text-sm text-dark-400">Add Bot to Compare</div>
             </div>
-          </button>
+          </Link>
         )}
       </motion.div>
 
@@ -224,7 +226,7 @@ export default function BotComparePage() {
           <BarChart3 className="w-5 h-5 text-primary-400" />
           Performance Comparison Overview
         </h2>
-        <div className="h-[400px]">
+        <div className="h-[400px] [&_*]:outline-none">
           <ResponsiveContainer width="100%" height="100%">
             <RadarChart data={radarData}>
               <PolarGrid stroke="#374151" />
@@ -273,7 +275,11 @@ export default function BotComparePage() {
                   {selectedBots.map((bot) => (
                     <th key={bot.id} className="text-center py-3 px-4 text-sm font-semibold text-white">
                       <div className="flex items-center justify-center gap-2">
-                        <div className="text-lg">{bot.icon}</div>
+                        {typeof bot.icon === 'string' && bot.icon.startsWith('/') ? (
+                          <img src={bot.icon} alt={bot.name} className="w-6 h-6 object-contain" />
+                        ) : (
+                          <div className="text-lg">{bot.icon}</div>
+                        )}
                         {bot.name}
                       </div>
                     </th>
@@ -339,16 +345,6 @@ export default function BotComparePage() {
                   ))}
                 </tr>
 
-                {/* Max Drawdown */}
-                <tr className="hover:bg-dark-800/50 transition-colors">
-                  <td className="py-3 px-4 text-sm text-dark-300">Max Drawdown</td>
-                  {selectedBots.map((bot) => (
-                    <td key={bot.id} className="py-3 px-4 text-center">
-                      <span className="font-bold text-red-400">{bot.stats.maxDD}%</span>
-                    </td>
-                  ))}
-                </tr>
-
                 {/* Sharpe Ratio */}
                 <tr className="hover:bg-dark-800/50 transition-colors">
                   <td className="py-3 px-4 text-sm text-dark-300">Sharpe Ratio</td>
@@ -359,12 +355,12 @@ export default function BotComparePage() {
                   ))}
                 </tr>
 
-                {/* Min Investment */}
+                {/* Capital Reservation */}
                 <tr className="hover:bg-dark-800/50 transition-colors">
-                  <td className="py-3 px-4 text-sm text-dark-300">Min Investment</td>
+                  <td className="py-3 px-4 text-sm text-dark-300">Capital Reservation</td>
                   {selectedBots.map((bot) => (
                     <td key={bot.id} className="py-3 px-4 text-center">
-                      <span className="font-bold text-white">${bot.stats.minInvestment}</span>
+                      <span className="font-bold text-white">{bot.stats.reservationDays || 30} days</span>
                     </td>
                   ))}
                 </tr>
@@ -397,24 +393,15 @@ export default function BotComparePage() {
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between items-center">
                     <span className="text-dark-400 flex items-center gap-1">
-                      <DollarSign className="w-3 h-3" /> Min Investment:
+                      <Clock className="w-3 h-3" /> Capital Reservation:
                     </span>
-                    <span className="font-bold text-white">${bot.stats.minInvestment}</span>
+                    <span className="font-bold text-white">{bot.stats.reservationDays || 30} days</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-dark-400 flex items-center gap-1">
                       <Users className="w-3 h-3" /> Current Copiers:
                     </span>
                     <span className="font-bold text-white">{bot.stats.copiers.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-dark-400 flex items-center gap-1">
-                      <Star className="w-3 h-3" /> Rating:
-                    </span>
-                    <span className="font-bold text-white flex items-center gap-1">
-                      <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
-                      {bot.stats.rating}/5.0
-                    </span>
                   </div>
                 </div>
                 <Link
@@ -429,57 +416,14 @@ export default function BotComparePage() {
         </div>
       </motion.div>
 
-      {/* Bot Selector Modal */}
-      {showSelector && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto"
-          >
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-white">Select Bot to Compare</h3>
-              <button
-                onClick={() => setShowSelector(false)}
-                className="p-2 text-dark-400 hover:text-white hover:bg-dark-700/50 rounded-lg transition-all"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="grid gap-4">
-              {availableBots.map((bot) => (
-                <motion.button
-                  key={bot.id}
-                  whileHover={{ scale: 1.01, x: 4 }}
-                  onClick={() => handleSelectBot(bot, selectedBots.length < 3 ? selectedBots.length : 0)}
-                  disabled={selectedBots.some((b) => b.id === bot.id)}
-                  className="p-4 bg-dark-900/50 border border-dark-700 rounded-xl hover:border-primary-500/50 hover:bg-dark-800/50 transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-2xl"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="text-2xl">{bot.icon}</div>
-                    <div className="flex-1">
-                      <div className="font-bold text-white flex items-center gap-2">
-                        {bot.name}
-                        {bot.verified && <Shield className="w-4 h-4 text-accent-400" />}
-                      </div>
-                      <div className="text-sm text-dark-400">{bot.strategy}</div>
-                      <div className="text-xs text-dark-500 mt-1">{bot.description}</div>
-                    </div>
-                    <div className="text-right">
-                      <div className={`text-lg font-bold flex items-center gap-1 ${getPercentColor(bot.stats.return30d)}`}>
-                        <TrendingUp className="w-4 h-4" />
-                        {formatPercent(bot.stats.return30d)}
-                      </div>
-                      <div className="text-xs text-dark-400">30d return</div>
-                    </div>
-                  </div>
-                </motion.button>
-              ))}
-            </div>
-          </motion.div>
-        </div>
-      )}
     </div>
+  );
+}
+
+export default function BotComparePage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-[50vh] text-white">Loading...</div>}>
+      <BotCompareContent />
+    </Suspense>
   );
 }

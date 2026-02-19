@@ -33,6 +33,8 @@ export function calculateLeaderboard(
         return b.stats.monthlyReturn - a.stats.monthlyReturn;
       case 'winRate':
         return b.stats.winRate - a.stats.winRate;
+      case 'invested':
+        return (b.stats.totalInvested || 0) - (a.stats.totalInvested || 0);
       default:
         return 0;
     }
@@ -54,6 +56,7 @@ export function calculateLeaderboard(
       winRate: trader.stats.winRate,
       trades: trader.stats.totalTrades,
       copiers: trader.stats.copiers,
+      invested: trader.stats.totalInvested || 0,
     },
     isCurrentUser: trader.userId === currentUserId,
   }));

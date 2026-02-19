@@ -10,16 +10,17 @@ import type { UserCopy } from './userCopies';
 /**
  * Complete P&L breakdown for a user copy.
  * ALL UI pages MUST use getUserCopyPnLBreakdown() — no duplicate calculations.
+ *
+ * Profit is auto-credited to user's available balance when trades close.
+ * No manual collect — totalAutoCredited tracks what was already sent to balance.
  */
 export interface PnLBreakdown {
   realizedPnL: number;        // sum(closedTrades.pnl) — from trades after copy creation
   unrealizedPnL: number;      // sum(openPositions.pnl)
   totalPnL: number;           // realized + unrealized (for leaderboard)
-  totalCollected: number;     // already withdrawn by user via Collect P&L
-  availableToCollect: number; // max(0, realizedPnL - totalCollected)
-  currentValue: number;       // invested + realized - collected + unrealized
+  totalAutoCredited: number;  // profit already auto-credited to user's available balance
+  currentValue: number;       // invested + realized - autoCredited + unrealized
   investedAmount: number;     // original capital
-  collectCount: number;       // number of times user collected
 }
 
 /**
@@ -55,19 +56,16 @@ export function getUserCopyPnLBreakdown(copyId: string): PnLBreakdown | null {
   const unrealizedPnL = isFinite(rawUnrealized) && !isNaN(rawUnrealized) ? rawUnrealized : 0;
 
   const totalPnL = realizedPnL + unrealizedPnL;
-  const totalCollected = copy.totalCollectedPnL || 0;
-  const availableToCollect = Math.max(0, realizedPnL - totalCollected);
-  const currentValue = copy.investedAmount + realizedPnL - totalCollected + unrealizedPnL;
+  const totalAutoCredited = copy.totalCollectedPnL || 0;
+  const currentValue = copy.investedAmount + realizedPnL - totalAutoCredited + unrealizedPnL;
 
   return {
     realizedPnL,
     unrealizedPnL,
     totalPnL,
-    totalCollected,
-    availableToCollect,
+    totalAutoCredited,
     currentValue,
     investedAmount: copy.investedAmount,
-    collectCount: copy.collectCount || 0,
   };
 }
 

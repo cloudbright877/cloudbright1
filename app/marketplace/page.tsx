@@ -9,7 +9,6 @@ import { GlowButton } from '@/components/animations/GlowButton';
 import MiniChart from '@/components/dashboard-v2/MiniChart';
 import { DEMO_BOTS } from '@/lib/demoMarketplace';
 import {
-  Star,
   TrendingUp,
   Gauge,
   AlertTriangle,
@@ -40,13 +39,12 @@ const riskIcons: Record<string, typeof Gauge> = {
   high: AlertTriangle,
 };
 
-type SortOption = 'return30d' | 'copiers' | 'winRate' | 'rating';
+type SortOption = 'return30d' | 'copiers' | 'winRate';
 
 const sortOptions: { value: SortOption; label: string }[] = [
   { value: 'return30d', label: '30d Return' },
   { value: 'copiers', label: 'Copiers' },
   { value: 'winRate', label: 'Win Rate' },
-  { value: 'rating', label: 'Rating' },
 ];
 
 /* Deterministic volatile chart — risk level drives swing amplitude */
@@ -253,11 +251,6 @@ export default function MarketplacePage() {
                               {bot.verified && <Shield className="w-3.5 h-3.5 text-accent-400 flex-shrink-0" />}
                             </div>
                             <div className="flex items-center gap-2 mt-1 text-[10px] text-dark-400">
-                              <div className="flex items-center gap-0.5 text-white">
-                                <Star className="w-3 h-3 fill-white" />
-                                <span className="font-semibold">{bot.stats.rating.toFixed(1)}</span>
-                              </div>
-                              <span className="w-1 h-1 rounded-full bg-dark-600" />
                               <span>{bot.stats.copiers} copiers</span>
                             </div>
                           </div>

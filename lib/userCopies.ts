@@ -37,19 +37,20 @@ export interface UserCopy {
   finalPnL?: number; // Final P&L in USDT when closed
   finalValue?: number; // investedAmount + finalPnL
 
-  // Capital Reservation fields
-  reservationDays: number; // 30 (set at copy creation)
-  earlyExitFee?: number; // $ amount of penalty at close time
-  earlyExitPenaltyRate?: number; // % rate applied at close time
-  isEarlyExit?: boolean; // true if closed before reservation period
+  // Capital Reservation (Lock-in Period)
+  reservationDays: number; // Lock-in period in days (14-180, set from bot config at copy creation)
 
-  // Collect P&L fields
-  totalCollectedPnL: number; // total profit already withdrawn by user
-  collectCount: number; // how many times user collected
-  lastCollectAt?: number; // timestamp of last collect (for rate limiting)
+  // Auto-credit P&L fields
+  totalCollectedPnL: number; // total profit auto-credited to user's available balance
+  collectCount: number; // legacy (unused, kept for migration compat)
+  lastCollectAt?: number; // legacy (unused, kept for migration compat)
+
+  // Compounding settings
+  compoundingPercent: number; // 0-100: 0 = all profit → available balance, 100 = all profit → reinvest into bot
+  autocloseAfterLockIn: boolean; // Auto-deactivate bot after lock-in period ends
 
   // Concurrency lock (future-proof for Firestore/PostgreSQL)
-  operationInProgress: 'collect' | 'archive' | null;
+  operationInProgress: 'archive' | null;
 
   // Legacy fields (kept for migration compatibility)
   lastSettledPnL?: number;
@@ -66,7 +67,8 @@ const USER_COPIES_KEY = 'user_copies';
 export function createUserCopy(
   masterBotId: string,
   investedAmount: number,
-  userId: string = 'user_default'
+  userId: string = 'user_default',
+  lockInDays: number = 30
 ): string {
   const now = Date.now();
 
@@ -78,12 +80,17 @@ export function createUserCopy(
     status: 'ACTIVE', // Default status
     createdAt: now,
 
-    // Capital Reservation
-    reservationDays: 30,
+    // Capital Reservation (Lock-in Period)
+    reservationDays: lockInDays,
 
-    // Collect P&L
+    // Auto-credit P&L
     totalCollectedPnL: 0,
     collectCount: 0,
+
+    // Compounding defaults
+    compoundingPercent: 0, // Default: all profit → available balance
+    autocloseAfterLockIn: false,
+
     operationInProgress: null,
   };
 

@@ -304,7 +304,6 @@ export interface MasterBotData {
   description: string;     // Short description
   risk: BotRisk;           // Risk level
   verified: boolean;       // Verification status
-  ageMonths: number;       // Bot age in months
 
   // Aggregate Statistics (all copiers combined)
   totalCopiers: number;           // Total number of people copying this bot
@@ -329,8 +328,6 @@ export interface MasterBotData {
 
   // Additional Info
   minInvestment: number;         // Minimum investment to copy
-  rating: number;                // User rating (1-5)
-  reviews: number;               // Number of reviews
   tags: string[];                // Tags (e.g., ["BTC", "ETH", "Low Risk"])
 }
 
@@ -372,14 +369,11 @@ export interface BotListItem {
     maxDD: number;
     sharpeRatio: number;
     copiers: number;
-    rating: number;
-    reviews: number;
     minInvestment: number;
   };
   tags: string[];
   trending: boolean;
   verified: boolean;
-  ageMonths: number;
   performanceData: number[];  // 30-day performance chart data
 }
 

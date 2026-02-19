@@ -34,6 +34,7 @@ export interface TraderStats {
   copiers: number;
   copiersAUM: number;       // Total $ managed via copies
   totalInvested: number;    // Trader's own invested capital
+  totalWithdrawn: number;   // Total withdrawn amount
 }
 
 // === FEED EVENTS ===
@@ -96,7 +97,7 @@ export interface WhaleAlert {
   traderTier: TierLevel;
   traderVerified: boolean;
   traderAvatar: string | null;
-  action: 'invested' | 'withdrew' | 'profit';
+  action: 'invested' | 'withdrew';
   amount: number;
   botName: string;
   botSlug: string;
@@ -121,15 +122,11 @@ export interface LeaderboardEntry {
     winRate: number;
     trades: number;
     copiers: number;
+    invested: number;
   };
   isCurrentUser?: boolean;
 }
 
 export type LeaderboardTimeFrame = 'weekly' | 'monthly' | 'all-time';
-export type LeaderboardCategory = 'profit' | 'return' | 'winRate';
+export type LeaderboardCategory = 'profit' | 'return' | 'winRate' | 'invested';
 
-// === FOLLOW SYSTEM ===
-export interface FollowData {
-  userId: string;          // Who is following
-  following: string[];     // Array of traderIds being followed
-}

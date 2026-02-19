@@ -8,11 +8,10 @@ export interface BotData {
   return1y: number;
   copiers: number;
   winRate: number;
-  rating: number;
-  ageMonths: number;
   verified: boolean;
   trending: boolean;
   minInvestment: number;
+  reservationDays: number;
   performanceData: number[];
 }
 
@@ -27,11 +26,12 @@ export const featuredBots: BotData[] = [
     return1y: 156,
     copiers: 5830,
     winRate: 58.1,
-    rating: 4.9,
-    ageMonths: 14,
+
+
     verified: true,
     trending: true,
-    minInvestment: 100,
+    minInvestment: 50,
+    reservationDays: 30,
     performanceData: [10, 12, 11, 15, 14, 18, 17, 20, 19, 22, 21, 25, 24, 27, 26, 29, 28, 31, 30, 33],
   },
   {
@@ -44,11 +44,12 @@ export const featuredBots: BotData[] = [
     return1y: 182,
     copiers: 4240,
     winRate: 56.3,
-    rating: 4.7,
-    ageMonths: 11,
+
+
     verified: true,
     trending: false,
-    minInvestment: 200,
+    minInvestment: 50,
+    reservationDays: 45,
     performanceData: [8, 10, 9, 13, 12, 16, 18, 17, 21, 20, 24, 23, 27, 26, 30, 29, 33, 32, 35, 37],
   },
   {
@@ -61,11 +62,12 @@ export const featuredBots: BotData[] = [
     return1y: 340,
     copiers: 2890,
     winRate: 55.3,
-    rating: 4.5,
-    ageMonths: 9,
+
+
     verified: true,
     trending: true,
-    minInvestment: 300,
+    minInvestment: 50,
+    reservationDays: 60,
     performanceData: [5, 8, 6, 12, 10, 18, 15, 22, 19, 28, 25, 32, 29, 38, 35, 42, 39, 48, 45, 52],
   },
   {
@@ -78,11 +80,12 @@ export const featuredBots: BotData[] = [
     return1y: 245,
     copiers: 3120,
     winRate: 52.8,
-    rating: 4.6,
-    ageMonths: 10,
+
+
     verified: true,
     trending: true,
-    minInvestment: 250,
+    minInvestment: 50,
+    reservationDays: 45,
     performanceData: [6, 9, 7, 14, 11, 20, 16, 25, 22, 30, 27, 34, 31, 38, 35, 42, 39, 45, 43, 48],
   },
   {
@@ -95,11 +98,12 @@ export const featuredBots: BotData[] = [
     return1y: 95,
     copiers: 6450,
     winRate: 72.4,
-    rating: 4.8,
-    ageMonths: 18,
+
+
     verified: true,
     trending: false,
-    minInvestment: 500,
+    minInvestment: 50,
+    reservationDays: 90,
     performanceData: [10, 11, 12, 13, 13, 14, 15, 16, 16, 17, 18, 19, 19, 20, 21, 22, 22, 23, 24, 25],
   },
   {
@@ -112,11 +116,12 @@ export const featuredBots: BotData[] = [
     return1y: 520,
     copiers: 1840,
     winRate: 48.7,
-    rating: 4.3,
-    ageMonths: 7,
+
+
     verified: true,
     trending: true,
-    minInvestment: 500,
+    minInvestment: 50,
+    reservationDays: 90,
     performanceData: [5, 12, 3, 22, 8, 35, 18, 42, 28, 55, 38, 62, 45, 70, 52, 78, 60, 85, 68, 92],
   },
   {
@@ -129,11 +134,12 @@ export const featuredBots: BotData[] = [
     return1y: 118,
     copiers: 4780,
     winRate: 68.2,
-    rating: 4.7,
-    ageMonths: 12,
+
+
     verified: true,
     trending: false,
-    minInvestment: 150,
+    minInvestment: 50,
+    reservationDays: 30,
     performanceData: [10, 12, 14, 15, 17, 18, 20, 22, 23, 25, 26, 28, 29, 31, 32, 34, 35, 37, 38, 40],
   },
   {
@@ -146,11 +152,12 @@ export const featuredBots: BotData[] = [
     return1y: 210,
     copiers: 2560,
     winRate: 54.1,
-    rating: 4.5,
-    ageMonths: 8,
+
+
     verified: true,
     trending: false,
-    minInvestment: 300,
+    minInvestment: 50,
+    reservationDays: 60,
     performanceData: [8, 6, 14, 10, 20, 16, 26, 22, 30, 28, 36, 32, 40, 37, 44, 41, 48, 45, 52, 49],
   },
   {
@@ -163,11 +170,12 @@ export const featuredBots: BotData[] = [
     return1y: 195,
     copiers: 3340,
     winRate: 53.6,
-    rating: 4.6,
-    ageMonths: 10,
+
+
     verified: true,
     trending: true,
-    minInvestment: 250,
+    minInvestment: 50,
+    reservationDays: 45,
     performanceData: [7, 10, 8, 15, 12, 20, 17, 24, 21, 28, 25, 32, 29, 36, 33, 40, 37, 43, 41, 46],
   },
 ];

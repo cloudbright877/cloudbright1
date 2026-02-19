@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
   Shield,
-  Star,
   TrendingUp,
   BarChart3,
   DollarSign,
@@ -254,12 +253,6 @@ export function BotCarousel({ bots, autoPlayInterval = 5000 }: BotCarouselProps)
                           <div className="flex items-center gap-1.5">
                             <h3 className="text-sm font-semibold text-white truncate">{bot.name}</h3>
                             {bot.verified && <Shield className="w-3.5 h-3.5 text-accent-400 shrink-0" />}
-                          </div>
-                          <div className="flex items-center gap-2 mt-0.5">
-                            <Star className="w-3 h-3 fill-white text-white" />
-                            <span className="text-[10px] font-semibold text-white">{bot.rating.toFixed(1)}</span>
-                            <span className="w-1 h-1 rounded-full bg-dark-600" />
-                            <span className="text-[10px] text-dark-400">{bot.ageMonths}mo</span>
                           </div>
                           <p className="text-[10px] text-dark-400 mt-0.5 truncate">{bot.strategy}</p>
                         </div>

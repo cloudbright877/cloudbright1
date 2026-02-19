@@ -1,5 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
+@import 'flag-icons/css/flag-icons.min.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -71,6 +73,11 @@ body {
 
 .dark * {
   scrollbar-color: #0ea5e9 rgba(15, 23, 42, 0.8);
+}
+
+/* Hide body scroll when dashboard takes over scrolling */
+body:has(.dark) {
+  overflow: hidden;
 }
 
 @layer utilities {

@@ -85,30 +85,6 @@ export function getForYouFeed(): FeedEvent[] {
 }
 
 /**
- * Get feed events for "Following" tab
- * Only events from traders the user follows
- */
-export function getFollowingFeed(followedTraderIds: string[]): FeedEvent[] {
-  const events = getAllFeedEvents();
-  return events
-    .filter(event => followedTraderIds.includes(event.traderId))
-    .sort((a, b) => b.timestamp - a.timestamp);
-}
-
-/**
- * Get feed events for "Trending" tab
- * Events with most likes in last 24 hours
- */
-export function getTrendingFeed(): FeedEvent[] {
-  const events = getAllFeedEvents();
-  const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
-
-  return events
-    .filter(event => event.timestamp > oneDayAgo)
-    .sort((a, b) => b.likes - a.likes);
-}
-
-/**
  * Format milestone amount for display
  */
 export function formatMilestone(amount: number): string {

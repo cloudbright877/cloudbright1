@@ -21,18 +21,9 @@ export function migrateUserCopiesToV2(): number {
   ) as UserCopy[];
 
   copiesToMigrate.forEach((copy) => {
-    const isClosed = copy.status === 'CLOSED';
-    const closedAt = copy.closedAt;
-    const createdAt = copy.createdAt;
-
     const updates: Partial<UserCopy> = {
       reservationDays: 30,
     };
-
-    if (isClosed && closedAt) {
-      const daysSinceCopy = Math.floor((closedAt - createdAt) / (1000 * 60 * 60 * 24));
-      updates.isEarlyExit = daysSinceCopy < 30;
-    }
 
     updateUserCopy(copy.id, updates);
     migrated++;

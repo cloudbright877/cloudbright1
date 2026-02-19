@@ -28,15 +28,15 @@
 
 ### Что это?
 
-Реферальная система для copy trading платформы, которая позволяет пользователям зарабатывать комиссии с прибыли своих рефералов на **10 уровнях** глубины.
+Реферальная система для copy trading платформы, которая позволяет пользователям зарабатывать комиссии при **активации ботов** рефералами на **5 уровнях** глубины.
 
 ### Ключевые особенности
 
-- ✅ **10-уровневая реферальная программа** (10%, 5%, 3%, 2%×7)
-- ✅ **Collect P&L Model** - пользователь вручную собирает realized profit
+- ✅ **5-уровневая реферальная программа** (5%, 3%, 2%, 1%, 0.5%)
+- ✅ **Bot Activation Model** - комиссии при активации бота (от суммы инвестиции)
 - ✅ **Capital Reservation** - 30-дневный период с tiered penalties
 - ✅ **Platform Bonus Model** - комиссии оплачиваются платформой, НЕ вычитаются из прибыли пользователя
-- ✅ **Turnover Bonuses** - дополнительные бонусы за командный оборот
+- ✅ **Turnover Bonuses** - дополнительные бонусы за командный оборот (weighted active bots)
 - ✅ **Frozen/Available Balance** - разделение капитала
 - ✅ **Real-time Awards** - мгновенное начисление
 - ✅ **Transparent Breakdown** - детальный расчет P&L (realized/unrealized)
@@ -44,15 +44,13 @@
 ### Бизнес-модель
 
 ```
-Инвестор нажимает "Collect P&L" (или архивирует копию)
+Инвестор активирует бота (createBotCopy)
     ↓
-Система рассчитывает realized profit (закрытые сделки)
+Система начисляет комиссии от суммы инвестиции (до 11.5%)
     ↓
-Инвестор получает 100% realized profit
+Комиссии распределяются по upline chain (5 уровней)
     ↓
-Платформа начисляет реферальные бонусы из своих средств (до 32%)
-    ↓
-Проверка порогов turnover bonuses
+Проверка порогов turnover bonuses (weighted active bots)
     ↓
 Бонусы зачисляются на available balance upline
     ↓
@@ -465,17 +463,17 @@ CLOSED:  Закрыта, средства возвращены
 ### ReferralCommission
 
 ```typescript
-type CommissionLevel = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
+type CommissionLevel = 1 | 2 | 3 | 4 | 5;
 type CommissionStatus = 'PENDING' | 'PAID';
 
 interface ReferralCommission {
   id: string;                    // 'comm_123'
   uplineUserId: string;          // Кому начислена
-  investorUserId: string;        // Кто закрыл копию
+  investorUserId: string;        // Кто активировал бота
   userCopyId: string;            // Какая копия
-  level: CommissionLevel;        // Уровень (1-10)
-  commissionRate: number;        // Ставка (0.10, 0.05, 0.03, 0.02)
-  investorPnL: number;           // Прибыль инвестора
+  level: CommissionLevel;        // Уровень (1-5)
+  commissionRate: number;        // Ставка (0.05, 0.03, 0.02, 0.01, 0.005)
+  investorPnL: number;           // Сумма инвестиции (поле сохранено для совместимости)
   commissionAmount: number;      // Сумма комиссии
   status: CommissionStatus;      // Статус
   createdAt: number;             // Время создания
@@ -485,32 +483,27 @@ interface ReferralCommission {
 
 **Commission Rates:**
 ```
-Level 1:  10%
-Level 2:   5%
-Level 3:   3%
-Level 4:   2%
-Level 5:   2%
-Level 6:   2%
-Level 7:   2%
-Level 8:   2%
-Level 9:   2%
-Level 10:  2%
-─────────────
-Total:    32%
+Level 1:   5%
+Level 2:   3%
+Level 3:   2%
+Level 4:   1%
+Level 5:   0.5%
+──────────────
+Total:   11.5%
 ```
 
 **Примеры:**
 ```typescript
-// Level 1 комиссия
+// Level 1 комиссия (при активации бота)
 {
   id: 'comm_001',
   uplineUserId: 'user_002',      // Прямой реферер
   investorUserId: 'user_003',    // Инвестор
   userCopyId: 'copy_001',
   level: 1,
-  commissionRate: 0.10,
-  investorPnL: 1000,
-  commissionAmount: 100,         // $1000 × 10%
+  commissionRate: 0.05,
+  investorPnL: 5000,             // Сумма инвестиции
+  commissionAmount: 250,         // $5000 × 5%
   status: 'PAID',
   createdAt: 1706880000000,
   paidAt: 1706880001000
@@ -523,9 +516,9 @@ Total:    32%
   investorUserId: 'user_003',
   userCopyId: 'copy_001',
   level: 2,
-  commissionRate: 0.05,
-  investorPnL: 1000,
-  commissionAmount: 50,          // $1000 × 5%
+  commissionRate: 0.03,
+  investorPnL: 5000,             // Сумма инвестиции
+  commissionAmount: 150,         // $5000 × 3%
   status: 'PAID',
   createdAt: 1706880000000,
   paidAt: 1706880001000
@@ -565,7 +558,7 @@ Level 9:  $750,000 turnover  → $7,500 bonus
 Level 10: $1,000,000 turnover → $10,000 bonus
 ```
 
-**Team Turnover:** Сумма positive realized P&L всех рефералов (убытки не считаются)
+**Team Turnover:** Сумма active bot sizes от рефералов, взвешенная по уровню (Cashflow Impact: L1=100%, L2=50%, L3=25%, L4=10%, L5=10%)
 
 **Примеры:**
 ```typescript
@@ -826,20 +819,22 @@ const result = await botsApi.closeUserCopy('copy_001');
 async function distributeReferralCommissions(
   investorUserId: string,
   userCopyId: string,
-  profitAmount: number
+  investedAmount: number
 ): Promise<number>
 ```
 
+**Trigger:** Bot activation (createBotCopy)
+
 **Algorithm:**
 ```
-IF profitAmount <= 0:
+IF investedAmount <= 0:
   RETURN 0
 
-uplineChain = getUplineChain(investorUserId) // Max 10 levels
+uplineChain = getUplineChain(investorUserId) // Max 5 levels
 
-FOR EACH upline IN uplineChain (level 1-10):
+FOR EACH upline IN uplineChain (level 1-5):
   rate = COMMISSION_RATES[level]
-  commissionAmount = profitAmount × rate
+  commissionAmount = investedAmount × rate
 
   1. Create ReferralCommission record
   2. Credit to upline's available balance
@@ -854,18 +849,18 @@ RETURN totalDistributed
 **Example:**
 ```typescript
 // 3-level chain: UserA → UserB → UserC → Investor
-// Investor closes copy with $1,000 profit
+// Investor activates bot with $5,000 investment
 
 const distributed = await distributeReferralCommissions(
   investorId,
   'copy_001',
-  1000
+  5000
 );
 
-// UserC (Level 1): +$100 (10%)
-// UserB (Level 2): +$50 (5%)
-// UserA (Level 3): +$30 (3%)
-// Total: $180
+// UserC (Level 1): +$250 (5%)
+// UserB (Level 2): +$150 (3%)
+// UserA (Level 3): +$100 (2%)
+// Total: $500
 ```
 
 ### 5. Award Turnover Bonuses
@@ -892,14 +887,16 @@ async function checkAndAwardTurnoverBonuses(userId: string): Promise<void>
 **Team Turnover Calculation:**
 ```typescript
 async function calculateTeamTurnover(userId: string): Promise<number> {
-  referrals = getAllReferrals(userId) // All levels
+  referrals = getAllReferrals(userId)
 
   totalTurnover = 0
   FOR EACH referral IN referrals:
-    closedCopies = getClosedUserCopies(referral.id)
-    FOR EACH copy IN closedCopies:
-      IF copy.finalPnL > 0:
-        totalTurnover += copy.finalPnL
+    level = getReferralLevel(currentUser, referral)
+    IF level > 5: SKIP
+    impact = CASHFLOW_IMPACT[level]  // L1=100%, L2=50%, L3=25%, L4=10%, L5=10%
+    activeCopies = getActiveUserCopies(referral.id)
+    FOR EACH copy IN activeCopies:
+      totalTurnover += copy.investedAmount × impact
 
   RETURN totalTurnover
 }
@@ -907,17 +904,17 @@ async function calculateTeamTurnover(userId: string): Promise<number> {
 
 **Example:**
 ```typescript
-// UserA has 5 referrals:
-// - Bob: closed 2 copies (+$300, +$500)
-// - Charlie: closed 1 copy (-$100) → excluded
-// - Diana: closed 1 copy (+$400)
-// Total turnover: $1,200
+// UserA has referrals:
+// - Bob (L1): active copy $2,000 → $2,000 × 100% = $2,000
+// - Charlie (L2): active copy $3,000 → $3,000 × 50% = $1,500
+// - Diana (L3): active copy $4,000 → $4,000 × 25% = $1,000
+// Total turnover: $4,500
 
 await checkAndAwardTurnoverBonuses('userA');
 
 // Result:
-// - Level 1 bonus awarded ($10) at $1,000 threshold
-// - Available balance += $10
+// - Level 1 bonus awarded ($100) at $1,000 threshold
+// - Available balance += $100
 ```
 
 ---
@@ -1629,25 +1626,19 @@ CREATE INDEX idx_transactions_user ON balance_transactions(user_id, created_at D
 
 ### Q: Когда начисляются комиссии?
 
-**A:** Комиссии начисляются **при Collect P&L или при архивировании копии** — когда пользователь забирает realized profit. Комиссии оплачиваются **платформой** и **НЕ вычитаются** из прибыли пользователя.
+**A:** Комиссии начисляются **при активации бота** (createBotCopy) — от суммы инвестиции. Комиссии оплачиваются **платформой** и **НЕ вычитаются** из прибыли пользователя.
 
-**Почему не per-trade?**
-- ✅ Сохраняет compounding эффект (unrealized P&L остается в копии)
+**Почему при активации?**
+- ✅ Мгновенное вознаграждение для рефереров
 - ✅ Пользователь получает 100% своего profit
 - ✅ Понятная бизнес-логика
-- ✅ Легко проверить (auditable)
+- ✅ Реферер мотивирован привлекать активных трейдеров
 
 ---
 
 ### Q: Что если investor закрывает копию с убытком?
 
-**A:** Комиссии **не начисляются**. Uplines не получают ничего.
-
-```typescript
-if (finalPnL <= 0) {
-  return 0; // No commissions
-}
-```
+**A:** Комиссии уже были начислены при **активации** бота (от суммы инвестиции), поэтому закрытие копии не влияет на комиссии.
 
 ---
 
@@ -1657,25 +1648,29 @@ if (finalPnL <= 0) {
 
 ---
 
-### Q: Считаются ли убытки в team turnover?
+### Q: Как считается team turnover?
 
-**A:** **Нет!** Team turnover = сумма **только positive realized P&L**.
+**A:** Team turnover = сумма **active bot sizes** от рефералов, взвешенная по уровню (Cashflow Impact).
 
 ```typescript
-if (copy.finalPnL > 0) {
-  teamTurnover += copy.finalPnL;
-}
-// Losses are ignored
+// L1 referral with $2,000 active bot:
+turnover += 2000 * 1.0;   // 100% impact
+
+// L2 referral with $3,000 active bot:
+turnover += 3000 * 0.5;   // 50% impact
+
+// L3 referral with $4,000 active bot:
+turnover += 4000 * 0.25;  // 25% impact
 ```
 
 ---
 
 ### Q: Сколько максимум могут взять в комиссиях?
 
-**A:** **Максимум 32% от прибыли** (если есть полная 10-уровневая цепочка).
+**A:** **Максимум 11.5% от суммы инвестиции** (если есть полная 5-уровневая цепочка).
 
 ```
-10% + 5% + 3% + (2% × 7) = 32%
+5% + 3% + 2% + 1% + 0.5% = 11.5%
 ```
 
 ---

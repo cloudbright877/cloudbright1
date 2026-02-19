@@ -27,7 +27,7 @@ export function shouldGenerateAlert(
  */
 export function createWhaleAlert(
   trader: TraderProfile,
-  action: 'invested' | 'withdrew' | 'profit',
+  action: 'invested' | 'withdrew',
   amount: number,
   botName: string,
   botSlug: string
@@ -83,7 +83,7 @@ export function getWhaleAlerts(): WhaleAlert[] {
  * Get whale alerts filtered by criteria
  */
 export function getFilteredWhaleAlerts(
-  filter: 'all' | 'invested' | 'profit' | 'withdrew' = 'all',
+  filter: 'all' | 'invested' | 'withdrew' = 'all',
   minAmount: number = 0
 ): WhaleAlert[] {
   return getWhaleAlerts().filter(alert => {

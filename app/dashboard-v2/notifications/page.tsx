@@ -1,10 +1,20 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import {
+  Bell,
+  CreditCard,
+  Wallet,
+  Gift,
+  CheckCircle,
+  Globe,
+  Lock,
+  Bot,
+  TrendingUp,
+  Trash2,
+} from 'lucide-react';
 import GlassCard from '@/components/ui/GlassCard';
-import { getUserTransactions, type BalanceTransaction } from '@/lib/balances';
-import { getCurrentUserId } from '@/lib/getCurrentUserId';
 
 interface Notification {
   id: string;
@@ -14,69 +24,139 @@ interface Notification {
   read: boolean;
 }
 
-/**
- * Generate notifications from real balance transactions.
- * BACKEND MIGRATION: Replace with push notification system / notification table.
- */
-function transactionToNotification(tx: BalanceTransaction): Notification {
-  const amount = `<strong>$${tx.amount.toFixed(2)} USDT</strong>`;
-  const ref = tx.relatedEntityId ? ` <strong>${tx.relatedEntityId}</strong>` : '';
-
-  let title = 'Transaction';
-  let body = `Amount: ${amount}`;
-
-  switch (tx.type) {
-    case 'DEPOSIT':
-      title = 'Deposit Confirmed';
-      body = `Your deposit of ${amount} has been confirmed and credited to your account`;
-      break;
-    case 'WITHDRAW':
-      title = 'Withdrawal Processed';
-      body = `Your withdrawal of ${amount} has been processed`;
-      break;
-    case 'PNL_COLLECT':
-      title = 'Profit Collected';
-      body = `You collected ${amount} profit from copy${ref}`;
-      break;
-    case 'COPY_OPEN':
-      title = 'Copy Bot Started';
-      body = `${amount} has been allocated to copy${ref}`;
-      break;
-    case 'COPY_CLOSE':
-      title = 'Copy Bot Closed';
-      body = `${amount} has been returned from copy${ref}`;
-      break;
-    case 'REFERRAL_COMMISSION':
-      title = 'Referral Bonus Received';
-      body = `You received ${amount} referral commission`;
-      break;
-    case 'TURNOVER_BONUS':
-      title = 'Turnover Bonus Awarded';
-      body = `You earned ${amount} turnover bonus`;
-      break;
-  }
-
-  return { id: tx.id, title, body, date: tx.createdAt, read: true };
-}
+const MOCK_NOTIFICATIONS: Notification[] = [
+  {
+    id: 'n1',
+    title: 'Deposit Confirmed',
+    body: 'Your deposit of <strong>$5,000.00 USDT</strong> has been confirmed and credited to your account',
+    date: Date.now() - 5 * 60 * 1000,
+    read: false,
+  },
+  {
+    id: 'n2',
+    title: 'Profit Credited',
+    body: 'Trade closed — <strong>$312.50 USDT</strong> profit credited from copy <strong>AlphaBot Pro</strong>',
+    date: Date.now() - 12 * 60 * 1000,
+    read: false,
+  },
+  {
+    id: 'n3',
+    title: 'Copy Bot Started',
+    body: '<strong>$2,000.00 USDT</strong> has been allocated to copy <strong>Whale Hunter X</strong>',
+    date: Date.now() - 35 * 60 * 1000,
+    read: false,
+  },
+  {
+    id: 'n4',
+    title: 'New Login Detected',
+    body: 'New login from <strong>Chrome on Windows</strong> at IP <strong>192.168.1.42</strong>. If this wasn\'t you, secure your account immediately.',
+    date: Date.now() - 1.5 * 3600 * 1000,
+    read: false,
+  },
+  {
+    id: 'n5',
+    title: 'Referral Bonus Received',
+    body: 'You received <strong>$75.00 USDT</strong> referral commission from <strong>mike_trader</strong>',
+    date: Date.now() - 2 * 3600 * 1000,
+    read: true,
+  },
+  {
+    id: 'n6',
+    title: 'Withdrawal Processed',
+    body: 'Your withdrawal of <strong>$1,500.00 USDT</strong> has been processed and sent to your wallet',
+    date: Date.now() - 3 * 3600 * 1000,
+    read: true,
+  },
+  {
+    id: 'n7',
+    title: 'Copy Bot Closed',
+    body: '<strong>$3,250.00 USDT</strong> has been returned from copy <strong>Grid Master</strong> (PnL: <strong class="text-green-400">+$487.50</strong>)',
+    date: Date.now() - 5 * 3600 * 1000,
+    read: true,
+  },
+  {
+    id: 'n8',
+    title: 'Turnover Bonus Awarded',
+    body: 'You earned <strong>$120.00 USDT</strong> turnover bonus for reaching <strong>$50,000</strong> monthly volume',
+    date: Date.now() - 8 * 3600 * 1000,
+    read: true,
+  },
+  {
+    id: 'n9',
+    title: 'Bot Performance Alert',
+    body: '<strong>AlphaBot Pro</strong> hit a new weekly high — <strong>+18.3%</strong> return this week. <strong>$2,745 USDT</strong> profit generated.',
+    date: Date.now() - 12 * 3600 * 1000,
+    read: true,
+  },
+  {
+    id: 'n10',
+    title: 'IP Address Change',
+    body: 'Your account was accessed from a new IP address <strong>85.214.132.77</strong> (Frankfurt, Germany)',
+    date: Date.now() - 18 * 3600 * 1000,
+    read: true,
+  },
+  {
+    id: 'n11',
+    title: 'Deposit Confirmed',
+    body: 'Your deposit of <strong>$10,000.00 USDT</strong> has been confirmed and credited to your account',
+    date: Date.now() - 24 * 3600 * 1000,
+    read: true,
+  },
+  {
+    id: 'n12',
+    title: 'Investment Completed',
+    body: 'Your 30-day investment in <strong>Stable Yield Fund</strong> has matured. <strong>$10,450.00 USDT</strong> returned to your balance.',
+    date: Date.now() - 36 * 3600 * 1000,
+    read: true,
+  },
+  {
+    id: 'n13',
+    title: 'Profit Credited',
+    body: 'Trade closed — <strong>$89.20 USDT</strong> profit credited from copy <strong>Scalper Elite</strong>',
+    date: Date.now() - 2 * 86400 * 1000,
+    read: true,
+  },
+  {
+    id: 'n14',
+    title: 'Referral Bonus Received',
+    body: 'You received <strong>$150.00 USDT</strong> referral commission from <strong>crypto_jane</strong>',
+    date: Date.now() - 3 * 86400 * 1000,
+    read: true,
+  },
+  {
+    id: 'n15',
+    title: 'Copy Bot Started',
+    body: '<strong>$5,000.00 USDT</strong> has been allocated to copy <strong>DCA Momentum</strong>',
+    date: Date.now() - 4 * 86400 * 1000,
+    read: true,
+  },
+  {
+    id: 'n16',
+    title: 'Withdrawal Processed',
+    body: 'Your withdrawal of <strong>$3,000.00 USDT</strong> has been processed and sent to your wallet',
+    date: Date.now() - 5 * 86400 * 1000,
+    read: true,
+  },
+  {
+    id: 'n17',
+    title: 'Turnover Bonus Awarded',
+    body: 'You earned <strong>$200.00 USDT</strong> turnover bonus for reaching <strong>$100,000</strong> quarterly volume',
+    date: Date.now() - 6 * 86400 * 1000,
+    read: true,
+  },
+  {
+    id: 'n18',
+    title: 'New Login Detected',
+    body: 'New login from <strong>Safari on macOS</strong> at IP <strong>10.0.0.15</strong>',
+    date: Date.now() - 7 * 86400 * 1000,
+    read: true,
+  },
+];
 
 export default function NotificationsPage() {
   const [displayCount, setDisplayCount] = useState(15);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-
-  // Load notifications from real transactions
-  useEffect(() => {
-    const userId = getCurrentUserId();
-    if (!userId) return;
-
-    getUserTransactions(userId).then((txs) => {
-      const mapped = txs.map(transactionToNotification);
-      // Mark recent ones (last hour) as unread
-      const oneHourAgo = Date.now() - 60 * 60 * 1000;
-      mapped.forEach((n) => { if (n.date > oneHourAgo) n.read = false; });
-      setNotifications(mapped);
-    });
-  }, []);
+  const [notifications, setNotifications] = useState<Notification[]>(MOCK_NOTIFICATIONS);
 
   const handleMarkAllAsRead = () => {
     setNotifications(notifications.map(n => ({ ...n, read: true })));
@@ -102,13 +182,15 @@ export default function NotificationsPage() {
 
   const getNotificationIcon = (title: string) => {
     const lowerTitle = title.toLowerCase();
-    if (lowerTitle.includes('deposit') || lowerTitle.includes('credited')) return '💳';
-    if (lowerTitle.includes('withdrawal')) return '💸';
-    if (lowerTitle.includes('referral') || lowerTitle.includes('bonus')) return '🎁';
-    if (lowerTitle.includes('investment') || lowerTitle.includes('completed')) return '✓';
-    if (lowerTitle.includes('ip')) return '🌐';
-    if (lowerTitle.includes('login')) return '🔐';
-    return '🔔';
+    if (lowerTitle.includes('deposit') || lowerTitle.includes('credited')) return <CreditCard className="w-6 h-6 text-blue-400" />;
+    if (lowerTitle.includes('withdrawal')) return <Wallet className="w-6 h-6 text-orange-400" />;
+    if (lowerTitle.includes('referral') || lowerTitle.includes('bonus')) return <Gift className="w-6 h-6 text-accent-400" />;
+    if (lowerTitle.includes('profit') || lowerTitle.includes('credited')) return <TrendingUp className="w-6 h-6 text-green-400" />;
+    if (lowerTitle.includes('copy') || lowerTitle.includes('bot')) return <Bot className="w-6 h-6 text-primary-400" />;
+    if (lowerTitle.includes('investment') || lowerTitle.includes('completed')) return <CheckCircle className="w-6 h-6 text-purple-400" />;
+    if (lowerTitle.includes('ip')) return <Globe className="w-6 h-6 text-yellow-400" />;
+    if (lowerTitle.includes('login')) return <Lock className="w-6 h-6 text-primary-400" />;
+    return <Bell className="w-6 h-6 text-primary-400" />;
   };
 
   const getNotificationColor = (title: string) => {
@@ -156,32 +238,25 @@ export default function NotificationsPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Header */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-        <div className="flex items-center justify-between mb-2">
-          <h1 className="text-3xl sm:text-4xl font-bold text-white">Notifications</h1>
-          <div className="flex items-center gap-3">
-            {notifications.length > 0 && (
-              <button
-                onClick={() => setShowDeleteModal(true)}
-                className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 rounded-lg text-sm text-red-400 transition-all duration-300 hover:scale-105"
-              >
-                Delete All
-              </button>
-            )}
-            {unreadCount > 0 && (
-              <button
-                onClick={handleMarkAllAsRead}
-                className="px-4 py-2 bg-primary-500/10 hover:bg-primary-500/20 border border-primary-500/30 rounded-lg text-sm text-primary-400 transition-all duration-300 hover:scale-105"
-              >
-                Mark all as read
-              </button>
-            )}
-          </div>
+        <div className="flex items-center justify-end gap-3">
+          {notifications.length > 0 && (
+            <button
+              onClick={() => setShowDeleteModal(true)}
+              className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 rounded-lg text-sm text-red-400 transition-all duration-300 hover:scale-105"
+            >
+              Delete All
+            </button>
+          )}
+          {unreadCount > 0 && (
+            <button
+              onClick={handleMarkAllAsRead}
+              className="px-4 py-2 bg-primary-500/10 hover:bg-primary-500/20 border border-primary-500/30 rounded-lg text-sm text-primary-400 transition-all duration-300 hover:scale-105"
+            >
+              Mark all as read
+            </button>
+          )}
         </div>
-        <p className="text-dark-300">
-          {unreadCount > 0 ? `You have ${unreadCount} unread notification${unreadCount > 1 ? 's' : ''}` : 'All caught up!'}
-        </p>
       </motion.div>
 
       {/* Notifications List */}
@@ -258,7 +333,9 @@ export default function NotificationsPage() {
         ) : (
           <GlassCard>
             <div className="text-center py-16">
-              <div className="text-6xl mb-4">🔔</div>
+              <div className="w-16 h-16 mx-auto mb-4 bg-dark-800 rounded-full flex items-center justify-center">
+                <Bell className="w-8 h-8 text-dark-400" />
+              </div>
               <h3 className="text-xl font-bold text-white mb-2">No Notifications</h3>
               <p className="text-dark-300">You don't have any notifications yet</p>
             </div>
@@ -287,19 +364,7 @@ export default function NotificationsPage() {
                 <div className="p-6">
                   {/* Icon */}
                   <div className="w-16 h-16 mx-auto mb-4 bg-red-500/10 rounded-full flex items-center justify-center">
-                    <svg
-                      className="w-8 h-8 text-red-500"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                      />
-                    </svg>
+                    <Trash2 className="w-8 h-8 text-red-500" />
                   </div>
 
                   {/* Title */}

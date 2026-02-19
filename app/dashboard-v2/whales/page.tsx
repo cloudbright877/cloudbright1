@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import {
   Fish,
@@ -17,26 +17,35 @@ import {
   Award,
   Medal,
   Copy,
-  UserPlus,
-  UserCheck
+  ChevronDown,
 } from 'lucide-react';
 
 // Social system imports
 import type { WhaleAlert } from '@/lib/social/types';
 import { getFilteredWhaleAlerts, getTopWhales } from '@/lib/social/whale-detector';
-import { getTierGradient, getTierIconName } from '@/lib/social/tier-utils';
-import { toggleFollow, isFollowing } from '@/lib/social/follow-system';
+import { getTierGradient, getTierIconName, getAvatarStyle } from '@/lib/social/tier-utils';
 import { seedSocialData } from '@/lib/social/mock-seed';
 
 
-type FilterType = 'all' | 'invested' | 'profit' | 'withdrew';
+type FilterType = 'all' | 'invested' | 'withdrew';
 
 export default function WhalesPage() {
   const [activities, setActivities] = useState<WhaleAlert[]>([]);
   const [topWhales, setTopWhales] = useState<WhaleAlert[]>([]);
-  const [followStates, setFollowStates] = useState<Record<string, boolean>>({});
   const [filter, setFilter] = useState<FilterType>('all');
   const [minAmount, setMinAmount] = useState(10000);
+  const [showAmountDropdown, setShowAmountDropdown] = useState(false);
+  const amountDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (amountDropdownRef.current && !amountDropdownRef.current.contains(e.target as Node)) {
+        setShowAmountDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
 
   // Initialize data on mount
   useEffect(() => {
@@ -53,25 +62,11 @@ export default function WhalesPage() {
   const loadActivities = () => {
     const loaded = getFilteredWhaleAlerts(filter, minAmount);
     setActivities(loaded);
-
-    // Load follow states
-    const states: Record<string, boolean> = {};
-    loaded.forEach(activity => {
-      states[activity.traderId] = isFollowing(activity.traderId);
-    });
-    setFollowStates(states);
   };
 
   const loadTopWhales = () => {
     const loaded = getTopWhales(5);
     setTopWhales(loaded);
-  };
-
-  const handleFollowToggle = (traderId: string, e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const newState = toggleFollow(traderId);
-    setFollowStates(prev => ({ ...prev, [traderId]: newState }));
   };
 
   const filteredActivities = activities;
@@ -87,7 +82,6 @@ export default function WhalesPage() {
   const getActionColor = (action: string) => {
     switch (action) {
       case 'invested': return 'text-blue-400';
-      case 'profit': return 'text-green-400';
       case 'withdrew': return 'text-yellow-400';
       default: return 'text-white';
     }
@@ -96,7 +90,6 @@ export default function WhalesPage() {
   const getActionIcon = (action: string) => {
     switch (action) {
       case 'invested': return <DollarSign className="w-4 h-4" />;
-      case 'profit': return <TrendingUp className="w-4 h-4" />;
       case 'withdrew': return <Banknote className="w-4 h-4" />;
       default: return <Bell className="w-4 h-4" />;
     }
@@ -105,7 +98,6 @@ export default function WhalesPage() {
   const getActionText = (action: string) => {
     switch (action) {
       case 'invested': return 'invested';
-      case 'profit': return 'earned profit of';
       case 'withdrew': return 'withdrew';
       default: return 'action';
     }
@@ -121,21 +113,6 @@ export default function WhalesPage() {
   return (
     <div className="min-h-screen p-4 lg:p-8">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <h1 className="text-3xl lg:text-4xl font-bold text-white mb-2 flex items-center gap-3">
-            <Fish className="w-8 h-8 text-blue-400" />
-            Whale Watching
-          </h1>
-          <p className="text-dark-300">
-            Track and copy the biggest investors on Cloudbright
-          </p>
-        </motion.div>
-
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Feed */}
           <div className="lg:col-span-2 space-y-6">
@@ -144,7 +121,7 @@ export default function WhalesPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6"
+              className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6 overflow-visible relative z-20"
             >
               <div className="flex flex-col md:flex-row gap-4">
                 {/* Action Filter */}
@@ -173,17 +150,6 @@ export default function WhalesPage() {
                       Investments
                     </button>
                     <button
-                      onClick={() => setFilter('profit')}
-                      className={`px-4 py-2 rounded-lg font-medium transition-all flex items-center gap-2 ${
-                        filter === 'profit'
-                          ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-                          : 'bg-dark-900/50 text-dark-300 hover:text-white border border-dark-700'
-                      }`}
-                    >
-                      <TrendingUp className="w-4 h-4" />
-                      Profits
-                    </button>
-                    <button
                       onClick={() => setFilter('withdrew')}
                       className={`px-4 py-2 rounded-lg font-medium transition-all flex items-center gap-2 ${
                         filter === 'withdrew'
@@ -200,17 +166,45 @@ export default function WhalesPage() {
                 {/* Min Amount Filter */}
                 <div className="md:w-48">
                   <div className="text-sm text-dark-400 mb-3">Min Amount</div>
-                  <select
-                    value={minAmount}
-                    onChange={(e) => setMinAmount(Number(e.target.value))}
-                    className="w-full px-4 py-2 bg-dark-900/50 border border-dark-700 rounded-lg text-white hover:bg-dark-900 transition-colors"
-                  >
-                    <option value={5000}>$5,000+</option>
-                    <option value={10000}>$10,000+</option>
-                    <option value={25000}>$25,000+</option>
-                    <option value={50000}>$50,000+</option>
-                    <option value={100000}>$100,000+</option>
-                  </select>
+                  <div className="relative" ref={amountDropdownRef}>
+                    <button
+                      onClick={() => setShowAmountDropdown(!showAmountDropdown)}
+                      className="w-full px-4 py-2 bg-dark-900/50 border border-dark-700 rounded-lg text-white flex items-center justify-between gap-2 hover:border-dark-600 transition-colors"
+                    >
+                      <span>${minAmount >= 1000 ? `${(minAmount / 1000).toFixed(0)}k` : minAmount}+</span>
+                      <ChevronDown className={`w-4 h-4 text-dark-400 transition-transform ${showAmountDropdown ? 'rotate-180' : ''}`} />
+                    </button>
+                    <AnimatePresence>
+                      {showAmountDropdown && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 4 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 4 }}
+                          className="absolute top-full left-0 right-0 mt-1 bg-dark-900 border border-dark-700 rounded-lg overflow-hidden z-[9999] shadow-xl"
+                        >
+                          {[
+                            { value: 5000, label: '$5,000+' },
+                            { value: 10000, label: '$10,000+' },
+                            { value: 25000, label: '$25,000+' },
+                            { value: 50000, label: '$50,000+' },
+                            { value: 100000, label: '$100,000+' },
+                          ].map((opt) => (
+                            <button
+                              key={opt.value}
+                              onClick={() => { setMinAmount(opt.value); setShowAmountDropdown(false); }}
+                              className={`w-full px-4 py-2.5 text-left text-sm transition-colors ${
+                                minAmount === opt.value
+                                  ? 'bg-primary-500/20 text-primary-400'
+                                  : 'text-dark-300 hover:bg-dark-800 hover:text-white'
+                              }`}
+                            >
+                              {opt.label}
+                            </button>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -245,7 +239,7 @@ export default function WhalesPage() {
                         href={`/dashboard-v2/traders/${activity.traderUsername}`}
                         className="group"
                       >
-                        <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${getTierGradient(activity.traderTier)} flex items-center justify-center text-white font-bold text-lg overflow-hidden flex-shrink-0 group-hover:scale-110 transition-transform`}>
+                        <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-lg overflow-hidden flex-shrink-0 group-hover:scale-110 transition-transform" style={getAvatarStyle(activity.traderDisplayName)}>
                           {activity.traderAvatar ? (
                             <Image
                               src={activity.traderAvatar}
@@ -279,21 +273,13 @@ export default function WhalesPage() {
                                 {activity.traderTier}
                               </span>
                             </div>
-                            <div className="text-sm text-dark-300">
-                              <span className={`${getActionColor(activity.action)} flex items-center gap-1 inline-flex`}>
+                            <div className="flex items-center gap-1.5 text-sm text-dark-300 flex-wrap">
+                              <span className={`${getActionColor(activity.action)} flex items-center gap-1`}>
                                 {getActionIcon(activity.action)} {getActionText(activity.action)}
                               </span>
-                              {' '}
                               <span className="font-bold text-white">
                                 ${activity.amount.toLocaleString()}
                               </span>
-                              {' '}in{' '}
-                              <Link
-                                href={`/dashboard-v2/bots/${activity.botSlug}`}
-                                className="text-primary-400 hover:text-primary-300 transition-colors"
-                              >
-                                {activity.botName}
-                              </Link>
                             </div>
                           </div>
                           <div className="text-xs text-dark-500">
@@ -315,34 +301,12 @@ export default function WhalesPage() {
                               +${activity.totalProfit.toLocaleString()}
                             </div>
                           </div>
-                          <div className="ml-auto flex items-center gap-2">
-                            <button
-                              onClick={(e) => handleFollowToggle(activity.traderId, e)}
-                              className={`px-3 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 ${
-                                followStates[activity.traderId]
-                                  ? 'bg-dark-700 text-dark-300 hover:bg-dark-600'
-                                  : 'bg-dark-900/50 border border-primary-500/30 text-primary-400 hover:bg-primary-500/10'
-                              }`}
-                            >
-                              {followStates[activity.traderId] ? (
-                                <>
-                                  <UserCheck className="w-4 h-4" />
-                                  Following
-                                </>
-                              ) : (
-                                <>
-                                  <UserPlus className="w-4 h-4" />
-                                  Follow
-                                </>
-                              )}
-                            </button>
-                            <Link
-                              href={`/dashboard-v2/traders/${activity.traderUsername}`}
-                              className="px-4 py-2 bg-gradient-to-r from-primary-500 to-accent-500 rounded-lg text-sm font-semibold text-white hover:shadow-lg hover:shadow-primary-500/50 transition-all flex items-center gap-2"
-                            >
-                              <Copy className="w-4 h-4" />
-                              Copy
-                            </Link>
+                          <div>
+                            <div className="text-xs text-dark-400">Return</div>
+                            <div className="text-sm font-bold text-green-400 flex items-center gap-1">
+                              <TrendingUp className="w-3 h-3" />
+                              +{activity.totalInvested > 0 ? ((activity.totalProfit / activity.totalInvested) * 100).toFixed(1) : '0.0'}%
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -396,7 +360,7 @@ export default function WhalesPage() {
                         <div className="text-lg font-bold text-dark-500 w-6">
                           #{index + 1}
                         </div>
-                        <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${getTierGradient(whale.traderTier)} flex items-center justify-center text-white font-bold overflow-hidden flex-shrink-0`}>
+                        <div className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold overflow-hidden flex-shrink-0" style={getAvatarStyle(whale.traderDisplayName)}>
                           {whale.traderAvatar ? (
                             <Image
                               src={whale.traderAvatar}
@@ -428,10 +392,10 @@ export default function WhalesPage() {
 
               {/* View All Button */}
               <Link
-                href="/dashboard-v2/traders"
+                href="/dashboard-v2/leaderboard"
                 className="block mt-4 px-4 py-2 bg-dark-900/50 border border-dark-700 rounded-lg text-center text-sm text-dark-300 hover:text-white hover:border-dark-600 transition-all flex items-center justify-center gap-2"
               >
-                View All Traders
+                View Leaderboard
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </motion.div>

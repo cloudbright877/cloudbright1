@@ -12,7 +12,7 @@ import { botManager } from '@/lib/BotManager';
 
 export default function BotsPage() {
   const [activeTab, setActiveTab] = useState<'recommendation' | 'ranklist'>('recommendation');
-  const [sortBy, setSortBy] = useState<'rating' | 'return' | 'copiers' | 'winRate' | 'risk'>('rating');
+  const [sortBy, setSortBy] = useState<'return' | 'copiers' | 'winRate' | 'risk'>('return');
   const [bots, setBots] = useState<DemoBot[]>([]);
 
   // Load bots and update in real-time
@@ -45,8 +45,6 @@ export default function BotsPage() {
   // Filter and sort bots for Rank List
   const filteredAndSortedBots = [...bots].sort((a, b) => {
     switch (sortBy) {
-      case 'rating':
-        return b.stats.rating - a.stats.rating;
       case 'return':
         return b.stats.return1y - a.stats.return1y;
       case 'copiers':
@@ -75,39 +73,17 @@ export default function BotsPage() {
   return (
     <div className="min-h-screen p-4 lg:p-8">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8 flex items-center justify-between"
-        >
-          <div>
-            <h1 className="text-3xl lg:text-4xl font-bold text-white mb-2 flex items-center gap-3">
-              <Bot className="w-8 h-8 text-primary-400" />
-              Trading Bots
-            </h1>
-            <p className="text-dark-300">Choose from a wide selection of AI-powered bots to copy and start earning</p>
-          </div>
-          <Link
-            href="/dashboard-v2/bots/compare"
-            className="px-4 py-2 bg-primary-500/20 border border-primary-500/30 rounded-lg text-primary-400 font-semibold hover:bg-primary-500/30 transition-all flex items-center gap-2"
-          >
-            <Scale className="w-5 h-5" />
-            <span className="hidden md:inline">Compare Bots</span>
-          </Link>
-        </motion.div>
-
-        {/* Tabs */}
+        {/* Tabs + Compare */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="mb-6"
+          className="mb-6 flex items-center justify-between gap-4"
         >
-          <div className="flex items-center gap-0.5 rounded-lg bg-dark-900/50 border border-dark-700 p-1 inline-flex">
+          <div className="flex items-center gap-0.5 rounded-lg bg-dark-900/50 border border-dark-700 p-1.5 inline-flex">
             <button
               onClick={() => setActiveTab('recommendation')}
-              className={`px-6 py-3 font-semibold rounded-lg text-sm transition-all ${
+              className={`px-6 py-3 font-semibold rounded-md text-sm transition-all ${
                 activeTab === 'recommendation'
                   ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white shadow-lg shadow-primary-500/30'
                   : 'text-dark-300 hover:text-white'
@@ -117,7 +93,7 @@ export default function BotsPage() {
             </button>
             <button
               onClick={() => setActiveTab('ranklist')}
-              className={`px-6 py-3 font-semibold rounded-lg text-sm transition-all ${
+              className={`px-6 py-3 font-semibold rounded-md text-sm transition-all ${
                 activeTab === 'ranklist'
                   ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white shadow-lg shadow-primary-500/30'
                   : 'text-dark-300 hover:text-white'
@@ -126,6 +102,13 @@ export default function BotsPage() {
               Rank List
             </button>
           </div>
+          <Link
+            href="/dashboard-v2/bots/compare"
+            className="px-4 py-2 bg-primary-500/20 border border-primary-500/30 rounded-lg text-primary-400 font-semibold hover:bg-primary-500/30 transition-all flex items-center gap-2"
+          >
+            <Scale className="w-5 h-5" />
+            <span className="hidden md:inline">Compare Bots</span>
+          </Link>
         </motion.div>
 
         {/* Content */}
@@ -212,7 +195,6 @@ export default function BotsPage() {
               <div className="flex items-center gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-dark-700 scrollbar-track-transparent">
                 <span className="text-sm font-semibold text-dark-300 flex-shrink-0">Sort by:</span>
                 {[
-                  { label: 'Rating', value: 'rating' },
                   { label: 'Return', value: 'return' },
                   { label: 'Copiers', value: 'copiers' },
                   { label: 'Win Rate', value: 'winRate' },
@@ -277,12 +259,6 @@ export default function BotsPage() {
 
                     {/* Stats */}
                     <div className="hidden md:flex items-center gap-8">
-                      <div className="text-center">
-                        <div className="text-[10px] text-dark-400 mb-1">Rating</div>
-                        <div className="text-sm font-semibold text-white">
-                          {bot.stats.rating.toFixed(1)}
-                        </div>
-                      </div>
                       <div className="text-center">
                         <div className="text-[10px] text-dark-400 mb-1">Return</div>
                         <div className={`text-sm font-semibold ${bot.stats.return1y >= 0 ? 'text-green-400' : 'text-red-400'}`}>

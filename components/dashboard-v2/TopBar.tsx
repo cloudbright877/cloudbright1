@@ -17,12 +17,13 @@ import {
   CreditCard,
   Wallet,
   User,
-  Briefcase,
   Settings,
   LogOut,
   ChevronDown,
   Gem
 } from 'lucide-react';
+import LanguageSwitcher from '../LanguageSwitcher';
+import ThemeToggle from '../ThemeToggle';
 
 interface NotificationProps {
   id: number;
@@ -46,13 +47,6 @@ const userNotifications: NotificationProps[] = [
     title: 'Whale Alert',
     body: '<strong>crypto_whale_47</strong> invested <strong>$50,000</strong> in ProTrader Elite. <a href="/dashboard-v2/whales" class="text-primary-400">Copy strategy</a>',
     date: Date.now() - 3600000, // 1h ago
-    read: false,
-  },
-  {
-    id: 3,
-    title: 'New Follower',
-    body: '<strong>mike_trader</strong> started following you and copied your portfolio allocation',
-    date: Date.now() - 7200000, // 2h ago
     read: false,
   },
   {
@@ -90,7 +84,6 @@ export default function TopBar() {
   const router = useRouter();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [locale, setLocale] = useState('en');
   const [notifications, setNotifications] = useState<NotificationProps[]>(userNotifications);
 
   const notificationsRef = useRef<HTMLDivElement>(null);
@@ -130,16 +123,45 @@ export default function TopBar() {
     ));
   };
 
-  const getPageTitle = () => {
-    if (pathname === '/dashboard-v2') return 'Feed';
-    if (pathname?.startsWith('/dashboard-v2/bots')) return 'Bots';
-    if (pathname?.startsWith('/dashboard-v2/traders')) return 'Traders';
-    if (pathname?.startsWith('/dashboard-v2/whales')) return 'Whales';
-    if (pathname?.startsWith('/dashboard-v2/leaderboard')) return 'Leaderboard';
-    if (pathname?.startsWith('/wallets')) return 'Wallets';
-    if (pathname?.startsWith('/profile')) return 'Profile';
-    if (pathname?.startsWith('/notifications')) return 'Notifications';
-    return 'Dashboard';
+  const getBreadcrumbs = (): Array<{ label: string; href?: string }> => {
+    if (!pathname || pathname === '/dashboard-v2') return [];
+
+    const segments = pathname.replace('/dashboard-v2/', '').split('/');
+    const crumbs: Array<{ label: string; href?: string }> = [];
+
+    const labelMap: Record<string, string> = {
+      bots: 'Bots',
+      traders: 'Traders',
+      whales: 'Whales',
+      leaderboard: 'Leaderboard',
+      wallets: 'Wallets',
+      feed: 'Feed',
+      referrals: 'Referrals',
+      notifications: 'Notifications',
+      settings: 'Settings',
+      analytics: 'Analytics',
+      compare: 'Compare',
+      deposit: 'Deposit',
+      withdraw: 'Withdraw',
+      copy: 'Copy',
+      archive: 'Archive',
+      select: 'Select',
+      profile: 'Profile',
+      security: 'Security',
+      preferences: 'Preferences',
+      kyc: 'KYC',
+    };
+
+    let path = '/dashboard-v2';
+    for (let i = 0; i < segments.length; i++) {
+      const seg = segments[i];
+      path += `/${seg}`;
+      const label = labelMap[seg] || decodeURIComponent(seg);
+      const isLast = i === segments.length - 1;
+      crumbs.push({ label, href: isLast ? undefined : path });
+    }
+
+    return crumbs;
   };
 
   const getNotificationIcon = (title: string) => {
@@ -150,8 +172,6 @@ export default function TopBar() {
       return <Fish className="w-5 h-5 text-blue-400" />;
     if (lowerTitle.includes('leaderboard') || lowerTitle.includes('rank'))
       return <Trophy className="w-5 h-5 text-yellow-400" />;
-    if (lowerTitle.includes('follower') || lowerTitle.includes('following'))
-      return <Users className="w-5 h-5 text-purple-400" />;
     if (lowerTitle.includes('trade') || lowerTitle.includes('executed'))
       return <TrendingUp className="w-5 h-5 text-green-400" />;
     if (lowerTitle.includes('achievement') || lowerTitle.includes('badge'))
@@ -193,25 +213,26 @@ export default function TopBar() {
             >
               Home
             </Link>
-            {pathname !== '/dashboard-v2' && (
-              <>
+            {getBreadcrumbs().map((crumb, i) => (
+              <span key={i} className="flex items-center gap-2">
                 <span className="text-dark-600">/</span>
-                <span className="text-white font-medium">{getPageTitle()}</span>
-              </>
-            )}
+                {crumb.href ? (
+                  <Link
+                    href={crumb.href}
+                    className="text-dark-400 hover:text-primary-400 transition-colors"
+                  >
+                    {crumb.label}
+                  </Link>
+                ) : (
+                  <span className="text-white font-medium">{crumb.label}</span>
+                )}
+              </span>
+            ))}
           </nav>
         </div>
 
         {/* Right: Actions */}
         <div className="flex items-center gap-4">
-          {/* Quick Actions */}
-          <Link
-            href="/wallets/deposit"
-            className="px-4 py-2 bg-gradient-to-r from-primary-500 to-accent-500 rounded-lg font-semibold text-white hover:shadow-lg hover:shadow-primary-500/50 transition-all duration-200"
-          >
-            Deposit
-          </Link>
-
           {/* Notifications */}
           <div className="relative" ref={notificationsRef}>
             <button
@@ -305,20 +326,11 @@ export default function TopBar() {
             </AnimatePresence>
           </div>
 
+          {/* Theme Toggle */}
+          <ThemeToggle />
+
           {/* Language Selector */}
-          <div className="relative">
-            <select
-              value={locale}
-              onChange={(e) => setLocale(e.target.value)}
-              className="px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white hover:bg-dark-700 transition-colors cursor-pointer appearance-none pr-8 font-medium"
-            >
-              <option value="en">EN</option>
-              <option value="ru">RU</option>
-              <option value="de">DE</option>
-              <option value="es">ES</option>
-              <option value="fr">FR</option>
-            </select>
-          </div>
+          <LanguageSwitcher />
 
           {/* User Menu */}
           <div className="relative" ref={userMenuRef}>
@@ -371,17 +383,6 @@ export default function TopBar() {
                       <User className="w-4 h-4 text-dark-400 group-hover:text-white" />
                       <span className="text-sm text-dark-300 group-hover:text-white">
                         My Profile
-                      </span>
-                    </Link>
-
-                    <Link
-                      href="/dashboard-v2/portfolio"
-                      className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-dark-800 transition-colors group"
-                      onClick={() => setShowUserMenu(false)}
-                    >
-                      <Briefcase className="w-4 h-4 text-dark-400 group-hover:text-white" />
-                      <span className="text-sm text-dark-300 group-hover:text-white">
-                        Portfolio
                       </span>
                     </Link>
 

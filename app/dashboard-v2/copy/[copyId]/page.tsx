@@ -6,16 +6,15 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { botsApi } from '@/lib/api/botsApi';
-import { getUserCopy } from '@/lib/userCopies';
+import { getUserCopy, updateUserCopy } from '@/lib/userCopies';
 import { getUserCopyPnLBreakdown, type PnLBreakdown } from '@/lib/userCopyStats';
+import { isLockedIn, getDaysRemainingInReservation } from '@/lib/capitalReservation';
 import { getDemoBotById } from '@/lib/demoMarketplace';
 import {
   TrendingUp,
   TrendingDown,
   Activity,
   Settings,
-  Pause,
-  Play,
   DollarSign,
   Target,
   Clock,
@@ -98,11 +97,14 @@ export default function UserCopyPage() {
   // P&L Breakdown (from central formula)
   const [pnlBreakdown, setPnlBreakdown] = useState<PnLBreakdown | null>(null);
 
-  // Collect P&L dialog state
-  const [showCollectDialog, setShowCollectDialog] = useState(false);
-  const [collectLoading, setCollectLoading] = useState(false);
-  const [collectSuccess, setCollectSuccess] = useState(false);
-  const [collectError, setCollectError] = useState<string | null>(null);
+  // Settings dialog state
+  const [showSettings, setShowSettings] = useState(false);
+  const [compoundingPercent, setCompoundingPercent] = useState(0);
+  const [autocloseAfterLockIn, setAutocloseAfterLockIn] = useState(false);
+
+  // Lock-in state
+  const [lockedIn, setLockedIn] = useState(true);
+  const [lockInDaysRemaining, setLockInDaysRemaining] = useState(0);
 
   // Note: PriceService subscription is handled globally in Dashboard page
   // to avoid duplicate ticks when multiple pages are open
@@ -147,6 +149,15 @@ export default function UserCopyPage() {
 
         setMasterBotId(copyInfo.masterBotId);
         setInvestedAmount(copyInfo.investedAmount);
+
+        // Load lock-in status
+        const locked = isLockedIn(copyInfo.createdAt, copyInfo.reservationDays);
+        setLockedIn(locked);
+        setLockInDaysRemaining(getDaysRemainingInReservation(copyInfo.createdAt, copyInfo.reservationDays));
+
+        // Load settings
+        setCompoundingPercent(copyInfo.compoundingPercent ?? 0);
+        setAutocloseAfterLockIn(copyInfo.autocloseAfterLockIn ?? false);
 
         // Get master bot info
         const masterBot = await botsApi.getMasterBot(copyInfo.masterBotId);
@@ -499,26 +510,10 @@ export default function UserCopyPage() {
   );
 
 
-  // Handle Collect P&L
-  const handleCollect = async () => {
-    setCollectLoading(true);
-    setCollectError(null);
-    try {
-      const result = await botsApi.collectProfit(copyId);
-      if (result.collectedAmount > 0) {
-        setCollectSuccess(true);
-        setTimeout(() => {
-          setCollectSuccess(false);
-          setShowCollectDialog(false);
-        }, 2000);
-      } else {
-        setShowCollectDialog(false);
-      }
-    } catch (err: any) {
-      setCollectError(err.message || 'Failed to collect');
-    } finally {
-      setCollectLoading(false);
-    }
+  // Handle save settings
+  const handleSaveSettings = () => {
+    updateUserCopy(copyId, { compoundingPercent, autocloseAfterLockIn });
+    setShowSettings(false);
   };
 
   if (!botDetails || !botStats) {
@@ -590,13 +585,28 @@ export default function UserCopyPage() {
             </div>
 
             <div className="flex gap-3">
-              <Link
-                href={`/dashboard-v2/copy/${copyId}/archive`}
-                className="px-4 py-2 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 hover:border-amber-500/50 rounded-lg font-semibold text-amber-400 hover:text-amber-300 transition-all flex items-center gap-2"
+              <button
+                onClick={() => setShowSettings(true)}
+                className="px-4 py-2 bg-dark-700/50 hover:bg-dark-700 border border-dark-600 hover:border-dark-500 rounded-lg font-semibold text-dark-300 hover:text-white transition-all flex items-center gap-2"
               >
-                <Archive className="w-4 h-4" />
-                Archive
-              </Link>
+                <Settings className="w-4 h-4" />
+                Settings
+              </button>
+              {!lockedIn && (
+                <Link
+                  href={`/dashboard-v2/copy/${copyId}/archive`}
+                  className="px-4 py-2 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 hover:border-amber-500/50 rounded-lg font-semibold text-amber-400 hover:text-amber-300 transition-all flex items-center gap-2"
+                >
+                  <Archive className="w-4 h-4" />
+                  Archive
+                </Link>
+              )}
+              {lockedIn && lockInDaysRemaining > 0 && (
+                <div className="px-4 py-2 bg-dark-800/50 border border-dark-700 rounded-lg text-dark-400 flex items-center gap-2 text-sm">
+                  <Clock className="w-4 h-4" />
+                  Lock-in: {lockInDaysRemaining}d left
+                </div>
+              )}
             </div>
           </div>
         </motion.div>
@@ -625,26 +635,6 @@ export default function UserCopyPage() {
                 {(pnlBreakdown?.realizedPnL ?? 0) >= 0 ? '+' : ''}${Math.abs(pnlBreakdown?.realizedPnL ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </div>
               <div className="text-xs text-dark-400">Running for {botDetails.runningDays} days</div>
-            </div>
-          </motion.div>
-
-          {/* Unrealized P&L */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}>
-            <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6 hover:border-cyan-500/50 transition-all">
-              <div className="flex items-center justify-between mb-4">
-                <div className={`w-12 h-12 ${(pnlBreakdown?.unrealizedPnL ?? 0) >= 0 ? 'bg-cyan-500/20 border-cyan-500/30' : 'bg-red-500/20 border-red-500/30'} border rounded-xl flex items-center justify-center`}>
-                  <Activity className="w-6 h-6 text-cyan-400" />
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse" />
-                  <span className="text-xs font-semibold text-cyan-400">LIVE</span>
-                </div>
-              </div>
-              <div className="text-sm text-dark-400 mb-1">Unrealized P&L</div>
-              <div className={`text-2xl font-bold mb-2 ${(pnlBreakdown?.unrealizedPnL ?? 0) >= 0 ? 'text-cyan-400' : 'text-red-400'}`}>
-                {(pnlBreakdown?.unrealizedPnL ?? 0) >= 0 ? '+' : ''}${Math.abs(pnlBreakdown?.unrealizedPnL ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </div>
-              <div className="text-xs text-dark-400">Open positions</div>
             </div>
           </motion.div>
 
@@ -709,112 +699,169 @@ export default function UserCopyPage() {
           </motion.div>
         </div>
 
-        {/* Collect P&L Section */}
-        {pnlBreakdown && (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} className="mb-6">
-            <div className={`bg-gradient-to-r ${pnlBreakdown.availableToCollect > 0 ? 'from-green-500/10 via-emerald-500/5 to-green-500/10 border-green-500/30 hover:border-green-500/50' : 'from-dark-800/95 to-dark-900/95 border-dark-700'} border rounded-2xl p-6 transition-all`}>
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <Wallet className="w-5 h-5 text-green-400" />
-                    <span className="text-sm text-dark-400">Available to Collect</span>
-                  </div>
-                  <div className={`text-3xl font-bold ${pnlBreakdown.availableToCollect > 0 ? 'text-green-400' : 'text-dark-500'}`}>
-                    +${pnlBreakdown.availableToCollect.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </div>
-                  <div className="text-xs text-dark-400 mt-1">
-                    Already collected: ${pnlBreakdown.totalCollected.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    {pnlBreakdown.collectCount > 0 && ` (${pnlBreakdown.collectCount} time${pnlBreakdown.collectCount !== 1 ? 's' : ''})`}
-                  </div>
-                </div>
-                <button
-                  onClick={() => {
-                    setCollectError(null);
-                    setCollectSuccess(false);
-                    setShowCollectDialog(true);
-                  }}
-                  disabled={pnlBreakdown.availableToCollect <= 0}
-                  className={`px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 ${
-                    pnlBreakdown.availableToCollect > 0
-                      ? 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 text-white shadow-lg shadow-green-500/20'
-                      : 'bg-dark-700 text-dark-500 cursor-not-allowed'
-                  }`}
-                >
-                  <DollarSign className="w-5 h-5" />
-                  Collect P&L
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        )}
-
-        {/* Collect Confirmation Dialog */}
-        {showCollectDialog && pnlBreakdown && (
+        {/* Settings Dialog */}
+        {showSettings && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               className="bg-dark-800 border border-dark-700 rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl"
             >
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-white">Collect P&L</h3>
-                <button onClick={() => setShowCollectDialog(false)} className="text-dark-400 hover:text-white">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-bold text-white">Bot Settings</h3>
+                <button onClick={() => setShowSettings(false)} className="text-dark-400 hover:text-white">
                   <CloseIcon className="w-5 h-5" />
                 </button>
               </div>
 
-              {collectSuccess ? (
-                <div className="text-center py-6">
-                  <CheckCircle2 className="w-16 h-16 text-green-400 mx-auto mb-3" />
-                  <p className="text-xl font-bold text-green-400">Collected!</p>
-                  <p className="text-sm text-dark-400 mt-1">Funds added to your available balance</p>
-                </div>
-              ) : (
-                <>
-                  <div className="p-4 bg-dark-900/50 rounded-xl border border-dark-700 mb-4">
-                    <div className="text-sm text-dark-400 mb-1">Collect amount</div>
-                    <div className="text-2xl font-bold text-green-400">
-                      +${pnlBreakdown.availableToCollect.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </div>
-                    <div className="text-xs text-dark-500 mt-2">
-                      Funds will be credited to your available balance.
-                    </div>
-                    <div className="text-xs text-dark-500 mt-1">
-                      Referral bonus will be awarded to your referrer by the platform.
-                    </div>
+              <div className="space-y-5">
+                {/* Compounding Slider */}
+                <div className="p-4 bg-dark-900/50 rounded-xl border border-dark-700">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="text-sm font-semibold text-white">Compounding</div>
+                    <div className={`text-sm font-bold ${
+                      compoundingPercent === 0 ? 'text-blue-400' :
+                      compoundingPercent <= 30 ? 'text-green-400' :
+                      compoundingPercent <= 70 ? 'text-yellow-400' :
+                      'text-primary-400'
+                    }`}>{compoundingPercent}%</div>
                   </div>
 
-                  {collectError && (
-                    <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg mb-4">
-                      <p className="text-sm text-red-400">{collectError}</p>
+                  {/* Slider */}
+                  <div
+                    className="relative w-full h-2 bg-dark-600 rounded-full cursor-pointer group"
+                    onClick={(e) => {
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      const pct = Math.round(Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100)));
+                      setCompoundingPercent(pct);
+                    }}
+                    onPointerDown={(e) => {
+                      e.currentTarget.setPointerCapture(e.pointerId);
+                      const track = e.currentTarget;
+                      const onMove = (ev: PointerEvent) => {
+                        const rect = track.getBoundingClientRect();
+                        const pct = Math.round(Math.max(0, Math.min(100, ((ev.clientX - rect.left) / rect.width) * 100)));
+                        setCompoundingPercent(pct);
+                      };
+                      const onUp = () => {
+                        track.removeEventListener('pointermove', onMove);
+                        track.removeEventListener('pointerup', onUp);
+                      };
+                      track.addEventListener('pointermove', onMove);
+                      track.addEventListener('pointerup', onUp);
+                    }}
+                  >
+                    {/* Filled track */}
+                    <div
+                      className={`absolute inset-y-0 left-0 rounded-full pointer-events-none bg-gradient-to-r ${
+                        compoundingPercent === 0 ? 'from-blue-500 to-blue-400' :
+                        compoundingPercent <= 30 ? 'from-green-500 to-emerald-400' :
+                        compoundingPercent <= 70 ? 'from-yellow-500 to-amber-400' :
+                        'from-primary-500 to-accent-500'
+                      }`}
+                      style={{ width: `${compoundingPercent}%` }}
+                    />
+                    {/* Thumb */}
+                    <div
+                      className={`absolute top-1/2 -translate-y-1/2 w-5 h-5 rounded-full shadow-lg border-2 border-white/20 pointer-events-none ${
+                        compoundingPercent === 0 ? 'bg-blue-500' :
+                        compoundingPercent <= 30 ? 'bg-green-500' :
+                        compoundingPercent <= 70 ? 'bg-yellow-500' :
+                        'bg-primary-500'
+                      }`}
+                      style={{ left: `calc(${compoundingPercent}% - 10px)` }}
+                    />
+                  </div>
+
+                  {/* Quick Presets */}
+                  <div className="flex gap-2 mt-3">
+                    {[0, 25, 50, 75, 100].map((pct) => (
+                      <button
+                        key={pct}
+                        onClick={() => setCompoundingPercent(pct)}
+                        className={`flex-1 px-2 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                          compoundingPercent === pct
+                            ? pct === 0 ? 'bg-blue-500/20 border border-blue-500/50 text-blue-400' :
+                              pct <= 30 ? 'bg-green-500/20 border border-green-500/50 text-green-400' :
+                              pct <= 70 ? 'bg-yellow-500/20 border border-yellow-500/50 text-yellow-400' :
+                              'bg-primary-500/20 border border-primary-500/50 text-primary-400'
+                            : 'bg-dark-700 text-dark-400 hover:bg-dark-600 hover:text-white'
+                        }`}
+                      >
+                        {pct}%
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Split Description */}
+                  <div className="mt-4 p-3 bg-dark-800/80 rounded-lg border border-dark-700/50 space-y-1.5">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-dark-400">Reinvest into bot</span>
+                      <span className="font-semibold text-primary-400">{compoundingPercent}%</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-dark-400">Send to Available Balance</span>
+                      <span className="font-semibold text-green-400">{100 - compoundingPercent}%</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Auto-close after Lock-in */}
+                <div className="p-4 bg-dark-900/50 rounded-xl border border-dark-700">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-sm font-semibold text-white">Auto-close after lock-in</div>
+                      <div className="text-xs text-dark-400 mt-0.5">
+                        {lockedIn
+                          ? `Automatically archive bot when lock-in ends (${lockInDaysRemaining}d left)`
+                          : 'Lock-in period has already ended'
+                        }
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setAutocloseAfterLockIn(!autocloseAfterLockIn)}
+                      className={`relative w-12 h-6 rounded-full transition-colors flex-shrink-0 ${
+                        autocloseAfterLockIn ? 'bg-amber-500' : 'bg-dark-600'
+                      }`}
+                    >
+                      <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
+                        autocloseAfterLockIn ? 'translate-x-6' : 'translate-x-0.5'
+                      }`} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Lock-in Info */}
+                <div className="p-4 bg-dark-900/50 rounded-xl border border-dark-700">
+                  <div className="text-sm font-semibold text-white mb-2">Lock-in Period</div>
+                  {lockedIn ? (
+                    <div className="flex items-center gap-2 text-amber-400">
+                      <Clock className="w-4 h-4" />
+                      <span className="text-sm">{lockInDaysRemaining} days remaining</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 text-green-400">
+                      <CheckCircle2 className="w-4 h-4" />
+                      <span className="text-sm">Lock-in period ended</span>
                     </div>
                   )}
+                </div>
+              </div>
 
-                  <div className="flex gap-3">
-                    <button
-                      onClick={() => setShowCollectDialog(false)}
-                      disabled={collectLoading}
-                      className="flex-1 px-4 py-3 bg-dark-700 hover:bg-dark-600 border border-dark-600 rounded-lg text-white font-medium transition-colors"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleCollect}
-                      disabled={collectLoading}
-                      className="flex-1 px-4 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 rounded-lg text-white font-semibold transition-all flex items-center justify-center gap-2"
-                    >
-                      {collectLoading ? (
-                        <>
-                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                          Collecting...
-                        </>
-                      ) : (
-                        'Confirm'
-                      )}
-                    </button>
-                  </div>
-                </>
-              )}
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => setShowSettings(false)}
+                  className="flex-1 px-4 py-3 bg-dark-700 hover:bg-dark-600 border border-dark-600 rounded-lg text-white font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveSettings}
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-400 hover:to-accent-400 rounded-lg text-white font-semibold transition-all"
+                >
+                  Save
+                </button>
+              </div>
             </motion.div>
           </div>
         )}
@@ -824,14 +871,9 @@ export default function UserCopyPage() {
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }} className="lg:col-span-8">
             <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6 hover:border-primary-500/50 transition-all flex flex-col">
               <div className="flex items-center justify-between mb-6 flex-shrink-0">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-green-500/20 border border-green-500/30 rounded-xl flex items-center justify-center">
-                    <TrendingUp className="w-6 h-6 text-green-400" />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-bold text-white">Equity Curve</h2>
-                    <p className="text-xs text-dark-400">Portfolio value over time</p>
-                  </div>
+                <div>
+                  <h2 className="text-xl font-bold text-white">Equity Curve</h2>
+                  <p className="text-xs text-dark-400">Portfolio value over time</p>
                 </div>
                 <div className="flex gap-2">
                   {(['day', 'week', 'month', 'all'] as const).map((period) => (
@@ -963,19 +1005,19 @@ export default function UserCopyPage() {
                 {pnlBreakdown && (
                   <div className="p-3 bg-dark-900/50 rounded-xl border border-dark-700/50 space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-xs text-dark-400">Total P&L (historical)</span>
+                      <span className="text-xs text-dark-400">Total P&L</span>
                       <span className={`text-xs font-semibold ${pnlBreakdown.totalPnL >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                         {pnlBreakdown.totalPnL >= 0 ? '+' : ''}${pnlBreakdown.totalPnL.toFixed(2)}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-xs text-dark-400">Collected</span>
-                      <span className="text-xs font-semibold text-white">${pnlBreakdown.totalCollected.toFixed(2)}</span>
+                      <span className="text-xs text-dark-400">Auto-Credited</span>
+                      <span className="text-xs font-semibold text-green-400">${pnlBreakdown.totalAutoCredited.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-xs text-dark-400">In Bot (uncollected)</span>
-                      <span className={`text-xs font-semibold ${pnlBreakdown.availableToCollect > 0 ? 'text-green-400' : 'text-dark-400'}`}>
-                        ${pnlBreakdown.availableToCollect.toFixed(2)}
+                      <span className="text-xs text-dark-400">Compounding</span>
+                      <span className={`text-xs font-semibold ${compoundingPercent > 0 ? 'text-primary-400' : 'text-dark-400'}`}>
+                        {compoundingPercent > 0 ? 'On' : 'Off'}
                       </span>
                     </div>
                   </div>

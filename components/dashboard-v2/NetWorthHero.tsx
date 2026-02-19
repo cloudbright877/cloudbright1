@@ -6,7 +6,7 @@ import { Gauge, TrendingUp, TrendingDown } from 'lucide-react';
 interface NetWorthHeroProps {
   portfolioValue: number;
   totalInvested: number;
-  unrealizedPnL: number;
+  untotalRealizedPnL?: number;
   totalProfit: number;
   totalProfitPercent: number;
   todayPnL: number;
@@ -19,14 +19,12 @@ interface NetWorthHeroProps {
 export function NetWorthHero({
   portfolioValue,
   totalInvested,
-  unrealizedPnL,
   totalProfit,
   totalProfitPercent,
   todayPnL,
   activeBots,
   totalBots,
   totalRealizedPnL = 0,
-  totalAvailableToCollect = 0,
 }: NetWorthHeroProps) {
   return (
     <motion.div
@@ -73,7 +71,7 @@ export function NetWorthHero({
           </div>
 
           <div className="mt-auto space-y-4">
-            {/* Three-section: Invested | Realized | Unrealized */}
+            {/* Invested | Realized P&L */}
             <div className="flex items-center justify-between p-4 bg-dark-900/50 backdrop-blur-sm rounded-xl border border-dark-700">
               <div>
                 <p className="text-xs text-dark-400 mb-1">Invested</p>
@@ -81,16 +79,9 @@ export function NetWorthHero({
               </div>
               <div className="w-px h-12 bg-dark-700" />
               <div>
-                <p className="text-xs text-dark-400 mb-1">Realized</p>
+                <p className="text-xs text-dark-400 mb-1">Realized P&L</p>
                 <p className={`text-lg font-bold ${totalRealizedPnL >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                   {totalRealizedPnL >= 0 ? '+' : ''}${totalRealizedPnL.toFixed(2)}
-                </p>
-              </div>
-              <div className="w-px h-12 bg-dark-700" />
-              <div>
-                <p className="text-xs text-dark-400 mb-1">Unrealized</p>
-                <p className={`text-lg font-bold ${unrealizedPnL >= 0 ? 'text-cyan-400' : 'text-red-400'}`}>
-                  {unrealizedPnL >= 0 ? '+' : ''}${unrealizedPnL.toFixed(2)}
                 </p>
               </div>
             </div>

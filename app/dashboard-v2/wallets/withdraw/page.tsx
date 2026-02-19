@@ -3,7 +3,14 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
+import {
+  TokenBTC,
+  TokenETH,
+  TokenUSDT,
+  TokenBNB,
+  TokenSOL,
+  TokenTRX,
+} from '@web3icons/react';
 import {
   ChevronLeft,
   AlertTriangle,
@@ -13,23 +20,90 @@ import {
   Info,
 } from 'lucide-react';
 import Stepper from '@/components/ui/Stepper';
+import CurrencyCard from '@/components/wallet/CurrencyCard';
 import { useToast } from '@/context/ToastContext';
 import { getBalance } from '@/lib/balances';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const TOKEN_ICONS: Record<string, any> = {
+  BTC: TokenBTC,
+  ETH: TokenETH,
+  USDT: TokenUSDT,
+  BNB: TokenBNB,
+  SOL: TokenSOL,
+  TRX: TokenTRX,
+};
 
 interface Network {
   id: string;
   name: string;
+  networkName: string;
   fee: string;
   minAmount: number;
 }
 
-const NETWORKS: Network[] = [
-  { id: 'erc20', name: 'Ethereum (ERC20)', fee: '2 USDT', minAmount: 10 },
-  { id: 'trc20', name: 'Tron (TRC20)', fee: '0.5 USDT', minAmount: 5 },
-  { id: 'bep20', name: 'BSC (BEP20)', fee: '0.3 USDT', minAmount: 5 },
+interface Currency {
+  symbol: string;
+  name: string;
+  icon: string;
+  networks: Network[];
+}
+
+const CURRENCIES: Currency[] = [
+  {
+    symbol: 'USDT',
+    name: 'Tether',
+    icon: '/currency/Tether.svg',
+    networks: [
+      { id: 'erc20', name: 'Ethereum (ERC20)', networkName: 'ERC20', fee: '2 USDT', minAmount: 10 },
+      { id: 'trc20', name: 'Tron (TRC20)', networkName: 'TRC20', fee: '0.5 USDT', minAmount: 5 },
+      { id: 'bep20', name: 'BSC (BEP20)', networkName: 'BEP20', fee: '0.3 USDT', minAmount: 5 },
+    ],
+  },
+  {
+    symbol: 'BTC',
+    name: 'Bitcoin',
+    icon: '/currency/Bitcoin.svg',
+    networks: [
+      { id: 'btc', name: 'Bitcoin Network', networkName: 'BTC', fee: '0.0001 BTC', minAmount: 0.001 },
+    ],
+  },
+  {
+    symbol: 'ETH',
+    name: 'Ethereum',
+    icon: '/currency/Ethereum.svg',
+    networks: [
+      { id: 'erc20', name: 'Ethereum (ERC20)', networkName: 'ERC20', fee: '0.002 ETH', minAmount: 0.01 },
+    ],
+  },
+  {
+    symbol: 'BNB',
+    name: 'Binance Coin',
+    icon: '/currency/bnb.svg',
+    networks: [
+      { id: 'bep20', name: 'BSC (BEP20)', networkName: 'BEP20', fee: '0.0005 BNB', minAmount: 0.01 },
+    ],
+  },
+  {
+    symbol: 'SOL',
+    name: 'Solana',
+    icon: '/currency/Solana.svg',
+    networks: [
+      { id: 'solana', name: 'Solana Network', networkName: 'SOL', fee: '0.00001 SOL', minAmount: 0.1 },
+    ],
+  },
+  {
+    symbol: 'TRX',
+    name: 'Tron',
+    icon: '/currency/Tron.svg',
+    networks: [
+      { id: 'trc20', name: 'Tron Network', networkName: 'TRC20', fee: '1 TRX', minAmount: 10 },
+    ],
+  },
 ];
 
 const STEPS = [
+  { label: 'Currency', description: 'Select coin' },
   { label: 'Details', description: 'Amount & address' },
   { label: 'Security', description: 'Verify identity' },
   { label: 'Confirm', description: 'Review & submit' },
@@ -37,7 +111,8 @@ const STEPS = [
 
 export default function WithdrawPage() {
   const [step, setStep] = useState(1);
-  const [selectedNetwork, setSelectedNetwork] = useState<Network>(NETWORKS[1]); // Default to TRC20
+  const [selectedCurrency, setSelectedCurrency] = useState<Currency | null>(null);
+  const [selectedNetwork, setSelectedNetwork] = useState<Network | null>(null);
   const [amount, setAmount] = useState('');
   const [withdrawAddress, setWithdrawAddress] = useState('');
   const [pinCode, setPinCode] = useState(['', '', '', '']);
@@ -72,16 +147,27 @@ export default function WithdrawPage() {
     loadBalance();
   }, []);
 
+  const handleCurrencySelect = (currency: Currency) => {
+    setSelectedCurrency(currency);
+    setSelectedNetwork(currency.networks.length === 1 ? currency.networks[0] : null);
+    setStep(2);
+  };
+
   const handleMaxAmount = () => {
+    if (!selectedNetwork) return;
     const feeNum = parseFloat(selectedNetwork.fee.split(' ')[0]);
     const maxAmount = Math.max(0, availableBalance - feeNum);
     setAmount(maxAmount.toString());
   };
 
   const handleContinueToSecurity = () => {
+    if (!selectedNetwork) {
+      toast.error('Network required', 'Please select a network');
+      return;
+    }
     const amountNum = parseFloat(amount);
     if (isNaN(amountNum) || amountNum < selectedNetwork.minAmount) {
-      toast.error('Invalid amount', `Minimum withdrawal: ${selectedNetwork.minAmount} USDT`);
+      toast.error('Invalid amount', `Minimum withdrawal: ${selectedNetwork.minAmount} ${selectedCurrency?.symbol}`);
       return;
     }
 
@@ -95,7 +181,7 @@ export default function WithdrawPage() {
       return;
     }
 
-    setStep(2);
+    setStep(3);
   };
 
   const handleContinueToConfirm = () => {
@@ -109,7 +195,7 @@ export default function WithdrawPage() {
       return;
     }
 
-    setStep(3);
+    setStep(4);
   };
 
   const handleSubmitWithdrawal = () => {
@@ -161,7 +247,7 @@ export default function WithdrawPage() {
   };
 
   const calculateTotal = () => {
-    if (!amount) return 0;
+    if (!amount || !selectedNetwork) return 0;
     const amountNum = parseFloat(amount);
     const feeNum = parseFloat(selectedNetwork.fee.split(' ')[0]);
     return Math.max(0, amountNum - feeNum);
@@ -181,7 +267,6 @@ export default function WithdrawPage() {
   return (
     <div className="min-h-screen bg-dark-950 text-white">
       <div className="max-w-[1400px] mx-auto p-4 lg:p-6">
-        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -194,8 +279,6 @@ export default function WithdrawPage() {
             <ChevronLeft className="w-5 h-5" />
             Back to Wallets
           </Link>
-          <h1 className="text-3xl lg:text-4xl font-bold text-white mb-1">Withdraw Funds</h1>
-          <p className="text-dark-400">Transfer your crypto to an external wallet</p>
         </motion.div>
 
         {/* Stepper */}
@@ -220,8 +303,29 @@ export default function WithdrawPage() {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3 }}
               >
-                {/* Step 1: Withdrawal Details */}
+                {/* Step 1: Select Currency */}
                 {step === 1 && (
+                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6">
+                    <h2 className="text-2xl font-bold text-white mb-6">Select Currency</h2>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3">
+                      {CURRENCIES.map((currency, index) => (
+                        <CurrencyCard
+                          key={currency.symbol}
+                          symbol={currency.symbol}
+                          name={currency.name}
+                          icon={currency.icon}
+                          networks={currency.networks.length}
+                          selected={selectedCurrency?.symbol === currency.symbol}
+                          onClick={() => handleCurrencySelect(currency)}
+                          delay={index * 0.05}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Step 2: Withdrawal Details */}
+                {step === 2 && selectedCurrency && (
                   <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6 space-y-6">
                     <h2 className="text-2xl font-bold text-white">Withdrawal Details</h2>
 
@@ -230,37 +334,48 @@ export default function WithdrawPage() {
                       <label className="block text-sm font-medium text-dark-300 mb-3">
                         Select Network
                       </label>
-                      <div className="space-y-2">
-                        {NETWORKS.map((network) => (
-                          <button
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3">
+                        {selectedCurrency.networks.map((network, index) => (
+                          <motion.button
                             key={network.id}
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: index * 0.05 }}
                             onClick={() => setSelectedNetwork(network)}
                             className={`
-                              w-full p-4 rounded-xl border-2 text-left transition-all
+                              relative flex items-center gap-3 px-4 py-3 rounded-xl border-2 text-left transition-all
                               ${
-                                selectedNetwork.id === network.id
-                                  ? 'bg-primary-500/10 border-primary-500'
-                                  : 'bg-dark-800/50 border-dark-700 hover:border-primary-500/50'
+                                selectedNetwork?.id === network.id
+                                  ? 'bg-primary-500/10 border-primary-500 shadow-lg shadow-primary-500/20'
+                                  : 'bg-dark-800/50 border-dark-700 hover:border-primary-500/50 hover:bg-dark-800'
                               }
                             `}
                           >
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <div className="font-bold text-white">{network.name}</div>
-                                <div className="text-sm text-dark-400">Fee: {network.fee}</div>
+                            <div className="flex-1 min-w-0">
+                              <div className="font-bold text-white text-sm truncate">{network.networkName}</div>
+                              <div className="text-xs text-dark-400 truncate">{network.name}</div>
+                              <div className="flex items-center gap-2 text-[11px] text-dark-500 mt-0.5">
+                                <span>Fee: {network.fee}</span>
+                                {network.minAmount > 0 && (
+                                  <>
+                                    <span>·</span>
+                                    <span>Min: {network.minAmount}</span>
+                                  </>
+                                )}
                               </div>
-                              <div
-                                className={`
-                                  w-5 h-5 rounded-full border-2
-                                  ${
-                                    selectedNetwork.id === network.id
-                                      ? 'border-primary-500 bg-primary-500'
-                                      : 'border-dark-600'
-                                  }
-                                `}
-                              />
                             </div>
-                          </button>
+                            {selectedNetwork?.id === network.id && (
+                              <motion.div
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                className="absolute top-2 right-2 w-5 h-5 bg-gradient-to-br from-primary-500 to-accent-500 rounded-full flex items-center justify-center"
+                              >
+                                <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                </svg>
+                              </motion.div>
+                            )}
+                          </motion.button>
                         ))}
                       </div>
                     </div>
@@ -268,7 +383,7 @@ export default function WithdrawPage() {
                     {/* Amount */}
                     <div>
                       <label className="block text-sm font-medium text-dark-300 mb-3">
-                        Amount (USDT)
+                        Amount ({selectedCurrency.symbol})
                       </label>
                       <div className="relative">
                         <input
@@ -288,10 +403,12 @@ export default function WithdrawPage() {
                           MAX
                         </button>
                       </div>
-                      <div className="mt-2 text-sm text-dark-400">
-                        Minimum: {selectedNetwork.minAmount} USDT • Available:{' '}
-                        {formatNumber(availableBalance, 2)} USDT
-                      </div>
+                      {selectedNetwork && (
+                        <div className="mt-2 text-sm text-dark-400">
+                          Minimum: {selectedNetwork.minAmount} {selectedCurrency.symbol} • Available:{' '}
+                          {formatNumber(availableBalance, 2)} {selectedCurrency.symbol}
+                        </div>
+                      )}
                     </div>
 
                     {/* Withdrawal Address */}
@@ -322,18 +439,27 @@ export default function WithdrawPage() {
                       </div>
                     </div>
 
-                    {/* Continue Button */}
-                    <button
-                      onClick={handleContinueToSecurity}
-                      className="w-full px-6 py-4 bg-gradient-to-r from-primary-500 to-accent-500 hover:shadow-2xl rounded-xl text-white font-bold transition-all"
-                    >
-                      Continue
-                    </button>
+                    {/* Buttons */}
+                    <div className="flex gap-4">
+                      <button
+                        onClick={() => { setStep(1); setSelectedCurrency(null); setSelectedNetwork(null); setAmount(''); setWithdrawAddress(''); }}
+                        className="px-6 py-3 bg-dark-800 hover:bg-dark-700 border-2 border-dark-700 rounded-xl text-white font-medium transition-colors"
+                      >
+                        <ChevronLeft className="w-4 h-4 inline mr-2" />
+                        Back
+                      </button>
+                      <button
+                        onClick={handleContinueToSecurity}
+                        className="flex-1 px-6 py-4 bg-gradient-to-r from-primary-500 to-accent-500 hover:shadow-2xl rounded-xl text-white font-bold transition-all"
+                      >
+                        Continue
+                      </button>
+                    </div>
                   </div>
                 )}
 
-                {/* Step 2: Security Verification */}
-                {step === 2 && (
+                {/* Step 3: Security Verification */}
+                {step === 3 && (
                   <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6 space-y-6">
                     <div className="flex items-center gap-3 mb-4">
                       <div className="w-12 h-12 bg-primary-500/20 rounded-xl flex items-center justify-center">
@@ -406,7 +532,7 @@ export default function WithdrawPage() {
                     {/* Buttons */}
                     <div className="flex gap-4">
                       <button
-                        onClick={() => setStep(1)}
+                        onClick={() => setStep(2)}
                         className="flex-1 px-6 py-3 bg-dark-800 hover:bg-dark-700 border-2 border-dark-700 rounded-xl text-white font-medium transition-colors"
                       >
                         <ChevronLeft className="w-4 h-4 inline mr-2" />
@@ -422,8 +548,8 @@ export default function WithdrawPage() {
                   </div>
                 )}
 
-                {/* Step 3: Confirmation */}
-                {step === 3 && (
+                {/* Step 4: Confirmation */}
+                {step === 4 && (
                   <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6 space-y-6">
                     <h2 className="text-2xl font-bold text-white">Review Withdrawal</h2>
 
@@ -444,7 +570,7 @@ export default function WithdrawPage() {
                     {/* Buttons */}
                     <div className="flex gap-4">
                       <button
-                        onClick={() => setStep(2)}
+                        onClick={() => setStep(3)}
                         className="flex-1 px-6 py-3 bg-dark-800 hover:bg-dark-700 border-2 border-dark-700 rounded-xl text-white font-medium transition-colors"
                       >
                         <ChevronLeft className="w-4 h-4 inline mr-2" />
@@ -471,16 +597,16 @@ export default function WithdrawPage() {
 
                 {/* Currency Icon */}
                 <div className="flex items-center gap-3 mb-6 pb-6 border-b border-dark-700">
-                  <Image
-                    src="/currency/Tether.svg"
-                    alt="USDT"
-                    width={48}
-                    height={48}
-                    className="w-12 h-12"
-                  />
+                  {(() => {
+                    const sym = selectedCurrency?.symbol || 'USDT';
+                    const Icon = TOKEN_ICONS[sym];
+                    return Icon ? <Icon size={48} variant="branded" /> : <span className="text-white text-2xl font-bold">{sym.charAt(0)}</span>;
+                  })()}
                   <div>
                     <div className="text-sm text-dark-400">Currency</div>
-                    <div className="text-xl font-bold text-white">USDT (Tether)</div>
+                    <div className="text-xl font-bold text-white">
+                      {selectedCurrency ? `${selectedCurrency.symbol} (${selectedCurrency.name})` : 'Not selected'}
+                    </div>
                   </div>
                 </div>
 
@@ -488,22 +614,22 @@ export default function WithdrawPage() {
                 <div className="space-y-4">
                   <div className="flex justify-between py-3 border-b border-dark-700">
                     <span className="text-dark-400">Network</span>
-                    <span className="font-bold text-white">{selectedNetwork.name}</span>
+                    <span className="font-bold text-white">{selectedNetwork?.name || '—'}</span>
                   </div>
                   <div className="flex justify-between py-3 border-b border-dark-700">
                     <span className="text-dark-400">Amount</span>
                     <span className="font-bold text-white">
-                      {amount || '0.00'} USDT
+                      {amount || '0.00'} {selectedCurrency?.symbol || ''}
                     </span>
                   </div>
                   <div className="flex justify-between py-3 border-b border-dark-700">
                     <span className="text-dark-400">Network Fee</span>
-                    <span className="font-bold text-red-400">- {selectedNetwork.fee}</span>
+                    <span className="font-bold text-red-400">- {selectedNetwork?.fee || '—'}</span>
                   </div>
                   <div className="flex justify-between py-3 bg-dark-800/50 px-4 -mx-2 rounded-xl">
                     <span className="font-bold text-white">You will receive</span>
                     <span className="font-bold text-green-400">
-                      {formatNumber(calculateTotal(), 2)} USDT
+                      {formatNumber(calculateTotal(), 2)} {selectedCurrency?.symbol || ''}
                     </span>
                   </div>
                   {withdrawAddress && (
@@ -520,7 +646,7 @@ export default function WithdrawPage() {
                 <div className="mt-6 p-4 bg-green-500/10 border border-green-500/20 rounded-xl">
                   <div className="text-xs text-green-400/70 mb-1">Available Balance</div>
                   <div className="text-2xl font-bold text-green-400">
-                    {formatNumber(availableBalance, 2)} USDT
+                    {formatNumber(availableBalance, 2)} {selectedCurrency?.symbol || 'USDT'}
                   </div>
                 </div>
               </div>
@@ -562,7 +688,7 @@ export default function WithdrawPage() {
                 <h3 className="text-2xl font-bold text-white mb-2">Confirm Withdrawal</h3>
                 <p className="text-dark-300">
                   You are about to withdraw{' '}
-                  <span className="font-bold text-white">{amount} USDT</span>
+                  <span className="font-bold text-white">{amount} {selectedCurrency?.symbol}</span>
                 </p>
               </div>
 

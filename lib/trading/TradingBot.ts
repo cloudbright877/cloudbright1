@@ -10,6 +10,8 @@ import { ConvergenceController } from './convergence/ConvergenceController';
 import type { Position, Trade, BotConfig, BotStats, BotPersonality } from './types';
 import { migrateRunningBot, migrateTrades } from './convergence/migration';
 
+export type TradeCloseCallback = (botId: string, trade: Trade) => void;
+
 export class TradingBot {
   public id: string;
   public config: BotConfig;
@@ -22,6 +24,7 @@ export class TradingBot {
   private personality: BotPersonality;
   private lastOpenTime: number = 0; // Track last position open time for cooldown
   private lastResetDate: string = ''; // Tracks last daily reset (YYYY-MM-DD UTC)
+  private onTradeCloseCallback: TradeCloseCallback | null = null;
 
   constructor(id: string, config: BotConfig) {
     this.id = id;
@@ -62,6 +65,13 @@ export class TradingBot {
 
     // Load state if exists
     this.load();
+  }
+
+  /**
+   * Set callback for when a trade is closed (used for auto-crediting profit)
+   */
+  setOnTradeClose(callback: TradeCloseCallback): void {
+    this.onTradeCloseCallback = callback;
   }
 
   // ============================================================================
@@ -546,6 +556,15 @@ export class TradingBot {
     this.dailyController.save(this.id);
     this.convergenceController.save(this.id);
     this.staggeredClosingManager.save(this.id);
+
+    // Notify callback for auto-crediting profit to user copies
+    if (this.onTradeCloseCallback) {
+      try {
+        this.onTradeCloseCallback(this.id, trade);
+      } catch (err) {
+        console.error(`[${this.config.name}] onTradeClose callback error:`, err);
+      }
+    }
   }
 
   // ============================================================================

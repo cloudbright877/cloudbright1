@@ -506,7 +506,7 @@ export default function AnalyticsPage() {
   return (
     <div className="min-h-screen bg-dark-950 text-white">
       <div className="max-w-[1800px] mx-auto p-4 lg:p-6">
-        {/* Header */}
+        {/* Navigation and Controls */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -515,13 +515,11 @@ export default function AnalyticsPage() {
           <div>
             <Link
               href="/dashboard-v2"
-              className="inline-flex items-center gap-2 text-dark-400 hover:text-white transition-colors mb-3"
+              className="inline-flex items-center gap-2 text-dark-400 hover:text-white transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
               <span className="text-sm">Back to Dashboard</span>
             </Link>
-            <h1 className="text-3xl lg:text-4xl font-bold text-white mb-1">Portfolio Analytics</h1>
-            <p className="text-dark-400">Comprehensive performance insights</p>
           </div>
 
           {/* Time Range Selector */}

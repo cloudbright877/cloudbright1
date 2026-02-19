@@ -1,12 +1,23 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import Image from 'next/image';
+import {
+  TokenBTC,
+  TokenETH,
+  TokenUSDT,
+  TokenBNB,
+  TokenSOL,
+  TokenTRX,
+  TokenUSDC,
+  TokenMATIC,
+} from '@web3icons/react';
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyIcon = any;
 
 interface CurrencyCardProps {
   symbol: string;
   name: string;
-  icon?: string; // Path to SVG icon (e.g., '/currency/Tether.svg')
+  icon?: string;
   gradient?: string;
   price?: string;
   networks?: number;
@@ -27,6 +38,17 @@ const DEFAULT_GRADIENTS: Record<string, string> = {
   POL: 'from-purple-600 to-indigo-500',
 };
 
+const TOKEN_ICONS: Record<string, AnyIcon> = {
+  BTC: TokenBTC,
+  ETH: TokenETH,
+  USDT: TokenUSDT,
+  BNB: TokenBNB,
+  SOL: TokenSOL,
+  TRX: TokenTRX,
+  USDC: TokenUSDC,
+  MATIC: TokenMATIC,
+};
+
 export default function CurrencyCard({
   symbol,
   name,
@@ -39,6 +61,7 @@ export default function CurrencyCard({
   delay = 0,
 }: CurrencyCardProps) {
   const cardGradient = gradient || DEFAULT_GRADIENTS[symbol] || 'from-gray-500 to-gray-600';
+  const IconComponent = TOKEN_ICONS[symbol.toUpperCase()];
 
   return (
     <motion.button
@@ -47,7 +70,7 @@ export default function CurrencyCard({
       transition={{ delay }}
       onClick={onClick}
       className={`
-        relative p-6 rounded-2xl transition-all duration-300
+        relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300
         ${
           selected
             ? 'bg-dark-800/80 border-2 border-primary-500 shadow-lg shadow-primary-500/20'
@@ -58,56 +81,43 @@ export default function CurrencyCard({
       {/* Glow effect when selected */}
       {selected && (
         <div
-          className={`absolute -inset-0.5 bg-gradient-to-br ${cardGradient} rounded-2xl blur opacity-20 -z-10`}
+          className={`absolute -inset-0.5 bg-gradient-to-br ${cardGradient} rounded-xl blur opacity-20 -z-10`}
         />
       )}
 
       {/* Icon */}
-      <div
-        className={`
-          w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center
-          bg-gradient-to-br ${cardGradient}
-          shadow-lg transition-transform duration-300
-          ${selected ? 'scale-110' : 'group-hover:scale-110'}
-        `}
-      >
-        {icon ? (
-          <Image
-            src={icon}
-            alt={symbol}
-            width={48}
-            height={48}
-            className="w-12 h-12 object-contain"
-          />
+      <div className="w-10 h-10 flex-shrink-0 flex items-center justify-center">
+        {IconComponent ? (
+          <IconComponent size={32} variant="branded" />
         ) : (
-          <span className="text-white text-2xl font-bold">{symbol.charAt(0)}</span>
+          <span className="text-white text-lg font-bold">{symbol.charAt(0)}</span>
         )}
       </div>
 
-      {/* Symbol */}
-      <div className="font-bold text-white text-lg mb-1">{symbol}</div>
-
-      {/* Name */}
-      <div className="text-sm text-dark-400">{name}</div>
+      {/* Text */}
+      <div className="flex-1 text-left min-w-0">
+        <div className="flex items-center gap-2">
+          <span className="font-bold text-white text-sm">{symbol}</span>
+          {networks !== undefined && (
+            <span className="text-[11px] text-dark-500">
+              {networks} net{networks > 1 ? 's' : ''}
+            </span>
+          )}
+        </div>
+        <div className="text-xs text-dark-400 truncate">{name}</div>
+      </div>
 
       {/* Price (optional) */}
-      {price && <div className="text-xs text-dark-500 mt-1">${price}</div>}
-
-      {/* Networks count (optional) */}
-      {networks !== undefined && (
-        <div className="mt-3 text-xs text-dark-500">
-          {networks} network{networks > 1 ? 's' : ''}
-        </div>
-      )}
+      {price && <div className="text-xs text-dark-500 flex-shrink-0">${price}</div>}
 
       {/* Selected indicator */}
       {selected && (
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          className="absolute top-3 right-3 w-6 h-6 bg-gradient-to-br from-primary-500 to-accent-500 rounded-full flex items-center justify-center"
+          className="absolute top-2 right-2 w-5 h-5 bg-gradient-to-br from-primary-500 to-accent-500 rounded-full flex items-center justify-center"
         >
-          <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
           </svg>
         </motion.div>

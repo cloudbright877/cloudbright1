@@ -9,8 +9,8 @@
  * Flow:
  * 1. Deposit → Available++
  * 2. Open Copy → Available--, Frozen++
- * 3. Collect P&L → Available++ (user gets 100% of profit)
- * 4. Close Copy → Frozen--, Available++ (capital return - early exit fee)
+ * 3. Trade Close → Available++ (profit auto-credited when trades close)
+ * 4. Close Copy → Frozen--, Available++ (full capital return after lock-in period)
  * 5. Withdraw → Available--
  */
 

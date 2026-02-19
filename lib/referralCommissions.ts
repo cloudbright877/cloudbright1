@@ -1,15 +1,16 @@
 /**
  * Referral Commission System
  *
- * Commission Structure:
- * - Level 1 (Direct): 10%
- * - Level 2: 5%
- * - Level 3: 3%
- * - Levels 4-10: 2% each
- * - Total max: 32% of profit
+ * Commission Structure (5 levels):
+ * - Level 1 (Direct): 5%
+ * - Level 2: 3%
+ * - Level 3: 2%
+ * - Level 4: 1%
+ * - Level 5: 0.5%
+ * - Total max: 11.5%
  *
- * Trigger: When a user collects P&L or archives a copy (realized P&L)
- * Payment: Instant credit to upline's available balance (platform bonus, not deducted from user)
+ * Trigger: When a referral activates a trading bot
+ * Payment: Instant credit to upline's available balance in USDT
  */
 
 import { storage } from './storage/LocalStorageAdapter';
@@ -18,17 +19,17 @@ import { creditCommission } from './balances';
 
 const REFERRAL_COMMISSIONS_KEY = 'referral_commissions';
 
-export type CommissionLevel = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
+export type CommissionLevel = 1 | 2 | 3 | 4 | 5;
 export type CommissionStatus = 'PENDING' | 'PAID';
 
 export interface ReferralCommission {
   id: string;
   uplineUserId: string; // Who receives the commission
-  investorUserId: string; // Who closed the copy
-  userCopyId: string; // Which copy was closed
-  level: CommissionLevel; // 1-10
-  commissionRate: number; // 0.10, 0.05, 0.03, 0.02
-  investorPnL: number; // Investor's profit (before commissions)
+  investorUserId: string; // Who activated the bot
+  userCopyId: string; // Which bot was activated
+  level: CommissionLevel; // 1-5
+  commissionRate: number; // 0.05, 0.03, 0.02, 0.01, 0.005
+  investorPnL: number; // Bot activation amount
   commissionAmount: number; // Commission paid to upline
   status: CommissionStatus;
   createdAt: number;
@@ -37,34 +38,29 @@ export interface ReferralCommission {
 
 // Commission rates by level
 const COMMISSION_RATES: Record<CommissionLevel, number> = {
-  1: 0.10, // 10%
-  2: 0.05, // 5%
-  3: 0.03, // 3%
-  4: 0.02, // 2%
-  5: 0.02, // 2%
-  6: 0.02, // 2%
-  7: 0.02, // 2%
-  8: 0.02, // 2%
-  9: 0.02, // 2%
-  10: 0.02, // 2%
+  1: 0.05,  // 5%
+  2: 0.03,  // 3%
+  3: 0.02,  // 2%
+  4: 0.01,  // 1%
+  5: 0.005, // 0.5%
 };
 
 /**
- * Distribute referral commissions when a copy is closed
+ * Distribute referral commissions when a bot is activated
  * Returns total amount distributed to uplines
  */
 export async function distributeReferralCommissions(
   investorUserId: string,
   userCopyId: string,
-  profitAmount: number
+  investedAmount: number
 ): Promise<number> {
-  // No profit = no commissions
-  if (profitAmount <= 0) {
-    console.log(`[ReferralCommissions] No profit for copy ${userCopyId}, skipping commission distribution`);
+  // No investment = no commissions
+  if (investedAmount <= 0) {
+    console.log(`[ReferralCommissions] No investment for copy ${userCopyId}, skipping commission distribution`);
     return 0;
   }
 
-  // Get upline chain (max 10 levels)
+  // Get upline chain (max 5 levels)
   const uplineChain = await getUplineChain(investorUserId);
 
   if (uplineChain.length === 0) {
@@ -75,11 +71,11 @@ export async function distributeReferralCommissions(
   let totalDistributed = 0;
 
   // Distribute to each level
-  for (let i = 0; i < uplineChain.length && i < 10; i++) {
+  for (let i = 0; i < uplineChain.length && i < 5; i++) {
     const upline = uplineChain[i];
     const level = (i + 1) as CommissionLevel;
     const rate = COMMISSION_RATES[level];
-    const commissionAmount = profitAmount * rate;
+    const commissionAmount = investedAmount * rate;
 
     try {
       // Create commission record
@@ -90,7 +86,7 @@ export async function distributeReferralCommissions(
         userCopyId,
         level,
         commissionRate: rate,
-        investorPnL: profitAmount,
+        investorPnL: investedAmount, // Bot activation amount (kept as investorPnL for localStorage compatibility)
         commissionAmount,
         status: 'PENDING',
         createdAt: Date.now(),
@@ -176,11 +172,6 @@ export async function getCommissionStats(userId: string): Promise<{
     3: { count: 0, total: 0 },
     4: { count: 0, total: 0 },
     5: { count: 0, total: 0 },
-    6: { count: 0, total: 0 },
-    7: { count: 0, total: 0 },
-    8: { count: 0, total: 0 },
-    9: { count: 0, total: 0 },
-    10: { count: 0, total: 0 },
   };
 
   paidCommissions.forEach(c => {
@@ -200,22 +191,22 @@ export async function getCommissionsForCopy(userCopyId: string): Promise<Referra
 }
 
 /**
- * Calculate expected commissions for a given profit (before closing)
+ * Calculate expected commissions for a given investment amount (before activation)
  * Returns breakdown by level
  */
 export async function calculateExpectedCommissions(
   investorUserId: string,
-  profitAmount: number
+  investedAmount: number
 ): Promise<Array<{ level: CommissionLevel; rate: number; amount: number; upline: User | null }>> {
-  if (profitAmount <= 0) return [];
+  if (investedAmount <= 0) return [];
 
   const uplineChain = await getUplineChain(investorUserId);
   const expected: Array<{ level: CommissionLevel; rate: number; amount: number; upline: User | null }> = [];
 
-  for (let i = 0; i < Math.min(uplineChain.length, 10); i++) {
+  for (let i = 0; i < Math.min(uplineChain.length, 5); i++) {
     const level = (i + 1) as CommissionLevel;
     const rate = COMMISSION_RATES[level];
-    const amount = profitAmount * rate;
+    const amount = investedAmount * rate;
     const upline = uplineChain[i] || null;
 
     expected.push({ level, rate, amount, upline });

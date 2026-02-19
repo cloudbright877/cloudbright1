@@ -103,49 +103,35 @@ console.log('\n🎯 Setting up demo referral data...\n');
 
     console.log('');
 
-    // Step 4: Simulate closed copies with profits
-    console.log('Step 4: Simulating trading activity...');
+    // Step 4: Create active copies and distribute commissions on activation
+    console.log('Step 4: Creating active copies (commissions on activation)...');
 
-    const tradingScenarios = [
-      { userLevel: 10, invested: 2000, pnl: 500, bot: 'demo-btc-scalper' },
-      { userLevel: 9, invested: 3000, pnl: 750, bot: 'demo-eth-trader' },
-      { userLevel: 8, invested: 1500, pnl: -200, bot: 'demo-btc-scalper' },
-      { userLevel: 7, invested: 2500, pnl: 600, bot: 'demo-bnb-flipper' },
-      { userLevel: 6, invested: 4000, pnl: 1200, bot: 'demo-btc-scalper' },
-      { userLevel: 5, invested: 3500, pnl: -300, bot: 'demo-eth-trader' },
-      { userLevel: 4, invested: 2000, pnl: 400, bot: 'demo-bnb-flipper' },
-      { userLevel: 3, invested: 5000, pnl: 1500, bot: 'demo-btc-scalper' },
-      { userLevel: 2, invested: 3000, pnl: 900, bot: 'demo-eth-trader' },
-      { userLevel: 1, invested: 4000, pnl: 1000, bot: 'demo-btc-scalper' },
+    const activeCopies = [
+      { userLevel: 1, invested: 4000, bot: 'demo-btc-scalper' },
+      { userLevel: 2, invested: 3000, bot: 'demo-eth-trader' },
+      { userLevel: 3, invested: 5000, bot: 'demo-btc-scalper' },
+      { userLevel: 4, invested: 2000, bot: 'demo-bnb-flipper' },
+      { userLevel: 5, invested: 3500, bot: 'demo-eth-trader' },
+      { userLevel: 6, invested: 4000, bot: 'demo-btc-scalper' },
+      { userLevel: 7, invested: 2500, bot: 'demo-bnb-flipper' },
+      { userLevel: 8, invested: 3000, bot: 'demo-btc-scalper' },
+      { userLevel: 9, invested: 3000, bot: 'demo-eth-trader' },
+      { userLevel: 10, invested: 2000, bot: 'demo-btc-scalper' },
+      // Extra active copies to boost turnover thresholds
+      { userLevel: 1, invested: 5000, bot: 'demo-eth-trader' },
+      { userLevel: 2, invested: 4000, bot: 'demo-bnb-flipper' },
+      { userLevel: 3, invested: 3500, bot: 'demo-eth-trader' },
+      { userLevel: 5, invested: 4500, bot: 'demo-btc-scalper' },
     ];
 
-    for (const scenario of tradingScenarios) {
-      const user = userTree[scenario.userLevel];
+    for (const active of activeCopies) {
+      const user = userTree[active.userLevel];
+      const copyId = createUserCopy(active.bot, active.invested, user.id);
 
-      // Create copy
-      const copyId = createUserCopy(
-        scenario.bot,
-        scenario.invested,
-        user.id
-      );
+      // Distribute commissions on bot activation
+      await distributeReferralCommissions(user.id, copyId, active.invested);
 
-      // Close copy with P&L
-      updateUserCopy(copyId, {
-        status: 'CLOSED',
-        closedAt: Date.now() - Math.random() * 86400000 * 7, // Random time in last 7 days
-        finalPnL: scenario.pnl,
-        finalValue: scenario.invested + scenario.pnl,
-      });
-
-      // Distribute commissions if profitable
-      if (scenario.pnl > 0) {
-        await distributeReferralCommissions(user.id, copyId, scenario.pnl);
-      }
-
-      const result = scenario.pnl >= 0 ? 'profit' : 'loss';
-      console.log(
-        `  ✓ ${user.username}: Closed copy (${result} ${scenario.pnl >= 0 ? '+' : ''}$${scenario.pnl.toFixed(0)})`
-      );
+      console.log(`  ✓ ${user.username}: Active copy ($${active.invested}) — commissions distributed`);
     }
 
     console.log('');
@@ -160,19 +146,28 @@ console.log('\n🎯 Setting up demo referral data...\n');
 
     console.log('  ✓ Turnover bonuses awarded\n');
 
-    // Step 6: Create some active copies (not closed)
-    console.log('Step 6: Creating active copies...');
+    // Step 6: Create some closed copies (historical, no commissions)
+    console.log('Step 6: Creating historical closed copies...');
 
-    const activeCopies = [
-      { userLevel: 5, invested: 2000, bot: 'demo-btc-scalper' },
-      { userLevel: 3, invested: 3500, bot: 'demo-eth-trader' },
-      { userLevel: 1, invested: 2500, bot: 'demo-bnb-flipper' },
+    const closedScenarios = [
+      { userLevel: 10, invested: 2000, pnl: 500, bot: 'demo-btc-scalper' },
+      { userLevel: 8, invested: 1500, pnl: -200, bot: 'demo-btc-scalper' },
+      { userLevel: 5, invested: 3500, pnl: -300, bot: 'demo-eth-trader' },
     ];
 
-    for (const active of activeCopies) {
-      const user = userTree[active.userLevel];
-      createUserCopy(active.bot, active.invested, user.id);
-      console.log(`  ✓ ${user.username}: Active copy ($${active.invested})`);
+    for (const scenario of closedScenarios) {
+      const user = userTree[scenario.userLevel];
+      const copyId = createUserCopy(scenario.bot, scenario.invested, user.id);
+
+      updateUserCopy(copyId, {
+        status: 'CLOSED',
+        closedAt: Date.now() - Math.random() * 86400000 * 7,
+        finalPnL: scenario.pnl,
+        finalValue: scenario.invested + scenario.pnl,
+      });
+
+      const result = scenario.pnl >= 0 ? 'profit' : 'loss';
+      console.log(`  ✓ ${user.username}: Closed copy (${result} ${scenario.pnl >= 0 ? '+' : ''}$${scenario.pnl.toFixed(0)}) — no commissions`);
     }
 
     console.log('');
@@ -182,9 +177,9 @@ console.log('\n🎯 Setting up demo referral data...\n');
     console.log('DEMO DATA SETUP COMPLETE');
     console.log('═══════════════════════════════════════');
     console.log(`✓ Users: ${userTree.length} in main chain + 4 branches`);
-    console.log(`✓ Closed copies: ${tradingScenarios.length}`);
     console.log(`✓ Active copies: ${activeCopies.length}`);
-    console.log(`✓ Commissions: Distributed for profitable closes`);
+    console.log(`✓ Closed copies: ${closedScenarios.length}`);
+    console.log(`✓ Commissions: Distributed on bot activation`);
     console.log(`✓ Turnover bonuses: Awarded where applicable`);
     console.log('═══════════════════════════════════════\n');
 

@@ -2,19 +2,20 @@
  * Turnover Bonus System
  *
  * Concept: Additional bonuses for reaching team turnover milestones
- * Team Turnover = Sum of positive realized P&L from all referrals (losses don't count)
+ * Team Turnover = Sum of active bot sizes from referrals, weighted by cashflow impact
+ * Cashflow Impact: L1 = 100%, L2 = 50%, L3 = 25%, L4 = 10%, L5 = 10%
  * Awards: Real-time when threshold is reached
  *
  * 10 Levels:
- * Level 1: $1K turnover → $10 bonus
- * Level 2: $5K turnover → $50 bonus
+ * Level 1: $1K turnover → $100 bonus
+ * Level 2: $5K turnover → $200 bonus
  * ...
- * Level 10: $1M turnover → $10K bonus
+ * Level 10: $1M turnover → $50K bonus
  */
 
 import { storage } from './storage/LocalStorageAdapter';
-import { getAllReferrals, getUser } from './users';
-import { getClosedUserCopies } from './userCopies';
+import { getAllReferrals, getUser, getReferralLevel } from './users';
+import { getActiveUserCopies } from './userCopies';
 import { creditTurnoverBonus } from './balances';
 
 const TURNOVER_BONUSES_KEY = 'turnover_bonuses';
@@ -42,36 +43,49 @@ export interface TurnoverLevel {
 
 // 10 turnover bonus levels
 export const TURNOVER_LEVELS: TurnoverLevel[] = [
-  { level: 1, threshold: 1_000, bonus: 10 },
-  { level: 2, threshold: 5_000, bonus: 50 },
-  { level: 3, threshold: 10_000, bonus: 100 },
-  { level: 4, threshold: 25_000, bonus: 250 },
-  { level: 5, threshold: 50_000, bonus: 500 },
-  { level: 6, threshold: 100_000, bonus: 1_000 },
-  { level: 7, threshold: 250_000, bonus: 2_500 },
-  { level: 8, threshold: 500_000, bonus: 5_000 },
-  { level: 9, threshold: 750_000, bonus: 7_500 },
-  { level: 10, threshold: 1_000_000, bonus: 10_000 },
+  { level: 1, threshold: 1_000, bonus: 100 },
+  { level: 2, threshold: 5_000, bonus: 200 },
+  { level: 3, threshold: 10_000, bonus: 500 },
+  { level: 4, threshold: 15_000, bonus: 500 },
+  { level: 5, threshold: 25_000, bonus: 1_500 },
+  { level: 6, threshold: 50_000, bonus: 3_000 },
+  { level: 7, threshold: 100_000, bonus: 5_000 },
+  { level: 8, threshold: 250_000, bonus: 15_000 },
+  { level: 9, threshold: 500_000, bonus: 30_000 },
+  { level: 10, threshold: 1_000_000, bonus: 50_000 },
 ];
+
+// Cashflow impact by referral level (for turnover calculation)
+export const CASHFLOW_IMPACT: Record<number, number> = {
+  1: 1.0,   // 100%
+  2: 0.5,   // 50%
+  3: 0.25,  // 25%
+  4: 0.10,  // 10%
+  5: 0.10,  // 10%
+};
 
 /**
  * Calculate team turnover for a user
- * Team turnover = sum of positive realized P&L from all referrals (all levels)
+ * Team turnover = sum of active bot sizes from referrals, weighted by cashflow impact per level
  */
 export async function calculateTeamTurnover(userId: string): Promise<number> {
+  const currentUser = await getUser(userId);
+  if (!currentUser) return 0;
+
   // Get all referrals (all levels)
   const referrals = await getAllReferrals(userId);
 
   let totalTurnover = 0;
 
-  // Sum positive realized P&L from closed copies
   for (const referral of referrals) {
-    const closedCopies = await getClosedUserCopies(referral.id);
+    const level = getReferralLevel(currentUser, referral);
+    if (level === null || level > 5) continue; // Only levels 1-5
 
-    for (const copy of closedCopies) {
-      if (copy.finalPnL && copy.finalPnL > 0) {
-        totalTurnover += copy.finalPnL;
-      }
+    const impact = CASHFLOW_IMPACT[level] ?? 0;
+    const activeCopies = getActiveUserCopies(referral.id);
+
+    for (const copy of activeCopies) {
+      totalTurnover += copy.investedAmount * impact;
     }
   }
 

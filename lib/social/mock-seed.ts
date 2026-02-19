@@ -174,6 +174,7 @@ function generateStatsForTier(tier: 'Diamond' | 'Platinum' | 'Gold' | 'Silver') 
     copiers: randomInRange(config.copiersRange),
     copiersAUM: randomInRange(config.copiersRange) * randomInRange([5000, 50000]),
     totalInvested: randomInRange(config.investedRange),
+    totalWithdrawn: Math.floor(totalProfit * (0.3 + Math.random() * 0.5)),
   };
 }
 
@@ -211,13 +212,13 @@ function generateMockFeedEvents(traders: TraderProfile[]): void {
         };
         break;
       case 'whale-move':
-        const action = ['invested', 'withdrew', 'profit'][Math.floor(Math.random() * 3)];
+        const action = ['invested', 'withdrew'][Math.floor(Math.random() * 2)];
         const amount = randomInRange([10000, 50000]);
         data = {
           type: 'whale-move' as const,
-          title: `WHALE ALERT: ${action === 'invested' ? 'Invested' : action === 'withdrew' ? 'Withdrew' : 'Took Profit'} $${(amount / 1000).toFixed(0)}k`,
-          description: `${action === 'invested' ? 'Just invested' : action === 'withdrew' ? 'Withdrew' : 'Secured'} $${amount.toLocaleString()} ${action === 'invested' ? 'into' : 'from'} trading bots`,
-          action: action === 'invested' ? 'Invested' : action === 'withdrew' ? 'Withdrew' : 'Took Profit',
+          title: `WHALE ALERT: ${action === 'invested' ? 'Invested' : 'Withdrew'} $${(amount / 1000).toFixed(0)}k`,
+          description: `${action === 'invested' ? 'Just invested' : 'Withdrew'} $${amount.toLocaleString()} ${action === 'invested' ? 'into' : 'from'} trading bots`,
+          action: action === 'invested' ? 'Invested' : 'Withdrew',
           amount,
         };
         break;
@@ -285,7 +286,7 @@ function generateMockWhaleAlerts(traders: TraderProfile[]): void {
       traderTier: whale.tier,
       traderVerified: whale.verified,
       traderAvatar: whale.avatar,
-      action: ['invested', 'withdrew', 'profit'][Math.floor(Math.random() * 3)] as any,
+      action: (['invested', 'withdrew'] as const)[Math.floor(Math.random() * 2)],
       amount: randomInRange([10000, 100000]),
       botName: `${whale.displayName}'s Bot`,
       botSlug: whale.username,

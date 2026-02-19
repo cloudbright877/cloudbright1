@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Shield, TrendingUp, BarChart3, Star, DollarSign } from 'lucide-react';
+import { Shield, TrendingUp, BarChart3, Clock } from 'lucide-react';
 import MiniChart from './MiniChart';
 
 interface Bot {
@@ -21,14 +21,12 @@ interface Bot {
     maxDD: number;
     sharpeRatio: number;
     copiers: number;
-    rating: number;
-    reviews: number;
     minInvestment: number;
+    reservationDays?: number;
   };
   tags: string[];
   trending: boolean;
   verified: boolean;
-  ageMonths: number;
   performanceData: number[];
 }
 
@@ -76,14 +74,6 @@ export function BotCarousel({ title, bots }: BotCarouselProps) {
                         {bot.verified && (
                           <Shield className="w-4 h-4 text-accent-400 flex-shrink-0" />
                         )}
-                      </div>
-                      <div className="flex items-center gap-2 text-[10px] text-dark-400 mt-1.5">
-                        <div className="flex items-center gap-1 text-white">
-                          <Star className="w-3 h-3 fill-white" />
-                          <span className="font-semibold">{bot.stats.rating.toFixed(1)}</span>
-                        </div>
-                        <span className="w-1 h-1 rounded-full bg-dark-600" />
-                        <span>{bot.ageMonths}mo</span>
                       </div>
                       <p className="text-[10px] text-dark-400 mt-1 truncate">{bot.strategy}</p>
                     </div>
@@ -140,14 +130,14 @@ export function BotCarousel({ title, bots }: BotCarouselProps) {
                     </div>
                   </div>
 
-                  {/* Minimum Investment */}
+                  {/* Capital Reservation */}
                   <div className="mb-4 p-3 bg-dark-900/50 rounded-lg border border-dark-700/50 flex items-center justify-between">
                     <div className="flex items-center gap-2 text-[10px] text-dark-400">
-                      <DollarSign className="w-3.5 h-3.5" />
-                      <span>Min. Investment</span>
+                      <Clock className="w-3.5 h-3.5" />
+                      <span>Capital Reservation</span>
                     </div>
                     <span className="text-sm font-semibold text-white">
-                      ${bot.stats.minInvestment.toLocaleString()}
+                      {bot.stats.reservationDays || 30} days
                     </span>
                   </div>
 

@@ -3,28 +3,23 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import {
   Home,
-  Briefcase,
   Bot,
   Users,
   Fish,
-  Trophy,
   Settings,
-  LogOut,
   ChevronLeft,
   ChevronRight,
-  Gem,
   BarChart3,
   MessageCircle,
   Gauge,
   ShieldCheck,
   Wallet,
-  Receipt,
+
   Gift,
-  Bell,
 } from 'lucide-react';
 
 interface NavItemProps {
@@ -81,21 +76,7 @@ const NavDivider = () => (
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const router = useRouter();
   const [isCollapsed, setIsCollapsed] = useState(false);
-
-  const userData = {
-    user: {
-      username: 'john_pro',
-      avatar: null,
-      totalBalance: 60847.32,
-      tier: 'Diamond',
-    },
-  };
-
-  const handleLogout = () => {
-    router.push('/login');
-  };
 
   return (
     <>
@@ -150,14 +131,6 @@ export default function Sidebar() {
             isCollapsed={isCollapsed}
           />
 
-          <NavItem
-            href="/dashboard-v2/notifications"
-            icon={<Bell className="w-6 h-6" />}
-            label="Notifications"
-            active={pathname?.startsWith('/dashboard-v2/notifications')}
-            isCollapsed={isCollapsed}
-          />
-
           <NavDivider />
 
           {!isCollapsed && (
@@ -173,14 +146,6 @@ export default function Sidebar() {
             icon={<Wallet className="w-6 h-6" />}
             label="Wallets"
             active={pathname?.startsWith('/dashboard-v2/wallets')}
-            isCollapsed={isCollapsed}
-          />
-
-          <NavItem
-            href="/dashboard-v2/transactions"
-            icon={<Receipt className="w-6 h-6" />}
-            label="Transactions"
-            active={pathname?.startsWith('/dashboard-v2/transactions')}
             isCollapsed={isCollapsed}
           />
 
@@ -203,10 +168,10 @@ export default function Sidebar() {
           />
 
           <NavItem
-            href="/dashboard-v2/traders"
+            href="/dashboard-v2/leaderboard"
             icon={<Users className="w-6 h-6" />}
-            label="Traders"
-            active={pathname?.startsWith('/dashboard-v2/traders')}
+            label="Leaderboard"
+            active={pathname?.startsWith('/dashboard-v2/leaderboard') || pathname?.startsWith('/dashboard-v2/traders')}
             isCollapsed={isCollapsed}
           />
 
@@ -225,14 +190,6 @@ export default function Sidebar() {
             icon={<Fish className="w-6 h-6" />}
             label="Whales"
             active={pathname?.startsWith('/dashboard-v2/whales')}
-            isCollapsed={isCollapsed}
-          />
-
-          <NavItem
-            href="/dashboard-v2/leaderboard"
-            icon={<Trophy className="w-6 h-6" />}
-            label="Leaderboard"
-            active={pathname?.startsWith('/dashboard-v2/leaderboard')}
             isCollapsed={isCollapsed}
           />
 
@@ -255,57 +212,6 @@ export default function Sidebar() {
           />
         </nav>
 
-        {/* User Card (Bottom) */}
-        {!isCollapsed && (
-          <div className="p-4 border-t border-dark-700">
-            <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border-2 border-dark-700 rounded-2xl p-4">
-              <div className="flex items-center gap-3 mb-3">
-                {/* Avatar */}
-                <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-500 rounded-xl flex items-center justify-center text-white font-bold text-lg overflow-hidden">
-                  {userData.user.avatar ? (
-                    <Image
-                      src={userData.user.avatar}
-                      alt={userData.user.username}
-                      width={48}
-                      height={48}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span>{userData.user.username[0].toUpperCase()}</span>
-                  )}
-                </div>
-
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-semibold text-white truncate">
-                    {userData.user.username}
-                  </div>
-                  <div className="text-xs text-dark-400 flex items-center gap-1">
-                    <Gem className="w-3 h-3 text-accent-400" />
-                    {userData.user.tier}
-                  </div>
-                </div>
-              </div>
-
-              {/* Balance */}
-              <div className="mb-3 p-3 bg-dark-900/50 rounded-lg">
-                <div className="text-xs text-dark-400 mb-1">Total Balance</div>
-                <div className="text-lg font-bold text-gradient">
-                  ${userData.user.totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                </div>
-              </div>
-
-              {/* Logout Button */}
-              <button
-                onClick={handleLogout}
-                className="w-full py-2 px-4 bg-dark-900/50 hover:bg-dark-900 border border-dark-700 rounded-lg text-sm text-dark-300 hover:text-white transition-all duration-300 flex items-center justify-center gap-2"
-              >
-                <LogOut className="w-4 h-4" />
-                <span>Logout</span>
-              </button>
-            </div>
-          </div>
-        )}
       </motion.aside>
 
       {/* Mobile Bottom Navigation */}
@@ -324,18 +230,6 @@ export default function Sidebar() {
           </Link>
 
           <Link
-            href="/dashboard-v2/portfolio"
-            className={`flex flex-col items-center gap-1 py-2 rounded-lg transition-colors ${
-              pathname?.startsWith('/dashboard-v2/portfolio')
-                ? 'bg-primary-500/20 text-primary-400'
-                : 'text-dark-400'
-            }`}
-          >
-            <Briefcase className="w-5 h-5" />
-            <span className="text-xs font-medium">Portfolio</span>
-          </Link>
-
-          <Link
             href="/dashboard-v2/bots"
             className={`flex flex-col items-center gap-1 py-2 rounded-lg transition-colors ${
               pathname?.startsWith('/dashboard-v2/bots')
@@ -348,15 +242,15 @@ export default function Sidebar() {
           </Link>
 
           <Link
-            href="/dashboard-v2/traders"
+            href="/dashboard-v2/leaderboard"
             className={`flex flex-col items-center gap-1 py-2 rounded-lg transition-colors ${
-              pathname?.startsWith('/dashboard-v2/traders')
+              pathname?.startsWith('/dashboard-v2/leaderboard') || pathname?.startsWith('/dashboard-v2/traders')
                 ? 'bg-primary-500/20 text-primary-400'
                 : 'text-dark-400'
             }`}
           >
             <Users className="w-5 h-5" />
-            <span className="text-xs font-medium">Traders</span>
+            <span className="text-xs font-medium">Leaderboard</span>
           </Link>
 
           <Link

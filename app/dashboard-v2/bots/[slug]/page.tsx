@@ -69,14 +69,6 @@ interface Trade {
   date: string;
 }
 
-interface Review {
-  name: string;
-  rating: number;
-  text: string;
-  date: string;
-  verified: boolean;
-}
-
 /**
  * Generate ticker data from real DemoBot stats.
  * BACKEND MIGRATION: Pull from real-time API.
@@ -87,7 +79,7 @@ function getTickerData(bot: DemoBot | null | undefined) {
     { icon: Flame, label: `${bot.stats.copiers} copiers`, value: 'total', color: 'text-green-400' },
     { icon: TrendingUp, label: `+${bot.stats.return1y}% ROI`, value: '1 year', color: 'text-green-400' },
     { icon: DollarSign, label: `+${bot.stats.return30d}%`, value: '30d return', color: 'text-green-400' },
-    { icon: Star, label: `${bot.stats.rating}/5`, value: `from ${bot.stats.reviews} reviews`, color: 'text-yellow-400' },
+    { icon: Star, label: `+${bot.stats.return7d}%`, value: '7d return', color: 'text-yellow-400' },
     { icon: Target, label: `${bot.stats.winRate}% win rate`, value: '', color: 'text-accent-400' },
     { icon: Trophy, label: `Sharpe ${bot.stats.sharpeRatio}`, value: '', color: 'text-yellow-400' },
     { icon: Rocket, label: `Max DD ${bot.stats.maxDD}%`, value: '', color: 'text-red-400' },
@@ -95,15 +87,6 @@ function getTickerData(bot: DemoBot | null | undefined) {
 }
 
 // Top wins/losses: populated from real trade data in masterBotData.recentTrades
-
-// Reviews data
-const reviewsData: Review[] = [
-  { name: 'John D.', rating: 5, text: 'Amazing bot! Consistent profits every day. Highly recommend for serious investors.', date: '2 days ago', verified: true },
-  { name: 'Sarah M.', rating: 5, text: 'Been copying for 3 months now. Up 42% total. Best decision I made!', date: '5 days ago', verified: true },
-  { name: 'Mike R.', rating: 4, text: 'Very good performance. Had a few losing days but overall very profitable.', date: '1 week ago', verified: false },
-  { name: 'Lisa K.', rating: 5, text: 'Love the transparency and consistent results. Customer service is excellent too.', date: '1 week ago', verified: true },
-  { name: 'Tom H.', rating: 5, text: 'Started with $5k, now at $7.2k after 2 months. Incredible!', date: '2 weeks ago', verified: true },
-];
 
 // Bot data is loaded dynamically from demoMarketplace via getDemoBotBySlug()
 
@@ -196,8 +179,6 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
       aggregateProfit: 0, // Will be overridden with real data
       aggregateProfitPercent: 0,
       totalInvestedByAll: 0, // Will be overridden with real data
-      rating: demoBot.stats.rating,
-      reviews: demoBot.stats.reviews,
       activePositions: 0, // Will be overridden with real data
       maxPositions: completeConfig.maxConcurrentPositions,
       stats: {
@@ -913,11 +894,6 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                   <div><span className="text-accent-400">Execution:</span> <span className="text-green-400">8ms</span></div>
                   <div><span className="text-accent-400">Slippage:</span> <span className="text-green-400">0.03%</span></div>
                   <div className="flex items-center gap-1">
-                    <Star className="w-3 h-3 text-accent-400 fill-accent-400" />
-                    <span className="text-accent-400">{masterBotData.rating}</span>
-                    <span className="text-slate-500">({masterBotData.reviews})</span>
-                  </div>
-                  <div className="flex items-center gap-1">
                     <Users className="w-3 h-3 text-accent-400" />
                     <span className="text-accent-400">{masterBotData.totalCopiers.toLocaleString()}</span>
                     <span className="text-slate-400">copiers</span>
@@ -947,14 +923,14 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
           transition={{ delay: 0.1 }}
           className="mb-6"
         >
-          <div className="flex items-center gap-0.5 rounded-lg bg-dark-900/50 border border-dark-700 p-1 inline-flex overflow-x-auto">
+          <div className="flex items-center gap-0.5 rounded-lg bg-dark-900/50 border border-dark-700 p-1.5 inline-flex overflow-x-auto">
             {tabs.map(tab => {
               const IconComponent = tab.icon;
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`px-4 py-2.5 font-semibold rounded-lg text-sm transition-all flex items-center gap-2 whitespace-nowrap ${
+                  className={`px-4 py-2.5 font-semibold rounded-md text-sm transition-all flex items-center gap-2 whitespace-nowrap ${
                     activeTab === tab.id
                       ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white shadow-lg shadow-primary-500/30'
                       : 'text-dark-300 hover:text-white'
@@ -1554,7 +1530,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                     </div>
                   </div>
 
-                  {/* Rating */}
+                  {/* Sharpe Ratio */}
                   <div className="flex-1 bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-xl p-5 hover:border-yellow-500/50 transition-all flex items-center">
                     <div className="flex items-center justify-between w-full">
                       <div className="flex items-center gap-3">
@@ -1562,13 +1538,13 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                           <Award className="w-6 h-6 text-yellow-400" />
                         </div>
                         <div>
-                          <div className="text-xs text-dark-400 mb-1">Rating</div>
-                          <div className="text-2xl font-bold text-white">{masterBotData.rating}/5.0</div>
+                          <div className="text-xs text-dark-400 mb-1">Sharpe Ratio</div>
+                          <div className="text-2xl font-bold text-white">{masterBotData.stats.sharpeRatio}</div>
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-sm font-semibold text-yellow-400">{masterBotData.reviews}</div>
-                        <div className="text-xs text-dark-400 mt-0.5">reviews</div>
+                        <div className="text-sm font-semibold text-yellow-400">{masterBotData.stats.maxDrawdown < 10 ? 'Low Risk' : 'Moderate'}</div>
+                        <div className="text-xs text-dark-400 mt-0.5">risk level</div>
                       </div>
                     </div>
                   </div>
@@ -1727,7 +1703,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
               {/* Bottom Section: Leaderboard + Top Copiers + Reviews */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 {/* Global Leaderboard */}
-                <div className="lg:col-span-4 bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6 hover:border-yellow-500/50 transition-all">
+                <div className="lg:col-span-6 bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6 hover:border-yellow-500/50 transition-all">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-12 h-12 bg-yellow-500/20 border border-yellow-500/30 rounded-xl flex items-center justify-center">
                       <Trophy className="w-6 h-6 text-yellow-400" />
@@ -1776,7 +1752,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                 </div>
 
                 {/* Top Copiers */}
-                <div className="lg:col-span-4 bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6 hover:border-green-500/50 transition-all">
+                <div className="lg:col-span-6 bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6 hover:border-green-500/50 transition-all">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-12 h-12 bg-green-500/20 border border-green-500/30 rounded-xl flex items-center justify-center">
                       <Medal className="w-6 h-6 text-green-400" />
@@ -1810,44 +1786,6 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                   </div>
                 </div>
 
-                {/* User Reviews */}
-                <div className="lg:col-span-4 bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6 hover:border-pink-500/50 transition-all">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="w-12 h-12 bg-pink-500/20 border border-pink-500/30 rounded-xl flex items-center justify-center">
-                      <MessageSquare className="w-6 h-6 text-pink-400" />
-                    </div>
-                    <div>
-                      <h2 className="text-xl font-bold text-white">Reviews</h2>
-                      <p className="text-xs text-dark-400">{masterBotData.reviews} total</p>
-                    </div>
-                  </div>
-                  <div className="space-y-3">
-                    {reviewsData.slice(0, 3).map((review, idx) => (
-                      <div key={idx} className="bg-dark-800/50 rounded-xl p-4 border border-dark-700 hover:border-pink-500/30 transition-all">
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center text-white font-semibold text-sm">
-                              {review.name[0]}
-                            </div>
-                            <div>
-                              <div className="flex items-center gap-1">
-                                <span className="font-semibold text-white text-sm">{review.name}</span>
-                                {review.verified && (
-                                  <span className="text-xs bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded">✓</span>
-                                )}
-                              </div>
-                              <div className="text-xs text-dark-500">{review.date}</div>
-                            </div>
-                          </div>
-                          <div className="text-yellow-400 text-xs">
-                            {'★'.repeat(review.rating)}
-                          </div>
-                        </div>
-                        <p className="text-slate-300 text-sm line-clamp-2">{review.text}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
               </div>
             </motion.div>
           )}

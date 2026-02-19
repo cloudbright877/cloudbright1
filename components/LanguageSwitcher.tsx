@@ -6,19 +6,28 @@ import { motion, AnimatePresence } from 'framer-motion';
 interface Language {
   code: string;
   name: string;
-  flag: string;
+  countryCode: string;
 }
 
 const languages: Language[] = [
-  { code: 'en', name: 'English', flag: '🇺🇸' },
-  { code: 'es', name: 'Español', flag: '🇪🇸' },
-  { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
-  { code: 'fr', name: 'Français', flag: '🇫🇷' },
-  { code: 'zh', name: '中文', flag: '🇨🇳' },
-  { code: 'hi', name: 'हिन्दी', flag: '🇮🇳' },
-  { code: 'cs', name: 'Čeština', flag: '🇨🇿' },
-  { code: 'ru', name: 'Русский', flag: '🇷🇺' },
+  { code: 'en', name: 'English', countryCode: 'us' },
+  { code: 'es', name: 'Español', countryCode: 'es' },
+  { code: 'de', name: 'Deutsch', countryCode: 'de' },
+  { code: 'fr', name: 'Français', countryCode: 'fr' },
+  { code: 'zh', name: '中文', countryCode: 'cn' },
+  { code: 'hi', name: 'हिन्दी', countryCode: 'in' },
+  { code: 'cs', name: 'Čeština', countryCode: 'cz' },
+  { code: 'ru', name: 'Русский', countryCode: 'ru' },
 ];
+
+function FlagIcon({ countryCode, className = '' }: { countryCode: string; className?: string }) {
+  return (
+    <span
+      className={`fi fi-${countryCode} inline-block ${className}`}
+      style={{ fontSize: '1.25em', lineHeight: 1 }}
+    />
+  );
+}
 
 export default function LanguageSwitcher({ variant = 'desktop' }: { variant?: 'desktop' | 'mobile' } = {}) {
   const [currentLang, setCurrentLang] = useState<Language>(languages[0]);
@@ -45,7 +54,6 @@ export default function LanguageSwitcher({ variant = 'desktop' }: { variant?: 'd
   const handleLanguageChange = (lang: Language) => {
     setCurrentLang(lang);
     setIsOpen(false);
-    // Here you would typically trigger language change logic
     console.log('Language changed to:', lang.code);
   };
 
@@ -58,7 +66,7 @@ export default function LanguageSwitcher({ variant = 'desktop' }: { variant?: 'd
           aria-label="Change language"
         >
           <div className="flex items-center gap-2">
-            <span className="text-lg">{currentLang.flag}</span>
+            <FlagIcon countryCode={currentLang.countryCode} />
             <span className="text-sm">{currentLang.name}</span>
           </div>
           <svg
@@ -91,7 +99,7 @@ export default function LanguageSwitcher({ variant = 'desktop' }: { variant?: 'd
                         : 'text-gray-600 dark:text-dark-300 hover:bg-gray-50 dark:hover:bg-dark-700'
                     }`}
                   >
-                    <span className="text-lg">{lang.flag}</span>
+                    <FlagIcon countryCode={lang.countryCode} />
                     <span className="text-sm font-medium">{lang.name}</span>
                   </button>
                 ))}
@@ -111,7 +119,7 @@ export default function LanguageSwitcher({ variant = 'desktop' }: { variant?: 'd
         className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 transition-colors duration-200"
         aria-label="Change language"
       >
-        <span className="text-xl">{currentLang.flag}</span>
+        <FlagIcon countryCode={currentLang.countryCode} />
       </button>
 
       {/* Dropdown Menu */}
@@ -135,7 +143,7 @@ export default function LanguageSwitcher({ variant = 'desktop' }: { variant?: 'd
                       : ''
                   }`}
                 >
-                  <span className="text-xl">{lang.flag}</span>
+                  <FlagIcon countryCode={lang.countryCode} />
                   <span className="text-sm font-medium text-gray-700 dark:text-dark-200">
                     {lang.name}
                   </span>

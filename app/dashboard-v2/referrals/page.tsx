@@ -1,6 +1,6 @@
 'use client';
 
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import {
@@ -13,46 +13,89 @@ import {
   ChevronLeft,
   ChevronRight,
   Gift,
-  Target,
   Trophy,
   Zap,
   CheckCircle,
   Clock,
-  UserPlus,
   Share2,
-  MessageCircle,
-  BarChart3,
-  Award
+  Shield,
+  Crown,
 } from 'lucide-react';
-import { getUser, getDirectReferrals, getAllReferrals } from '@/lib/users';
+import { getUser, getAllReferrals } from '@/lib/users';
 import { getTotalEarned, getUserCommissions } from '@/lib/referralCommissions';
 import { calculateTeamTurnover, getTurnoverStats, TURNOVER_LEVELS } from '@/lib/turnoverBonuses';
 import { getBalance } from '@/lib/balances';
-import { getUserCopy, getActiveUserCopies, getClosedUserCopies } from '@/lib/userCopies';
+import { getAvatarStyle } from '@/lib/social/tier-utils';
+import { getActiveUserCopies } from '@/lib/userCopies';
 
+/* ═══════════════════════════════════════════════════════════════
+   CONSTANTS (matching affiliate page)
+   ═══════════════════════════════════════════════════════════════ */
 
-// Helper function to calculate level between two users
-async function calculateReferralLevel(uplineUserId: string, referralUserId: string): Promise<number> {
+const commissionStructure = [
+  { level: 1, commission: 5, description: 'Direct referrals', highlight: true },
+  { level: 2, commission: 3, description: 'Second level network' },
+  { level: 3, commission: 2, description: 'Third level network' },
+  { level: 4, commission: 1, description: 'Fourth level network' },
+  { level: 5, commission: 0.5, description: 'Fifth level network' },
+];
+
+const cashflowLevels = [
+  { level: 1, impact: '100%' },
+  { level: 2, impact: '50%' },
+  { level: 3, impact: '25%' },
+  { level: 4, impact: '10%' },
+  { level: 5, impact: '10%' },
+];
+
+/* ═══════════════════════════════════════════════════════════════
+   HELPERS
+   ═══════════════════════════════════════════════════════════════ */
+
+async function calculateReferralLevel(
+  uplineUserId: string,
+  referralUserId: string,
+): Promise<number> {
   const referral = await getUser(referralUserId);
   if (!referral || !referral.referralPath) return 0;
-
   const pathParts = referral.referralPath.split('/').filter(Boolean);
   const uplineIndex = pathParts.indexOf(uplineUserId);
-
   if (uplineIndex === -1) return 0;
   return pathParts.length - uplineIndex;
 }
 
+const formatNumber = (num: number) =>
+  new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(num);
+
+const formatDate = (timestamp: number) =>
+  new Date(timestamp).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+
+const timeAgo = (timestamp: number) => {
+  const hours = Math.floor((Date.now() - timestamp) / (1000 * 60 * 60));
+  if (hours < 1) return 'Just now';
+  if (hours < 24) return `${hours}h ago`;
+  return `${Math.floor(hours / 24)}d ago`;
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   PAGE
+   ═══════════════════════════════════════════════════════════════ */
+
 export default function ReferralsPage() {
   const [copied, setCopied] = useState(false);
-  const [activeLevel, setActiveLevel] = useState<number | '4-10' | 'all'>('all');
+  const [activeLevel, setActiveLevel] = useState<number | 'all'>('all');
   const [currentPage, setCurrentPage] = useState(1);
-  const [showBonusExplainer, setShowBonusExplainer] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [showCurrencyDropdown, setShowCurrencyDropdown] = useState(false);
   const referralsPerPage = 5;
 
-  // Real data state
+  // Data state
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [totalEarned, setTotalEarned] = useState(0);
   const [teamTurnover, setTeamTurnover] = useState(0);
@@ -62,75 +105,51 @@ export default function ReferralsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [referrerUser, setReferrerUser] = useState<any>(null);
 
-  const walletForBonus = 'USDT';
-
-  const commissionStructure = [
-    { level: 1, commission: 10 },
-    { level: 2, commission: 5 },
-    { level: 3, commission: 3 },
-    { level: '4-10', commission: 2 },
-  ];
-
-  // Load real data
+  // Load data
   useEffect(() => {
     async function loadData() {
       try {
-        // Get current user from localStorage
         const currentUserId = localStorage.getItem('currentUserId');
         if (!currentUserId) {
-          console.warn('[Referrals] No current user found');
           setIsLoading(false);
           return;
         }
 
         const user = await getUser(currentUserId);
         if (!user) {
-          console.warn('[Referrals] User not found:', currentUserId);
           setIsLoading(false);
           return;
         }
 
         setCurrentUser(user);
 
-        // Load referrer if exists
         if (user.referredBy) {
           const referrer = await getUser(user.referredBy);
           setReferrerUser(referrer);
         }
 
-        // Load total earned
         const earned = await getTotalEarned(currentUserId);
         setTotalEarned(earned);
 
-        // Load team turnover
         const turnover = await calculateTeamTurnover(currentUserId);
         setTeamTurnover(turnover);
 
-        // Load turnover stats
         const stats = await getTurnoverStats(currentUserId);
         setTurnoverStats(stats);
 
-        // Load all referrals (all levels)
+        // Load all referrals
         const allReferrals = await getAllReferrals(currentUserId);
-
-        // For each referral, calculate their data
         const referralsWithData = await Promise.all(
           allReferrals.map(async (referral) => {
-            // Calculate level
             const level = await calculateReferralLevel(currentUserId, referral.id);
-
-            // Get their balance
             const balance = await getBalance(referral.id);
             const totalDeposits = balance.available + balance.frozen;
-
-            // Get active copies count
             const activeCopies = await getActiveUserCopies(referral.id);
             const isActive = activeCopies.length > 0;
 
-            // Calculate total commissions earned from this referral
             const commissions = await getUserCommissions(currentUserId);
             const commissionsFromReferral = commissions
-              .filter(c => c.investorUserId === referral.id)
+              .filter((c) => c.investorUserId === referral.id)
               .reduce((sum, c) => sum + c.commissionAmount, 0);
 
             return {
@@ -142,32 +161,30 @@ export default function ReferralsPage() {
               bonus: commissionsFromReferral,
               status: isActive ? 'active' : 'inactive',
               date: referral.createdAt,
-              avatar: null,
             };
-          })
+          }),
         );
 
         setReferrals(referralsWithData);
 
-        // Load recent commissions (last 10)
+        // Recent commissions
         const commissions = await getUserCommissions(currentUserId);
-        const recent = commissions
-          .sort((a, b) => b.createdAt - a.createdAt)
-          .slice(0, 10)
-          .map(async (c) => {
-            const investor = await getUser(c.investorUserId);
-            return {
-              id: c.id,
-              amount: c.commissionAmount,
-              currency: 'USDT',
-              from: investor?.username || 'Unknown',
-              level: c.level,
-              date: c.createdAt,
-            };
-          });
-
-        const recentWithUsernames = await Promise.all(recent);
-        setRecentCommissions(recentWithUsernames);
+        const recent = await Promise.all(
+          commissions
+            .sort((a, b) => b.createdAt - a.createdAt)
+            .slice(0, 10)
+            .map(async (c) => {
+              const investor = await getUser(c.investorUserId);
+              return {
+                id: c.id,
+                amount: c.commissionAmount,
+                from: investor?.username || 'Unknown',
+                level: c.level,
+                date: c.createdAt,
+              };
+            }),
+        );
+        setRecentCommissions(recent);
 
         setIsLoading(false);
       } catch (error) {
@@ -177,8 +194,6 @@ export default function ReferralsPage() {
     }
 
     loadData();
-
-    // Auto-refresh every 30 seconds
     const interval = setInterval(loadData, 30000);
     return () => clearInterval(interval);
   }, []);
@@ -191,25 +206,12 @@ export default function ReferralsPage() {
   // Stats
   const stats = {
     totalReferrals: referrals.length,
-    activeInvestors: referrals.filter(r => r.status === 'active').length,
+    activeInvestors: referrals.filter((r) => r.status === 'active').length,
     totalEarned,
     turnover: teamTurnover,
   };
 
-  const recentBonuses = recentCommissions;
   const claimedLevels = turnoverStats?.currentLevel || 0;
-
-  // Available currencies for bonus preference
-  const bonusCurrencies = [
-    { symbol: 'USDT', name: 'Tether', icon: 'Tether.svg' },
-    { symbol: 'BTC', name: 'Bitcoin', icon: 'Bitcoin.svg' },
-    { symbol: 'ETH', name: 'Ethereum', icon: 'Ethereum.svg' },
-    { symbol: 'TRX', name: 'Tron', icon: 'Tron.svg' },
-    { symbol: 'BNB', name: 'BNB', icon: 'bnb.svg' },
-    { symbol: 'SOL', name: 'Solana', icon: 'Solana.svg' },
-  ];
-
-  const selectedBonusCurrency = bonusCurrencies.find((c) => c.symbol === walletForBonus);
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(referralLink);
@@ -217,79 +219,43 @@ export default function ReferralsPage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleBonusCurrencyChange = (currency: string) => {
-    setShowCurrencyDropdown(false);
-    console.log('Bonus currency changed to:', currency);
-  };
-
-  const formatNumber = (num: number) => {
-    return new Intl.NumberFormat('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(num);
-  };
-
-  const formatDate = (timestamp: number) => {
-    return new Date(timestamp).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  };
-
-  const timeAgo = (timestamp: number) => {
-    const hours = Math.floor((Date.now() - timestamp) / (1000 * 60 * 60));
-    if (hours < 1) return 'Just now';
-    if (hours < 24) return `${hours}h ago`;
-    const days = Math.floor(hours / 24);
-    return `${days}d ago`;
-  };
-
-  // Filter and sort referrals
+  // Filter & search referrals
   const filteredReferrals =
     activeLevel === 'all'
       ? referrals
-      : activeLevel === '4-10'
-      ? referrals.filter((ref: any) => ref.level >= 4 && ref.level <= 10)
       : referrals.filter((ref: any) => ref.level === activeLevel);
 
-  // Sort by total deposits (highest first)
-  const sortedReferrals = [...filteredReferrals].sort((a: any, b: any) => b.deposits - a.deposits);
+  const searchedReferrals = searchQuery
+    ? filteredReferrals.filter(
+        (r: any) =>
+          r.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          r.email?.toLowerCase().includes(searchQuery.toLowerCase()),
+      )
+    : filteredReferrals;
 
-  // Pagination
+  const sortedReferrals = [...searchedReferrals].sort(
+    (a: any, b: any) => b.deposits - a.deposits,
+  );
   const totalPages = Math.ceil(sortedReferrals.length / referralsPerPage);
   const paginatedReferrals = sortedReferrals.slice(
     (currentPage - 1) * referralsPerPage,
-    currentPage * referralsPerPage
+    currentPage * referralsPerPage,
   );
 
-  // Count referrals per level (1-3 separately, 4-10 combined)
-  const levelCounts = [
-    { level: 1, count: referrals.filter((ref: any) => ref.level === 1).length },
-    { level: 2, count: referrals.filter((ref: any) => ref.level === 2).length },
-    { level: 3, count: referrals.filter((ref: any) => ref.level === 3).length },
-    {
-      level: '4-10',
-      count: referrals.filter((ref: any) => ref.level >= 4 && ref.level <= 10).length
-    },
-  ];
+  // Level counts (1-5)
+  const levelCounts = [1, 2, 3, 4, 5].map((level) => ({
+    level,
+    count: referrals.filter((ref: any) => ref.level === level).length,
+  }));
 
-  // Handle level change
-  const handleLevelChange = (level: number | string | 'all') => {
-    setActiveLevel(level as typeof activeLevel);
-    setCurrentPage(1);
-  };
-
-  // Loading state
+  // Loading
   if (isLoading) {
     return (
       <div className="min-h-screen p-4 lg:p-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-center min-h-[60vh]">
-            <div className="text-center">
-              <div className="w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-dark-300">Loading referral data...</p>
-            </div>
+        <div className="max-w-7xl mx-auto flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <div className="w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-dark-300">Loading referral data...</p>
           </div>
         </div>
       </div>
@@ -299,94 +265,75 @@ export default function ReferralsPage() {
   return (
     <div className="min-h-screen p-4 lg:p-8">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <h1 className="text-3xl lg:text-4xl font-bold text-white mb-2 flex items-center gap-3">
-            <Gift className="w-8 h-8 text-primary-400" />
-            Referral Program
-          </h1>
-          <p className="text-dark-300">
-            Earn up to 32% commissions from your referral network (10 levels deep)
-          </p>
-        </motion.div>
+        {/* ══════════ STATS CARDS ══════════ */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6 text-center hover:border-primary-500/50 transition-all">
+              <Users className="w-8 h-8 text-primary-400 mx-auto mb-2" />
+              <div className="text-2xl font-bold text-white mb-1">
+                {stats.totalReferrals}
+              </div>
+              <div className="text-sm text-dark-400">Total Referrals</div>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6 text-center hover:border-green-500/50 transition-all">
+              <Activity className="w-8 h-8 text-green-400 mx-auto mb-2" />
+              <div className="text-2xl font-bold text-white mb-1">
+                {stats.activeInvestors}
+              </div>
+              <div className="text-sm text-dark-400">Active Investors</div>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6 text-center hover:border-accent-500/50 transition-all">
+              <DollarSign className="w-8 h-8 text-accent-400 mx-auto mb-2" />
+              <div className="text-2xl font-bold bg-gradient-to-r from-primary-400 to-accent-400 bg-clip-text text-transparent mb-1">
+                ${formatNumber(stats.totalEarned)}
+              </div>
+              <div className="text-sm text-dark-400">Total Earned</div>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6 text-center hover:border-blue-500/50 transition-all">
+              <TrendingUp className="w-8 h-8 text-blue-400 mx-auto mb-2" />
+              <div className="text-2xl font-bold text-white mb-1">
+                ${formatNumber(stats.turnover)}
+              </div>
+              <div className="text-sm text-dark-400">Team Turnover</div>
+            </div>
+          </motion.div>
+        </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Left Column - Stats & Link */}
+          {/* ══════════ LEFT COLUMN ══════════ */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Stats Cards */}
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                whileHover={{ scale: 1.02 }}
-              >
-                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6 text-center hover:border-primary-500/50 transition-all">
-                  <Users className="w-8 h-8 text-primary-400 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-white mb-1">
-                    {stats.totalReferrals}
-                  </div>
-                  <div className="text-sm text-dark-400">Total Referrals</div>
-                </div>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                whileHover={{ scale: 1.02 }}
-              >
-                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6 text-center hover:border-green-500/50 transition-all">
-                  <Activity className="w-8 h-8 text-green-400 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-white mb-1">
-                    {stats.activeInvestors}
-                  </div>
-                  <div className="text-sm text-dark-400">Active Investors</div>
-                </div>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                whileHover={{ scale: 1.02 }}
-              >
-                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6 text-center hover:border-accent-500/50 transition-all">
-                  <DollarSign className="w-8 h-8 text-accent-400 mx-auto mb-2" />
-                  <div className="text-2xl font-bold bg-gradient-to-r from-primary-400 to-accent-400 bg-clip-text text-transparent mb-1">
-                    ${formatNumber(stats.totalEarned)}
-                  </div>
-                  <div className="text-sm text-dark-400">Total Earned</div>
-                </div>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                whileHover={{ scale: 1.02 }}
-              >
-                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6 text-center hover:border-blue-500/50 transition-all">
-                  <TrendingUp className="w-8 h-8 text-blue-400 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-white mb-1">
-                    ${formatNumber(teamTurnover)}
-                  </div>
-                  <div className="text-sm text-dark-400">Team Turnover</div>
-                </div>
-              </motion.div>
-            </div>
-
-            {/* Referral Link */}
+            {/* ── Referral Link ── */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
             >
-              <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6 hover:border-primary-500/30 transition-all">
+              <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6">
                 <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
                   <Share2 className="w-5 h-5 text-primary-400" />
                   Your Referral Link
@@ -415,233 +362,201 @@ export default function ReferralsPage() {
                     )}
                   </button>
                 </div>
+                <div className="mt-4 flex flex-wrap gap-4">
+                  {[
+                    'No deposit required',
+                    'Paid in USDT',
+                    'Instant payout',
+                  ].map((text) => (
+                    <div
+                      key={text}
+                      className="flex items-center gap-1.5 text-xs text-dark-300"
+                    >
+                      <CheckCircle className="w-3 h-3 text-primary-400" />
+                      {text}
+                    </div>
+                  ))}
+                </div>
               </div>
             </motion.div>
 
-            {/* Bonus Systems Explainer */}
+            {/* ── Commission Structure (Bento Grid) ── */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6 }}
             >
-              <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                    <Target className="w-5 h-5 text-primary-400" />
-                    How Bonuses Work
+              <div className="grid md:grid-cols-2 gap-4">
+                {/* Commission Table */}
+                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6 hover:border-emerald-500/30 transition-all">
+                  <h3 className="text-lg font-semibold text-white mb-4">
+                    Commission per Level
                   </h3>
-                  <button
-                    onClick={() => setShowBonusExplainer(!showBonusExplainer)}
-                    className="text-primary-400 hover:text-primary-300 text-sm font-medium transition-colors"
-                  >
-                    {showBonusExplainer ? 'Hide Details' : 'Show Details'}
-                  </button>
-                </div>
-
-                {/* Two Bonus Systems Overview */}
-                <div className="grid md:grid-cols-2 gap-4 mb-4">
-                  <div className="p-4 bg-dark-900/50 rounded-xl border border-primary-500/30 hover:border-primary-500/50 transition-all">
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className="w-10 h-10 rounded-lg bg-primary-500/20 flex items-center justify-center">
-                        <Target className="w-5 h-5 text-primary-400" />
-                      </div>
-                      <h4 className="font-bold text-white">Direct Referral Bonuses</h4>
-                    </div>
-                    <p className="text-sm text-dark-300 mb-3">
-                      Earn instant commissions when your referrals close profitable copies
-                    </p>
-                    <div className="space-y-1 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-dark-400">Level 1:</span>
-                        <span className="text-white font-medium">10%</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-dark-400">Level 2:</span>
-                        <span className="text-white font-medium">5%</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-dark-400">Level 3:</span>
-                        <span className="text-white font-medium">3%</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-dark-400">Levels 4-10:</span>
-                        <span className="text-white font-medium">2%</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="p-4 bg-dark-900/50 rounded-xl border border-accent-500/30 hover:border-accent-500/50 transition-all">
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className="w-10 h-10 rounded-lg bg-accent-500/20 flex items-center justify-center">
-                        <Trophy className="w-5 h-5 text-accent-400" />
-                      </div>
-                      <h4 className="font-bold text-white">Turnover Bonuses</h4>
-                    </div>
-                    <p className="text-sm text-dark-300 mb-3">
-                      Unlock milestone rewards based on team performance
-                    </p>
-                    <div className="text-sm space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-dark-400">Team Turnover:</span>
-                        <span className="text-white font-medium">${formatNumber(teamTurnover)}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-dark-400">Achieved Levels:</span>
-                        <span className="text-white font-medium">{claimedLevels} / 10</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-dark-400">Bonuses Earned:</span>
-                        <span className="text-white font-medium">
-                          ${formatNumber(turnoverStats?.totalBonusesEarned || 0)}
+                  <div className="space-y-2">
+                    {commissionStructure.map((item) => (
+                      <div
+                        key={item.level}
+                        className={`flex items-center justify-between p-3 rounded-xl border transition-all ${
+                          item.highlight
+                            ? 'bg-emerald-500/10 border-emerald-500/30'
+                            : 'bg-dark-900/50 border-dark-700/50 hover:border-dark-600/50'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <span
+                            className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold ${
+                              item.highlight
+                                ? 'bg-emerald-500/20 text-emerald-400'
+                                : 'bg-dark-800 text-dark-300'
+                            }`}
+                          >
+                            L{item.level}
+                          </span>
+                          <div>
+                            <p className="text-sm font-semibold text-white">
+                              Level {item.level}
+                            </p>
+                            <p className="text-xs text-dark-400">
+                              {item.description}
+                            </p>
+                          </div>
+                        </div>
+                        <span
+                          className={`text-lg font-bold ${
+                            item.highlight ? 'text-emerald-400' : 'text-white'
+                          }`}
+                        >
+                          {item.commission}%
                         </span>
                       </div>
-                    </div>
+                    ))}
                   </div>
                 </div>
 
-                {showBonusExplainer && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    className="space-y-6 pt-4 border-t border-dark-700"
-                  >
-                    {/* Direct Referral Bonus Explanation */}
-                    <div>
-                      <h4 className="font-bold text-white mb-3 flex items-center gap-2">
-                        <Target className="w-5 h-5 text-primary-400" />
-                        Direct Referral Bonuses - How It Works
-                      </h4>
-                      <div className="bg-dark-900/30 rounded-xl p-4 space-y-3 border border-dark-700">
-                      <p className="text-sm text-dark-300">
-                        When someone in your referral network closes a profitable copy, you earn a commission based on their level:
-                      </p>
-
-                      <div className="space-y-2">
-                        {commissionStructure.map((item, index) => (
-                          <div key={index} className="flex items-center gap-3 p-2 bg-dark-900/50 rounded">
-                            <div className="w-16 text-center">
-                              <span className="text-xs text-dark-500">Level</span>
-                              <div className="text-white font-bold">{item.level}</div>
-                            </div>
-                            <div className="flex-1 h-2 bg-dark-700 rounded-full overflow-hidden">
-                              <div
-                                className="h-full bg-gradient-to-r from-primary-600 to-secondary-600"
-                                style={{ width: `${item.commission * 20}%` }}
-                              />
-                            </div>
-                            <div className="w-12 text-right text-white font-bold">
-                              {item.commission}%
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-
-                      <div className="mt-4 p-3 bg-primary-500/10 border border-primary-500/20 rounded-lg">
-                        <p className="text-sm text-dark-200">
-                          <strong className="text-white">Example:</strong> Your direct referral (Level 1) closes a copy with $1,000 profit.
-                          You earn <strong className="text-primary-400">$100 instantly</strong> (10%).
-                          If they refer someone who profits $1,000, you earn <strong className="text-primary-400">$50</strong> (5% from Level 2).
-                        </p>
-                      </div>
-                    </div>
+                {/* Feature Cards */}
+                <div className="flex flex-col gap-4">
+                  <div className="flex-1 bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6 hover:border-emerald-500/30 transition-all flex flex-col justify-center">
+                    <Zap className="w-7 h-7 text-emerald-400 mb-3" />
+                    <h3 className="text-lg font-semibold text-white mb-2">
+                      Instant Payout
+                    </h3>
+                    <p className="text-sm text-dark-300">
+                      Commission is credited to your USDT balance the moment
+                      your referral activates any trading bot. No delays, no
+                      minimum thresholds.
+                    </p>
                   </div>
-
-                    {/* Turnover Bonus Explanation */}
-                    <div>
-                      <h4 className="font-bold text-white mb-3 flex items-center gap-2">
-                        <Trophy className="w-5 h-5 text-accent-400" />
-                        Turnover Bonuses - Milestone Rewards
-                      </h4>
-                      <div className="bg-dark-900/30 rounded-xl p-4 space-y-3 border border-dark-700">
-                      <p className="text-sm text-dark-300">
-                        Team turnover combines all levels with weighted contributions from your referral network.
-                      </p>
-
-                      <div className="p-3 bg-secondary-500/10 border border-secondary-500/20 rounded-lg">
-                        <p className="text-sm text-dark-200">
-                          <strong className="text-white">Example:</strong><br/>
-                          Direct referrals contribute most to your turnover, while deeper levels contribute proportionally less based on their distance from you.
-                        </p>
-                      </div>
-
-                      <div className="mt-4">
-                        <h5 className="text-sm font-bold text-white mb-3">Turnover Bonus Levels:</h5>
-                        <div className="space-y-2 max-h-64 overflow-y-auto">
-                          {TURNOVER_LEVELS.map((level) => {
-                            const isUnlocked = teamTurnover >= level.threshold;
-                            const isClaimed = level.level <= claimedLevels;
-
-                            return (
-                              <div
-                                key={level.level}
-                                className={`p-3 rounded-lg border ${
-                                  isClaimed
-                                    ? 'bg-green-500/10 border-green-500/30'
-                                    : isUnlocked
-                                    ? 'bg-yellow-500/10 border-yellow-500/30'
-                                    : 'bg-dark-900/30 border-dark-700'
-                                }`}
-                              >
-                                <div className="flex items-center justify-between">
-                                  <div className="flex-1">
-                                    <div className="flex items-center gap-2 mb-1">
-                                      <span className={`text-xs px-2 py-0.5 rounded ${
-                                        isClaimed ? 'bg-green-500/20 text-green-400' :
-                                        isUnlocked ? 'bg-yellow-500/20 text-yellow-400' :
-                                        'bg-dark-700 text-dark-400'
-                                      }`}>
-                                        Level {level.level}
-                                      </span>
-                                      {isClaimed && <span className="text-green-400 text-sm">✓ Claimed</span>}
-                                      {!isClaimed && isUnlocked && <span className="text-yellow-400 text-sm">⚡ Ready!</span>}
-                                    </div>
-                                    <div className="text-sm text-dark-300">
-                                      Turnover: ${formatNumber(level.threshold)}
-                                    </div>
-                                  </div>
-                                  <div className={`text-lg font-bold ${
-                                    isClaimed ? 'text-green-400' :
-                                    isUnlocked ? 'text-yellow-400' :
-                                    'text-dark-500'
-                                  }`}>
-                                    ${formatNumber(level.bonus)}
-                                  </div>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-
-                        <div className="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
-                          <p className="text-sm text-dark-200">
-                            <strong className="text-white">Important:</strong> Bonuses are automatically awarded when your team reaches the turnover threshold.
-                            Team turnover = sum of all positive P&L from closed copies (losses excluded).
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
+                  <div className="flex-1 bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6 hover:border-emerald-500/30 transition-all flex flex-col justify-center">
+                    <Shield className="w-7 h-7 text-emerald-400 mb-3" />
+                    <h3 className="text-lg font-semibold text-white mb-2">
+                      No Deposit Required
+                    </h3>
+                    <p className="text-sm text-dark-300">
+                      You don&apos;t need an active deposit to earn affiliate
+                      commissions. Simply share your link and start building
+                      your network.
+                    </p>
+                  </div>
+                </div>
               </div>
             </motion.div>
 
-            {/* Referrals List */}
+            {/* ── Cashflow Levels Impact ── */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7 }}
             >
               <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6">
+                <h3 className="text-lg font-bold text-white mb-2">
+                  Cashflow Levels Impact
+                </h3>
+                <p className="text-sm text-dark-400 mb-4">
+                  Each level has a different impact on your cashflow turnover.
+                  The closer the referral, the higher the contribution.
+                </p>
+                <div className="rounded-xl border border-violet-500/20 overflow-hidden overflow-x-auto">
+                  {/* Header */}
+                  <div className="grid grid-cols-5 bg-violet-500/[0.06] min-w-[360px]">
+                    {cashflowLevels.map((l) => (
+                      <div
+                        key={l.level}
+                        className="px-3 py-3 text-center border-r border-violet-500/10 last:border-r-0"
+                      >
+                        <span className="text-xs text-dark-400 font-medium">
+                          Level {l.level}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                  {/* Impact row */}
+                  <div className="grid grid-cols-5 border-t border-violet-500/10 min-w-[360px]">
+                    {cashflowLevels.map((l, i) => (
+                      <div
+                        key={l.level}
+                        className="px-3 py-5 text-center border-r border-violet-500/10 last:border-r-0"
+                      >
+                        <span
+                          className={`text-xl sm:text-2xl font-bold ${
+                            i === 0 ? 'text-violet-400' : 'text-white'
+                          }`}
+                        >
+                          {l.impact}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                  {/* Label row */}
+                  <div className="grid grid-cols-5 border-t border-violet-500/10 min-w-[360px]">
+                    {cashflowLevels.map((l) => (
+                      <div
+                        key={l.level}
+                        className="px-3 py-2 text-center border-r border-violet-500/10 last:border-r-0"
+                      >
+                        <span className="text-[10px] text-dark-500 uppercase tracking-wider">
+                          Impact
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="mt-4 space-y-2 text-xs text-dark-400">
+                  <div className="flex items-start gap-2">
+                    <CheckCircle className="w-3 h-3 text-violet-400 mt-0.5 flex-shrink-0" />
+                    <span>
+                      Turnover = sum of all active bots in your network,
+                      weighted by level
+                    </span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle className="w-3 h-3 text-violet-400 mt-0.5 flex-shrink-0" />
+                    <span>
+                      Reach turnover milestones to unlock cash bonuses in USDT
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* ── Your Referrals ── */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8 }}
+            >
+              <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6">
                 <div className="mb-6">
-                  <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
                     <h3 className="text-xl font-bold text-white flex items-center gap-2">
                       <Users className="w-5 h-5 text-primary-400" />
                       Your Referrals
                     </h3>
                     <div className="flex gap-2 flex-wrap">
                       <button
-                        onClick={() => handleLevelChange('all')}
+                        onClick={() => {
+                          setActiveLevel('all');
+                          setCurrentPage(1);
+                        }}
                         className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                           activeLevel === 'all'
                             ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white'
@@ -653,7 +568,10 @@ export default function ReferralsPage() {
                       {levelCounts.map((lc) => (
                         <button
                           key={lc.level}
-                          onClick={() => handleLevelChange(lc.level)}
+                          onClick={() => {
+                            setActiveLevel(lc.level);
+                            setCurrentPage(1);
+                          }}
                           className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                             activeLevel === lc.level
                               ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30'
@@ -666,7 +584,7 @@ export default function ReferralsPage() {
                     </div>
                   </div>
 
-                  {/* Search Input */}
+                  {/* Search */}
                   <div className="relative">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-500" />
                     <input
@@ -692,65 +610,57 @@ export default function ReferralsPage() {
 
                 {paginatedReferrals.length > 0 ? (
                   <div className="space-y-3">
-                    {paginatedReferrals.map((referral: any, index: number) => (
-                      <motion.div
-                        key={referral.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                        whileHover={{ scale: 1.01, y: -2 }}
-                        className="flex items-center justify-between p-4 bg-dark-900/50 rounded-xl border border-dark-700 hover:border-primary-500/50 hover:bg-dark-900 transition-all"
-                      >
-                        <div className="flex items-center gap-4 flex-1">
-                          <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-500 rounded-xl flex items-center justify-center text-white font-bold overflow-hidden">
-                            {referral.avatar ? (
-                              <Image
-                                src={referral.avatar}
-                                alt={referral.username}
-                                width={48}
-                                height={48}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <span>{referral.username[0].toUpperCase()}</span>
-                            )}
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="font-bold text-white">{referral.username}</span>
-                              <span className="text-xs px-2 py-0.5 rounded bg-primary-500/20 text-primary-400 border border-primary-500/30">
-                                Level {referral.level}
+                    {paginatedReferrals.map(
+                      (referral: any, index: number) => (
+                        <motion.div
+                          key={referral.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.05 }}
+                          className="flex items-center justify-between p-4 bg-dark-900/50 rounded-xl border border-dark-700 hover:border-primary-500/50 transition-all"
+                        >
+                          <div className="flex items-center gap-4 flex-1">
+                            <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold" style={getAvatarStyle(referral.username)}>
+                              <span>
+                                {referral.username[0].toUpperCase()}
                               </span>
-                              {referral.status === 'active' && (
-                                <span className="text-xs px-2 py-0.5 rounded bg-green-500/20 text-green-400 border border-green-500/30 flex items-center gap-1">
-                                  <Activity className="w-3 h-3" />
-                                  Active
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                <span className="font-bold text-white">
+                                  {referral.username}
                                 </span>
-                              )}
-                            </div>
-                            {referral.email && (
-                              <div className="text-xs text-dark-500 mt-0.5">
-                                {referral.email}
+                                <span className="text-xs px-2 py-0.5 rounded bg-primary-500/20 text-primary-400 border border-primary-500/30">
+                                  Level {referral.level}
+                                </span>
+                                {referral.status === 'active' && (
+                                  <span className="text-xs px-2 py-0.5 rounded bg-green-500/20 text-green-400 border border-green-500/30 flex items-center gap-1">
+                                    <Activity className="w-3 h-3" />
+                                    Active
+                                  </span>
+                                )}
                               </div>
-                            )}
-                            <div className="text-sm text-dark-400 mt-1 flex items-center gap-1">
-                              <Clock className="w-3 h-3" />
-                              Joined {formatDate(referral.date)}
+                              <div className="text-sm text-dark-400 flex items-center gap-1">
+                                <Clock className="w-3 h-3" />
+                                Joined {formatDate(referral.date)}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-xs text-dark-400 mb-1">Total Deposits</div>
-                          <div className="text-lg font-bold text-white">
-                            ${formatNumber(referral.deposits)}
+                          <div className="text-right">
+                            <div className="text-xs text-dark-400 mb-1">
+                              Deposits
+                            </div>
+                            <div className="text-lg font-bold text-white">
+                              ${formatNumber(referral.deposits)}
+                            </div>
+                            <div className="text-sm text-green-400 flex items-center justify-end gap-1 mt-1">
+                              <DollarSign className="w-3 h-3" />$
+                              {formatNumber(referral.bonus)} earned
+                            </div>
                           </div>
-                          <div className="text-sm text-green-400 flex items-center justify-end gap-1 mt-1">
-                            <DollarSign className="w-3 h-3" />
-                            ${formatNumber(referral.bonus)} earned
-                          </div>
-                        </div>
-                      </motion.div>
-                    ))}
+                        </motion.div>
+                      ),
+                    )}
 
                     {/* Pagination */}
                     {totalPages > 1 && (
@@ -760,7 +670,9 @@ export default function ReferralsPage() {
                         </div>
                         <div className="flex gap-2">
                           <button
-                            onClick={() => setCurrentPage(currentPage - 1)}
+                            onClick={() =>
+                              setCurrentPage(currentPage - 1)
+                            }
                             disabled={currentPage === 1}
                             className="px-4 py-2 bg-dark-900/50 hover:bg-dark-900 disabled:bg-dark-900/20 border border-dark-700 rounded-xl text-white disabled:text-dark-600 font-medium transition-all disabled:cursor-not-allowed flex items-center gap-2"
                           >
@@ -768,7 +680,9 @@ export default function ReferralsPage() {
                             Previous
                           </button>
                           <button
-                            onClick={() => setCurrentPage(currentPage + 1)}
+                            onClick={() =>
+                              setCurrentPage(currentPage + 1)
+                            }
                             disabled={currentPage === totalPages}
                             className="px-4 py-2 bg-dark-900/50 hover:bg-dark-900 disabled:bg-dark-900/20 border border-dark-700 rounded-xl text-white disabled:text-dark-600 font-medium transition-all disabled:cursor-not-allowed flex items-center gap-2"
                           >
@@ -782,30 +696,170 @@ export default function ReferralsPage() {
                 ) : (
                   <div className="text-center py-12 text-dark-400">
                     <Users className="w-16 h-16 text-dark-600 mx-auto mb-4" />
-                    <div className="text-lg font-semibold text-white mb-1">No referrals yet</div>
-                    <div className="text-sm">Share your link to start earning</div>
+                    <div className="text-lg font-semibold text-white mb-1">
+                      No referrals yet
+                    </div>
+                    <div className="text-sm">
+                      Share your link to start earning
+                    </div>
                   </div>
                 )}
               </div>
             </motion.div>
           </div>
 
-          {/* Right Column - Recent Bonuses */}
+          {/* ══════════ RIGHT COLUMN ══════════ */}
           <div className="space-y-6">
+            {/* ── Turnover Bonuses Progress ── */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8 }}
             >
               <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6">
-                <h3 className="text-xl font-bold text-white mb-1 flex items-center gap-2">
+                <div className="flex items-center gap-2 mb-4">
+                  <Crown className="w-5 h-5 text-violet-400" />
+                  <h3 className="text-lg font-bold text-white">
+                    Turnover Bonuses
+                  </h3>
+                </div>
+
+                {/* Current Status */}
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  <div className="p-3 bg-dark-900/50 rounded-lg border border-dark-700">
+                    <div className="text-xs text-dark-400 mb-1">
+                      Team Turnover
+                    </div>
+                    <div className="text-lg font-bold text-white">
+                      ${formatNumber(teamTurnover)}
+                    </div>
+                  </div>
+                  <div className="p-3 bg-dark-900/50 rounded-lg border border-dark-700">
+                    <div className="text-xs text-dark-400 mb-1">
+                      Bonuses Earned
+                    </div>
+                    <div className="text-lg font-bold text-green-400">
+                      ${formatNumber(turnoverStats?.totalBonusesEarned || 0)}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Next Level Progress */}
+                {turnoverStats?.nextLevel && (
+                  <div className="mb-4 p-4 bg-violet-500/10 rounded-xl border border-violet-500/20">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm text-dark-300">
+                        Next:{' '}
+                        <span className="font-bold text-white">
+                          Level {turnoverStats.nextLevel.level}
+                        </span>
+                      </span>
+                      <span className="text-lg font-bold text-violet-400">
+                        ${formatNumber(turnoverStats.nextLevel.bonus)}
+                      </span>
+                    </div>
+                    <div className="h-2 bg-dark-700 rounded-full overflow-hidden mb-1">
+                      <div
+                        className="h-full bg-gradient-to-r from-violet-600 to-purple-500 transition-all duration-1000"
+                        style={{
+                          width: `${Math.min(turnoverStats.nextLevel.progress, 100)}%`,
+                        }}
+                      />
+                    </div>
+                    <div className="flex justify-between text-xs text-dark-500">
+                      <span>${formatNumber(teamTurnover)}</span>
+                      <span>
+                        {turnoverStats.nextLevel.progress.toFixed(1)}%
+                      </span>
+                      <span>
+                        ${formatNumber(turnoverStats.nextLevel.threshold)}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Milestone Levels */}
+                <div className="space-y-2 max-h-80 overflow-y-auto">
+                  {TURNOVER_LEVELS.map((level) => {
+                    const isUnlocked = teamTurnover >= level.threshold;
+                    const isClaimed = level.level <= claimedLevels;
+
+                    return (
+                      <div
+                        key={level.level}
+                        className={`p-3 rounded-lg border ${
+                          isClaimed
+                            ? 'bg-green-500/10 border-green-500/30'
+                            : isUnlocked
+                              ? 'bg-yellow-500/10 border-yellow-500/30'
+                              : 'bg-dark-900/30 border-dark-700'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="flex items-center gap-2 mb-0.5">
+                              <span
+                                className={`text-xs px-2 py-0.5 rounded ${
+                                  isClaimed
+                                    ? 'bg-green-500/20 text-green-400'
+                                    : isUnlocked
+                                      ? 'bg-yellow-500/20 text-yellow-400'
+                                      : 'bg-dark-700 text-dark-400'
+                                }`}
+                              >
+                                LVL {level.level}
+                              </span>
+                              {isClaimed && (
+                                <span className="text-green-400 text-xs">
+                                  Claimed
+                                </span>
+                              )}
+                              {!isClaimed && isUnlocked && (
+                                <span className="text-yellow-400 text-xs">
+                                  Ready!
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-xs text-dark-400">
+                              Turnover: ${formatNumber(level.threshold)}
+                            </div>
+                          </div>
+                          <span
+                            className={`text-base font-bold ${
+                              isClaimed
+                                ? 'text-green-400'
+                                : isUnlocked
+                                  ? 'text-yellow-400'
+                                  : 'text-dark-500'
+                            }`}
+                          >
+                            ${formatNumber(level.bonus)}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </motion.div>
+
+            {/* ── Recent Commissions ── */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.9 }}
+            >
+              <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6">
+                <h3 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
                   <DollarSign className="w-5 h-5 text-green-400" />
-                  Recent Bonuses
+                  Recent Commissions
                 </h3>
-                <p className="text-xs text-dark-500 mb-4">Last 10 bonuses received</p>
+                <p className="text-xs text-dark-500 mb-4">
+                  Last 10 commissions received
+                </p>
                 <div className="space-y-3">
-                  {recentBonuses.length > 0 ? (
-                    recentBonuses.map((bonus: any) => (
+                  {recentCommissions.length > 0 ? (
+                    recentCommissions.map((bonus: any) => (
                       <div
                         key={bonus.id}
                         className="flex items-center gap-3 p-3 bg-dark-900/50 rounded-xl border border-dark-700 hover:border-green-500/30 transition-all"
@@ -815,9 +869,9 @@ export default function ReferralsPage() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <div className="text-sm font-bold text-green-400">
+                            <span className="text-sm font-bold text-green-400">
                               +${formatNumber(bonus.amount)}
-                            </div>
+                            </span>
                             {bonus.level && (
                               <span className="text-xs px-1.5 py-0.5 rounded bg-primary-500/20 text-primary-400 border border-primary-500/30">
                                 L{bonus.level}
@@ -827,7 +881,9 @@ export default function ReferralsPage() {
                           <div className="text-xs text-dark-400 truncate">
                             from {bonus.from}
                           </div>
-                          <div className="text-xs text-dark-500">{timeAgo(bonus.date)}</div>
+                          <div className="text-xs text-dark-500">
+                            {timeAgo(bonus.date)}
+                          </div>
                         </div>
                       </div>
                     ))
@@ -835,58 +891,16 @@ export default function ReferralsPage() {
                     <div className="text-center py-8 text-dark-400">
                       <DollarSign className="w-12 h-12 text-dark-600 mx-auto mb-2" />
                       <div className="text-sm">No commissions yet</div>
-                      <div className="text-xs mt-1">Share your link to start earning</div>
+                      <div className="text-xs mt-1">
+                        Share your link to start earning
+                      </div>
                     </div>
                   )}
                 </div>
               </div>
             </motion.div>
 
-            {/* Referral Tips */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.9 }}
-            >
-              <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6">
-                <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                  <Zap className="w-5 h-5 text-accent-400" />
-                  Referral Tips
-                </h3>
-                <div className="space-y-3 text-sm text-dark-300">
-                  <div className="flex gap-3 p-2 rounded-lg hover:bg-dark-900/50 transition-colors">
-                    <UserPlus className="w-5 h-5 text-primary-400 flex-shrink-0" />
-                    <div>
-                      <div className="font-medium text-white">Share Your Link</div>
-                      <div className="text-xs">Post on social media and forums</div>
-                    </div>
-                  </div>
-                  <div className="flex gap-3 p-2 rounded-lg hover:bg-dark-900/50 transition-colors">
-                    <MessageCircle className="w-5 h-5 text-blue-400 flex-shrink-0" />
-                    <div>
-                      <div className="font-medium text-white">Explain Benefits</div>
-                      <div className="text-xs">Show them how they can earn too</div>
-                    </div>
-                  </div>
-                  <div className="flex gap-3 p-2 rounded-lg hover:bg-dark-900/50 transition-colors">
-                    <BarChart3 className="w-5 h-5 text-green-400 flex-shrink-0" />
-                    <div>
-                      <div className="font-medium text-white">Build a Team</div>
-                      <div className="text-xs">Help your referrals succeed</div>
-                    </div>
-                  </div>
-                  <div className="flex gap-3 p-2 rounded-lg hover:bg-dark-900/50 transition-colors">
-                    <Trophy className="w-5 h-5 text-yellow-400 flex-shrink-0" />
-                    <div>
-                      <div className="font-medium text-white">Unlock Milestones</div>
-                      <div className="text-xs">Reach turnover targets for bonuses</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Referred By Section */}
+            {/* ── Referred By ── */}
             {referrerUser && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -895,95 +909,26 @@ export default function ReferralsPage() {
               >
                 <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-500 rounded-xl flex items-center justify-center text-white font-bold overflow-hidden">
-                      <span>{referrerUser.username[0]?.toUpperCase() || '?'}</span>
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold" style={getAvatarStyle(referrerUser.username)}>
+                      <span>
+                        {referrerUser.username[0]?.toUpperCase() || '?'}
+                      </span>
                     </div>
                     <div className="flex-1">
-                      <div className="text-xs text-dark-400 mb-1">Referred By</div>
-                      <div className="font-semibold text-white">{referrerUser.username}</div>
-                      <div className="text-xs text-dark-500">Code: {referrerUser.referralCode}</div>
+                      <div className="text-xs text-dark-400 mb-1">
+                        Referred By
+                      </div>
+                      <div className="font-semibold text-white">
+                        {referrerUser.username}
+                      </div>
+                      <div className="text-xs text-dark-500">
+                        Code: {referrerUser.referralCode}
+                      </div>
                     </div>
                   </div>
                 </div>
               </motion.div>
             )}
-
-            {/* Bonus Currency Preference */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.1 }}
-            >
-              <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6">
-                <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
-                  <Award className="w-5 h-5 text-primary-400" />
-                  Bonus Currency
-                </h3>
-                <p className="text-xs text-dark-400 mb-4">Choose which currency to receive referral bonuses</p>
-
-                <div className="relative">
-                  <button
-                    onClick={() => setShowCurrencyDropdown(!showCurrencyDropdown)}
-                    className="w-full flex items-center justify-between px-4 py-3 bg-dark-900/50 border border-dark-700 rounded-xl text-white hover:border-primary-500/50 transition-all"
-                  >
-                    <div className="flex items-center gap-3">
-                      {selectedBonusCurrency && selectedBonusCurrency.icon && (
-                        <Image
-                          src={`/currency/${selectedBonusCurrency.icon}`}
-                          alt={selectedBonusCurrency.symbol}
-                          width={32}
-                          height={32}
-                          className="w-8 h-8 object-contain"
-                        />
-                      )}
-                      <div className="text-left">
-                        <div className="font-medium">{walletForBonus}</div>
-                        <div className="text-xs text-dark-400">
-                          {selectedBonusCurrency?.name}
-                        </div>
-                      </div>
-                    </div>
-                    <span className="text-dark-400">▼</span>
-                  </button>
-
-                  {/* Dropdown */}
-                  <AnimatePresence>
-                    {showCurrencyDropdown && (
-                      <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        className="absolute z-10 w-full mt-2 bg-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-xl shadow-2xl overflow-hidden"
-                      >
-                        {bonusCurrencies.map((curr) => (
-                          <button
-                            key={curr.symbol}
-                            onClick={() => handleBonusCurrencyChange(curr.symbol)}
-                            className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-dark-800 transition-colors ${
-                              curr.symbol === walletForBonus ? 'bg-primary-500/10' : ''
-                            }`}
-                          >
-                            {curr.icon && (
-                              <Image
-                                src={`/currency/${curr.icon}`}
-                                alt={curr.symbol}
-                                width={32}
-                                height={32}
-                                className="w-8 h-8 object-contain"
-                              />
-                            )}
-                            <div className="text-left">
-                              <div className="font-medium text-white">{curr.symbol}</div>
-                              <div className="text-xs text-dark-400">{curr.name}</div>
-                            </div>
-                          </button>
-                        ))}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              </div>
-            </motion.div>
           </div>
         </div>
       </div>

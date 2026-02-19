@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useState, Suspense } from 'react';
 import { NeonGridLines, hexGridBg } from '@/components/animations/NeonGridLines';
-import { ArrowLeft, Lock, Users, ShieldCheck, Star } from 'lucide-react';
+import { ArrowLeft, Lock, Users, ShieldCheck } from 'lucide-react';
 
 function LoginForm() {
   const [formData, setFormData] = useState({
@@ -163,10 +163,6 @@ function LoginForm() {
           <div className="flex items-center gap-1.5">
             <ShieldCheck className="w-3.5 h-3.5 text-primary-400" />
             <span>Bank-Level Security</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <Star className="w-3.5 h-3.5 text-primary-400" />
-            <span>4.9/5 Rating</span>
           </div>
         </motion.div>
       </div>

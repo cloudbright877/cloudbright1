@@ -13,14 +13,8 @@ import {
   getUserCopyPnLBreakdown,
 } from '../userCopyStats';
 import { getAllDemoBots, getDemoBotById } from '../demoMarketplace';
-import { distributeReferralCommissions } from '../referralCommissions';
-import { checkAndAwardTurnoverBonuses } from '../turnoverBonuses';
 import { unfreezeFunds, freezeFunds, creditCollectedPnL } from '../balances';
-import { getUser, getUplineChain } from '../users';
-import {
-  calculateEarlyExitFee,
-  getDaysSinceCreation,
-} from '../capitalReservation';
+import { isLockedIn } from '../capitalReservation';
 import type { DemoBot } from '../demoMarketplace';
 import type { BotConfig, BotStats } from '../trading/types';
 import type { AggregatedMasterBotStats } from '../userCopyStats';
@@ -126,10 +120,35 @@ export const botsApi = {
     // Ensure Master Bot instance exists before creating copy
     await this.ensureMasterBot(masterBotId);
 
+    // Get lock-in days from bot config
+    const demoBot = getDemoBotById(masterBotId);
+    const lockInDays = demoBot?.lockInDays ?? 30;
+
     // Move funds from available to frozen
     await freezeFunds(userId, investedAmount, 'pending_copy');
 
-    const copyId = createUserCopy(masterBotId, investedAmount, userId);
+    const copyId = createUserCopy(masterBotId, investedAmount, userId, lockInDays);
+
+    // Distribute referral commissions on bot activation (non-blocking)
+    try {
+      const { distributeReferralCommissions } = await import('../referralCommissions');
+      await distributeReferralCommissions(userId, copyId, investedAmount);
+    } catch (err) {
+      console.error(`[botsApi] Referral commission error for copy ${copyId}:`, err);
+    }
+
+    // Check turnover bonuses for upline (non-blocking)
+    try {
+      const { getUplineChain } = await import('../users');
+      const { checkAndAwardTurnoverBonuses } = await import('../turnoverBonuses');
+      const uplineChain = await getUplineChain(userId);
+      for (let i = 0; i < Math.min(uplineChain.length, 5); i++) {
+        await checkAndAwardTurnoverBonuses(uplineChain[i].id);
+      }
+    } catch (err) {
+      console.error(`[botsApi] Turnover bonus error for copy ${copyId}:`, err);
+    }
+
     return copyId;
 
     /* FUTURE:
@@ -144,95 +163,44 @@ export const botsApi = {
   },
 
   /**
-   * Collect available P&L from an active copy
+   * Auto-credit profit to user's available balance when a trade closes.
+   * Called by BotManager's onTradeClose callback.
    *
-   * User gets 100% of collected profit (no deductions).
-   * Referrer gets % of collect amount as platform bonus.
-   *
-   * Atomicity: totalCollectedPnL updated BEFORE creditCollectedPnL().
-   * Rate limiting: max 1 collect per copy per 10 minutes.
+   * Credits max(0, realizedPnL - totalAlreadyCredited) to balance.
+   * No referral commissions or other deductions here.
    */
-  async collectProfit(copyId: string): Promise<{
-    collectedAmount: number;
-    totalCollectedPnL: number;
-    collectCount: number;
-  }> {
-    await new Promise((resolve) => setTimeout(resolve, 100));
+  async autoCreditOnTradeClose(masterBotId: string): Promise<void> {
+    // Find all ACTIVE copies of this master bot
+    const { getAllCopiesOfMaster } = await import('../userCopies');
+    const copies = getAllCopiesOfMaster(masterBotId).filter(c => c.status === 'ACTIVE');
 
-    // 1. Validate copy is ACTIVE
-    const copy = getUserCopyStorage(copyId);
-    if (!copy) throw new Error(`Copy ${copyId} not found`);
-    if (copy.status !== 'ACTIVE') throw new Error(`Copy ${copyId} is not active`);
-
-    // 2. Acquire lock (before rate limit check to prevent race condition)
-    if (copy.operationInProgress !== null) {
-      throw new Error(`Operation "${copy.operationInProgress}" already in progress`);
-    }
-    updateUserCopy(copyId, { operationInProgress: 'collect' });
-
-    try {
-      // 3. Rate limit: check AFTER lock to prevent race condition
-      const RATE_LIMIT_MS = 10 * 60 * 1000; // 10 minutes
-      const freshCopy = getUserCopyStorage(copyId);
-      const lastCollect = freshCopy?.lastCollectAt || copy.lastCollectAt;
-      if (lastCollect && Date.now() - lastCollect < RATE_LIMIT_MS) {
-        const remainingSec = Math.ceil((RATE_LIMIT_MS - (Date.now() - lastCollect)) / 1000);
-        throw new Error(`Rate limited: wait ${remainingSec}s before next collect`);
-      }
-
-      // 4a. Get realized P&L from breakdown
-      const breakdown = getUserCopyPnLBreakdown(copyId);
-      if (!breakdown) throw new Error(`Failed to get P&L breakdown for copy ${copyId}`);
-
-      // 4b. Calculate available to collect (early return goes through finally → lock released)
-      const availableToCollect = breakdown.availableToCollect;
-      if (availableToCollect <= 0) {
-        return { collectedAmount: 0, totalCollectedPnL: copy.totalCollectedPnL || 0, collectCount: copy.collectCount || 0 };
-      }
-
-      // 4d. UPDATE COPY FIRST (prevents double-spend if crash after this point)
-      const newTotalCollected = (copy.totalCollectedPnL || 0) + availableToCollect;
-      const newCollectCount = (copy.collectCount || 0) + 1;
-      updateUserCopy(copyId, {
-        totalCollectedPnL: newTotalCollected,
-        collectCount: newCollectCount,
-        lastCollectAt: Date.now(),
-      });
-
-      // Verify update succeeded before crediting (prevents double-spend)
-      // Check both totalCollectedPnL AND collectCount as monotonic nonce
-      const updatedCopy = getUserCopyStorage(copyId);
-      if (!updatedCopy ||
-          updatedCopy.totalCollectedPnL !== newTotalCollected ||
-          updatedCopy.collectCount !== newCollectCount) {
-        throw new Error(`Failed to update totalCollectedPnL for copy ${copyId} — aborting credit`);
-      }
-
-      // 4e. Credit to user's available balance (user gets 100%)
-      await creditCollectedPnL(copy.userId, availableToCollect, copyId);
-
-      // 4f. Distribute referral commissions (platform bonus, not deducted from user)
-      await distributeReferralCommissions(copy.userId, copyId, availableToCollect);
-
-      // 4g. Check turnover bonuses for upline chain
-      const uplineChain = await getUplineChain(copy.userId);
-      for (const upline of uplineChain) {
-        await checkAndAwardTurnoverBonuses(upline.id);
-      }
-
-      console.log(`[botsApi] Collected $${availableToCollect.toFixed(2)} from copy ${copyId} (total: $${newTotalCollected.toFixed(2)}, #${newCollectCount})`);
-
-      return {
-        collectedAmount: availableToCollect,
-        totalCollectedPnL: newTotalCollected,
-        collectCount: newCollectCount,
-      };
-    } finally {
-      // 5. Release lock (wrapped in try-catch to prevent deadlock)
+    for (const copy of copies) {
       try {
-        updateUserCopy(copyId, { operationInProgress: null });
+        const breakdown = getUserCopyPnLBreakdown(copy.id);
+        if (!breakdown) continue;
+
+        const totalAlreadyCredited = copy.totalCollectedPnL || 0;
+        const creditAmount = Math.max(0, breakdown.realizedPnL - totalAlreadyCredited);
+
+        if (creditAmount <= 0) continue;
+
+        // Update copy record FIRST (prevents double-credit)
+        const newTotal = totalAlreadyCredited + creditAmount;
+        updateUserCopy(copy.id, { totalCollectedPnL: newTotal });
+
+        // Verify update succeeded
+        const updatedCopy = getUserCopyStorage(copy.id);
+        if (!updatedCopy || updatedCopy.totalCollectedPnL !== newTotal) {
+          console.error(`[botsApi] Failed to update totalCollectedPnL for copy ${copy.id} — skipping credit`);
+          continue;
+        }
+
+        // Credit to user's available balance
+        await creditCollectedPnL(copy.userId, creditAmount, copy.id);
+
+        console.log(`[botsApi] Auto-credited $${creditAmount.toFixed(2)} to ${copy.userId} from copy ${copy.id}`);
       } catch (err) {
-        console.error(`[botsApi] CRITICAL: Failed to release collect lock for copy ${copyId}`, err);
+        console.error(`[botsApi] Auto-credit error for copy ${copy.id}:`, err);
       }
     }
   },
@@ -241,25 +209,17 @@ export const botsApi = {
    * Close (archive) a user copy
    *
    * Flow:
-   * 1. Validate copy is ACTIVE, no operation in progress
+   * 1. Validate copy is ACTIVE, lock-in period ended, no operation in progress
    * 2. Set operationInProgress = 'archive', status = CLOSING
-   * 3. Auto-collect uncollected profit (update-before-credit rule)
-   * 4. Calculate early exit fee on investedAmount
-   * 5. capitalReturn = max(0, investedCapital - earlyExitFee)
-   * 6. Unfreeze funds
-   * 7. Mark CLOSED
-   *
-   * User gets 100% of profit. Referrer gets platform bonus.
+   * 3. Credit any remaining uncollected profit
+   * 4. Return full capital
+   * 5. Unfreeze funds
+   * 6. Mark CLOSED
    */
   async closeUserCopy(copyId: string): Promise<{
     copy: BotStats | null;
     finalPnL: number;
     finalValue: number;
-    investorReceives: number;
-    earlyExitFee: number;
-    isEarlyExit: boolean;
-    previouslyCollected: number;
-    autoCollected: number;
     capitalReturn: number;
   }> {
     await new Promise((resolve) => setTimeout(resolve, 100));
@@ -272,6 +232,11 @@ export const botsApi = {
       throw new Error(`Operation "${copy.operationInProgress}" already in progress`);
     }
 
+    // Check lock-in period
+    if (isLockedIn(copy.createdAt, copy.reservationDays)) {
+      throw new Error(`Copy ${copyId} is still within lock-in period`);
+    }
+
     // 2. Acquire lock + mark CLOSING
     updateUserCopy(copyId, { operationInProgress: 'archive', status: 'CLOSING' });
 
@@ -280,99 +245,42 @@ export const botsApi = {
       const breakdown = getUserCopyPnLBreakdown(copyId);
       if (!breakdown) throw new Error(`Failed to get P&L breakdown for copy ${copyId}`);
 
-      const stats = getUserCopyStats(copyId);
       const finalPnL = breakdown.totalPnL;
       const finalValue = copy.investedAmount + finalPnL;
-      const previouslyCollected = copy.totalCollectedPnL || 0;
+      const totalAlreadyCredited = copy.totalCollectedPnL || 0;
 
-      // 4. Auto-collect uncollected realized profit
-      let autoCollected = 0;
-      const uncollected = Math.max(0, breakdown.realizedPnL - previouslyCollected);
-      if (uncollected > 0) {
-        // Update totalCollectedPnL FIRST (atomicity rule)
-        const newTotalCollected = previouslyCollected + uncollected;
-        updateUserCopy(copyId, {
-          totalCollectedPnL: newTotalCollected,
-          collectCount: (copy.collectCount || 0) + 1,
-          lastCollectAt: Date.now(),
-        });
-
-        // Verify update succeeded before crediting (prevents double-spend)
-        // Check both totalCollectedPnL AND collectCount as monotonic nonce
-        const newCollectCount = (copy.collectCount || 0) + 1;
-        const updatedCopy = getUserCopyStorage(copyId);
-        if (!updatedCopy ||
-            updatedCopy.totalCollectedPnL !== newTotalCollected ||
-            updatedCopy.collectCount !== newCollectCount) {
-          throw new Error(`Failed to update totalCollectedPnL for copy ${copyId} — aborting credit`);
-        }
-
-        // Credit to user's available balance
-        await creditCollectedPnL(copy.userId, uncollected, copyId);
-
-        // Distribute referral commissions (platform bonus)
-        await distributeReferralCommissions(copy.userId, copyId, uncollected);
-
-        autoCollected = uncollected;
-        console.log(`[botsApi] Auto-collected $${uncollected.toFixed(2)} uncollected profit`);
+      // 4. Credit any remaining uncollected realized profit
+      const uncredited = Math.max(0, breakdown.realizedPnL - totalAlreadyCredited);
+      if (uncredited > 0) {
+        const newTotal = totalAlreadyCredited + uncredited;
+        updateUserCopy(copyId, { totalCollectedPnL: newTotal });
+        await creditCollectedPnL(copy.userId, uncredited, copyId);
+        console.log(`[botsApi] Final credit $${uncredited.toFixed(2)} on archive for copy ${copyId}`);
       }
 
-      // 5. Calculate early exit fee
-      const daysSinceCopy = getDaysSinceCreation(copy.createdAt);
-      const earlyExitResult = calculateEarlyExitFee(
-        copy.investedAmount,
-        0, // fee is on invested capital only, not profit
-        daysSinceCopy,
-        copy.reservationDays
-      );
+      // 5. Full capital return
+      const capitalReturn = copy.investedAmount;
 
-      // 6. Capital return = max(0, invested - earlyExitFee)
-      const capitalReturn = Math.max(0, copy.investedAmount - earlyExitResult.fee);
-
-      // 7. Unfreeze funds (frozen → available)
+      // 6. Unfreeze funds (frozen → available)
       await unfreezeFunds(copy.userId, copy.investedAmount, capitalReturn, copyId);
 
-      // 8. Award turnover bonuses
-      if (autoCollected > 0) {
-        const uplineChain = await getUplineChain(copy.userId);
-        for (const upline of uplineChain) {
-          await checkAndAwardTurnoverBonuses(upline.id);
-        }
-      }
-
-      // 9. Mark as CLOSED
+      // 7. Mark as CLOSED
       updateUserCopy(copyId, {
         status: 'CLOSED',
         closedAt: Date.now(),
         finalPnL,
         finalValue,
-        earlyExitFee: earlyExitResult.fee,
-        earlyExitPenaltyRate: earlyExitResult.penaltyRate,
-        isEarlyExit: earlyExitResult.isEarlyExit,
         operationInProgress: null,
       });
 
-      const investorReceives = capitalReturn + autoCollected;
-
       console.log(`[botsApi] Closed copy ${copyId}:`);
-      console.log(`  Previously collected: $${previouslyCollected.toFixed(2)}`);
-      console.log(`  Auto-collected now: $${autoCollected.toFixed(2)}`);
+      console.log(`  Total auto-credited: $${(totalAlreadyCredited + uncredited).toFixed(2)}`);
       console.log(`  Capital return: $${capitalReturn.toFixed(2)}`);
-      if (earlyExitResult.isEarlyExit) {
-        console.log(`  Early Exit Fee: $${earlyExitResult.fee.toFixed(2)} (${(earlyExitResult.penaltyRate * 100).toFixed(0)}%)`);
-      }
-      console.log(`  Credited now: $${investorReceives.toFixed(2)}`);
-      console.log(`  Total all-time: $${(investorReceives + previouslyCollected).toFixed(2)}`);
 
       return {
         copy: getUserCopyStats(copyId),
         finalPnL,
         finalValue,
-        investorReceives,
-        earlyExitFee: earlyExitResult.fee,
-        isEarlyExit: earlyExitResult.isEarlyExit,
-        previouslyCollected,
-        autoCollected,
         capitalReturn,
       };
     } catch (error) {
@@ -443,6 +351,12 @@ export const botsApi = {
     // Load existing bots from localStorage
     botManager.load();
 
+    // Set up auto-credit callback: when a master bot closes a trade,
+    // credit proportional profit to all active user copies
+    botManager.setOnTradeClose((masterBotId: string) => {
+      this.autoCreditOnTradeClose(masterBotId);
+    });
+
     // DON'T auto-create all Master Bots - only create when user copies
     // This prevents localStorage overflow
 
@@ -454,7 +368,7 @@ export const botsApi = {
       botManager.tick(prices);
     });
 
-    console.log('[botsApi] Master bots initialized');
+    console.log('[botsApi] Master bots initialized (with auto-credit on trade close)');
   },
 
   /**

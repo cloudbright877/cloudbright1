@@ -167,7 +167,7 @@ export default function CommissionHistory({
                   </span>
                 </div>
                 <div className="text-xs text-dark-400 truncate">
-                  From investor P&L: ${formatNumber(commission.investorPnL)}
+                  Bot activation: ${formatNumber(commission.investorPnL)}
                 </div>
                 <div className="text-xs text-dark-500">{timeAgo(commission.createdAt)}</div>
               </div>
