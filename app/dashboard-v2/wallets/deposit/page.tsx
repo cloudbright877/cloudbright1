@@ -140,7 +140,7 @@ export default function DepositPage() {
   };
 
   return (
-    <div className="min-h-screen bg-dark-950 text-white">
+    <div className="min-h-screen bg-gray-100 dark:bg-dark-950 text-gray-900 dark:text-white">
       <div className="max-w-[1400px] mx-auto p-4 lg:p-6">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -149,7 +149,7 @@ export default function DepositPage() {
         >
           <Link
             href="/dashboard-v2/wallets"
-            className="inline-flex items-center gap-2 text-dark-400 hover:text-white transition-colors mb-4"
+            className="inline-flex items-center gap-2 text-gray-600 dark:text-dark-400 hover:text-gray-900 dark:hover:text-white transition-colors mb-4"
           >
             <ChevronLeft className="w-5 h-5" />
             Back to Wallets
@@ -178,8 +178,8 @@ export default function DepositPage() {
             {/* Step 1: Select Currency */}
             {step === 1 && (
               <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
-                <h2 className="text-2xl font-medium text-white mb-6">Select Currency</h2>
+                <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
+                <h2 className="text-2xl font-medium text-gray-900 dark:text-white mb-6">Select Currency</h2>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3">
                   {CURRENCIES.map((currency, index) => (
                     <CurrencyCard
@@ -201,11 +201,11 @@ export default function DepositPage() {
             {/* Step 2: Select Network */}
             {step === 2 && selectedCurrency && (
               <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
-                <h2 className="text-2xl font-medium text-white mb-2">
+                <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
+                <h2 className="text-2xl font-medium text-gray-900 dark:text-white mb-2">
                   Select Network for {selectedCurrency.name}
                 </h2>
-                <p className="text-dark-400 mb-6">Choose the blockchain network for deposit</p>
+                <p className="text-gray-600 dark:text-dark-400 mb-6">Choose the blockchain network for deposit</p>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3 mb-6">
                   {selectedCurrency.networks.map((network, index) => (
@@ -220,14 +220,14 @@ export default function DepositPage() {
                         ${
                           selectedNetwork?.id === network.id
                             ? 'bg-primary-500/10 border-primary-500 shadow-lg shadow-primary-500/20'
-                            : 'bg-dark-800/50 border-dark-700 hover:border-primary-500/50 hover:bg-dark-800'
+                            : 'bg-gray-100 dark:bg-dark-800/50 border-gray-200 dark:border-dark-700 hover:border-primary-500/50 hover:bg-gray-200 dark:hover:bg-dark-800'
                         }
                       `}
                     >
                       <div className="flex-1 min-w-0">
-                        <div className="font-medium text-white text-sm truncate">{network.networkName}</div>
-                        <div className="text-xs text-dark-400 truncate">{network.name}</div>
-                        <div className="flex items-center gap-2 text-[11px] text-dark-500 mt-0.5">
+                        <div className="font-medium text-gray-900 dark:text-white text-sm truncate">{network.networkName}</div>
+                        <div className="text-xs text-gray-600 dark:text-dark-400 truncate">{network.name}</div>
+                        <div className="flex items-center gap-2 text-[11px] text-gray-500 dark:text-dark-500 mt-0.5">
                           <span>Fee: {network.fee}</span>
                           {network.minAmount && parseFloat(network.minAmount) > 0 && (
                             <>
@@ -243,7 +243,7 @@ export default function DepositPage() {
                           animate={{ scale: 1 }}
                           className="absolute top-2 right-2 w-5 h-5 bg-gradient-to-br from-primary-500 to-accent-500 rounded-full flex items-center justify-center"
                         >
-                          <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-3 h-3 text-gray-900 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                           </svg>
                         </motion.div>
@@ -254,7 +254,7 @@ export default function DepositPage() {
 
                 <button
                   onClick={handleBack}
-                  className="px-6 py-3 bg-dark-800 hover:bg-dark-700 border-2 border-dark-700 rounded-xl text-white font-medium transition-colors"
+                  className="px-6 py-3 bg-gray-50 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 border-2 border-gray-200 dark:border-dark-700 rounded-xl text-gray-900 dark:text-white font-medium transition-colors"
                 >
                   <ChevronLeft className="w-4 h-4 inline mr-2" />
                   Back
@@ -269,8 +269,8 @@ export default function DepositPage() {
                 {/* Left Panel - QR & Address (col-span-5) */}
                 <div className="lg:col-span-5">
                   <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] sticky top-6">
-                    <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
-                    <h3 className="text-xl font-medium text-white mb-6">Deposit Address</h3>
+                    <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
+                    <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-6">Deposit Address</h3>
 
                     {/* QR Code */}
                     <div className="flex flex-col items-center mb-6">
@@ -284,7 +284,7 @@ export default function DepositPage() {
 
                     {/* Address Input */}
                     <div className="mb-4">
-                      <label className="block text-sm font-medium text-dark-300 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-2">
                         Deposit Address
                       </label>
                       <div className="flex gap-2">
@@ -292,7 +292,7 @@ export default function DepositPage() {
                           type="text"
                           value={depositAddress}
                           readOnly
-                          className="flex-1 px-4 py-3 bg-dark-800 border-2 border-dark-700 rounded-xl text-white font-mono text-sm"
+                          className="flex-1 px-4 py-3 bg-gray-100 dark:bg-dark-800 border-2 border-gray-200 dark:border-dark-700 rounded-xl text-gray-900 dark:text-white font-mono text-sm"
                         />
                         <button
                           onClick={handleCopyAddress}
@@ -307,7 +307,7 @@ export default function DepositPage() {
                     {/* Back Button */}
                     <button
                       onClick={handleBack}
-                      className="w-full px-6 py-3 bg-dark-800 hover:bg-dark-700 border-2 border-dark-700 rounded-xl text-white font-medium transition-colors"
+                      className="w-full px-6 py-3 bg-gray-50 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 border-2 border-gray-200 dark:border-dark-700 rounded-xl text-gray-900 dark:text-white font-medium transition-colors"
                     >
                       <ChevronLeft className="w-4 h-4 inline mr-2" />
                       Back
@@ -320,34 +320,34 @@ export default function DepositPage() {
                 <div className="lg:col-span-7 space-y-4">
                   {/* Network Info */}
                   <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                    <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
-                    <h3 className="text-xl font-medium text-white mb-4">Network Details</h3>
+                    <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
+                    <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-4">Network Details</h3>
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="p-4 bg-dark-900/50 rounded-xl">
-                        <div className="text-xs text-dark-400 mb-1">Currency</div>
+                      <div className="p-4 bg-gray-100 dark:bg-dark-900/50 rounded-xl">
+                        <div className="text-xs text-gray-600 dark:text-dark-400 mb-1">Currency</div>
                         <div className="flex items-center gap-2">
                           {(() => {
                             const Icon = TOKEN_ICONS[selectedCurrency.symbol];
-                            return Icon ? <Icon size={24} variant="branded" /> : <span className="text-white font-medium">{selectedCurrency.symbol.charAt(0)}</span>;
+                            return Icon ? <Icon size={24} variant="branded" /> : <span className="text-gray-900 dark:text-white font-medium">{selectedCurrency.symbol.charAt(0)}</span>;
                           })()}
-                          <div className="text-lg font-medium text-white">
+                          <div className="text-lg font-medium text-gray-900 dark:text-white">
                             {selectedCurrency.symbol}
                           </div>
                         </div>
                       </div>
-                      <div className="p-4 bg-dark-900/50 rounded-xl">
-                        <div className="text-xs text-dark-400 mb-1">Network</div>
-                        <div className="text-lg font-medium text-white">
+                      <div className="p-4 bg-gray-100 dark:bg-dark-900/50 rounded-xl">
+                        <div className="text-xs text-gray-600 dark:text-dark-400 mb-1">Network</div>
+                        <div className="text-lg font-medium text-gray-900 dark:text-white">
                           {selectedNetwork.networkName}
                         </div>
                       </div>
-                      <div className="p-4 bg-dark-900/50 rounded-xl">
-                        <div className="text-xs text-dark-400 mb-1">Network Fee</div>
-                        <div className="text-lg font-medium text-white">{selectedNetwork.fee}</div>
+                      <div className="p-4 bg-gray-100 dark:bg-dark-900/50 rounded-xl">
+                        <div className="text-xs text-gray-600 dark:text-dark-400 mb-1">Network Fee</div>
+                        <div className="text-lg font-medium text-gray-900 dark:text-white">{selectedNetwork.fee}</div>
                       </div>
-                      <div className="p-4 bg-dark-900/50 rounded-xl">
-                        <div className="text-xs text-dark-400 mb-1">Processing Time</div>
-                        <div className="text-lg font-medium text-white">3-10 min</div>
+                      <div className="p-4 bg-gray-100 dark:bg-dark-900/50 rounded-xl">
+                        <div className="text-xs text-gray-600 dark:text-dark-400 mb-1">Processing Time</div>
+                        <div className="text-lg font-medium text-gray-900 dark:text-white">3-10 min</div>
                       </div>
                     </div>
                     </div>
@@ -358,11 +358,11 @@ export default function DepositPage() {
                     <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl">
                       <div className="flex items-start gap-3">
                         <Info className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
-                        <div className="text-sm text-blue-200">
+                        <div className="text-sm text-gray-900 dark:text-blue-200">
                           <div className="font-medium mb-1">
                             Minimum Deposit: ${selectedNetwork.minAmount}
                           </div>
-                          <div className="text-blue-200/80">
+                          <div className="text-gray-700 dark:text-blue-200/80">
                             Deposits below minimum amount will not be credited to your account.
                           </div>
                         </div>
@@ -374,9 +374,9 @@ export default function DepositPage() {
                   <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl">
                     <div className="flex items-start gap-3">
                       <AlertTriangle className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
-                      <div className="text-sm text-yellow-200">
+                      <div className="text-sm text-gray-900 dark:text-yellow-200">
                         <div className="font-medium mb-1">Important Network Information</div>
-                        <div className="text-yellow-200/80">
+                        <div className="text-gray-700 dark:text-yellow-200/80">
                           Please ensure you send {selectedCurrency.symbol} via {selectedNetwork.name}{' '}
                           only. Sending via a different network may result in permanent loss of funds.
                         </div>
@@ -386,12 +386,12 @@ export default function DepositPage() {
 
                   {/* Instructions */}
                   <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                    <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
-                    <h3 className="text-xl font-medium text-white mb-4 flex items-center gap-2">
+                    <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
+                    <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                       <Clock className="w-5 h-5 text-primary-400" />
                       How to Deposit
                     </h3>
-                    <ol className="space-y-3 text-dark-300">
+                    <ol className="space-y-3 text-gray-700 dark:text-dark-300">
                       <li className="flex gap-3">
                         <span className="flex-shrink-0 w-6 h-6 bg-primary-500/20 border border-primary-500/30 rounded-full flex items-center justify-center text-xs font-medium text-primary-400">
                           1

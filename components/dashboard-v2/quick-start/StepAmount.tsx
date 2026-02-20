@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { DollarSign } from 'lucide-react';
+import { DollarSign, Wallet, Sprout, TrendingUp, BarChart3, Crown } from 'lucide-react';
 
 interface StepAmountProps {
   userBalance: number;
@@ -9,7 +9,12 @@ interface StepAmountProps {
   onSelect: (amount: number) => void;
 }
 
-const PRESET_AMOUNTS = [100, 500, 1000, 5000];
+const TIERS = [
+  { amount: 100, label: 'Starter', description: 'Try the platform', icon: Sprout, badge: null },
+  { amount: 500, label: 'Growth', description: 'Build a portfolio', icon: TrendingUp, badge: 'Popular' },
+  { amount: 1000, label: 'Premium', description: 'Diversified strategy', icon: BarChart3, badge: null },
+  { amount: 5000, label: 'Professional', description: 'Maximum diversification', icon: Crown, badge: null },
+];
 
 export function StepAmount({ userBalance, selectedAmount, onSelect }: StepAmountProps) {
   const [customAmount, setCustomAmount] = useState('');
@@ -35,28 +40,56 @@ export function StepAmount({ userBalance, selectedAmount, onSelect }: StepAmount
 
   return (
     <div className="space-y-6">
-      <div className="text-center mb-8">
-        <h3 className="text-2xl font-semibold text-white mb-2">How much do you want to invest?</h3>
-        <p className="text-dark-400">
-          Available balance: <span className="text-green-400 font-normal">${userBalance.toLocaleString()}</span>
-        </p>
+      <div className="text-center mb-4 sm:mb-6 lg:mb-8">
+        <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white mb-2">How much do you want to invest?</h3>
+        <p className="text-gray-600 dark:text-dark-400">Select a tier or enter a custom amount</p>
       </div>
 
-      {/* Preset amounts */}
+      {/* Balance card */}
+      <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-50 dark:bg-dark-800 border border-gray-200 dark:border-dark-700">
+        <div className="w-8 h-8 rounded-lg bg-primary-500/20 flex items-center justify-center">
+          <Wallet className="w-4 h-4 text-primary-400" />
+        </div>
+        <div>
+          <p className="text-[11px] text-gray-600 dark:text-dark-400 leading-tight">Available Balance</p>
+          <p className="text-base font-semibold text-gray-900 dark:text-white">${userBalance.toLocaleString()}</p>
+        </div>
+      </div>
+
+      {/* Tier cards */}
       <div className="grid grid-cols-2 gap-3">
-        {PRESET_AMOUNTS.map(amount => (
-          <button
-            key={amount}
-            onClick={() => handlePresetClick(amount)}
-            className={`px-6 py-4 rounded-xl font-medium text-lg transition-all ${
-              selectedAmount === amount && !showCustom
-                ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white border-2 border-primary-400 shadow-lg shadow-primary-500/50'
-                : 'bg-dark-800 border border-dark-700 text-white hover:border-primary-500/50 hover:bg-dark-700'
-            }`}
-          >
-            ${amount.toLocaleString()}
-          </button>
-        ))}
+        {TIERS.map((tier) => {
+          const Icon = tier.icon;
+          const isSelected = selectedAmount === tier.amount && !showCustom;
+          return (
+            <button
+              key={tier.amount}
+              onClick={() => handlePresetClick(tier.amount)}
+              className={`relative px-3 py-3 rounded-xl text-left transition-all ${
+                isSelected
+                  ? 'bg-gray-200 dark:bg-dark-800/80 border-2 border-primary-500 shadow-lg shadow-primary-500/20'
+                  : 'bg-gray-50 dark:bg-dark-800/60 border border-gray-200 dark:border-dark-700 hover:border-primary-500/50 hover:bg-gray-100 dark:hover:bg-dark-700/60'
+              }`}
+            >
+              {tier.badge && (
+                <span className="absolute -top-2 right-3 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-gradient-to-r from-primary-500 to-accent-500 text-white rounded-full">
+                  {tier.badge}
+                </span>
+              )}
+              <div className="flex items-center gap-3">
+                <div className={`w-9 h-9 rounded-lg flex-shrink-0 flex items-center justify-center ${
+                  isSelected ? 'bg-primary-500/20' : 'bg-gray-200 dark:bg-dark-700'
+                }`}>
+                  <Icon className={`w-4 h-4 ${isSelected ? 'text-primary-400' : 'text-gray-600 dark:text-dark-400'}`} />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-lg font-bold text-gray-900 dark:text-white leading-tight">${tier.amount.toLocaleString()}</p>
+                  <p className={`text-xs ${isSelected ? 'text-primary-400' : 'text-gray-600 dark:text-dark-500'}`}>{tier.label}</p>
+                </div>
+              </div>
+            </button>
+          );
+        })}
       </div>
 
       {/* Custom amount */}
@@ -64,13 +97,16 @@ export function StepAmount({ userBalance, selectedAmount, onSelect }: StepAmount
         {!showCustom ? (
           <button
             onClick={handleCustomClick}
-            className="w-full px-6 py-4 rounded-xl font-semibold bg-dark-800 border border-dark-700 text-white hover:border-primary-500/50 hover:bg-dark-700 transition-all"
+            className="w-full px-4 py-3 rounded-xl font-medium text-sm bg-gray-50 dark:bg-dark-800/60 border border-gray-200 dark:border-dark-700 border-dashed text-gray-700 dark:text-dark-300 hover:border-primary-500/50 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-dark-700/60 transition-all"
           >
-            Custom Amount
+            <div className="flex items-center justify-center gap-2">
+              <DollarSign className="w-4 h-4" />
+              Custom Amount
+            </div>
           </button>
         ) : (
           <div className="relative">
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-dark-400">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 dark:text-dark-400">
               <DollarSign className="w-5 h-5" />
             </div>
             <input
@@ -78,13 +114,12 @@ export function StepAmount({ userBalance, selectedAmount, onSelect }: StepAmount
               value={customAmount}
               onChange={(e) => handleCustomChange(e.target.value)}
               placeholder="Enter amount"
-              className="w-full px-6 py-4 pl-12 rounded-xl bg-gradient-to-r from-primary-500/10 to-accent-500/10 border-2 border-primary-500 text-white text-lg font-semibold placeholder-dark-500 focus:outline-none focus:border-primary-400"
+              className="w-full px-4 py-3 pl-11 rounded-xl bg-gray-100 dark:bg-dark-900 border-2 border-primary-500 text-gray-900 dark:text-white text-base font-semibold placeholder-gray-400 dark:placeholder-dark-500 focus:outline-none focus:border-primary-400 focus:ring-primary-500 shadow-lg shadow-primary-500/20"
               autoFocus
             />
           </div>
         )}
       </div>
-
     </div>
   );
 }

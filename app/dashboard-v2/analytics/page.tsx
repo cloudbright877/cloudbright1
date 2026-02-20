@@ -237,7 +237,7 @@ export default function AnalyticsPage() {
         pairCounts.set(trade.pair, (pairCounts.get(trade.pair) || 0) + 1);
       });
       const total = allTrades.length;
-      const colors = ['#F59E0B', '#6366F1', '#EC4899', '#14B8A6', '#64748b'];
+      const colors = ['#6B7FFF', '#4A90E2', '#8B5CF6', '#5865F2', '#6BA3FF'];
       const distribution = Array.from(pairCounts.entries())
         .sort((a, b) => b[1] - a[1])
         .slice(0, 5)
@@ -323,21 +323,23 @@ export default function AnalyticsPage() {
     stroke: {
       curve: 'smooth',
       width: 3,
-      colors: ['#10B981'],
+      colors: ['#6B7FFF'],
     },
     fill: {
       type: 'gradient',
       gradient: {
-        shadeIntensity: 1,
-        opacityFrom: 0.4,
-        opacityTo: 0.05,
-        stops: [0, 100],
-      },
-      colors: ['#10B981'],
+        opacityFrom: 0.7,
+        opacityTo: 0.1,
+        colorStops: [
+          { offset: 0, color: '#8B5CF6', opacity: 0.7 },
+          { offset: 50, color: '#6B7FFF', opacity: 0.4 },
+          { offset: 100, color: '#6B7FFF', opacity: 0.1 }
+        ]
+      }
     },
     grid: {
-      borderColor: '#1e293b',
-      strokeDashArray: 4,
+      borderColor: '#e5e7eb',
+      strokeDashArray: 0,
       xaxis: { lines: { show: false } },
     },
     xaxis: {
@@ -480,14 +482,14 @@ export default function AnalyticsPage() {
     },
     fill: {
       opacity: 1,
-      colors: botsComparison.map((_, i) => ['#10B981', '#3B82F6', '#F59E0B', '#EC4899', '#8B5CF6'][i % 5]),
+      colors: botsComparison.map((_, i) => ['#6B7FFF', '#4A90E2', '#8B5CF6', '#5865F2', '#6BA3FF'][i % 5]),
     },
     legend: {
       show: false,
     },
     grid: {
-      borderColor: '#1e293b',
-      strokeDashArray: 4,
+      borderColor: '#e5e7eb',
+      strokeDashArray: 0,
       xaxis: { lines: { show: false } },
     },
     tooltip: {
@@ -504,18 +506,18 @@ export default function AnalyticsPage() {
   }];
 
   return (
-    <div className="min-h-screen bg-dark-950 text-white">
+    <div className="min-h-screen bg-gray-100 dark:bg-dark-950 text-gray-900 dark:text-white">
       <div className="max-w-[1800px] mx-auto p-4 lg:p-6">
         {/* Navigation and Controls */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between mb-8"
+          className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8"
         >
           <div>
             <Link
               href="/dashboard-v2"
-              className="inline-flex items-center gap-2 text-dark-400 hover:text-white transition-colors"
+              className="inline-flex items-center gap-2 text-gray-600 dark:text-dark-400 hover:text-gray-900 dark:hover:text-white transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
               <span className="text-sm">Back to Dashboard</span>
@@ -531,7 +533,7 @@ export default function AnalyticsPage() {
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                   timeRange === range
                     ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30'
-                    : 'bg-dark-800 text-dark-400 border border-dark-700 hover:border-primary-500/30'
+                    : 'bg-gray-50 dark:bg-dark-800 text-gray-700 dark:text-dark-400 border border-gray-200 dark:border-dark-700 hover:border-primary-500/30'
                 }`}
               >
                 {range === '7d' ? '7D' : range === '30d' ? '30D' : range === '90d' ? '90D' : '1Y'}
@@ -549,22 +551,22 @@ export default function AnalyticsPage() {
             className="lg:col-span-8"
           >
             <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-            <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-primary-500/50 transition-all group">
-              <div className="flex items-center justify-between mb-6">
+            <div className="h-full bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all group">
+              <div className="flex items-center justify-between mb-4 lg:mb-6">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-green-500/20 border border-green-500/30 rounded-xl flex items-center justify-center">
-                    <TrendingUp className="w-6 h-6 text-green-400" />
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
+                    <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-primary-400" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-medium text-white">Portfolio Performance</h2>
-                    <p className="text-xs text-dark-400">Total value over time</p>
+                    <h2 className="text-lg sm:text-xl font-medium text-gray-900 dark:text-white">Portfolio Performance</h2>
+                    <p className="text-xs text-gray-600 dark:text-dark-400">Total value over time</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className={`text-2xl font-semibold ${totalProfitPercent >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  <div className={`text-lg sm:text-2xl font-semibold ${totalProfitPercent >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                     {totalProfitPercent >= 0 ? '+' : ''}{totalProfitPercent.toFixed(1)}%
                   </div>
-                  <div className="text-xs text-dark-400">Total Return</div>
+                  <div className="text-xs text-gray-600 dark:text-dark-400">Total Return</div>
                 </div>
               </div>
               <Chart
@@ -586,15 +588,15 @@ export default function AnalyticsPage() {
               className="flex-1"
             >
               <div className="h-full rounded-xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-              <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(0.75rem-1px)] p-5 hover:border-green-500/50 transition-all flex items-center">
+              <div className="h-full bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(0.75rem-1px)] p-5 hover:border-primary-500/50 transition-all flex items-center">
                 <div className="flex items-center justify-between w-full">
                   <div className="flex items-center gap-3">
-                    <div className="w-11 h-11 bg-green-500/20 border border-green-500/30 rounded-lg flex items-center justify-center">
-                      <TrendingUp className="w-6 h-6 text-green-400" />
+                    <div className="w-11 h-11 bg-primary-500/20 border border-primary-500/30 rounded-lg flex items-center justify-center">
+                      <TrendingUp className="w-6 h-6 text-primary-400" />
                     </div>
                     <div>
-                      <div className="text-xs text-dark-400 mb-1">Total Profit</div>
-                      <div className="text-2xl font-semibold text-white">
+                      <div className="text-xs text-gray-600 dark:text-dark-400 mb-1">Total Profit</div>
+                      <div className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white">
                         {totalProfit >= 0 ? '+' : ''}${totalProfit.toFixed(2)}
                       </div>
                     </div>
@@ -603,7 +605,7 @@ export default function AnalyticsPage() {
                     <div className={`text-base font-medium ${totalProfitPercent >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                       {totalProfitPercent >= 0 ? '+' : ''}{totalProfitPercent.toFixed(1)}%
                     </div>
-                    <div className="text-xs text-dark-400 mt-0.5">Invested: ${totalInvested.toLocaleString()}</div>
+                    <div className="text-xs text-gray-600 dark:text-dark-400 mt-0.5">Invested: ${totalInvested.toLocaleString()}</div>
                   </div>
                 </div>
               </div>
@@ -617,20 +619,20 @@ export default function AnalyticsPage() {
               className="flex-1"
             >
               <div className="h-full rounded-xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-              <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(0.75rem-1px)] p-5 hover:border-blue-500/50 transition-all flex items-center">
+              <div className="h-full bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(0.75rem-1px)] p-5 hover:border-primary-500/50 transition-all flex items-center">
                 <div className="flex items-center justify-between w-full">
                   <div className="flex items-center gap-3">
-                    <div className="w-11 h-11 bg-blue-500/20 border border-blue-500/30 rounded-lg flex items-center justify-center">
-                      <Activity className="w-6 h-6 text-blue-400" />
+                    <div className="w-11 h-11 bg-primary-500/20 border border-primary-500/30 rounded-lg flex items-center justify-center">
+                      <Activity className="w-6 h-6 text-primary-400" />
                     </div>
                     <div>
-                      <div className="text-xs text-dark-400 mb-1">Win Rate</div>
-                      <div className="text-2xl font-semibold text-white">{winRate.toFixed(1)}%</div>
+                      <div className="text-xs text-gray-600 dark:text-dark-400 mb-1">Win Rate</div>
+                      <div className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white">{winRate.toFixed(1)}%</div>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-base font-medium text-blue-400">{totalTrades}</div>
-                    <div className="text-xs text-dark-400 mt-0.5">Total Trades</div>
+                    <div className="text-base font-medium text-gray-900 dark:text-white">{totalTrades}</div>
+                    <div className="text-xs text-gray-600 dark:text-dark-400 mt-0.5">Total Trades</div>
                   </div>
                 </div>
               </div>
@@ -644,22 +646,22 @@ export default function AnalyticsPage() {
               className="flex-1"
             >
               <div className="h-full rounded-xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-              <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(0.75rem-1px)] p-5 hover:border-red-500/50 transition-all flex items-center">
+              <div className="h-full bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(0.75rem-1px)] p-5 hover:border-primary-500/50 transition-all flex items-center">
                 <div className="flex items-center justify-between w-full">
                   <div className="flex items-center gap-3">
-                    <div className="w-11 h-11 bg-red-500/20 border border-red-500/30 rounded-lg flex items-center justify-center">
-                      <AlertTriangle className="w-6 h-6 text-red-400" />
+                    <div className="w-11 h-11 bg-primary-500/20 border border-primary-500/30 rounded-lg flex items-center justify-center">
+                      <AlertTriangle className="w-6 h-6 text-primary-400" />
                     </div>
                     <div>
-                      <div className="text-xs text-dark-400 mb-1">Max Drawdown</div>
-                      <div className="text-2xl font-semibold text-white">{maxDrawdown.toFixed(1)}%</div>
+                      <div className="text-xs text-gray-600 dark:text-dark-400 mb-1">Max Drawdown</div>
+                      <div className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white">{maxDrawdown.toFixed(1)}%</div>
                     </div>
                   </div>
                   <div className="text-right">
                     <div className="text-base font-medium text-red-400">
                       {Math.abs(maxDrawdown) < 5 ? 'Very safe' : Math.abs(maxDrawdown) < 10 ? 'Safe' : 'Moderate'}
                     </div>
-                    <div className="text-xs text-dark-400 mt-0.5">Peak to trough</div>
+                    <div className="text-xs text-gray-600 dark:text-dark-400 mt-0.5">Peak to trough</div>
                   </div>
                 </div>
               </div>
@@ -679,14 +681,14 @@ export default function AnalyticsPage() {
             className="lg:col-span-5"
           >
             <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-            <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-accent-500/50 transition-all flex flex-col">
+            <div className="h-full bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all flex flex-col">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-accent-500/20 border border-accent-500/30 rounded-lg flex items-center justify-center">
-                  <PieChart className="w-5 h-5 text-accent-400" />
+                <div className="w-10 h-10 bg-primary-500/20 border border-primary-500/30 rounded-lg flex items-center justify-center">
+                  <PieChart className="w-5 h-5 text-primary-400" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-medium text-white">Asset Distribution</h3>
-                  <p className="text-xs text-dark-400">Trading pairs breakdown</p>
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">Asset Distribution</h3>
+                  <p className="text-xs text-gray-600 dark:text-dark-400">Trading pairs breakdown</p>
                 </div>
               </div>
               {assetDistribution.length > 0 ? (
@@ -701,15 +703,15 @@ export default function AnalyticsPage() {
                   </div>
                   <div className="grid grid-cols-2 gap-2 mt-4">
                     {assetDistribution.slice(0, 4).map((asset, i) => (
-                      <div key={i} className="flex items-center gap-2 px-3 py-2 bg-dark-900/50 rounded-lg">
+                      <div key={i} className="flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-dark-900/50 rounded-lg">
                         <div className="w-2 h-2 rounded-full" style={{ backgroundColor: asset.color }} />
-                        <span className="text-xs text-dark-300">{asset.pair} {asset.percentage.toFixed(0)}%</span>
+                        <span className="text-xs text-gray-700 dark:text-dark-300">{asset.pair} {asset.percentage.toFixed(0)}%</span>
                       </div>
                     ))}
                   </div>
                 </>
               ) : (
-                <div className="flex-1 flex items-center justify-center text-dark-400">
+                <div className="flex-1 flex items-center justify-center text-gray-600 dark:text-dark-400">
                   No trades yet
                 </div>
               )}
@@ -725,77 +727,77 @@ export default function AnalyticsPage() {
             className="lg:col-span-7"
           >
             <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-            <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-blue-500/50 transition-all flex flex-col">
-              <div className="flex items-center gap-3 mb-5">
-                <div className="w-10 h-10 bg-blue-500/20 border border-blue-500/30 rounded-lg flex items-center justify-center">
-                  <Activity className="w-5 h-5 text-blue-400" />
+            <div className="h-full bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all flex flex-col">
+              <div className="flex items-center gap-3 mb-4 lg:mb-5">
+                <div className="w-10 h-10 bg-primary-500/20 border border-primary-500/30 rounded-lg flex items-center justify-center">
+                  <Activity className="w-5 h-5 text-primary-400" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-medium text-white">Trading Statistics</h3>
-                  <p className="text-xs text-dark-400">Performance metrics</p>
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">Trading Statistics</h3>
+                  <p className="text-xs text-gray-600 dark:text-dark-400">Performance metrics</p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-3 flex-1">
-                <div className="p-3 bg-dark-900/50 rounded-xl border border-dark-700/50">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 flex-1">
+                <div className="p-3 bg-gray-50 dark:bg-dark-900/50 rounded-xl border border-gray-200 dark:border-dark-700/50">
                   <div className="flex items-center gap-2 mb-2">
-                    <BarChart3 className="w-4 h-4 text-blue-400" />
-                    <div className="text-xs text-dark-400">Total Trades</div>
+                    <BarChart3 className="w-4 h-4 text-primary-400" />
+                    <div className="text-xs text-gray-600 dark:text-dark-400">Total Trades</div>
                   </div>
-                  <div className="text-xl font-medium text-white">{totalTrades}</div>
-                  <div className="text-xs text-blue-400 mt-1">All bots combined</div>
+                  <div className="text-lg sm:text-xl font-medium text-gray-900 dark:text-white">{totalTrades}</div>
+                  <div className="text-xs text-gray-600 dark:text-dark-400 mt-1">All bots combined</div>
                 </div>
 
-                <div className="p-3 bg-dark-900/50 rounded-xl border border-dark-700/50">
+                <div className="p-3 bg-gray-50 dark:bg-dark-900/50 rounded-xl border border-gray-200 dark:border-dark-700/50">
                   <div className="flex items-center gap-2 mb-2">
-                    <Clock className="w-4 h-4 text-purple-400" />
-                    <div className="text-xs text-dark-400">Avg Hold Time</div>
+                    <Clock className="w-4 h-4 text-primary-400" />
+                    <div className="text-xs text-gray-600 dark:text-dark-400">Avg Hold Time</div>
                   </div>
-                  <div className="text-xl font-medium text-white">{tradingStats.avgHoldTime}</div>
-                  <div className="text-xs text-purple-400 mt-1">
+                  <div className="text-lg sm:text-xl font-medium text-gray-900 dark:text-white">{tradingStats.avgHoldTime}</div>
+                  <div className="text-xs text-gray-600 dark:text-dark-400 mt-1">
                     {tradingStats.avgHoldTime.includes('h') ? 'Swing trading' :
                      tradingStats.avgHoldTime.includes('m') && parseInt(tradingStats.avgHoldTime) > 10 ? 'Day trading' :
                      'Scalping'}
                   </div>
                 </div>
 
-                <div className="p-3 bg-dark-900/50 rounded-xl border border-dark-700/50">
+                <div className="p-3 bg-gray-50 dark:bg-dark-900/50 rounded-xl border border-gray-200 dark:border-dark-700/50">
                   <div className="flex items-center gap-2 mb-2">
-                    <Target className="w-4 h-4 text-green-400" />
-                    <div className="text-xs text-dark-400">Win/Loss Ratio</div>
+                    <Target className="w-4 h-4 text-primary-400" />
+                    <div className="text-xs text-gray-600 dark:text-dark-400">Win/Loss Ratio</div>
                   </div>
-                  <div className="text-xl font-medium text-white">{tradingStats.winLossRatio.toFixed(2)}:1</div>
-                  <div className="text-xs text-green-400 mt-1">{tradingStats.wins}W / {tradingStats.losses}L</div>
+                  <div className="text-lg sm:text-xl font-medium text-gray-900 dark:text-white">{tradingStats.winLossRatio.toFixed(2)}:1</div>
+                  <div className="text-xs text-gray-600 dark:text-dark-400 mt-1">{tradingStats.wins}W / {tradingStats.losses}L</div>
                 </div>
 
-                <div className="p-3 bg-dark-900/50 rounded-xl border border-dark-700/50">
+                <div className="p-3 bg-gray-50 dark:bg-dark-900/50 rounded-xl border border-gray-200 dark:border-dark-700/50">
                   <div className="flex items-center gap-2 mb-2">
-                    <TrendingUp className="w-4 h-4 text-green-400" />
-                    <div className="text-xs text-dark-400">Average Win</div>
+                    <TrendingUp className="w-4 h-4 text-primary-400" />
+                    <div className="text-xs text-gray-600 dark:text-dark-400">Average Win</div>
                   </div>
-                  <div className="text-xl font-medium text-green-400">+${tradingStats.avgWin.toFixed(2)}</div>
+                  <div className="text-lg sm:text-xl font-medium text-green-400">+${tradingStats.avgWin.toFixed(2)}</div>
                   <div className="text-xs text-green-400 mt-1">
                     {totalInvested > 0 ? `${((tradingStats.avgWin / totalInvested) * 100).toFixed(2)}% of capital` : 'N/A'}
                   </div>
                 </div>
 
-                <div className="p-3 bg-dark-900/50 rounded-xl border border-dark-700/50">
+                <div className="p-3 bg-gray-50 dark:bg-dark-900/50 rounded-xl border border-gray-200 dark:border-dark-700/50">
                   <div className="flex items-center gap-2 mb-2">
-                    <TrendingDown className="w-4 h-4 text-red-400" />
-                    <div className="text-xs text-dark-400">Average Loss</div>
+                    <TrendingDown className="w-4 h-4 text-primary-400" />
+                    <div className="text-xs text-gray-600 dark:text-dark-400">Average Loss</div>
                   </div>
-                  <div className="text-xl font-medium text-red-400">-${tradingStats.avgLoss.toFixed(2)}</div>
+                  <div className="text-lg sm:text-xl font-medium text-red-400">-${tradingStats.avgLoss.toFixed(2)}</div>
                   <div className="text-xs text-red-400 mt-1">
                     {totalInvested > 0 ? `${((tradingStats.avgLoss / totalInvested) * 100).toFixed(2)}% of capital` : 'N/A'}
                   </div>
                 </div>
 
-                <div className="p-3 bg-dark-900/50 rounded-xl border border-dark-700/50">
+                <div className="p-3 bg-gray-50 dark:bg-dark-900/50 rounded-xl border border-gray-200 dark:border-dark-700/50">
                   <div className="flex items-center gap-2 mb-2">
-                    <Zap className="w-4 h-4 text-amber-400" />
-                    <div className="text-xs text-dark-400">Profit Factor</div>
+                    <Zap className="w-4 h-4 text-primary-400" />
+                    <div className="text-xs text-gray-600 dark:text-dark-400">Profit Factor</div>
                   </div>
-                  <div className="text-xl font-medium text-amber-400">{tradingStats.profitFactor.toFixed(2)}</div>
+                  <div className="text-lg sm:text-xl font-medium text-gray-900 dark:text-white">{tradingStats.profitFactor.toFixed(2)}</div>
                   <div className={`text-xs mt-1 ${
                     tradingStats.profitFactor >= 2 ? 'text-green-400' :
                     tradingStats.profitFactor >= 1.5 ? 'text-yellow-400' :
@@ -809,24 +811,24 @@ export default function AnalyticsPage() {
                   </div>
                 </div>
 
-                <div className="p-3 bg-dark-900/50 rounded-xl border border-dark-700/50">
+                <div className="p-3 bg-gray-50 dark:bg-dark-900/50 rounded-xl border border-gray-200 dark:border-dark-700/50">
                   <div className="flex items-center gap-2 mb-2">
-                    <DollarSign className="w-4 h-4 text-cyan-400" />
-                    <div className="text-xs text-dark-400">Total Volume</div>
+                    <DollarSign className="w-4 h-4 text-primary-400" />
+                    <div className="text-xs text-gray-600 dark:text-dark-400">Total Volume</div>
                   </div>
-                  <div className="text-xl font-medium text-white">${(tradingStats.totalVolume / 1000).toFixed(0)}K</div>
-                  <div className="text-xs text-cyan-400 mt-1">
+                  <div className="text-lg sm:text-xl font-medium text-gray-900 dark:text-white">${(tradingStats.totalVolume / 1000).toFixed(0)}K</div>
+                  <div className="text-xs text-gray-600 dark:text-dark-400 mt-1">
                     {totalInvested > 0 ? `${(tradingStats.totalVolume / totalInvested).toFixed(1)}× capital turnover` : 'N/A'}
                   </div>
                 </div>
 
-                <div className="p-3 bg-dark-900/50 rounded-xl border border-dark-700/50">
+                <div className="p-3 bg-gray-50 dark:bg-dark-900/50 rounded-xl border border-gray-200 dark:border-dark-700/50">
                   <div className="flex items-center gap-2 mb-2">
-                    <Zap className="w-4 h-4 text-green-400" />
-                    <div className="text-xs text-dark-400">Best Streak</div>
+                    <Zap className="w-4 h-4 text-primary-400" />
+                    <div className="text-xs text-gray-600 dark:text-dark-400">Best Streak</div>
                   </div>
-                  <div className="text-xl font-medium text-green-400">{tradingStats.bestStreak} W</div>
-                  <div className="text-xs text-green-400 mt-1">
+                  <div className="text-lg sm:text-xl font-medium text-gray-900 dark:text-white">{tradingStats.bestStreak} W</div>
+                  <div className="text-xs text-gray-600 dark:text-dark-400 mt-1">
                     {tradingStats.bestStreak >= 10 ? 'Exceptional streak' :
                      tradingStats.bestStreak >= 7 ? 'Strong streak' :
                      tradingStats.bestStreak >= 5 ? 'Above average' :
@@ -835,13 +837,13 @@ export default function AnalyticsPage() {
                   </div>
                 </div>
 
-                <div className="p-3 bg-dark-900/50 rounded-xl border border-dark-700/50">
+                <div className="p-3 bg-gray-50 dark:bg-dark-900/50 rounded-xl border border-gray-200 dark:border-dark-700/50">
                   <div className="flex items-center gap-2 mb-2">
-                    <Award className="w-4 h-4 text-green-400" />
-                    <div className="text-xs text-dark-400">Best Day</div>
+                    <Award className="w-4 h-4 text-primary-400" />
+                    <div className="text-xs text-gray-600 dark:text-dark-400">Best Day</div>
                   </div>
-                  <div className="text-xl font-medium text-green-400">+${tradingStats.bestDay.toFixed(0)}</div>
-                  <div className="text-xs text-dark-400 mt-1">{tradingStats.bestDayDate || 'N/A'}</div>
+                  <div className="text-lg sm:text-xl font-medium text-green-400">+${tradingStats.bestDay.toFixed(0)}</div>
+                  <div className="text-xs text-gray-600 dark:text-dark-400 mt-1">{tradingStats.bestDayDate || 'N/A'}</div>
                 </div>
               </div>
             </div>
@@ -856,15 +858,15 @@ export default function AnalyticsPage() {
             className="lg:col-span-6"
           >
             <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-            <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-5 hover:border-green-500/50 transition-all flex flex-col">
+            <div className="h-full bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-5 hover:border-green-500/50 transition-all flex flex-col">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-green-500/20 border border-green-500/30 rounded-lg flex items-center justify-center">
                     <TrendingUp className="w-5 h-5 text-green-400" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-medium text-white">Top Winning Trades</h3>
-                    <p className="text-xs text-dark-400">Best performers</p>
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white">Top Winning Trades</h3>
+                    <p className="text-xs text-gray-600 dark:text-dark-400">Best performers</p>
                   </div>
                 </div>
               </div>
@@ -872,14 +874,14 @@ export default function AnalyticsPage() {
               <div className="space-y-2 flex-1">
                 {bestTrades.length > 0 ? (
                   bestTrades.map((trade) => (
-                    <div key={trade.id} className="flex items-center justify-between p-3 bg-dark-900/30 rounded-lg border border-dark-700/30 hover:border-green-500/30 transition-colors">
+                    <div key={trade.id} className="flex items-center justify-between p-3 bg-gray-100 dark:bg-dark-900/30 rounded-lg border border-gray-200 dark:border-dark-700/30 hover:border-green-500/30 transition-colors">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 bg-green-500/20 border border-green-500/30 rounded-lg flex items-center justify-center">
                           <ArrowUpRight className="w-4 h-4 text-green-400" />
                         </div>
                         <div>
-                          <div className="text-sm font-normal text-white">{trade.pair}</div>
-                          <div className="text-xs text-dark-400">{trade.botName} • {trade.date}</div>
+                          <div className="text-sm font-normal text-gray-900 dark:text-white">{trade.pair}</div>
+                          <div className="text-xs text-gray-600 dark:text-dark-400">{trade.botName} • {trade.date}</div>
                         </div>
                       </div>
                       <div className="text-right">
@@ -889,7 +891,7 @@ export default function AnalyticsPage() {
                     </div>
                   ))
                 ) : (
-                  <div className="flex items-center justify-center h-full text-dark-400">No winning trades yet</div>
+                  <div className="flex items-center justify-center h-full text-gray-600 dark:text-dark-400">No winning trades yet</div>
                 )}
               </div>
             </div>
@@ -904,15 +906,15 @@ export default function AnalyticsPage() {
             className="lg:col-span-6"
           >
             <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-            <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-5 hover:border-red-500/50 transition-all flex flex-col">
+            <div className="h-full bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-5 hover:border-red-500/50 transition-all flex flex-col">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-red-500/20 border border-red-500/30 rounded-lg flex items-center justify-center">
                     <TrendingDown className="w-5 h-5 text-red-400" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-medium text-white">Recent Losing Trades</h3>
-                    <p className="text-xs text-dark-400">Areas to improve</p>
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white">Recent Losing Trades</h3>
+                    <p className="text-xs text-gray-600 dark:text-dark-400">Areas to improve</p>
                   </div>
                 </div>
               </div>
@@ -920,14 +922,14 @@ export default function AnalyticsPage() {
               <div className="space-y-2 flex-1">
                 {worstTrades.length > 0 ? (
                   worstTrades.map((trade) => (
-                    <div key={trade.id} className="flex items-center justify-between p-3 bg-dark-900/30 rounded-lg border border-dark-700/30 hover:border-red-500/30 transition-colors">
+                    <div key={trade.id} className="flex items-center justify-between p-3 bg-gray-100 dark:bg-dark-900/30 rounded-lg border border-gray-200 dark:border-dark-700/30 hover:border-red-500/30 transition-colors">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 bg-red-500/20 border border-red-500/30 rounded-lg flex items-center justify-center">
                           <ArrowDownRight className="w-4 h-4 text-red-400" />
                         </div>
                         <div>
-                          <div className="text-sm font-normal text-white">{trade.pair}</div>
-                          <div className="text-xs text-dark-400">{trade.botName} • {trade.date}</div>
+                          <div className="text-sm font-normal text-gray-900 dark:text-white">{trade.pair}</div>
+                          <div className="text-xs text-gray-600 dark:text-dark-400">{trade.botName} • {trade.date}</div>
                         </div>
                       </div>
                       <div className="text-right">
@@ -937,7 +939,7 @@ export default function AnalyticsPage() {
                     </div>
                   ))
                 ) : (
-                  <div className="flex items-center justify-center h-full text-dark-400">No losing trades yet</div>
+                  <div className="flex items-center justify-center h-full text-gray-600 dark:text-dark-400">No losing trades yet</div>
                 )}
               </div>
             </div>
@@ -953,24 +955,17 @@ export default function AnalyticsPage() {
               className="lg:col-span-12"
             >
               <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-              <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-primary-500/50 transition-all">
-                <div className="flex items-center justify-between mb-6">
+              <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4 lg:mb-6">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
-                      <BarChart3 className="w-6 h-6 text-primary-400" />
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
+                      <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6 text-primary-400" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-medium text-white">Bots Performance Comparison</h2>
-                      <p className="text-sm text-dark-400">Total profit by each bot</p>
+                      <h2 className="text-lg sm:text-xl font-medium text-gray-900 dark:text-white">Bots Performance Comparison</h2>
+                      <p className="text-xs sm:text-sm text-gray-600 dark:text-dark-400">Total profit by each bot</p>
                     </div>
                   </div>
-                  <Link
-                    href="/dashboard-v2"
-                    className="text-sm text-primary-400 hover:text-primary-300 transition-colors flex items-center gap-1"
-                  >
-                    View Details
-                    <ChevronRight className="w-4 h-4" />
-                  </Link>
                 </div>
                 <Chart
                   options={botsComparisonOptions}

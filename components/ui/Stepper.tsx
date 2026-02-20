@@ -36,7 +36,7 @@ export default function Stepper({ steps, currentStep }: StepperProps) {
                       ? 'bg-gradient-to-br from-primary-500 to-accent-500 text-white shadow-lg shadow-primary-500/50'
                       : isCompleted
                       ? 'bg-gradient-to-br from-green-500 to-emerald-500 text-white'
-                      : 'bg-dark-800 border-2 border-dark-700 text-dark-400'
+                      : 'bg-gray-100 dark:bg-dark-800 border-2 border-gray-200 dark:border-dark-700 text-gray-900 dark:text-dark-400'
                   }
                 `}
               >
@@ -77,7 +77,7 @@ export default function Stepper({ steps, currentStep }: StepperProps) {
               <div className="mt-2 text-center">
                 <div
                   className={`text-xs font-semibold ${
-                    isCurrent ? 'text-white' : isCompleted ? 'text-green-400' : 'text-dark-500'
+                    isCurrent ? 'text-gray-900 dark:text-white' : isCompleted ? 'text-green-400' : 'text-gray-900 dark:text-dark-500'
                   }`}
                 >
                   {step.label}

@@ -73,8 +73,8 @@ export default function CurrencyCard({
         relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300
         ${
           selected
-            ? 'bg-dark-800/80 border-2 border-primary-500 shadow-lg shadow-primary-500/20'
-            : 'bg-dark-800/50 border-2 border-dark-700 hover:border-primary-500/50 hover:bg-dark-800'
+            ? 'bg-gray-100 dark:bg-dark-800/80 border-2 border-primary-500 shadow-lg shadow-primary-500/20'
+            : 'bg-white dark:bg-dark-800/50 border-2 border-gray-200 dark:border-dark-700 hover:border-primary-500/50 hover:bg-gray-50 dark:hover:bg-dark-800'
         }
       `}
     >
@@ -90,21 +90,21 @@ export default function CurrencyCard({
         {IconComponent ? (
           <IconComponent size={32} variant="branded" />
         ) : (
-          <span className="text-white text-lg font-bold">{symbol.charAt(0)}</span>
+          <span className="text-gray-900 dark:text-white text-lg font-bold">{symbol.charAt(0)}</span>
         )}
       </div>
 
       {/* Text */}
       <div className="flex-1 text-left min-w-0">
         <div className="flex items-center gap-2">
-          <span className="font-bold text-white text-sm">{symbol}</span>
+          <span className="font-bold text-gray-900 dark:text-white text-sm">{symbol}</span>
           {networks !== undefined && (
-            <span className="text-[11px] text-dark-500">
+            <span className="text-[11px] text-gray-500 dark:text-dark-500">
               {networks} net{networks > 1 ? 's' : ''}
             </span>
           )}
         </div>
-        <div className="text-xs text-dark-400 truncate">{name}</div>
+        <div className="text-xs text-gray-600 dark:text-dark-400 truncate">{name}</div>
       </div>
 
       {/* Price (optional) */}
