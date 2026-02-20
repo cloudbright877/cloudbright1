@@ -149,7 +149,7 @@ export function CompoundingSettingsModal({
                       <Settings className="w-5 h-5 text-primary-400" />
                     </div>
                     <div>
-                      <h2 className="text-lg font-bold text-white">Copy Settings</h2>
+                      <h2 className="text-lg font-medium text-white">Copy Settings</h2>
                       <p className="text-xs text-dark-400">{botName}</p>
                     </div>
                   </div>
@@ -167,7 +167,7 @@ export function CompoundingSettingsModal({
                   <div>
                     <div className="flex items-center gap-2 mb-1">
                       <RefreshCw className="w-4 h-4 text-primary-400" />
-                      <label className="text-sm font-semibold text-white">
+                      <label className="text-sm font-medium text-white">
                         Compounding
                       </label>
                     </div>
@@ -178,7 +178,7 @@ export function CompoundingSettingsModal({
                     {/* Value display */}
                     <div className="flex items-center justify-between mb-3">
                       <span className="text-xs text-dark-400">Withdraw</span>
-                      <span className={`text-2xl font-bold ${getCompoundingColor()}`}>
+                      <span className={`text-2xl font-medium ${getCompoundingColor()}`}>
                         {compounding}%
                       </span>
                       <span className="text-xs text-dark-400">Reinvest</span>
@@ -233,7 +233,7 @@ export function CompoundingSettingsModal({
                         <button
                           key={val}
                           onClick={() => setCompounding(val)}
-                          className={`flex-1 px-2 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                          className={`flex-1 px-2 py-1.5 rounded-lg text-xs font-medium transition-all ${
                             compounding === val
                               ? 'bg-primary-500/20 border border-primary-500/50 text-primary-400'
                               : 'bg-dark-700/50 border border-dark-600 text-dark-400 hover:text-white hover:border-dark-500'
@@ -248,13 +248,13 @@ export function CompoundingSettingsModal({
                     <div className="mt-4 p-3 bg-dark-900/50 rounded-lg border border-dark-700 space-y-2">
                       <div className="flex items-center justify-between text-xs">
                         <span className="text-dark-400">Profit to balance</span>
-                        <span className="font-semibold text-blue-400">
+                        <span className="font-normal text-blue-400">
                           {100 - compounding}%
                         </span>
                       </div>
                       <div className="flex items-center justify-between text-xs">
                         <span className="text-dark-400">Profit reinvested</span>
-                        <span className="font-semibold text-green-400">
+                        <span className="font-normal text-green-400">
                           {compounding}%
                         </span>
                       </div>
@@ -270,7 +270,7 @@ export function CompoundingSettingsModal({
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           <Power className="w-4 h-4 text-amber-400" />
-                          <label className="text-sm font-semibold text-white">
+                          <label className="text-sm font-medium text-white">
                             Auto-close after lock-in
                           </label>
                         </div>

@@ -121,7 +121,10 @@ export default function WhalesPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6 overflow-visible relative z-20"
+              className="overflow-visible relative z-20"
+            >
+              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6"
             >
               <div className="flex flex-col md:flex-row gap-4">
                 {/* Action Filter */}
@@ -207,6 +210,8 @@ export default function WhalesPage() {
                   </div>
                 </div>
               </div>
+              </div>
+              </div>
             </motion.div>
 
             {/* Results Count */}
@@ -230,8 +235,9 @@ export default function WhalesPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
                     whileHover={{ scale: 1.01, y: -4 }}
-                    className="relative bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6 hover:border-blue-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/20"
                   >
+                    <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                    <div className="relative bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6 hover:border-blue-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/20">
                     <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-500/0 to-accent-500/0 group-hover:from-blue-500/5 group-hover:to-accent-500/5 transition-all duration-300" />
                     <div className="flex items-start gap-4">
                       {/* Avatar */}
@@ -277,7 +283,7 @@ export default function WhalesPage() {
                               <span className={`${getActionColor(activity.action)} flex items-center gap-1`}>
                                 {getActionIcon(activity.action)} {getActionText(activity.action)}
                               </span>
-                              <span className="font-bold text-white">
+                              <span className="font-medium text-white">
                                 ${activity.amount.toLocaleString()}
                               </span>
                             </div>
@@ -291,25 +297,27 @@ export default function WhalesPage() {
                         <div className="flex items-center gap-4 mt-3 pt-3 border-t border-dark-700">
                           <div>
                             <div className="text-xs text-dark-400">Total Invested</div>
-                            <div className="text-sm font-bold text-white">
+                            <div className="text-sm font-medium text-white">
                               ${activity.totalInvested.toLocaleString()}
                             </div>
                           </div>
                           <div>
                             <div className="text-xs text-dark-400">Total Profit</div>
-                            <div className="text-sm font-bold text-green-400">
+                            <div className="text-sm font-medium text-green-400">
                               +${activity.totalProfit.toLocaleString()}
                             </div>
                           </div>
                           <div>
                             <div className="text-xs text-dark-400">Return</div>
-                            <div className="text-sm font-bold text-green-400 flex items-center gap-1">
+                            <div className="text-sm font-medium text-green-400 flex items-center gap-1">
                               <TrendingUp className="w-3 h-3" />
                               +{activity.totalInvested > 0 ? ((activity.totalProfit / activity.totalInvested) * 100).toFixed(1) : '0.0'}%
                             </div>
                           </div>
                         </div>
                       </div>
+                    </div>
+                    </div>
                     </div>
                   </motion.div>
                 ))}
@@ -321,13 +329,16 @@ export default function WhalesPage() {
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-12 text-center"
               >
+                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-12 text-center">
                 <Fish className="w-16 h-16 text-dark-600 mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-white mb-2">No whale activities found</h3>
+                <h3 className="text-xl font-medium text-white mb-2">No whale activities found</h3>
                 <p className="text-dark-400">
                   Try adjusting your filters to see more activities
                 </p>
+                </div>
+                </div>
               </motion.div>
             )}
           </div>
@@ -338,9 +349,12 @@ export default function WhalesPage() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
-              className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6 sticky top-24"
+              className="sticky top-24"
             >
-              <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6"
+            >
+              <h2 className="text-xl font-medium text-white mb-6 flex items-center gap-2">
                 <Trophy className="w-5 h-5 text-yellow-400" />
                 Top Whales
               </h2>
@@ -357,7 +371,7 @@ export default function WhalesPage() {
                       className="block group"
                     >
                       <div className="flex items-center gap-3 p-3 bg-dark-900/50 rounded-xl hover:bg-dark-900 transition-all">
-                        <div className="text-lg font-bold text-dark-500 w-6">
+                        <div className="text-lg font-medium text-dark-500 w-6">
                           #{index + 1}
                         </div>
                         <div className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold overflow-hidden flex-shrink-0" style={getAvatarStyle(whale.traderDisplayName)}>
@@ -375,7 +389,7 @@ export default function WhalesPage() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1 mb-0.5">
-                            <span className="text-sm font-semibold text-white truncate group-hover:text-primary-400 transition-colors">
+                            <span className="text-sm font-normal text-white truncate group-hover:text-primary-400 transition-colors">
                               {whale.traderDisplayName}
                             </span>
                             {whale.traderVerified && <Shield className="w-3 h-3 text-accent-400" />}
@@ -398,6 +412,8 @@ export default function WhalesPage() {
                 View Leaderboard
                 <ArrowRight className="w-4 h-4" />
               </Link>
+            </div>
+            </div>
             </motion.div>
           </div>
         </div>

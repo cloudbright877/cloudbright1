@@ -26,7 +26,7 @@ export default function SecuritySettingsPage() {
               <Shield className="w-5 h-5 text-primary-400" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-white">Security</h1>
+              <h1 className="text-2xl font-semibold text-white">Security</h1>
               <p className="text-sm text-dark-400">Password, two-factor authentication, and sessions</p>
             </div>
           </div>
@@ -37,7 +37,11 @@ export default function SecuritySettingsPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <SecuritySection />
+          <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+            <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
+              <SecuritySection />
+            </div>
+          </div>
         </motion.div>
       </div>
     </div>

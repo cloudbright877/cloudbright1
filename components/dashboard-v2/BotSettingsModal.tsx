@@ -98,7 +98,7 @@ export function BotSettingsModal({ isOpen, onClose, bot }: BotSettingsModalProps
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-dark-700">
                   <div>
-                    <h2 className="text-xl font-bold text-white mb-1">Bot Settings</h2>
+                    <h2 className="text-xl font-medium text-white mb-1">Bot Settings</h2>
                     <p className="text-sm text-dark-400">{config.name}</p>
                   </div>
                   <button
@@ -115,7 +115,7 @@ export function BotSettingsModal({ isOpen, onClose, bot }: BotSettingsModalProps
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
-                      className={`flex items-center gap-2 px-4 py-3 rounded-t-lg font-semibold transition-all ${
+                      className={`flex items-center gap-2 px-4 py-3 rounded-t-lg font-medium transition-all ${
                         activeTab === tab.id
                           ? 'bg-dark-700 text-white border-t border-x border-dark-600'
                           : 'text-dark-400 hover:text-white hover:bg-dark-800'
@@ -135,8 +135,8 @@ export function BotSettingsModal({ isOpen, onClose, bot }: BotSettingsModalProps
                       {/* Leverage */}
                       <div>
                         <div className="flex items-center justify-between mb-3">
-                          <label className="text-sm font-semibold text-white">Leverage</label>
-                          <span className="text-xl font-bold text-primary-400">×{leverage}</span>
+                          <label className="text-sm font-medium text-white">Leverage</label>
+                          <span className="text-xl font-medium text-primary-400">×{leverage}</span>
                         </div>
                         <input
                           type="range"
@@ -156,13 +156,13 @@ export function BotSettingsModal({ isOpen, onClose, bot }: BotSettingsModalProps
 
                       {/* Allowed Sides */}
                       <div>
-                        <label className="text-sm font-semibold text-white mb-3 block">Allowed Sides</label>
+                        <label className="text-sm font-medium text-white mb-3 block">Allowed Sides</label>
                         <div className="grid grid-cols-3 gap-2">
                           {(['LONG', 'SHORT', 'BOTH'] as const).map((side) => (
                             <button
                               key={side}
                               onClick={() => setAllowedSides(side)}
-                              className={`px-4 py-3 rounded-lg font-semibold transition-all ${
+                              className={`px-4 py-3 rounded-lg font-medium transition-all ${
                                 allowedSides === side
                                   ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white'
                                   : 'bg-dark-700 text-dark-400 hover:text-white hover:bg-dark-600'
@@ -177,8 +177,8 @@ export function BotSettingsModal({ isOpen, onClose, bot }: BotSettingsModalProps
                       {/* Win Rate */}
                       <div>
                         <div className="flex items-center justify-between mb-3">
-                          <label className="text-sm font-semibold text-white">Win Rate Target</label>
-                          <span className="text-xl font-bold text-green-400">{winRate.toFixed(1)}%</span>
+                          <label className="text-sm font-medium text-white">Win Rate Target</label>
+                          <span className="text-xl font-medium text-green-400">{winRate.toFixed(1)}%</span>
                         </div>
                         <input
                           type="range"
@@ -199,8 +199,8 @@ export function BotSettingsModal({ isOpen, onClose, bot }: BotSettingsModalProps
                       {/* Daily Target */}
                       <div>
                         <div className="flex items-center justify-between mb-3">
-                          <label className="text-sm font-semibold text-white">Daily P&L Target</label>
-                          <span className="text-xl font-bold text-accent-400">{dailyTarget.toFixed(1)}%</span>
+                          <label className="text-sm font-medium text-white">Daily P&L Target</label>
+                          <span className="text-xl font-medium text-accent-400">{dailyTarget.toFixed(1)}%</span>
                         </div>
                         <input
                           type="range"
@@ -221,8 +221,8 @@ export function BotSettingsModal({ isOpen, onClose, bot }: BotSettingsModalProps
                       {/* Trades Per Day */}
                       <div>
                         <div className="flex items-center justify-between mb-3">
-                          <label className="text-sm font-semibold text-white">Trades Per Day</label>
-                          <span className="text-xl font-bold text-blue-400">{tradesPerDay}</span>
+                          <label className="text-sm font-medium text-white">Trades Per Day</label>
+                          <span className="text-xl font-medium text-blue-400">{tradesPerDay}</span>
                         </div>
                         <input
                           type="range"
@@ -246,12 +246,12 @@ export function BotSettingsModal({ isOpen, onClose, bot }: BotSettingsModalProps
                     <>
                       {/* Position Size Range */}
                       <div>
-                        <label className="text-sm font-semibold text-white mb-3 block">Position Size Range</label>
+                        <label className="text-sm font-medium text-white mb-3 block">Position Size Range</label>
                         <div className="space-y-4">
                           <div>
                             <div className="flex items-center justify-between mb-2">
                               <span className="text-xs text-dark-400">Minimum</span>
-                              <span className="text-sm font-bold text-white">${minPositionSize.toFixed(0)}</span>
+                              <span className="text-sm font-medium text-white">${minPositionSize.toFixed(0)}</span>
                             </div>
                             <input
                               type="range"
@@ -266,7 +266,7 @@ export function BotSettingsModal({ isOpen, onClose, bot }: BotSettingsModalProps
                           <div>
                             <div className="flex items-center justify-between mb-2">
                               <span className="text-xs text-dark-400">Maximum</span>
-                              <span className="text-sm font-bold text-white">${maxPositionSize.toFixed(0)}</span>
+                              <span className="text-sm font-medium text-white">${maxPositionSize.toFixed(0)}</span>
                             </div>
                             <input
                               type="range"
@@ -284,8 +284,8 @@ export function BotSettingsModal({ isOpen, onClose, bot }: BotSettingsModalProps
                       {/* Max Concurrent Positions */}
                       <div>
                         <div className="flex items-center justify-between mb-3">
-                          <label className="text-sm font-semibold text-white">Max Concurrent Positions</label>
-                          <span className="text-xl font-bold text-primary-400">{maxConcurrentPositions}</span>
+                          <label className="text-sm font-medium text-white">Max Concurrent Positions</label>
+                          <span className="text-xl font-medium text-primary-400">{maxConcurrentPositions}</span>
                         </div>
                         <input
                           type="range"
@@ -305,8 +305,8 @@ export function BotSettingsModal({ isOpen, onClose, bot }: BotSettingsModalProps
                       {/* Open Frequency */}
                       <div>
                         <div className="flex items-center justify-between mb-3">
-                          <label className="text-sm font-semibold text-white">Open Frequency</label>
-                          <span className="text-xl font-bold text-accent-400">{openFrequency.toFixed(0)}%</span>
+                          <label className="text-sm font-medium text-white">Open Frequency</label>
+                          <span className="text-xl font-medium text-accent-400">{openFrequency.toFixed(0)}%</span>
                         </div>
                         <input
                           type="range"
@@ -330,12 +330,12 @@ export function BotSettingsModal({ isOpen, onClose, bot }: BotSettingsModalProps
                     <>
                       {/* Win P&L Range */}
                       <div>
-                        <label className="text-sm font-semibold text-white mb-3 block">Win P&L Range (%)</label>
+                        <label className="text-sm font-medium text-white mb-3 block">Win P&L Range (%)</label>
                         <div className="space-y-4">
                           <div>
                             <div className="flex items-center justify-between mb-2">
                               <span className="text-xs text-dark-400">Minimum Win</span>
-                              <span className="text-sm font-bold text-green-400">+{winPnLMin.toFixed(2)}%</span>
+                              <span className="text-sm font-medium text-green-400">+{winPnLMin.toFixed(2)}%</span>
                             </div>
                             <input
                               type="range"
@@ -350,7 +350,7 @@ export function BotSettingsModal({ isOpen, onClose, bot }: BotSettingsModalProps
                           <div>
                             <div className="flex items-center justify-between mb-2">
                               <span className="text-xs text-dark-400">Maximum Win</span>
-                              <span className="text-sm font-bold text-green-400">+{winPnLMax.toFixed(2)}%</span>
+                              <span className="text-sm font-medium text-green-400">+{winPnLMax.toFixed(2)}%</span>
                             </div>
                             <input
                               type="range"
@@ -367,12 +367,12 @@ export function BotSettingsModal({ isOpen, onClose, bot }: BotSettingsModalProps
 
                       {/* Loss P&L Range */}
                       <div>
-                        <label className="text-sm font-semibold text-white mb-3 block">Loss P&L Range (%)</label>
+                        <label className="text-sm font-medium text-white mb-3 block">Loss P&L Range (%)</label>
                         <div className="space-y-4">
                           <div>
                             <div className="flex items-center justify-between mb-2">
                               <span className="text-xs text-dark-400">Minimum Loss</span>
-                              <span className="text-sm font-bold text-red-400">{lossPnLMin.toFixed(2)}%</span>
+                              <span className="text-sm font-medium text-red-400">{lossPnLMin.toFixed(2)}%</span>
                             </div>
                             <input
                               type="range"
@@ -387,7 +387,7 @@ export function BotSettingsModal({ isOpen, onClose, bot }: BotSettingsModalProps
                           <div>
                             <div className="flex items-center justify-between mb-2">
                               <span className="text-xs text-dark-400">Maximum Loss</span>
-                              <span className="text-sm font-bold text-red-400">{lossPnLMax.toFixed(2)}%</span>
+                              <span className="text-sm font-medium text-red-400">{lossPnLMax.toFixed(2)}%</span>
                             </div>
                             <input
                               type="range"
@@ -404,12 +404,12 @@ export function BotSettingsModal({ isOpen, onClose, bot }: BotSettingsModalProps
 
                       {/* Duration Range */}
                       <div>
-                        <label className="text-sm font-semibold text-white mb-3 block">Duration Range (seconds)</label>
+                        <label className="text-sm font-medium text-white mb-3 block">Duration Range (seconds)</label>
                         <div className="space-y-4">
                           <div>
                             <div className="flex items-center justify-between mb-2">
                               <span className="text-xs text-dark-400">Minimum</span>
-                              <span className="text-sm font-bold text-white">{minDuration}s</span>
+                              <span className="text-sm font-medium text-white">{minDuration}s</span>
                             </div>
                             <input
                               type="range"
@@ -424,7 +424,7 @@ export function BotSettingsModal({ isOpen, onClose, bot }: BotSettingsModalProps
                           <div>
                             <div className="flex items-center justify-between mb-2">
                               <span className="text-xs text-dark-400">Maximum</span>
-                              <span className="text-sm font-bold text-white">{maxDuration}s</span>
+                              <span className="text-sm font-medium text-white">{maxDuration}s</span>
                             </div>
                             <input
                               type="range"
@@ -442,8 +442,8 @@ export function BotSettingsModal({ isOpen, onClose, bot }: BotSettingsModalProps
                       {/* Max Slippage */}
                       <div>
                         <div className="flex items-center justify-between mb-3">
-                          <label className="text-sm font-semibold text-white">Max Slippage</label>
-                          <span className="text-xl font-bold text-yellow-400">{(maxSlippage / 100).toFixed(2)}%</span>
+                          <label className="text-sm font-medium text-white">Max Slippage</label>
+                          <span className="text-xl font-medium text-yellow-400">{(maxSlippage / 100).toFixed(2)}%</span>
                         </div>
                         <input
                           type="range"

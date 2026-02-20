@@ -210,42 +210,51 @@ export default function WalletsPage() {
           {/* LEFT: Deposit/Withdraw */}
           <div className="lg:col-span-6">
             <div className="grid grid-cols-2 gap-4 h-full">
-              <Link
-                href="/dashboard-v2/wallets/deposit"
-                className="relative group overflow-hidden bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 hover:border-green-500/50 rounded-2xl p-5 transition-all"
-              >
-                <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/10 rounded-full blur-3xl opacity-100 group-hover:scale-150 transition-transform" />
-                <div className="relative z-10 flex items-center justify-between h-full">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-green-500/20 border border-green-500/30 rounded-xl flex items-center justify-center flex-shrink-0">
-                      <ArrowDownLeft className="w-6 h-6 text-green-400" />
+              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all hover:bg-[linear-gradient(135deg,rgba(74,222,128,0.2)_0%,rgba(74,222,128,0)_40%,rgba(74,222,128,0)_60%,rgba(74,222,128,0.2)_100%)]">
+                <Link
+                  href="/dashboard-v2/wallets/deposit"
+                  className="relative group overflow-hidden bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-5 block h-full"
+                >
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/10 rounded-full blur-3xl opacity-100 group-hover:scale-150 transition-transform" />
+                  <div className="relative z-10 flex items-center justify-between h-full">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-green-500/20 border border-green-500/30 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <ArrowDownLeft className="w-6 h-6 text-green-400" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-medium text-white">Deposit</h3>
+                        <p className="text-sm text-green-400/70">Add funds</p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="text-lg font-bold text-white">Deposit</h3>
-                      <p className="text-sm text-green-400/70">Add funds</p>
+                    <div className="text-green-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <ChevronRight className="w-6 h-6" />
                     </div>
                   </div>
-                  <div className="text-green-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <ChevronRight className="w-6 h-6" />
-                  </div>
-                </div>
-              </Link>
+                </Link>
+              </div>
 
-              <Link
-                href="/dashboard-v2/wallets/withdraw"
-                className="relative group overflow-hidden bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 hover:border-dark-600 rounded-2xl p-5 transition-all hover:shadow-2xl"
-              >
-                <div className="absolute -inset-1 bg-gradient-to-br from-dark-500/0 to-dark-600/0 group-hover:from-dark-500/20 group-hover:to-dark-600/20 blur-xl transition-all duration-500" />
-                <div className="relative z-10 flex items-center gap-4 h-full">
-                  <div className="w-12 h-12 bg-dark-700/50 border border-dark-600 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <ArrowUpLeft className="w-6 h-6 text-dark-300" />
+              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all hover:bg-[linear-gradient(135deg,rgba(255,255,255,0.2)_0%,rgba(255,255,255,0)_40%,rgba(255,255,255,0)_60%,rgba(255,255,255,0.2)_100%)]">
+                <Link
+                  href="/dashboard-v2/wallets/withdraw"
+                  className="relative group overflow-hidden bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-5 block h-full"
+                >
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-dark-500/10 rounded-full blur-3xl opacity-100 group-hover:scale-150 transition-transform" />
+                  <div className="relative z-10 flex items-center justify-between h-full">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-dark-700/50 border border-dark-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <ArrowUpLeft className="w-6 h-6 text-dark-300" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-medium text-white">Withdraw</h3>
+                        <p className="text-sm text-dark-400">Transfer out</p>
+                      </div>
+                    </div>
+                    <div className="text-dark-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <ChevronRight className="w-6 h-6" />
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-white">Withdraw</h3>
-                    <p className="text-sm text-dark-400">Transfer out</p>
-                  </div>
-                </div>
-              </Link>
+                </Link>
+              </div>
             </div>
           </div>
 
@@ -253,67 +262,75 @@ export default function WalletsPage() {
           <div className="lg:col-span-6 flex flex-col gap-4">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {/* Total Balance */}
-              <div className="relative overflow-hidden bg-gradient-to-br from-primary-500/10 via-dark-800/95 to-dark-900/95 border border-primary-500/30 rounded-2xl p-5">
-                <div className="absolute -top-12 -right-12 w-24 h-24 bg-primary-500/20 rounded-full blur-3xl" />
-                <div className="relative">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-8 h-8 bg-primary-500/20 border border-primary-500/30 rounded-lg flex items-center justify-center">
-                      <Wallet className="w-4 h-4 text-primary-400" />
+              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="relative overflow-hidden bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-5">
+                  <div className="absolute -top-12 -right-12 w-24 h-24 bg-primary-500/15 rounded-full blur-3xl" />
+                  <div className="relative">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-8 h-8 bg-primary-500/20 border border-primary-500/30 rounded-lg flex items-center justify-center">
+                        <Wallet className="w-4 h-4 text-primary-400" />
+                      </div>
+                      <span className="text-xs text-dark-400 font-normal">Total Balance</span>
                     </div>
-                    <span className="text-xs text-dark-400 font-medium">Total Balance</span>
-                  </div>
-                  <div className="text-2xl font-bold text-white">
-                    ${formatNumber(totalBalance)}
+                    <div className="text-2xl font-semibold text-white">
+                      ${formatNumber(totalBalance)}
+                    </div>
                   </div>
                 </div>
               </div>
 
               {/* Available */}
-              <div className="relative overflow-hidden bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-5">
-                <div className="absolute -top-12 -right-12 w-24 h-24 bg-green-500/10 rounded-full blur-3xl" />
-                <div className="relative">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-8 h-8 bg-green-500/20 border border-green-500/30 rounded-lg flex items-center justify-center">
-                      <ArrowDownLeft className="w-4 h-4 text-green-400" />
+              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="relative overflow-hidden bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-5">
+                  <div className="absolute -top-12 -right-12 w-24 h-24 bg-green-500/10 rounded-full blur-3xl" />
+                  <div className="relative">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-8 h-8 bg-green-500/20 border border-green-500/30 rounded-lg flex items-center justify-center">
+                        <ArrowDownLeft className="w-4 h-4 text-green-400" />
+                      </div>
+                      <span className="text-xs text-dark-400 font-normal">Available</span>
                     </div>
-                    <span className="text-xs text-dark-400 font-medium">Available</span>
-                  </div>
-                  <div className="text-2xl font-bold text-green-400">
-                    ${formatNumber(availableBalance)}
+                    <div className="text-2xl font-semibold text-green-400">
+                      ${formatNumber(availableBalance)}
+                    </div>
                   </div>
                 </div>
               </div>
 
               {/* In Copies */}
-              <div className="relative overflow-hidden bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-5">
-                <div className="absolute -top-12 -right-12 w-24 h-24 bg-yellow-500/10 rounded-full blur-3xl" />
-                <div className="relative">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-8 h-8 bg-yellow-500/20 border border-yellow-500/30 rounded-lg flex items-center justify-center">
-                      <Lock className="w-4 h-4 text-yellow-400" />
+              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="relative overflow-hidden bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-5">
+                  <div className="absolute -top-12 -right-12 w-24 h-24 bg-yellow-500/10 rounded-full blur-3xl" />
+                  <div className="relative">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-8 h-8 bg-yellow-500/20 border border-yellow-500/30 rounded-lg flex items-center justify-center">
+                        <Lock className="w-4 h-4 text-yellow-400" />
+                      </div>
+                      <span className="text-xs text-dark-400 font-normal">In Copies</span>
                     </div>
-                    <span className="text-xs text-dark-400 font-medium">In Copies</span>
-                  </div>
-                  <div className="text-2xl font-bold text-yellow-400">
-                    ${formatNumber(frozenBalance)}
+                    <div className="text-2xl font-semibold text-yellow-400">
+                      ${formatNumber(frozenBalance)}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Funds Flow */}
-            <div className="relative overflow-hidden bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-4">
+            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+            <div className="relative overflow-hidden bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-4">
               <div className="relative flex items-center justify-center gap-8">
                 <div>
                   <div className="text-xs text-dark-400 mb-0.5">Total In</div>
-                  <div className="text-xl font-bold text-green-400">+${formatNumber(totalIn)}</div>
+                  <div className="text-xl font-medium text-green-400">+${formatNumber(totalIn)}</div>
                 </div>
                 <div className="w-px h-10 bg-dark-700" />
                 <div>
                   <div className="text-xs text-dark-400 mb-0.5">Total Out</div>
-                  <div className="text-xl font-bold text-red-400">-${formatNumber(totalOut)}</div>
+                  <div className="text-xl font-medium text-red-400">-${formatNumber(totalOut)}</div>
                 </div>
               </div>
+            </div>
             </div>
           </div>
         </motion.div>
@@ -330,7 +347,7 @@ export default function WalletsPage() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-6 py-3 font-semibold rounded-md text-sm transition-all whitespace-nowrap ${
+                className={`flex items-center gap-2 px-6 py-3 font-medium rounded-md text-sm transition-all whitespace-nowrap ${
                   activeTab === tab.id
                     ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white shadow-lg shadow-primary-500/30'
                     : 'text-dark-300 hover:text-white'
@@ -339,7 +356,7 @@ export default function WalletsPage() {
                 {tab.icon}
                 <span>{tab.label}</span>
                 {tab.count !== undefined && (
-                  <span className={`ml-1 px-2 py-0.5 rounded-full text-xs font-bold ${
+                  <span className={`ml-1 px-2 py-0.5 rounded-full text-xs font-medium ${
                     activeTab === tab.id ? 'bg-white/20 text-white' : 'bg-dark-700 text-dark-400'
                   }`}>
                     {tab.count}
@@ -350,18 +367,19 @@ export default function WalletsPage() {
           </div>
 
           {/* Table */}
-          <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl overflow-hidden">
+          <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+          <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] overflow-hidden">
             {filteredTransactions.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-dark-700">
-                      <th className="text-left py-4 px-5 text-xs font-semibold text-dark-400 uppercase tracking-wider">Date</th>
-                      <th className="text-left py-4 px-5 text-xs font-semibold text-dark-400 uppercase tracking-wider">Type</th>
-                      <th className="text-left py-4 px-5 text-xs font-semibold text-dark-400 uppercase tracking-wider">Amount</th>
-                      <th className="text-left py-4 px-5 text-xs font-semibold text-dark-400 uppercase tracking-wider">Currency</th>
-                      <th className="text-left py-4 px-5 text-xs font-semibold text-dark-400 uppercase tracking-wider">Status</th>
-                      <th className="text-left py-4 px-5 text-xs font-semibold text-dark-400 uppercase tracking-wider">Details</th>
+                      <th className="text-left py-4 px-5 text-xs font-medium text-dark-400 uppercase tracking-wider">Date</th>
+                      <th className="text-left py-4 px-5 text-xs font-medium text-dark-400 uppercase tracking-wider">Type</th>
+                      <th className="text-left py-4 px-5 text-xs font-medium text-dark-400 uppercase tracking-wider">Amount</th>
+                      <th className="text-left py-4 px-5 text-xs font-medium text-dark-400 uppercase tracking-wider">Currency</th>
+                      <th className="text-left py-4 px-5 text-xs font-medium text-dark-400 uppercase tracking-wider">Status</th>
+                      <th className="text-left py-4 px-5 text-xs font-medium text-dark-400 uppercase tracking-wider">Details</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -377,12 +395,12 @@ export default function WalletsPage() {
                           <div className="text-sm text-white">{formatDate(tx.date)}</div>
                         </td>
                         <td className="py-4 px-5">
-                          <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold border ${getTypeColor(tx.type)}`}>
+                          <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium border ${getTypeColor(tx.type)}`}>
                             {tx.type}
                           </span>
                         </td>
                         <td className="py-4 px-5">
-                          <div className={`text-sm font-bold ${
+                          <div className={`text-sm font-medium ${
                             tx.type === 'Withdrawal' || tx.type === 'Deduction' ? 'text-red-400' : 'text-green-400'
                           }`}>
                             {tx.type === 'Withdrawal' || tx.type === 'Deduction' ? '-' : '+'}{formatNumber(tx.amount)}
@@ -392,7 +410,7 @@ export default function WalletsPage() {
                           <TokenUSDT size={24} variant="branded" />
                         </td>
                         <td className="py-4 px-5">
-                          <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold border capitalize ${getStatusColor(tx.status)}`}>
+                          <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium border capitalize ${getStatusColor(tx.status)}`}>
                             {tx.status}
                           </span>
                         </td>
@@ -451,10 +469,11 @@ export default function WalletsPage() {
                 <div className="w-16 h-16 mx-auto mb-4 bg-dark-800 rounded-full flex items-center justify-center">
                   <Inbox className="w-8 h-8 text-dark-400" />
                 </div>
-                <h3 className="text-xl font-bold text-white mb-2">No Transactions Found</h3>
+                <h3 className="text-xl font-medium text-white mb-2">No Transactions Found</h3>
                 <p className="text-dark-400">No transactions match the selected filter</p>
               </div>
             )}
+          </div>
           </div>
         </motion.div>
       </div>

@@ -125,7 +125,7 @@ export function QuickStartModal({
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-dark-700">
           <div>
-            <h2 className="text-2xl font-bold text-white">Quick Start</h2>
+            <h2 className="text-2xl font-semibold text-white">Quick Start</h2>
             <p className="text-sm text-dark-400">Get started in 3 clicks</p>
           </div>
           <button

@@ -22,7 +22,7 @@ export function ClosedTradesActivity({ trades }: ClosedTradesActivityProps) {
           <Activity className="w-5 h-5 text-accent-400" />
         </div>
         <div>
-          <h3 className="text-lg font-bold text-white">Recent Trades</h3>
+          <h3 className="text-lg font-medium text-white">Recent Trades</h3>
           <p className="text-xs text-dark-400">Last {trades.length} closed</p>
         </div>
       </div>
@@ -65,8 +65,8 @@ export function ClosedTradesActivity({ trades }: ClosedTradesActivityProps) {
               {/* Trade Info */}
               <div className="mb-2">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="font-semibold text-white text-sm">{trade.pair}</span>
-                  <div className={`px-1.5 py-0.5 rounded text-xs font-bold ${
+                  <span className="font-normal text-white text-sm">{trade.pair}</span>
+                  <div className={`px-1.5 py-0.5 rounded text-xs font-medium ${
                     trade.side === 'LONG'
                       ? 'bg-green-500/20 text-green-400'
                       : 'bg-red-500/20 text-red-400'
@@ -85,7 +85,7 @@ export function ClosedTradesActivity({ trades }: ClosedTradesActivityProps) {
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-dark-500">P&L</span>
                   <div className="text-right">
-                    <div className={`text-sm font-bold ${
+                    <div className={`text-sm font-medium ${
                       trade.pnl >= 0 ? 'text-green-400' : 'text-red-400'
                     }`}>
                       {trade.pnl >= 0 ? '+' : ''}${Math.abs(trade.pnl).toFixed(2)}

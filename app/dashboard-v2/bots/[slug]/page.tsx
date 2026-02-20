@@ -825,7 +825,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
           className="text-center max-w-md"
         >
           <AlertCircle className="w-20 h-20 text-red-400 mx-auto mb-6" />
-          <h1 className="text-4xl font-bold text-white mb-4">Bot Not Found</h1>
+          <h1 className="text-4xl font-semibold text-white mb-4">Bot Not Found</h1>
           <p className="text-dark-300 mb-8">{error || `The bot "${slug}" doesn't exist.`}</p>
           <Link
             href="/dashboard-v2/bots"
@@ -848,7 +848,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
             return (
               <div key={idx} className="flex-none px-8 whitespace-nowrap flex items-center">
                 <IconComponent className={`mr-2 w-4 h-4 ${item.color}`} />
-                <span className={`font-mono font-semibold ${item.color}`}>{item.label}</span>
+                <span className={`font-mono font-medium ${item.color}`}>{item.label}</span>
                 {item.value && <span className="ml-1 text-slate-400 text-sm">{item.value}</span>}
               </div>
             );
@@ -861,8 +861,9 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6 mb-3"
+          className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] mb-3"
         >
+          <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6">
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
             <div className="flex items-start gap-4">
               {masterBotData.icon.startsWith('/') ? (
@@ -874,9 +875,9 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
               )}
               <div>
                 <div className="flex items-center gap-2 mb-2 flex-wrap">
-                  <h1 className="text-3xl font-bold text-white">{masterBotData.name}</h1>
+                  <h1 className="text-3xl font-semibold text-white">{masterBotData.name}</h1>
                   {masterBotData.verified && (
-                    <span className="px-2 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-green-500 to-green-600 text-white flex items-center gap-1">
+                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-green-500 to-green-600 text-white flex items-center gap-1">
                       <Shield className="w-3 h-3" />
                       VERIFIED
                     </span>
@@ -914,6 +915,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
               Copy This Bot
             </Link>
           </div>
+          </div>
         </motion.div>
 
         {/* Tabs */}
@@ -930,7 +932,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`px-4 py-2.5 font-semibold rounded-md text-sm transition-all flex items-center gap-2 whitespace-nowrap ${
+                  className={`px-4 py-2.5 font-medium rounded-md text-sm transition-all flex items-center gap-2 whitespace-nowrap ${
                     activeTab === tab.id
                       ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white shadow-lg shadow-primary-500/30'
                       : 'text-dark-300 hover:text-white'
@@ -957,88 +959,97 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
               {/* Header Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {/* Total Invested */}
-                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6 hover:border-accent-500/50 transition-all">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-accent-500/20 border border-accent-500/30 rounded-xl flex items-center justify-center">
-                      <DollarSign className="w-6 h-6 text-accent-400" />
+                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-accent-500/50 transition-all">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="w-12 h-12 bg-accent-500/20 border border-accent-500/30 rounded-xl flex items-center justify-center">
+                        <DollarSign className="w-6 h-6 text-accent-400" />
+                      </div>
                     </div>
-                  </div>
-                  <div className="text-sm text-dark-400 mb-1">Total Invested</div>
-                  <div className="text-2xl font-bold text-white mb-2">
-                    ${masterBotData.totalInvestedByAll.toLocaleString('en-US', { maximumFractionDigits: 0 })}
-                  </div>
-                  <div className="text-xs text-dark-400">
-                    By all copiers
+                    <div className="text-sm text-dark-400 mb-1">Total Invested</div>
+                    <div className="text-2xl font-semibold text-white mb-2">
+                      ${masterBotData.totalInvestedByAll.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                    </div>
+                    <div className="text-xs text-dark-400">
+                      By all copiers
+                    </div>
                   </div>
                 </div>
 
                 {/* Aggregate P&L */}
-                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6 hover:border-green-500/50 transition-all">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-green-500/20 border border-green-500/30 rounded-xl flex items-center justify-center">
-                      <TrendingUp className="w-6 h-6 text-green-400" />
+                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-green-500/50 transition-all">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="w-12 h-12 bg-green-500/20 border border-green-500/30 rounded-xl flex items-center justify-center">
+                        <TrendingUp className="w-6 h-6 text-green-400" />
+                      </div>
+                      <div className="text-xs font-medium text-green-400 bg-green-500/10 px-2 py-1 rounded">
+                        +{masterBotData.aggregateProfitPercent.toFixed(1)}%
+                      </div>
                     </div>
-                    <div className="text-xs font-semibold text-green-400 bg-green-500/10 px-2 py-1 rounded">
-                      +{masterBotData.aggregateProfitPercent.toFixed(1)}%
+                    <div className="text-sm text-dark-400 mb-1">Aggregate P&L</div>
+                    <div className="text-2xl font-semibold text-green-400 mb-2">
+                      +${masterBotData.aggregateProfit.toLocaleString('en-US', { maximumFractionDigits: 0 })}
                     </div>
-                  </div>
-                  <div className="text-sm text-dark-400 mb-1">Aggregate P&L</div>
-                  <div className="text-2xl font-bold text-green-400 mb-2">
-                    +${masterBotData.aggregateProfit.toLocaleString('en-US', { maximumFractionDigits: 0 })}
-                  </div>
-                  <div className="text-xs text-dark-400">
-                    Total profit (all copiers)
+                    <div className="text-xs text-dark-400">
+                      Total profit (all copiers)
+                    </div>
                   </div>
                 </div>
 
                 {/* Win Rate */}
-                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6 hover:border-blue-500/50 transition-all">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-blue-500/20 border border-blue-500/30 rounded-xl flex items-center justify-center">
-                      <Target className="w-6 h-6 text-blue-400" />
+                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-blue-500/50 transition-all">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="w-12 h-12 bg-blue-500/20 border border-blue-500/30 rounded-xl flex items-center justify-center">
+                        <Target className="w-6 h-6 text-blue-400" />
+                      </div>
+                      <div className="text-xs font-medium text-blue-400 bg-blue-500/10 px-2 py-1 rounded">
+                        {masterBotData.stats.totalTrades} trades
+                      </div>
                     </div>
-                    <div className="text-xs font-semibold text-blue-400 bg-blue-500/10 px-2 py-1 rounded">
-                      {masterBotData.stats.totalTrades} trades
+                    <div className="text-sm text-dark-400 mb-1">Win Rate</div>
+                    <div className="text-2xl font-semibold text-white mb-2">
+                      {masterBotData.stats.winRate.toFixed(1)}%
                     </div>
-                  </div>
-                  <div className="text-sm text-dark-400 mb-1">Win Rate</div>
-                  <div className="text-2xl font-bold text-white mb-2">
-                    {masterBotData.stats.winRate.toFixed(1)}%
-                  </div>
-                  <div className="text-xs text-dark-400">
-                    {masterBotData.stats.winningTrades}W / {masterBotData.stats.losingTrades}L
+                    <div className="text-xs text-dark-400">
+                      {masterBotData.stats.winningTrades}W / {masterBotData.stats.losingTrades}L
+                    </div>
                   </div>
                 </div>
 
                 {/* Active Positions */}
-                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6 hover:border-purple-500/50 transition-all">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-purple-500/20 border border-purple-500/30 rounded-xl flex items-center justify-center">
-                      <Layers className="w-6 h-6 text-purple-400" />
+                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-purple-500/50 transition-all">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="w-12 h-12 bg-purple-500/20 border border-purple-500/30 rounded-xl flex items-center justify-center">
+                        <Layers className="w-6 h-6 text-purple-400" />
+                      </div>
+                      <div className="text-xs font-medium text-purple-400 bg-purple-500/10 px-2 py-1 rounded">
+                        Max {masterBotData.maxPositions}
+                      </div>
                     </div>
-                    <div className="text-xs font-semibold text-purple-400 bg-purple-500/10 px-2 py-1 rounded">
-                      Max {masterBotData.maxPositions}
+                    <div className="text-sm text-dark-400 mb-1">Active Positions</div>
+                    <div className="text-2xl font-semibold text-white mb-2">
+                      {masterBotData.activePositions} / {masterBotData.maxPositions}
                     </div>
-                  </div>
-                  <div className="text-sm text-dark-400 mb-1">Active Positions</div>
-                  <div className="text-2xl font-bold text-white mb-2">
-                    {masterBotData.activePositions} / {masterBotData.maxPositions}
-                  </div>
-                  <div className="text-xs text-dark-400">
-                    Currently open
+                    <div className="text-xs text-dark-400">
+                      Currently open
+                    </div>
                   </div>
                 </div>
               </div>
 
               {/* Equity Curve */}
-              <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6 hover:border-primary-500/50 transition-all">
+              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-primary-500/50 transition-all">
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 bg-green-500/20 border border-green-500/30 rounded-xl flex items-center justify-center">
                       <TrendingUp className="w-6 h-6 text-green-400" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-bold text-white">Aggregate Equity Curve</h2>
+                      <h2 className="text-xl font-medium text-white">Aggregate Equity Curve</h2>
                       <p className="text-xs text-dark-400">Total portfolio value from all copiers</p>
                     </div>
                   </div>
@@ -1047,7 +1058,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                       <button
                         key={period}
                         onClick={() => setEquityPeriod(period)}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                           equityPeriod === period
                             ? 'bg-primary-500 text-white'
                             : 'bg-dark-800 text-dark-400 hover:bg-dark-700'
@@ -1123,16 +1134,18 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                   type="area"
                   height={300}
                 />
+                </div>
               </div>
 
               {/* Performance Statistics */}
-              <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6 hover:border-blue-500/50 transition-all">
+              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-blue-500/50 transition-all">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-12 h-12 bg-blue-500/20 border border-blue-500/30 rounded-xl flex items-center justify-center">
                     <BarChart3 className="w-6 h-6 text-blue-400" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-white">Performance Statistics</h2>
+                    <h2 className="text-xl font-medium text-white">Performance Statistics</h2>
                     <p className="text-sm text-dark-400">Master bot trading metrics</p>
                   </div>
                 </div>
@@ -1140,40 +1153,42 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   <div className="p-4 bg-dark-900/50 rounded-xl border border-dark-700/50">
                     <div className="text-xs text-dark-400 mb-1">Total Trades</div>
-                    <div className="text-xl font-bold text-white">{masterBotData.stats.totalTrades}</div>
+                    <div className="text-xl font-medium text-white">{masterBotData.stats.totalTrades}</div>
                   </div>
                   <div className="p-4 bg-dark-900/50 rounded-xl border border-dark-700/50">
                     <div className="text-xs text-dark-400 mb-1">Profit Factor</div>
-                    <div className="text-xl font-bold text-amber-400">{masterBotData.stats.profitFactor.toFixed(2)}</div>
+                    <div className="text-xl font-medium text-amber-400">{masterBotData.stats.profitFactor.toFixed(2)}</div>
                   </div>
                   <div className="p-4 bg-dark-900/50 rounded-xl border border-dark-700/50">
                     <div className="text-xs text-dark-400 mb-1">Avg Win</div>
-                    <div className="text-xl font-bold text-green-400">+${masterBotData.stats.averageWin.toFixed(0)}</div>
+                    <div className="text-xl font-medium text-green-400">+${masterBotData.stats.averageWin.toFixed(0)}</div>
                   </div>
                   <div className="p-4 bg-dark-900/50 rounded-xl border border-dark-700/50">
                     <div className="text-xs text-dark-400 mb-1">Avg Loss</div>
-                    <div className="text-xl font-bold text-red-400">${masterBotData.stats.averageLoss.toFixed(0)}</div>
+                    <div className="text-xl font-medium text-red-400">${masterBotData.stats.averageLoss.toFixed(0)}</div>
                   </div>
                   <div className="p-4 bg-dark-900/50 rounded-xl border border-dark-700/50">
                     <div className="text-xs text-dark-400 mb-1">Best Trade</div>
-                    <div className="text-xl font-bold text-green-400">+${masterBotData.stats.bestTrade.toFixed(0)}</div>
+                    <div className="text-xl font-medium text-green-400">+${masterBotData.stats.bestTrade.toFixed(0)}</div>
                   </div>
                   <div className="p-4 bg-dark-900/50 rounded-xl border border-dark-700/50">
                     <div className="text-xs text-dark-400 mb-1">Total Volume</div>
-                    <div className="text-xl font-bold text-white">${(masterBotData.stats.totalVolume / 1000).toFixed(0)}k</div>
+                    <div className="text-xl font-medium text-white">${(masterBotData.stats.totalVolume / 1000).toFixed(0)}k</div>
                   </div>
+                </div>
                 </div>
               </div>
 
               {/* Open Positions (Live Grid) */}
-              <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6 hover:border-primary-500/50 transition-all">
+              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-primary-500/50 transition-all">
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
                       <Activity className="w-6 h-6 text-primary-400" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-bold text-white">Open Positions (Live)</h2>
+                      <h2 className="text-xl font-medium text-white">Open Positions (Live)</h2>
                       <p className="text-sm text-dark-400">{masterBotData.openPositions.length} active position{masterBotData.openPositions.length !== 1 ? 's' : ''} • Real-time</p>
                     </div>
                   </div>
@@ -1204,25 +1219,25 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                         {/* Header Row */}
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center gap-2">
-                            <div className={`px-2 py-0.5 rounded text-xs font-bold ${
+                            <div className={`px-2 py-0.5 rounded text-xs font-medium ${
                               position.side === 'LONG'
                                 ? 'bg-green-500/20 text-green-400 border border-green-500/30'
                                 : 'bg-red-500/20 text-red-400 border border-red-500/30'
                             }`}>
                               {position.side} ×{position.leverage}
                             </div>
-                            <span className="text-base font-semibold text-white">{position.pair}</span>
+                            <span className="text-base font-normal text-white">{position.pair}</span>
                             {/* SL/TP */}
                             <div className="flex items-center gap-1.5 ml-2">
                               <div className="px-1.5 py-0.5 bg-dark-800/50 border border-dark-700 rounded flex items-center gap-1.5">
                                 <div className="text-[9px] text-dark-400">SL</div>
-                                <div className="font-mono text-[10px] text-red-400 font-semibold">
+                                <div className="font-mono text-[10px] text-red-400 font-normal">
                                   ${position.stopLoss.toFixed(0)}
                                 </div>
                               </div>
                               <div className="px-1.5 py-0.5 bg-dark-800/50 border border-dark-700 rounded flex items-center gap-1.5">
                                 <div className="text-[9px] text-dark-400">TP</div>
-                                <div className="font-mono text-[10px] text-green-400 font-semibold">
+                                <div className="font-mono text-[10px] text-green-400 font-normal">
                                   ${position.takeProfit.toFixed(0)}
                                 </div>
                               </div>
@@ -1238,7 +1253,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                           <div>
                             <div className="text-[10px] text-dark-400 mb-0.5">Entry Price</div>
-                            <div className="font-mono text-sm text-white font-semibold">
+                            <div className="font-mono text-sm text-white font-normal">
                               ${position.entryPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </div>
                           </div>
@@ -1247,25 +1262,25 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                               Current Price
                               {position.pnl >= 0 ? <ArrowUpRight className="w-2.5 h-2.5 text-green-400" /> : <ArrowDownRight className="w-2.5 h-2.5 text-red-400" />}
                             </div>
-                            <div className="font-mono text-sm text-white font-semibold">
+                            <div className="font-mono text-sm text-white font-normal">
                               ${position.currentPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </div>
                           </div>
                           <div>
                             <div className="text-[10px] text-dark-400 mb-0.5">Position Size</div>
-                            <div className="font-mono text-sm text-white font-semibold">
+                            <div className="font-mono text-sm text-white font-normal">
                               ${position.positionSize.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </div>
                           </div>
                           <div>
                             <div className="text-[10px] text-dark-400 mb-0.5">Amount</div>
-                            <div className="font-mono text-sm text-white font-semibold">
+                            <div className="font-mono text-sm text-white font-normal">
                               {position.amount.toFixed(8)}
                             </div>
                           </div>
                           <div>
                             <div className="text-[10px] text-dark-400 mb-0.5">P&L</div>
-                            <div className={`font-mono text-sm font-semibold ${position.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                            <div className={`font-mono text-sm font-normal ${position.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                               {position.pnl >= 0 ? '+' : ''}${Math.abs(position.pnl).toFixed(2)} <span className="text-[10px] opacity-70">({position.pnl >= 0 ? '+' : ''}{position.pnlPercent.toFixed(2)}%)</span>
                             </div>
                           </div>
@@ -1274,17 +1289,19 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                     ))}
                   </div>
                 )}
+                </div>
               </div>
 
               {/* Recent Trades (Detailed Grid) */}
-              <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6 hover:border-accent-500/50 transition-all">
+              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-accent-500/50 transition-all">
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 bg-accent-500/20 border border-accent-500/30 rounded-xl flex items-center justify-center">
                       <Clock className="w-6 h-6 text-accent-400" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-bold text-white">Trade History</h2>
+                      <h2 className="text-xl font-medium text-white">Trade History</h2>
                       <p className="text-sm text-dark-400">{masterBotData.recentTrades.length} trades</p>
                     </div>
                   </div>
@@ -1311,8 +1328,8 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                           >
                             {/* Left: Pair & Side */}
                             <div className="flex items-center gap-2 flex-shrink-0">
-                              <span className="text-base font-semibold text-white">{trade.pair}</span>
-                              <div className={`px-2 py-0.5 rounded text-xs font-bold whitespace-nowrap ${
+                              <span className="text-base font-normal text-white">{trade.pair}</span>
+                              <div className={`px-2 py-0.5 rounded text-xs font-medium whitespace-nowrap ${
                                 trade.side === 'LONG' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
                               }`}>
                                 {trade.side === 'LONG' ? '↑' : '↓'} {trade.side}×{trade.leverage}
@@ -1322,10 +1339,10 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                             {/* Middle: P&L (Main Focus) */}
                             <div className="flex items-center gap-4">
                               <div className="text-right">
-                                <div className={`text-sm font-semibold ${trade.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                <div className={`text-sm font-normal ${trade.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                                   {trade.pnl >= 0 ? '+' : ''}${trade.pnl.toFixed(2)}
                                 </div>
-                                <div className={`text-[10px] font-semibold opacity-70 ${trade.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                <div className={`text-[10px] font-normal opacity-70 ${trade.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                                   {trade.pnl >= 0 ? '+' : ''}{trade.pnlPercent.toFixed(2)}%
                                 </div>
                               </div>
@@ -1359,22 +1376,22 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                                 <div>
                                   <div className="text-[10px] text-dark-400 mb-1">Entry Price</div>
                                   <div className="px-1.5 py-0.5 bg-dark-800/50 border border-dark-700 rounded inline-flex items-center">
-                                    <div className="font-mono text-sm text-white font-semibold">${trade.entryPrice.toFixed(2)}</div>
+                                    <div className="font-mono text-sm text-white font-normal">${trade.entryPrice.toFixed(2)}</div>
                                   </div>
                                 </div>
                                 <div>
                                   <div className="text-[10px] text-dark-400 mb-1">Exit Price</div>
                                   <div className="px-1.5 py-0.5 bg-dark-800/50 border border-dark-700 rounded inline-flex items-center">
-                                    <div className="font-mono text-sm text-white font-semibold">${trade.exitPrice.toFixed(2)}</div>
+                                    <div className="font-mono text-sm text-white font-normal">${trade.exitPrice.toFixed(2)}</div>
                                   </div>
                                 </div>
                                 <div>
                                   <div className="text-[10px] text-dark-400 mb-1">Position Size</div>
-                                  <div className="font-mono text-sm text-white font-semibold">${trade.positionSize.toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
+                                  <div className="font-mono text-sm text-white font-normal">${trade.positionSize.toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
                                 </div>
                                 <div>
                                   <div className="text-[10px] text-dark-400 mb-1">Duration</div>
-                                  <div className="text-sm text-white font-semibold">{trade.duration}</div>
+                                  <div className="text-sm text-white font-normal">{trade.duration}</div>
                                 </div>
                               </div>
                             </div>
@@ -1384,6 +1401,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                     })}
                   </div>
                 )}
+                </div>
               </div>
             </motion.div>
           )}
@@ -1401,19 +1419,20 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 {/* Left: Copiers Growth Chart */}
                 <div className="lg:col-span-8">
-                  <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6 hover:border-primary-500/50 transition-all">
+                  <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                    <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-primary-500/50 transition-all">
                     <div className="flex items-center justify-between mb-6">
                       <div className="flex items-center gap-3">
                         <div className="w-12 h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
                           <Users className="w-6 h-6 text-primary-400" />
                         </div>
                         <div>
-                          <h2 className="text-xl font-bold text-white">Copiers Growth</h2>
+                          <h2 className="text-xl font-medium text-white">Copiers Growth</h2>
                           <p className="text-xs text-dark-400">Total copiers over time (30 days)</p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-2xl font-bold text-green-400">+18.7%</div>
+                        <div className="text-2xl font-medium text-green-400">+18.7%</div>
                         <div className="text-xs text-dark-400">vs last month</div>
                       </div>
                     </div>
@@ -1487,6 +1506,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                     />
                   </div>
                 </div>
+                </div>
 
                 {/* Right: Stats Cards */}
                 <div className="lg:col-span-4 flex flex-col gap-4">
@@ -1499,14 +1519,14 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                         </div>
                         <div>
                           <div className="text-xs text-dark-400 mb-1">Avg Investment</div>
-                          <div className="text-2xl font-bold text-white">
+                          <div className="text-2xl font-medium text-white">
                             ${(masterBotData.totalInvestedByAll / masterBotData.totalCopiers).toLocaleString('en-US', { maximumFractionDigits: 0 })}
                           </div>
                         </div>
                       </div>
                       <div className="text-right">
                         <div className="text-sm text-dark-400">Total AUM</div>
-                        <div className="text-base font-semibold text-green-400">${(masterBotData.totalInvestedByAll / 1000000).toFixed(1)}M</div>
+                        <div className="text-base font-normal text-green-400">${(masterBotData.totalInvestedByAll / 1000000).toFixed(1)}M</div>
                       </div>
                     </div>
                   </div>
@@ -1520,11 +1540,11 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                         </div>
                         <div>
                           <div className="text-xs text-dark-400 mb-1">New (24h)</div>
-                          <div className="text-2xl font-bold text-white">+234</div>
+                          <div className="text-2xl font-medium text-white">+234</div>
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-sm font-semibold text-blue-400">Record</div>
+                        <div className="text-sm font-normal text-blue-400">Record</div>
                         <div className="text-xs text-dark-400 mt-0.5">All-time high</div>
                       </div>
                     </div>
@@ -1539,11 +1559,11 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                         </div>
                         <div>
                           <div className="text-xs text-dark-400 mb-1">Sharpe Ratio</div>
-                          <div className="text-2xl font-bold text-white">{masterBotData.stats.sharpeRatio}</div>
+                          <div className="text-2xl font-medium text-white">{masterBotData.stats.sharpeRatio}</div>
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-sm font-semibold text-yellow-400">{masterBotData.stats.maxDrawdown < 10 ? 'Low Risk' : 'Moderate'}</div>
+                        <div className="text-sm font-normal text-yellow-400">{masterBotData.stats.maxDrawdown < 10 ? 'Low Risk' : 'Moderate'}</div>
                         <div className="text-xs text-dark-400 mt-0.5">risk level</div>
                       </div>
                     </div>
@@ -1554,13 +1574,14 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
               {/* Middle Section: Geography Chart + Trading Pairs Distribution */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Geography Donut Chart */}
-                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6 hover:border-blue-500/50 transition-all">
+                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-blue-500/50 transition-all">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-12 h-12 bg-blue-500/20 border border-blue-500/30 rounded-xl flex items-center justify-center">
                       <BarChart3 className="w-6 h-6 text-blue-400" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-bold text-white">Copier Geography</h2>
+                      <h2 className="text-xl font-medium text-white">Copier Geography</h2>
                       <p className="text-xs text-dark-400">Distribution by country</p>
                     </div>
                   </div>
@@ -1648,16 +1669,18 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                     type="donut"
                     height={300}
                   />
+                  </div>
                 </div>
 
                 {/* Trading Pairs Distribution */}
-                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6 hover:border-purple-500/50 transition-all">
+                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-purple-500/50 transition-all">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-12 h-12 bg-purple-500/20 border border-purple-500/30 rounded-xl flex items-center justify-center">
                       <PieChart className="w-6 h-6 text-purple-400" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-bold text-white">Trading Pairs</h2>
+                      <h2 className="text-xl font-medium text-white">Trading Pairs</h2>
                       <p className="text-xs text-dark-400">Volume distribution (30d)</p>
                     </div>
                   </div>
@@ -1674,7 +1697,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                       <div key={pair.name} className="flex items-center gap-3">
                         {/* Pair Name */}
                         <div className="w-24 flex-shrink-0">
-                          <span className="text-sm font-semibold text-white">{pair.name}</span>
+                          <span className="text-sm font-normal text-white">{pair.name}</span>
                         </div>
 
                         {/* Horizontal Bar */}
@@ -1691,11 +1714,12 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
 
                           {/* Volume Label */}
                           <div className="w-16 text-right">
-                            <span className="text-sm font-bold text-white">${pair.volume}M</span>
+                            <span className="text-sm font-medium text-white">${pair.volume}M</span>
                           </div>
                         </div>
                       </div>
                     ))}
+                  </div>
                   </div>
                 </div>
               </div>
@@ -1703,24 +1727,25 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
               {/* Bottom Section: Leaderboard + Top Copiers + Reviews */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 {/* Global Leaderboard */}
-                <div className="lg:col-span-6 bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6 hover:border-yellow-500/50 transition-all">
+                <div className="lg:col-span-6 rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-yellow-500/50 transition-all">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-12 h-12 bg-yellow-500/20 border border-yellow-500/30 rounded-xl flex items-center justify-center">
                       <Trophy className="w-6 h-6 text-yellow-400" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-bold text-white">Leaderboard</h2>
+                      <h2 className="text-xl font-medium text-white">Leaderboard</h2>
                       <p className="text-xs text-dark-400">Global ranking</p>
                     </div>
                   </div>
                   <div className="flex items-center justify-between mb-6 p-4 bg-gradient-to-r from-yellow-500/10 to-orange-500/10 rounded-xl border border-yellow-500/20">
                     <div>
-                      <div className="text-5xl font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">#3</div>
+                      <div className="text-5xl font-semibold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">#3</div>
                       <div className="text-sm text-dark-400 mt-1">Out of 1,284 bots</div>
                     </div>
                     <div className="text-right">
                       <div className="text-sm text-dark-400">Change</div>
-                      <div className="text-3xl font-bold text-green-400">↑ 2</div>
+                      <div className="text-3xl font-medium text-green-400">↑ 2</div>
                       <div className="text-xs text-dark-500">This week</div>
                     </div>
                   </div>
@@ -1740,25 +1765,27 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                             : 'hover:bg-dark-800/50'
                         }`}
                       >
-                        <span className={leaderBot.highlight ? 'text-white font-semibold' : 'text-slate-400'}>
+                        <span className={leaderBot.highlight ? 'text-white font-normal' : 'text-slate-400'}>
                           #{leaderBot.rank} {leaderBot.name}
                         </span>
-                        <span className={leaderBot.highlight ? 'text-yellow-400 font-semibold font-mono' : 'text-slate-500 font-mono'}>
+                        <span className={leaderBot.highlight ? 'text-yellow-400 font-normal font-mono' : 'text-slate-500 font-mono'}>
                           {leaderBot.roi}
                         </span>
                       </div>
                     ))}
                   </div>
+                  </div>
                 </div>
 
                 {/* Top Copiers */}
-                <div className="lg:col-span-6 bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6 hover:border-green-500/50 transition-all">
+                <div className="lg:col-span-6 rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-green-500/50 transition-all">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-12 h-12 bg-green-500/20 border border-green-500/30 rounded-xl flex items-center justify-center">
                       <Medal className="w-6 h-6 text-green-400" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-bold text-white">Top Copiers</h2>
+                      <h2 className="text-xl font-medium text-white">Top Copiers</h2>
                       <p className="text-xs text-dark-400">Best performers</p>
                     </div>
                   </div>
@@ -1772,19 +1799,20 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                     ].map((copier, idx) => (
                       <div key={idx} className="flex items-center justify-between bg-dark-800/50 rounded-lg p-3 hover:bg-dark-800/70 transition-all">
                         <div className="flex items-center gap-3">
-                          <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${copier.gradient} flex items-center justify-center text-white font-bold shadow-lg`}>
+                          <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${copier.gradient} flex items-center justify-center text-white font-medium shadow-lg`}>
                             {copier.rank}
                           </div>
                           <div>
-                            <div className="text-sm font-semibold text-white">{copier.name}</div>
+                            <div className="text-sm font-normal text-white">{copier.name}</div>
                             <div className="text-xs text-dark-400">{copier.roi} ROI</div>
                           </div>
                         </div>
-                        <div className="text-sm font-bold text-green-400 font-mono">{copier.profit}</div>
+                        <div className="text-sm font-medium text-green-400 font-mono">{copier.profit}</div>
                       </div>
                     ))}
                   </div>
                 </div>
+              </div>
 
               </div>
             </motion.div>
@@ -1802,13 +1830,14 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
               {/* Heatmap & Terminal Grid */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                 {/* Activity Heatmap */}
-                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6 flex flex-col">
+                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6 flex flex-col">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="w-12 h-12 bg-purple-500/20 border border-purple-500/30 rounded-xl flex items-center justify-center">
                       <Calendar className="w-6 h-6 text-purple-400" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-bold text-white">Activity Heatmap</h2>
+                      <h2 className="text-xl font-medium text-white">Activity Heatmap</h2>
                       <p className="text-xs text-dark-400">Last 90 days trading activity</p>
                     </div>
                   </div>
@@ -1844,10 +1873,12 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                     </div>
                     <span>More</span>
                   </div>
+                  </div>
                 </div>
 
                 {/* Terminal */}
-                <div className="bg-black border border-dark-700 rounded-2xl overflow-hidden">
+                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                  <div className="bg-black rounded-[calc(1rem-1px)] overflow-hidden">
                   <div className="bg-dark-900 px-3 py-2 border-b border-dark-700 flex items-center gap-2">
                     <div className="w-3 h-3 bg-red-500 rounded-full"></div>
                     <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
@@ -1874,46 +1905,52 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                       );
                     })}
                   </div>
+                  </div>
                 </div>
               </div>
 
               {/* Trading Hours & Days */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6">
+                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-12 h-12 bg-blue-500/20 border border-blue-500/30 rounded-xl flex items-center justify-center">
                       <Clock className="w-6 h-6 text-blue-400" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-bold text-white">Best Trading Hours</h2>
+                      <h2 className="text-xl font-medium text-white">Best Trading Hours</h2>
                       <p className="text-xs text-dark-400">Optimal time periods (UTC)</p>
                     </div>
                   </div>
                   <Chart options={tradingHoursChartOptions} series={tradingHoursChartOptions.series} type="bar" height={250} />
+                  </div>
                 </div>
 
-                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6">
+                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-12 h-12 bg-cyan-500/20 border border-cyan-500/30 rounded-xl flex items-center justify-center">
                       <BarChart3 className="w-6 h-6 text-cyan-400" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-bold text-white">Day of Week Performance</h2>
+                      <h2 className="text-xl font-medium text-white">Day of Week Performance</h2>
                       <p className="text-xs text-dark-400">Weekly trading patterns</p>
                     </div>
                   </div>
                   <Chart options={dayOfWeekChartOptions} series={dayOfWeekChartOptions.series} type="bar" height={250} />
+                  </div>
                 </div>
               </div>
 
               {/* Market Conditions */}
-              <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6">
+              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-12 h-12 bg-amber-500/20 border border-amber-500/30 rounded-xl flex items-center justify-center">
                     <CloudSun className="w-6 h-6 text-amber-400" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-white">Market Conditions</h2>
+                    <h2 className="text-xl font-medium text-white">Market Conditions</h2>
                     <p className="text-xs text-dark-400">Performance across different market states</p>
                   </div>
                 </div>
@@ -1927,18 +1964,19 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                     return (
                       <div key={idx} className="bg-dark-800/50 rounded-lg p-4">
                         <div className="flex items-center justify-between mb-3">
-                          <span className={`text-sm font-semibold text-${condition.color}-400 flex items-center gap-2`}>
+                          <span className={`text-sm font-normal text-${condition.color}-400 flex items-center gap-2`}>
                             <IconComponent className="w-4 h-4" />
                             {condition.label}
                           </span>
                           <span className="text-xs text-slate-500">{condition.time}</span>
                         </div>
-                        <div className="text-2xl font-bold text-white mb-1">{condition.return}</div>
+                        <div className="text-2xl font-medium text-white mb-1">{condition.return}</div>
                         <div className="text-xs text-slate-400">Avg daily return</div>
                         <div className="mt-2 text-xs text-green-400">Win Rate: {condition.winRate}</div>
                       </div>
                     );
                   })}
+                </div>
                 </div>
               </div>
             </motion.div>
@@ -1955,70 +1993,87 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
             >
               {/* Advanced Metrics */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6 hover:border-purple-500/50 transition-all">
-                  <div className="text-xs text-slate-400 mb-2">SORTINO RATIO</div>
-                  <div className="text-2xl font-bold text-purple-400 mb-2">3.12</div>
-                  <div className="text-xs text-dark-400">Downside: 2.1%</div>
+                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6 hover:border-purple-500/50 transition-all">
+                    <div className="text-xs text-slate-400 mb-2">SORTINO RATIO</div>
+                    <div className="text-2xl font-medium text-purple-400 mb-2">3.12</div>
+                    <div className="text-xs text-dark-400">Downside: 2.1%</div>
+                  </div>
                 </div>
-                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6 hover:border-blue-500/50 transition-all">
-                  <div className="text-xs text-slate-400 mb-2">CALMAR RATIO</div>
-                  <div className="text-2xl font-bold text-blue-400 mb-2">2.87</div>
-                  <div className="text-xs text-dark-400">Return/MaxDD</div>
+                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6 hover:border-blue-500/50 transition-all">
+                    <div className="text-xs text-slate-400 mb-2">CALMAR RATIO</div>
+                    <div className="text-2xl font-medium text-blue-400 mb-2">2.87</div>
+                    <div className="text-xs text-dark-400">Return/MaxDD</div>
+                  </div>
                 </div>
-                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6 hover:border-green-500/50 transition-all">
-                  <div className="text-xs text-slate-400 mb-2">OMEGA RATIO</div>
-                  <div className="text-2xl font-bold text-green-400 mb-2">2.34</div>
-                  <div className="text-xs text-dark-400">Threshold: 0%</div>
+                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6 hover:border-green-500/50 transition-all">
+                    <div className="text-xs text-slate-400 mb-2">OMEGA RATIO</div>
+                    <div className="text-2xl font-medium text-green-400 mb-2">2.34</div>
+                    <div className="text-xs text-dark-400">Threshold: 0%</div>
+                  </div>
                 </div>
-                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6 hover:border-accent-500/50 transition-all">
-                  <div className="text-xs text-slate-400 mb-2">TREYNOR RATIO</div>
-                  <div className="text-2xl font-bold text-accent-400 mb-2">1.89</div>
-                  <div className="text-xs text-dark-400">Beta-adjusted</div>
+                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6 hover:border-accent-500/50 transition-all">
+                    <div className="text-xs text-slate-400 mb-2">TREYNOR RATIO</div>
+                    <div className="text-2xl font-medium text-accent-400 mb-2">1.89</div>
+                    <div className="text-xs text-dark-400">Beta-adjusted</div>
+                  </div>
                 </div>
               </div>
 
               {/* Risk/Reward Scatter */}
-              <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6">
+              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-12 h-12 bg-blue-500/20 border border-blue-500/30 rounded-xl flex items-center justify-center">
                     <BarChart className="w-6 h-6 text-blue-400" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-white">Risk/Reward Analysis</h2>
+                    <h2 className="text-xl font-medium text-white">Risk/Reward Analysis</h2>
                     <p className="text-xs text-dark-400">All trades performance scatter</p>
                   </div>
                 </div>
                 <Chart options={riskRewardScatterOptions} series={riskRewardScatterOptions.series} type="scatter" height={300} />
+                </div>
               </div>
 
               {/* Consecutive Stats */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6 hover:border-green-500/50 transition-all">
-                  <div className="text-xs text-slate-400 mb-2">MAX WIN STREAK</div>
-                  <div className="text-3xl font-bold text-green-400 mb-2">47</div>
-                  <div className="text-xs text-dark-400">Consecutive wins</div>
+                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6 hover:border-green-500/50 transition-all">
+                    <div className="text-xs text-slate-400 mb-2">MAX WIN STREAK</div>
+                    <div className="text-3xl font-medium text-green-400 mb-2">47</div>
+                    <div className="text-xs text-dark-400">Consecutive wins</div>
+                  </div>
                 </div>
-                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6 hover:border-red-500/50 transition-all">
-                  <div className="text-xs text-slate-400 mb-2">MAX LOSS STREAK</div>
-                  <div className="text-3xl font-bold text-red-400 mb-2">3</div>
-                  <div className="text-xs text-dark-400">Consecutive losses</div>
+                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6 hover:border-red-500/50 transition-all">
+                    <div className="text-xs text-slate-400 mb-2">MAX LOSS STREAK</div>
+                    <div className="text-3xl font-medium text-red-400 mb-2">3</div>
+                    <div className="text-xs text-dark-400">Consecutive losses</div>
+                  </div>
                 </div>
-                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6 hover:border-accent-500/50 transition-all">
-                  <div className="text-xs text-slate-400 mb-2">AVG HOLD TIME</div>
-                  <div className="text-3xl font-bold text-accent-400 mb-2">4.2h</div>
-                  <div className="text-xs text-dark-400">Per trade</div>
+                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6 hover:border-accent-500/50 transition-all">
+                    <div className="text-xs text-slate-400 mb-2">AVG HOLD TIME</div>
+                    <div className="text-3xl font-medium text-accent-400 mb-2">4.2h</div>
+                    <div className="text-xs text-dark-400">Per trade</div>
+                  </div>
                 </div>
               </div>
 
               {/* Order Book - Full Width */}
-              <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6">
+              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6">
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 bg-green-500/20 border border-green-500/30 rounded-xl flex items-center justify-center">
                       <BookOpen className="w-6 h-6 text-green-400" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-bold text-white">Order Book - BTC/USDT</h2>
+                      <h2 className="text-xl font-medium text-white">Order Book - BTC/USDT</h2>
                       <p className="text-xs text-dark-400">Real-time market depth</p>
                     </div>
                   </div>
@@ -2031,7 +2086,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {/* Asks (Sell Orders) */}
                   <div>
-                    <div className="grid grid-cols-3 gap-4 mb-2 text-xs text-slate-400 font-semibold font-mono px-2 pb-2 border-b border-dark-700">
+                    <div className="grid grid-cols-3 gap-4 mb-2 text-xs text-slate-400 font-medium font-mono px-2 pb-2 border-b border-dark-700">
                       <div>PRICE (USDT)</div>
                       <div className="text-right">SIZE (BTC)</div>
                       <div className="text-right">TOTAL (USDT)</div>
@@ -2039,7 +2094,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                     <div className="space-y-0.5">
                       {orderBook.asks.map((ask, idx) => (
                         <div key={idx} className="grid grid-cols-3 gap-4 py-1.5 px-2 bg-gradient-to-r from-transparent to-red-500/10 hover:to-red-500/20 transition-colors font-mono text-xs rounded">
-                          <div className="text-red-400 font-semibold">{ask.price.toFixed(2)}</div>
+                          <div className="text-red-400 font-normal">{ask.price.toFixed(2)}</div>
                           <div className="text-right text-white">{ask.size}</div>
                           <div className="text-right text-slate-400">{(ask.price * parseFloat(ask.size)).toFixed(2)}</div>
                         </div>
@@ -2049,7 +2104,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
 
                   {/* Bids (Buy Orders) */}
                   <div>
-                    <div className="grid grid-cols-3 gap-4 mb-2 text-xs text-slate-400 font-semibold font-mono px-2 pb-2 border-b border-dark-700">
+                    <div className="grid grid-cols-3 gap-4 mb-2 text-xs text-slate-400 font-medium font-mono px-2 pb-2 border-b border-dark-700">
                       <div>PRICE (USDT)</div>
                       <div className="text-right">SIZE (BTC)</div>
                       <div className="text-right">TOTAL (USDT)</div>
@@ -2057,7 +2112,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                     <div className="space-y-0.5">
                       {orderBook.bids.map((bid, idx) => (
                         <div key={idx} className="grid grid-cols-3 gap-4 py-1.5 px-2 bg-gradient-to-r from-transparent to-green-500/10 hover:to-green-500/20 transition-colors font-mono text-xs rounded">
-                          <div className="text-green-400 font-semibold">{bid.price.toFixed(2)}</div>
+                          <div className="text-green-400 font-normal">{bid.price.toFixed(2)}</div>
                           <div className="text-right text-white">{bid.size}</div>
                           <div className="text-right text-slate-400">{(bid.price * parseFloat(bid.size)).toFixed(2)}</div>
                         </div>
@@ -2068,20 +2123,22 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
 
                 {/* Current Price Separator */}
                 <div className="text-center py-4 my-4 bg-dark-800/50 rounded-lg border border-dark-700">
-                  <div className="text-3xl font-bold text-white font-mono">{orderBook.bids[0]?.price.toFixed(2) || '51,234.50'}</div>
+                  <div className="text-3xl font-medium text-white font-mono">{orderBook.bids[0]?.price.toFixed(2) || '51,234.50'}</div>
                   <div className="text-xs text-slate-500 font-mono mt-1">CURRENT MARKET PRICE</div>
                   <div className="text-sm text-green-400 font-mono mt-1">+2.45% ↗</div>
+                </div>
                 </div>
               </div>
 
               {/* Neural Network Visualization */}
-              <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6">
+              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-12 h-12 bg-purple-500/20 border border-purple-500/30 rounded-xl flex items-center justify-center">
                     <Brain className="w-6 h-6 text-purple-400" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-white">Neural Network Architecture</h2>
+                    <h2 className="text-xl font-medium text-white">Neural Network Architecture</h2>
                     <p className="text-xs text-dark-400">LSTM + XGBoost Ensemble</p>
                   </div>
                 </div>
@@ -2121,21 +2178,23 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                   ].map((metric, idx) => (
                     <div key={idx} className="bg-dark-800/50 rounded-lg p-4">
                       <div className="text-xs text-slate-400 mb-1 font-mono">{metric.label}</div>
-                      <div className={`text-2xl font-bold font-mono ${metric.color}`}>{metric.value}</div>
+                      <div className={`text-2xl font-medium font-mono ${metric.color}`}>{metric.value}</div>
                     </div>
                   ))}
+                </div>
                 </div>
               </div>
 
               {/* Fees & Correlation */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6">
+                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="w-12 h-12 bg-orange-500/20 border border-orange-500/30 rounded-xl flex items-center justify-center">
                       <DollarSign className="w-6 h-6 text-orange-400" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-bold text-white">Fee & Cost Breakdown</h2>
+                      <h2 className="text-xl font-medium text-white">Fee & Cost Breakdown</h2>
                       <p className="text-xs text-dark-400">Total operational costs</p>
                     </div>
                   </div>
@@ -2149,25 +2208,27 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                     ].map((fee, idx) => (
                       <div key={idx} className="flex items-center justify-between bg-dark-800/50 rounded-lg p-3">
                         <span className="text-sm text-slate-400">{fee.label}</span>
-                        <span className={`text-sm font-bold font-mono ${fee.color}`}>{fee.value}</span>
+                        <span className={`text-sm font-medium font-mono ${fee.color}`}>{fee.value}</span>
                       </div>
                     ))}
                     <div className="pt-2 border-t border-dark-700">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-semibold text-white">Net Profit After Fees</span>
-                        <span className="text-lg font-bold text-green-400 font-mono">+$65,516.44</span>
+                        <span className="text-sm font-normal text-white">Net Profit After Fees</span>
+                        <span className="text-lg font-medium text-green-400 font-mono">+$65,516.44</span>
                       </div>
                     </div>
                   </div>
+                  </div>
                 </div>
 
-                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6 flex flex-col">
+                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6 flex flex-col">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-12 h-12 bg-cyan-500/20 border border-cyan-500/30 rounded-xl flex items-center justify-center">
                       <Hash className="w-6 h-6 text-cyan-400" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-bold text-white">Correlation Matrix</h2>
+                      <h2 className="text-xl font-medium text-white">Correlation Matrix</h2>
                       <p className="text-xs text-dark-400">Trading pairs correlation</p>
                     </div>
                   </div>
@@ -2176,7 +2237,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                       <div className="flex flex-col gap-2 mr-3">
                         <div className="h-14"></div>
                         {['BTC', 'ETH', 'SOL', 'MATIC', 'AVAX'].map((pair, idx) => (
-                          <div key={idx} className="w-14 h-14 bg-dark-800 text-slate-400 text-xs flex items-center justify-center border border-dark-700 rounded font-semibold">
+                          <div key={idx} className="w-14 h-14 bg-dark-800 text-slate-400 text-xs flex items-center justify-center border border-dark-700 rounded font-medium">
                             {pair}
                           </div>
                         ))}
@@ -2184,7 +2245,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                       <div>
                         <div className="flex gap-2 mb-3">
                           {['BTC', 'ETH', 'SOL', 'MATIC', 'AVAX'].map((pair, idx) => (
-                            <div key={idx} className="w-14 h-14 bg-dark-800 text-slate-400 text-xs flex items-center justify-center border border-dark-700 rounded font-semibold">
+                            <div key={idx} className="w-14 h-14 bg-dark-800 text-slate-400 text-xs flex items-center justify-center border border-dark-700 rounded font-medium">
                               {pair}
                             </div>
                           ))}
@@ -2199,7 +2260,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                                              value > 0.4 ? 'bg-yellow-500' :
                                              'bg-orange-400';
                                 return (
-                                  <div key={j} className={`w-14 h-14 ${color} text-white text-sm flex items-center justify-center font-bold border border-dark-700 rounded transition-all hover:scale-110 cursor-pointer`}>
+                                  <div key={j} className={`w-14 h-14 ${color} text-white text-sm flex items-center justify-center font-medium border border-dark-700 rounded transition-all hover:scale-110 cursor-pointer`}>
                                     {value.toFixed(2)}
                                   </div>
                                 );
@@ -2210,35 +2271,40 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                       </div>
                     </div>
                   </div>
+                  </div>
                 </div>
               </div>
 
               {/* Feature Importance & Predictions */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6">
+                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-12 h-12 bg-amber-500/20 border border-amber-500/30 rounded-xl flex items-center justify-center">
                       <BarChart className="w-6 h-6 text-amber-400" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-bold text-white">Feature Importance</h2>
+                      <h2 className="text-xl font-medium text-white">Feature Importance</h2>
                       <p className="text-xs text-dark-400">Top 10 ML features</p>
                     </div>
                   </div>
                   <Chart options={featureImportanceChartOptions} series={featureImportanceChartOptions.series} type="bar" height={350} />
+                  </div>
                 </div>
 
-                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6">
+                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-12 h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
                       <Target className="w-6 h-6 text-primary-400" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-bold text-white">Model Predictions</h2>
+                      <h2 className="text-xl font-medium text-white">Model Predictions</h2>
                       <p className="text-xs text-dark-400">Vs actual returns</p>
                     </div>
                   </div>
                   <Chart options={predictionChartOptions} series={predictionChartOptions.series} type="line" height={300} />
+                  </div>
                 </div>
               </div>
 
@@ -2249,10 +2315,12 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                   { label: 'GAMMA (Γ)', value: '0.12', desc: 'Delta sensitivity', color: 'text-purple-400', border: 'hover:border-purple-500/50' },
                   { label: 'THETA (Θ)', value: '-0.08', desc: 'Time decay', color: 'text-orange-400', border: 'hover:border-orange-500/50' },
                 ].map((greek, idx) => (
-                  <div key={idx} className={`bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6 ${greek.border} transition-all`}>
-                    <h3 className="text-sm font-semibold mb-4 text-white">{greek.label}</h3>
-                    <div className={`text-4xl font-bold mb-2 ${greek.color}`}>{greek.value}</div>
-                    <div className="text-xs text-dark-400">{greek.desc}</div>
+                  <div key={idx} className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                    <div className={`bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6 ${greek.border} transition-all`}>
+                      <h3 className="text-sm font-medium mb-4 text-white">{greek.label}</h3>
+                      <div className={`text-4xl font-semibold mb-2 ${greek.color}`}>{greek.value}</div>
+                      <div className="text-xs text-dark-400">{greek.desc}</div>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -2270,36 +2338,45 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
             >
               {/* VaR Metrics */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6 hover:border-orange-500/50 transition-all">
-                  <div className="text-xs text-slate-400 mb-2">VAR (95%)</div>
-                  <div className="text-2xl font-bold text-orange-400 mb-2">-$1,234</div>
-                  <div className="text-xs text-dark-400">Daily VaR</div>
+                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6 hover:border-orange-500/50 transition-all">
+                    <div className="text-xs text-slate-400 mb-2">VAR (95%)</div>
+                    <div className="text-2xl font-medium text-orange-400 mb-2">-$1,234</div>
+                    <div className="text-xs text-dark-400">Daily VaR</div>
+                  </div>
                 </div>
-                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6 hover:border-red-500/50 transition-all">
-                  <div className="text-xs text-slate-400 mb-2">CVAR (95%)</div>
-                  <div className="text-2xl font-bold text-red-400 mb-2">-$1,567</div>
-                  <div className="text-xs text-dark-400">Conditional VaR</div>
+                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6 hover:border-red-500/50 transition-all">
+                    <div className="text-xs text-slate-400 mb-2">CVAR (95%)</div>
+                    <div className="text-2xl font-medium text-red-400 mb-2">-$1,567</div>
+                    <div className="text-xs text-dark-400">Conditional VaR</div>
+                  </div>
                 </div>
-                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6 hover:border-accent-500/50 transition-all">
-                  <div className="text-xs text-slate-400 mb-2">BETA (vs BTC)</div>
-                  <div className="text-2xl font-bold text-accent-400 mb-2">0.74</div>
-                  <div className="text-xs text-dark-400">Market correlation</div>
+                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6 hover:border-accent-500/50 transition-all">
+                    <div className="text-xs text-slate-400 mb-2">BETA (vs BTC)</div>
+                    <div className="text-2xl font-medium text-accent-400 mb-2">0.74</div>
+                    <div className="text-xs text-dark-400">Market correlation</div>
+                  </div>
                 </div>
-                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6 hover:border-green-500/50 transition-all">
-                  <div className="text-xs text-slate-400 mb-2">ALPHA</div>
-                  <div className="text-2xl font-bold text-green-400 mb-2">+12.4%</div>
-                  <div className="text-xs text-dark-400">Excess return</div>
+                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6 hover:border-green-500/50 transition-all">
+                    <div className="text-xs text-slate-400 mb-2">ALPHA</div>
+                    <div className="text-2xl font-medium text-green-400 mb-2">+12.4%</div>
+                    <div className="text-xs text-dark-400">Excess return</div>
+                  </div>
                 </div>
               </div>
 
               {/* Monte Carlo Simulation */}
-              <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6">
+              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-12 h-12 bg-purple-500/20 border border-purple-500/30 rounded-xl flex items-center justify-center">
                     <Activity className="w-6 h-6 text-purple-400" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-white">Monte Carlo Simulation</h2>
+                    <h2 className="text-xl font-medium text-white">Monte Carlo Simulation</h2>
                     <p className="text-xs text-dark-400">1000 runs, 30 days projection</p>
                   </div>
                 </div>
@@ -2314,34 +2391,38 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                   ].map((stat, idx) => (
                     <div key={idx} className="bg-dark-800/50 rounded-lg p-3">
                       <div className="text-xs text-slate-400 mb-1 font-mono">{stat.label}</div>
-                      <div className={`text-xl font-bold font-mono ${stat.color}`}>{stat.value}</div>
+                      <div className={`text-xl font-medium font-mono ${stat.color}`}>{stat.value}</div>
                     </div>
                   ))}
+                </div>
                 </div>
               </div>
 
               {/* Underwater Chart */}
-              <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6">
+              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-12 h-12 bg-red-500/20 border border-red-500/30 rounded-xl flex items-center justify-center">
                     <TrendingDown className="w-6 h-6 text-red-400" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-white">Underwater Chart</h2>
+                    <h2 className="text-xl font-medium text-white">Underwater Chart</h2>
                     <p className="text-xs text-dark-400">Drawdown over time</p>
                   </div>
                 </div>
                 <Chart options={underwaterChartOptions} series={underwaterChartOptions.series} type="area" height={250} />
+                </div>
               </div>
 
               {/* System Health */}
-              <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6">
+              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-12 h-12 bg-green-500/20 border border-green-500/30 rounded-xl flex items-center justify-center">
                     <Activity className="w-6 h-6 text-green-400" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-white">System Health Monitoring</h2>
+                    <h2 className="text-xl font-medium text-white">System Health Monitoring</h2>
                     <p className="text-xs text-dark-400">Real-time system status</p>
                   </div>
                 </div>
@@ -2389,13 +2470,14 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                   <div className="grid grid-cols-2 gap-4 mt-4">
                     <div className="bg-dark-800/50 rounded-lg p-3">
                       <div className="text-xs text-slate-400 mb-1">EXCHANGES</div>
-                      <div className="text-2xl font-bold text-white font-mono">8/8</div>
+                      <div className="text-2xl font-medium text-white font-mono">8/8</div>
                     </div>
                     <div className="bg-dark-800/50 rounded-lg p-3">
                       <div className="text-xs text-slate-400 mb-1">WEBSOCKETS</div>
-                      <div className="text-2xl font-bold text-green-400 font-mono">24/24</div>
+                      <div className="text-2xl font-medium text-green-400 font-mono">24/24</div>
                     </div>
                   </div>
+                </div>
                 </div>
               </div>
             </motion.div>

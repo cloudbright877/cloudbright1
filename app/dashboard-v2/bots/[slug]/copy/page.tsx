@@ -160,8 +160,9 @@ export default function CopyBotPage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6 lg:p-8"
+          className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]"
         >
+          <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 lg:p-8">
           {/* Header */}
           <div className="flex items-center gap-4 mb-6">
             {typeof bot.icon === 'string' && bot.icon.startsWith('/') ? (
@@ -172,7 +173,7 @@ export default function CopyBotPage() {
               </div>
             )}
             <div>
-              <h1 className="text-2xl lg:text-3xl font-bold text-white">Copy {bot.name}</h1>
+              <h1 className="text-2xl lg:text-3xl font-semibold text-white">Copy {bot.name}</h1>
               <p className="text-sm text-dark-400 mt-1">{bot.strategy}</p>
             </div>
           </div>
@@ -181,13 +182,13 @@ export default function CopyBotPage() {
           <div className="grid grid-cols-3 gap-3 mb-6">
             <div className="p-3 bg-dark-900/50 rounded-lg border border-dark-700">
               <p className="text-xs text-dark-400 mb-1">Return</p>
-              <p className="text-sm font-bold text-green-400">
+              <p className="text-sm font-medium text-green-400">
                 +{bot.stats.return1y?.toFixed(0) || '0'}%
               </p>
             </div>
             <div className="p-3 bg-dark-900/50 rounded-lg border border-dark-700">
               <p className="text-xs text-dark-400 mb-1">Win Rate</p>
-              <p className="text-sm font-bold text-white">
+              <p className="text-sm font-medium text-white">
                 {bot.stats.winRate?.toFixed(0) || '0'}%
               </p>
             </div>
@@ -195,7 +196,7 @@ export default function CopyBotPage() {
               <p className="text-xs opacity-70 mb-1">Risk</p>
               <div className="flex items-center gap-1">
                 {getRiskIcon()}
-                <p className="text-sm font-bold capitalize">{bot.risk}</p>
+                <p className="text-sm font-medium capitalize">{bot.risk}</p>
               </div>
             </div>
           </div>
@@ -203,7 +204,7 @@ export default function CopyBotPage() {
           {/* Investment Amount Input */}
           <div className="space-y-3 mb-6">
             <div>
-              <label className="block text-sm font-semibold text-white mb-2">
+              <label className="block text-sm font-normal text-white mb-2">
                 Investment Amount
               </label>
               <div className="relative">
@@ -233,7 +234,7 @@ export default function CopyBotPage() {
                   key={amount}
                   onClick={() => handleAmountChange(amount.toString())}
                   disabled={amount > userBalance}
-                  className="flex-1 px-3 py-2 bg-dark-700/50 hover:bg-primary-500/20 border border-dark-600 hover:border-primary-500/50 rounded-lg text-xs font-semibold text-dark-300 hover:text-primary-400 transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-dark-700/50 disabled:hover:border-dark-600 disabled:hover:text-dark-300"
+                  className="flex-1 px-3 py-2 bg-dark-700/50 hover:bg-primary-500/20 border border-dark-600 hover:border-primary-500/50 rounded-lg text-xs font-medium text-dark-300 hover:text-primary-400 transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-dark-700/50 disabled:hover:border-dark-600 disabled:hover:text-dark-300"
                 >
                   ${(amount / 1000).toFixed(amount >= 1000 ? 1 : 0)}k
                 </button>
@@ -244,7 +245,7 @@ export default function CopyBotPage() {
           {/* Balance Info */}
           <div className="flex items-center justify-between p-4 bg-dark-900/30 rounded-lg border border-dark-700 mb-6">
             <span className="text-sm text-dark-400">Available Balance</span>
-            <span className="text-sm font-bold text-white">
+            <span className="text-sm font-medium text-white">
               ${userBalance.toLocaleString()}
             </span>
           </div>
@@ -264,7 +265,7 @@ export default function CopyBotPage() {
             >
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-yellow-400" />
-                <span className="text-sm font-semibold text-white">Capital Reservation: {bot.lockInDays} Days</span>
+                <span className="text-sm font-medium text-white">Capital Reservation: {bot.lockInDays} Days</span>
               </div>
               <motion.div
                 animate={{ rotate: showReservationInfo ? 180 : 0 }}
@@ -288,15 +289,15 @@ export default function CopyBotPage() {
                 <div className="p-3 bg-dark-800/50 border border-dark-700 rounded-lg space-y-2">
                   <div className="flex justify-between text-xs">
                     <span className="text-dark-400">Lock-in period</span>
-                    <span className="font-semibold text-white">{bot.lockInDays} days</span>
+                    <span className="font-normal text-white">{bot.lockInDays} days</span>
                   </div>
                   <div className="flex justify-between text-xs">
                     <span className="text-dark-400">Deactivation available</span>
-                    <span className="font-semibold text-green-400">After day {bot.lockInDays}</span>
+                    <span className="font-normal text-green-400">After day {bot.lockInDays}</span>
                   </div>
                   <div className="flex justify-between text-xs">
                     <span className="text-dark-400">Capital return</span>
-                    <span className="font-semibold text-green-400">100%</span>
+                    <span className="font-normal text-green-400">100%</span>
                   </div>
                 </div>
 
@@ -334,6 +335,7 @@ export default function CopyBotPage() {
                 </>
               )}
             </button>
+          </div>
           </div>
         </motion.div>
       </div>

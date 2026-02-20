@@ -305,8 +305,9 @@ export default function WithdrawPage() {
               >
                 {/* Step 1: Select Currency */}
                 {step === 1 && (
-                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6">
-                    <h2 className="text-2xl font-bold text-white mb-6">Select Currency</h2>
+                  <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                    <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
+                    <h2 className="text-2xl font-medium text-white mb-6">Select Currency</h2>
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3">
                       {CURRENCIES.map((currency, index) => (
                         <CurrencyCard
@@ -321,13 +322,15 @@ export default function WithdrawPage() {
                         />
                       ))}
                     </div>
+                    </div>
                   </div>
                 )}
 
                 {/* Step 2: Withdrawal Details */}
                 {step === 2 && selectedCurrency && (
-                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6 space-y-6">
-                    <h2 className="text-2xl font-bold text-white">Withdrawal Details</h2>
+                  <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                    <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 space-y-6">
+                    <h2 className="text-2xl font-medium text-white">Withdrawal Details</h2>
 
                     {/* Network Selection */}
                     <div>
@@ -352,7 +355,7 @@ export default function WithdrawPage() {
                             `}
                           >
                             <div className="flex-1 min-w-0">
-                              <div className="font-bold text-white text-sm truncate">{network.networkName}</div>
+                              <div className="font-medium text-white text-sm truncate">{network.networkName}</div>
                               <div className="text-xs text-dark-400 truncate">{network.name}</div>
                               <div className="flex items-center gap-2 text-[11px] text-dark-500 mt-0.5">
                                 <span>Fee: {network.fee}</span>
@@ -430,7 +433,7 @@ export default function WithdrawPage() {
                       <div className="flex items-start gap-3">
                         <AlertTriangle className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
                         <div className="text-sm text-yellow-200">
-                          <div className="font-semibold mb-1">Important</div>
+                          <div className="font-medium mb-1">Important</div>
                           <div className="text-yellow-200/80">
                             Please double-check the withdrawal address. Cryptocurrency transactions
                             are irreversible.
@@ -455,18 +458,20 @@ export default function WithdrawPage() {
                         Continue
                       </button>
                     </div>
+                    </div>
                   </div>
                 )}
 
                 {/* Step 3: Security Verification */}
                 {step === 3 && (
-                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6 space-y-6">
+                  <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                    <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 space-y-6">
                     <div className="flex items-center gap-3 mb-4">
                       <div className="w-12 h-12 bg-primary-500/20 rounded-xl flex items-center justify-center">
                         <Shield className="w-6 h-6 text-primary-400" />
                       </div>
                       <div>
-                        <h2 className="text-2xl font-bold text-white">Security Verification</h2>
+                        <h2 className="text-2xl font-medium text-white">Security Verification</h2>
                         <p className="text-sm text-dark-400">Verify your identity to continue</p>
                       </div>
                     </div>
@@ -520,7 +525,7 @@ export default function WithdrawPage() {
                       <div className="flex items-start gap-3">
                         <Info className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
                         <div className="text-sm text-blue-200">
-                          <div className="font-semibold mb-1">Security Check</div>
+                          <div className="font-medium mb-1">Security Check</div>
                           <div className="text-blue-200/80">
                             We use PIN verification to protect your funds from unauthorized
                             withdrawals.
@@ -545,20 +550,22 @@ export default function WithdrawPage() {
                         Continue
                       </button>
                     </div>
+                    </div>
                   </div>
                 )}
 
                 {/* Step 4: Confirmation */}
                 {step === 4 && (
-                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6 space-y-6">
-                    <h2 className="text-2xl font-bold text-white">Review Withdrawal</h2>
+                  <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                    <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 space-y-6">
+                    <h2 className="text-2xl font-medium text-white">Review Withdrawal</h2>
 
                     {/* Processing Time Info */}
                     <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl">
                       <div className="flex items-start gap-3">
                         <Clock className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
                         <div className="text-sm text-blue-200">
-                          <div className="font-semibold mb-1">Processing Time</div>
+                          <div className="font-medium mb-1">Processing Time</div>
                           <div className="text-blue-200/80">
                             Withdrawals are processed within 24 hours. You will receive an email
                             confirmation.
@@ -583,6 +590,7 @@ export default function WithdrawPage() {
                         Submit Withdrawal
                       </button>
                     </div>
+                    </div>
                   </div>
                 )}
               </motion.div>
@@ -592,19 +600,20 @@ export default function WithdrawPage() {
           {/* Live Summary Sidebar - col-span-5, sticky */}
           <div className="lg:col-span-5">
             <div className="sticky top-6">
-              <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6">
-                <h3 className="text-xl font-bold text-white mb-6">Withdrawal Summary</h3>
+              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
+                <h3 className="text-xl font-medium text-white mb-6">Withdrawal Summary</h3>
 
                 {/* Currency Icon */}
                 <div className="flex items-center gap-3 mb-6 pb-6 border-b border-dark-700">
                   {(() => {
                     const sym = selectedCurrency?.symbol || 'USDT';
                     const Icon = TOKEN_ICONS[sym];
-                    return Icon ? <Icon size={48} variant="branded" /> : <span className="text-white text-2xl font-bold">{sym.charAt(0)}</span>;
+                    return Icon ? <Icon size={48} variant="branded" /> : <span className="text-white text-2xl font-medium">{sym.charAt(0)}</span>;
                   })()}
                   <div>
                     <div className="text-sm text-dark-400">Currency</div>
-                    <div className="text-xl font-bold text-white">
+                    <div className="text-xl font-medium text-white">
                       {selectedCurrency ? `${selectedCurrency.symbol} (${selectedCurrency.name})` : 'Not selected'}
                     </div>
                   </div>
@@ -614,21 +623,21 @@ export default function WithdrawPage() {
                 <div className="space-y-4">
                   <div className="flex justify-between py-3 border-b border-dark-700">
                     <span className="text-dark-400">Network</span>
-                    <span className="font-bold text-white">{selectedNetwork?.name || '—'}</span>
+                    <span className="font-medium text-white">{selectedNetwork?.name || '—'}</span>
                   </div>
                   <div className="flex justify-between py-3 border-b border-dark-700">
                     <span className="text-dark-400">Amount</span>
-                    <span className="font-bold text-white">
+                    <span className="font-medium text-white">
                       {amount || '0.00'} {selectedCurrency?.symbol || ''}
                     </span>
                   </div>
                   <div className="flex justify-between py-3 border-b border-dark-700">
                     <span className="text-dark-400">Network Fee</span>
-                    <span className="font-bold text-red-400">- {selectedNetwork?.fee || '—'}</span>
+                    <span className="font-medium text-red-400">- {selectedNetwork?.fee || '—'}</span>
                   </div>
                   <div className="flex justify-between py-3 bg-dark-800/50 px-4 -mx-2 rounded-xl">
-                    <span className="font-bold text-white">You will receive</span>
-                    <span className="font-bold text-green-400">
+                    <span className="font-medium text-white">You will receive</span>
+                    <span className="font-medium text-green-400">
                       {formatNumber(calculateTotal(), 2)} {selectedCurrency?.symbol || ''}
                     </span>
                   </div>
@@ -645,9 +654,10 @@ export default function WithdrawPage() {
                 {/* Available Balance */}
                 <div className="mt-6 p-4 bg-green-500/10 border border-green-500/20 rounded-xl">
                   <div className="text-xs text-green-400/70 mb-1">Available Balance</div>
-                  <div className="text-2xl font-bold text-green-400">
+                  <div className="text-2xl font-semibold text-green-400">
                     {formatNumber(availableBalance, 2)} {selectedCurrency?.symbol || 'USDT'}
                   </div>
+                </div>
                 </div>
               </div>
             </div>
@@ -665,13 +675,14 @@ export default function WithdrawPage() {
             className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
             onClick={() => setShowConfirmModal(false)}
           >
-            <motion.div
-              initial={{ scale: 0.9, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 20 }}
-              onClick={(e) => e.stopPropagation()}
-              className="max-w-md w-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6"
-            >
+            <div className="max-w-md w-full rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <motion.div
+                initial={{ scale: 0.9, y: 20 }}
+                animate={{ scale: 1, y: 0 }}
+                exit={{ scale: 0.9, y: 20 }}
+                onClick={(e) => e.stopPropagation()}
+                className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6"
+              >
               <div className="text-center mb-6">
                 <motion.div
                   className="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-4"
@@ -685,10 +696,10 @@ export default function WithdrawPage() {
                 >
                   <Shield className="w-8 h-8 text-green-400" />
                 </motion.div>
-                <h3 className="text-2xl font-bold text-white mb-2">Confirm Withdrawal</h3>
+                <h3 className="text-2xl font-medium text-white mb-2">Confirm Withdrawal</h3>
                 <p className="text-dark-300">
                   You are about to withdraw{' '}
-                  <span className="font-bold text-white">{amount} {selectedCurrency?.symbol}</span>
+                  <span className="font-medium text-white">{amount} {selectedCurrency?.symbol}</span>
                 </p>
               </div>
 
@@ -724,7 +735,8 @@ export default function WithdrawPage() {
                   Confirm
                 </button>
               </div>
-            </motion.div>
+              </motion.div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

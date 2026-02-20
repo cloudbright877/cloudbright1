@@ -272,12 +272,14 @@ export default function ReferralsPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
           >
-            <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6 text-center hover:border-primary-500/50 transition-all">
-              <Users className="w-8 h-8 text-primary-400 mx-auto mb-2" />
-              <div className="text-2xl font-bold text-white mb-1">
-                {stats.totalReferrals}
+            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all">
+              <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 text-center">
+                <Users className="w-8 h-8 text-primary-400 mx-auto mb-2" />
+                <div className="text-2xl font-semibold text-white mb-1">
+                  {stats.totalReferrals}
+                </div>
+                <div className="text-sm text-dark-400">Total Referrals</div>
               </div>
-              <div className="text-sm text-dark-400">Total Referrals</div>
             </div>
           </motion.div>
 
@@ -286,12 +288,14 @@ export default function ReferralsPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6 text-center hover:border-green-500/50 transition-all">
-              <Activity className="w-8 h-8 text-green-400 mx-auto mb-2" />
-              <div className="text-2xl font-bold text-white mb-1">
-                {stats.activeInvestors}
+            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all">
+              <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 text-center">
+                <Activity className="w-8 h-8 text-green-400 mx-auto mb-2" />
+                <div className="text-2xl font-semibold text-white mb-1">
+                  {stats.activeInvestors}
+                </div>
+                <div className="text-sm text-dark-400">Active Investors</div>
               </div>
-              <div className="text-sm text-dark-400">Active Investors</div>
             </div>
           </motion.div>
 
@@ -300,12 +304,14 @@ export default function ReferralsPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
           >
-            <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6 text-center hover:border-accent-500/50 transition-all">
-              <DollarSign className="w-8 h-8 text-accent-400 mx-auto mb-2" />
-              <div className="text-2xl font-bold bg-gradient-to-r from-primary-400 to-accent-400 bg-clip-text text-transparent mb-1">
-                ${formatNumber(stats.totalEarned)}
+            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all">
+              <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 text-center">
+                <DollarSign className="w-8 h-8 text-accent-400 mx-auto mb-2" />
+                <div className="text-2xl font-semibold bg-gradient-to-r from-primary-400 to-accent-400 bg-clip-text text-transparent mb-1">
+                  ${formatNumber(stats.totalEarned)}
+                </div>
+                <div className="text-sm text-dark-400">Total Earned</div>
               </div>
-              <div className="text-sm text-dark-400">Total Earned</div>
             </div>
           </motion.div>
 
@@ -314,12 +320,14 @@ export default function ReferralsPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
           >
-            <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6 text-center hover:border-blue-500/50 transition-all">
-              <TrendingUp className="w-8 h-8 text-blue-400 mx-auto mb-2" />
-              <div className="text-2xl font-bold text-white mb-1">
-                ${formatNumber(stats.turnover)}
+            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all">
+              <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 text-center">
+                <TrendingUp className="w-8 h-8 text-blue-400 mx-auto mb-2" />
+                <div className="text-2xl font-semibold text-white mb-1">
+                  ${formatNumber(stats.turnover)}
+                </div>
+                <div className="text-sm text-dark-400">Team Turnover</div>
               </div>
-              <div className="text-sm text-dark-400">Team Turnover</div>
             </div>
           </motion.div>
         </div>
@@ -333,8 +341,9 @@ export default function ReferralsPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
             >
-              <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6">
-                <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
+                <h3 className="text-xl font-medium text-white mb-4 flex items-center gap-2">
                   <Share2 className="w-5 h-5 text-primary-400" />
                   Your Referral Link
                 </h3>
@@ -378,6 +387,7 @@ export default function ReferralsPage() {
                   ))}
                 </div>
               </div>
+              </div>
             </motion.div>
 
             {/* ── Commission Structure (Bento Grid) ── */}
@@ -388,8 +398,9 @@ export default function ReferralsPage() {
             >
               <div className="grid md:grid-cols-2 gap-4">
                 {/* Commission Table */}
-                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6 hover:border-emerald-500/30 transition-all">
-                  <h3 className="text-lg font-semibold text-white mb-4">
+                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 transition-all">
+                  <h3 className="text-lg font-medium text-white mb-4">
                     Commission per Level
                   </h3>
                   <div className="space-y-2">
@@ -413,7 +424,7 @@ export default function ReferralsPage() {
                             L{item.level}
                           </span>
                           <div>
-                            <p className="text-sm font-semibold text-white">
+                            <p className="text-sm font-normal text-white">
                               Level {item.level}
                             </p>
                             <p className="text-xs text-dark-400">
@@ -422,7 +433,7 @@ export default function ReferralsPage() {
                           </div>
                         </div>
                         <span
-                          className={`text-lg font-bold ${
+                          className={`text-lg font-medium ${
                             item.highlight ? 'text-emerald-400' : 'text-white'
                           }`}
                         >
@@ -432,12 +443,13 @@ export default function ReferralsPage() {
                     ))}
                   </div>
                 </div>
+                </div>
 
                 {/* Feature Cards */}
                 <div className="flex flex-col gap-4">
-                  <div className="flex-1 bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6 hover:border-emerald-500/30 transition-all flex flex-col justify-center">
+                  <div className="flex-1 bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 transition-all flex flex-col justify-center">
                     <Zap className="w-7 h-7 text-emerald-400 mb-3" />
-                    <h3 className="text-lg font-semibold text-white mb-2">
+                    <h3 className="text-lg font-medium text-white mb-2">
                       Instant Payout
                     </h3>
                     <p className="text-sm text-dark-300">
@@ -446,9 +458,9 @@ export default function ReferralsPage() {
                       minimum thresholds.
                     </p>
                   </div>
-                  <div className="flex-1 bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6 hover:border-emerald-500/30 transition-all flex flex-col justify-center">
+                  <div className="flex-1 bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 transition-all flex flex-col justify-center">
                     <Shield className="w-7 h-7 text-emerald-400 mb-3" />
-                    <h3 className="text-lg font-semibold text-white mb-2">
+                    <h3 className="text-lg font-medium text-white mb-2">
                       No Deposit Required
                     </h3>
                     <p className="text-sm text-dark-300">
@@ -467,8 +479,8 @@ export default function ReferralsPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7 }}
             >
-              <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6">
-                <h3 className="text-lg font-bold text-white mb-2">
+              <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
+                <h3 className="text-lg font-medium text-white mb-2">
                   Cashflow Levels Impact
                 </h3>
                 <p className="text-sm text-dark-400 mb-4">
@@ -497,7 +509,7 @@ export default function ReferralsPage() {
                         className="px-3 py-5 text-center border-r border-violet-500/10 last:border-r-0"
                       >
                         <span
-                          className={`text-xl sm:text-2xl font-bold ${
+                          className={`text-xl sm:text-2xl font-medium ${
                             i === 0 ? 'text-violet-400' : 'text-white'
                           }`}
                         >
@@ -544,10 +556,10 @@ export default function ReferralsPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8 }}
             >
-              <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6">
+              <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
                 <div className="mb-6">
                   <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-                    <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                    <h3 className="text-xl font-medium text-white flex items-center gap-2">
                       <Users className="w-5 h-5 text-primary-400" />
                       Your Referrals
                     </h3>
@@ -627,7 +639,7 @@ export default function ReferralsPage() {
                             </div>
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                <span className="font-bold text-white">
+                                <span className="font-medium text-white">
                                   {referral.username}
                                 </span>
                                 <span className="text-xs px-2 py-0.5 rounded bg-primary-500/20 text-primary-400 border border-primary-500/30">
@@ -650,7 +662,7 @@ export default function ReferralsPage() {
                             <div className="text-xs text-dark-400 mb-1">
                               Deposits
                             </div>
-                            <div className="text-lg font-bold text-white">
+                            <div className="text-lg font-medium text-white">
                               ${formatNumber(referral.deposits)}
                             </div>
                             <div className="text-sm text-green-400 flex items-center justify-end gap-1 mt-1">
@@ -696,7 +708,7 @@ export default function ReferralsPage() {
                 ) : (
                   <div className="text-center py-12 text-dark-400">
                     <Users className="w-16 h-16 text-dark-600 mx-auto mb-4" />
-                    <div className="text-lg font-semibold text-white mb-1">
+                    <div className="text-lg font-medium text-white mb-1">
                       No referrals yet
                     </div>
                     <div className="text-sm">
@@ -716,10 +728,10 @@ export default function ReferralsPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8 }}
             >
-              <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6">
+              <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <Crown className="w-5 h-5 text-violet-400" />
-                  <h3 className="text-lg font-bold text-white">
+                  <h3 className="text-lg font-medium text-white">
                     Turnover Bonuses
                   </h3>
                 </div>
@@ -730,7 +742,7 @@ export default function ReferralsPage() {
                     <div className="text-xs text-dark-400 mb-1">
                       Team Turnover
                     </div>
-                    <div className="text-lg font-bold text-white">
+                    <div className="text-lg font-medium text-white">
                       ${formatNumber(teamTurnover)}
                     </div>
                   </div>
@@ -738,7 +750,7 @@ export default function ReferralsPage() {
                     <div className="text-xs text-dark-400 mb-1">
                       Bonuses Earned
                     </div>
-                    <div className="text-lg font-bold text-green-400">
+                    <div className="text-lg font-medium text-green-400">
                       ${formatNumber(turnoverStats?.totalBonusesEarned || 0)}
                     </div>
                   </div>
@@ -750,11 +762,11 @@ export default function ReferralsPage() {
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm text-dark-300">
                         Next:{' '}
-                        <span className="font-bold text-white">
+                        <span className="font-medium text-white">
                           Level {turnoverStats.nextLevel.level}
                         </span>
                       </span>
-                      <span className="text-lg font-bold text-violet-400">
+                      <span className="text-lg font-medium text-violet-400">
                         ${formatNumber(turnoverStats.nextLevel.bonus)}
                       </span>
                     </div>
@@ -825,7 +837,7 @@ export default function ReferralsPage() {
                             </div>
                           </div>
                           <span
-                            className={`text-base font-bold ${
+                            className={`text-base font-medium ${
                               isClaimed
                                 ? 'text-green-400'
                                 : isUnlocked
@@ -849,8 +861,8 @@ export default function ReferralsPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.9 }}
             >
-              <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6">
-                <h3 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
+              <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
+                <h3 className="text-lg font-medium text-white mb-1 flex items-center gap-2">
                   <DollarSign className="w-5 h-5 text-green-400" />
                   Recent Commissions
                 </h3>
@@ -869,7 +881,7 @@ export default function ReferralsPage() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="text-sm font-bold text-green-400">
+                            <span className="text-sm font-medium text-green-400">
                               +${formatNumber(bonus.amount)}
                             </span>
                             {bonus.level && (
@@ -907,7 +919,7 @@ export default function ReferralsPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 1.0 }}
               >
-                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6">
+                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold" style={getAvatarStyle(referrerUser.username)}>
                       <span>

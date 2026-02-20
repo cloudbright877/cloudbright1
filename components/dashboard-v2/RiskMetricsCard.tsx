@@ -21,7 +21,7 @@ export function RiskMetricsCard({ trades, positions }: RiskMetricsCardProps) {
     <div className="bg-gradient-to-br from-purple-500/10 via-pink-500/10 to-orange-500/10 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
       <div className="flex items-center gap-2 mb-6">
         <Activity className="w-5 h-5 text-purple-400" />
-        <h3 className="text-lg font-semibold text-white">Risk Metrics</h3>
+        <h3 className="text-lg font-medium text-white">Risk Metrics</h3>
       </div>
 
       <div className="space-y-6">
@@ -74,7 +74,7 @@ export function RiskMetricsCard({ trades, positions }: RiskMetricsCardProps) {
                 <Clock className="w-4 h-4 text-blue-400" />
                 <span className="text-sm text-gray-400">Staggered Closing</span>
               </div>
-              <span className="text-sm font-semibold text-blue-400">
+              <span className="text-sm font-normal text-blue-400">
                 {scheduledCount} scheduled
               </span>
             </div>

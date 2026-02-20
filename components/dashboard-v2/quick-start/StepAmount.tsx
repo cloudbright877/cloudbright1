@@ -36,9 +36,9 @@ export function StepAmount({ userBalance, selectedAmount, onSelect }: StepAmount
   return (
     <div className="space-y-6">
       <div className="text-center mb-8">
-        <h3 className="text-2xl font-bold text-white mb-2">How much do you want to invest?</h3>
+        <h3 className="text-2xl font-semibold text-white mb-2">How much do you want to invest?</h3>
         <p className="text-dark-400">
-          Available balance: <span className="text-green-400 font-semibold">${userBalance.toLocaleString()}</span>
+          Available balance: <span className="text-green-400 font-normal">${userBalance.toLocaleString()}</span>
         </p>
       </div>
 
@@ -48,7 +48,7 @@ export function StepAmount({ userBalance, selectedAmount, onSelect }: StepAmount
           <button
             key={amount}
             onClick={() => handlePresetClick(amount)}
-            className={`px-6 py-4 rounded-xl font-semibold text-lg transition-all ${
+            className={`px-6 py-4 rounded-xl font-medium text-lg transition-all ${
               selectedAmount === amount && !showCustom
                 ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white border-2 border-primary-400 shadow-lg shadow-primary-500/50'
                 : 'bg-dark-800 border border-dark-700 text-white hover:border-primary-500/50 hover:bg-dark-700'

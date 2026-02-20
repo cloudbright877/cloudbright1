@@ -46,14 +46,14 @@ export const PositionRow = memo<PositionRowProps>(
           {/* Header Row */}
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
-              <div className={`px-1.5 py-0.5 rounded text-xs font-bold ${
+              <div className={`px-1.5 py-0.5 rounded text-xs font-medium ${
                 position.side === 'LONG'
                   ? 'bg-green-500/20 text-green-400'
                   : 'bg-red-500/20 text-red-400'
               }`}>
                 {position.side} ×{position.leverage}
               </div>
-              <span className="font-bold text-white text-sm">{position.pair}</span>
+              <span className="font-normal text-white text-sm">{position.pair}</span>
               {/* Duration */}
               <div className="flex items-center gap-1 text-xs text-dark-400 ml-1">
                 <Clock className="w-3 h-3" />
@@ -66,14 +66,14 @@ export const PositionRow = memo<PositionRowProps>(
               {/* Stop Loss */}
               <div className="flex flex-col items-end">
                 <div className="text-[9px] text-dark-500">Stop Loss</div>
-                <div className="font-mono text-xs text-red-400 font-semibold">
+                <div className="font-mono text-xs text-red-400 font-normal">
                   ${(position.stopLoss || 0).toFixed(0)}
                 </div>
               </div>
               {/* Take Profit */}
               <div className="flex flex-col items-end">
                 <div className="text-[9px] text-dark-500">Take Profit</div>
-                <div className="font-mono text-xs text-green-400 font-semibold">
+                <div className="font-mono text-xs text-green-400 font-normal">
                   ${(position.takeProfit || 0).toFixed(0)}
                 </div>
               </div>
@@ -135,7 +135,7 @@ export const PositionRow = memo<PositionRowProps>(
             >
               <div className="flex items-center gap-3">
                 <div className="text-xs text-dark-400">P&L:</div>
-                <div className={`font-mono text-sm font-bold ${
+                <div className={`font-mono text-sm font-medium ${
                   position.pnl >= 0 ? 'text-green-400' : 'text-red-400'
                 }`}>
                   {position.pnl >= 0 ? '+' : '-'}${Math.abs(position.pnl).toFixed(2)}
@@ -153,7 +153,7 @@ export const PositionRow = memo<PositionRowProps>(
           {position.type === 'instant' && (
             <div className="mt-2 flex items-center gap-1.5 text-xs text-amber-400 bg-amber-500/10 px-2 py-1 rounded">
               <Target className="w-3 h-3" />
-              <span className="font-semibold">Closing soon...</span>
+              <span className="font-medium">Closing soon...</span>
             </div>
           )}
         </div>

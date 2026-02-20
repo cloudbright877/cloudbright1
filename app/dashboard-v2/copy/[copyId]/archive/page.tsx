@@ -101,7 +101,9 @@ export default function ArchiveBotPage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6 lg:p-8"
+        >
+          <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+          <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 lg:p-8"
         >
           {/* Header */}
           <div className="flex items-center gap-4 mb-6">
@@ -109,7 +111,7 @@ export default function ArchiveBotPage() {
               <Archive className="w-7 h-7 text-amber-400" />
             </div>
             <div>
-              <h1 className="text-2xl lg:text-3xl font-bold text-white">Deactivate Bot</h1>
+              <h1 className="text-2xl lg:text-3xl font-semibold text-white">Deactivate Bot</h1>
               <p className="text-sm text-dark-400 mt-1">{botName}</p>
             </div>
           </div>
@@ -119,7 +121,7 @@ export default function ArchiveBotPage() {
             <div className="flex items-start gap-3">
               <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
               <div>
-                <div className="font-bold text-green-400 mb-1">
+                <div className="font-medium text-green-400 mb-1">
                   Capital Reservation Complete
                 </div>
                 <div className="text-sm text-green-200/80">
@@ -141,7 +143,7 @@ export default function ArchiveBotPage() {
             {totalCredited > 0 && (
               <div className="flex justify-between p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
                 <span className="text-green-300">Profit auto-credited to balance</span>
-                <span className="font-bold text-green-400">
+                <span className="font-medium text-green-400">
                   +${formatNumber(totalCredited)}
                 </span>
               </div>
@@ -149,7 +151,7 @@ export default function ArchiveBotPage() {
 
             <div className="flex justify-between p-3 bg-dark-800/50 rounded-lg">
               <span className="text-dark-400">Invested capital</span>
-              <span className="font-bold text-white">
+              <span className="font-medium text-white">
                 ${formatNumber(investedAmount)}
               </span>
             </div>
@@ -162,7 +164,7 @@ export default function ArchiveBotPage() {
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-sm text-dark-400 mb-1">Capital returned to balance</div>
-                <div className="text-3xl font-bold text-gradient">
+                <div className="text-3xl font-semibold text-gradient">
                   ${formatNumber(investedAmount)}
                 </div>
               </div>
@@ -202,6 +204,8 @@ export default function ArchiveBotPage() {
               )}
             </button>
           </div>
+        </div>
+        </div>
         </motion.div>
       </div>
     </div>

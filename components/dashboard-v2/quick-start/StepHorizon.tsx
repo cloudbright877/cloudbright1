@@ -46,7 +46,7 @@ export function StepHorizon({ selectedHorizon, onSelect }: StepHorizonProps) {
   return (
     <div className="space-y-6">
       <div className="text-center mb-8">
-        <h3 className="text-2xl font-bold text-white mb-2">What is your time horizon?</h3>
+        <h3 className="text-2xl font-semibold text-white mb-2">What is your time horizon?</h3>
         <p className="text-dark-400">How long do you plan to invest?</p>
       </div>
 
@@ -82,7 +82,7 @@ export function StepHorizon({ selectedHorizon, onSelect }: StepHorizonProps) {
                   }`} />
                 </div>
                 <div className="flex-1">
-                  <h4 className="text-lg font-bold text-white mb-1">{option.title}</h4>
+                  <h4 className="text-lg font-medium text-white mb-1">{option.title}</h4>
                   <p className="text-sm text-dark-400 mb-2">{option.description}</p>
                   <p className="text-xs text-dark-500">{option.details}</p>
                 </div>

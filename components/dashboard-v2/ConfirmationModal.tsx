@@ -69,7 +69,7 @@ export function ConfirmationModal({
                         {icon}
                       </div>
                     )}
-                    <h2 className="text-lg font-bold text-white">{title}</h2>
+                    <h2 className="text-lg font-medium text-white">{title}</h2>
                   </div>
                   <button
                     onClick={onClose}
@@ -95,7 +95,7 @@ export function ConfirmationModal({
                     {isDangerous && (
                       <div className="flex items-center gap-2 mb-3">
                         <AlertTriangle className="w-4 h-4 text-red-400" />
-                        <p className="text-sm font-semibold text-red-400">What happens:</p>
+                        <p className="text-sm font-medium text-red-400">What happens:</p>
                       </div>
                     )}
                     <ul className="space-y-2">

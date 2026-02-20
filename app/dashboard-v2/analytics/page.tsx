@@ -528,7 +528,7 @@ export default function AnalyticsPage() {
               <button
                 key={range}
                 onClick={() => setTimeRange(range)}
-                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                   timeRange === range
                     ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30'
                     : 'bg-dark-800 text-dark-400 border border-dark-700 hover:border-primary-500/30'
@@ -548,19 +548,20 @@ export default function AnalyticsPage() {
             animate={{ opacity: 1, scale: 1 }}
             className="lg:col-span-8"
           >
-            <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6 hover:border-primary-500/50 transition-all group">
+            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+            <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-primary-500/50 transition-all group">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-green-500/20 border border-green-500/30 rounded-xl flex items-center justify-center">
                     <TrendingUp className="w-6 h-6 text-green-400" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-white">Portfolio Performance</h2>
+                    <h2 className="text-xl font-medium text-white">Portfolio Performance</h2>
                     <p className="text-xs text-dark-400">Total value over time</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className={`text-2xl font-bold ${totalProfitPercent >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  <div className={`text-2xl font-semibold ${totalProfitPercent >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                     {totalProfitPercent >= 0 ? '+' : ''}{totalProfitPercent.toFixed(1)}%
                   </div>
                   <div className="text-xs text-dark-400">Total Return</div>
@@ -573,6 +574,7 @@ export default function AnalyticsPage() {
                 height={270}
               />
             </div>
+            </div>
           </motion.div>
 
           {/* Stats Grid - Right (4 cols, vertical) */}
@@ -583,7 +585,8 @@ export default function AnalyticsPage() {
               transition={{ delay: 0.1 }}
               className="flex-1"
             >
-              <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-xl p-5 hover:border-green-500/50 transition-all flex items-center">
+              <div className="h-full rounded-xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(0.75rem-1px)] p-5 hover:border-green-500/50 transition-all flex items-center">
                 <div className="flex items-center justify-between w-full">
                   <div className="flex items-center gap-3">
                     <div className="w-11 h-11 bg-green-500/20 border border-green-500/30 rounded-lg flex items-center justify-center">
@@ -591,18 +594,19 @@ export default function AnalyticsPage() {
                     </div>
                     <div>
                       <div className="text-xs text-dark-400 mb-1">Total Profit</div>
-                      <div className="text-2xl font-bold text-white">
+                      <div className="text-2xl font-semibold text-white">
                         {totalProfit >= 0 ? '+' : ''}${totalProfit.toFixed(2)}
                       </div>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className={`text-base font-semibold ${totalProfitPercent >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    <div className={`text-base font-medium ${totalProfitPercent >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                       {totalProfitPercent >= 0 ? '+' : ''}{totalProfitPercent.toFixed(1)}%
                     </div>
                     <div className="text-xs text-dark-400 mt-0.5">Invested: ${totalInvested.toLocaleString()}</div>
                   </div>
                 </div>
+              </div>
               </div>
             </motion.div>
 
@@ -612,7 +616,8 @@ export default function AnalyticsPage() {
               transition={{ delay: 0.15 }}
               className="flex-1"
             >
-              <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-xl p-5 hover:border-blue-500/50 transition-all flex items-center">
+              <div className="h-full rounded-xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(0.75rem-1px)] p-5 hover:border-blue-500/50 transition-all flex items-center">
                 <div className="flex items-center justify-between w-full">
                   <div className="flex items-center gap-3">
                     <div className="w-11 h-11 bg-blue-500/20 border border-blue-500/30 rounded-lg flex items-center justify-center">
@@ -620,14 +625,15 @@ export default function AnalyticsPage() {
                     </div>
                     <div>
                       <div className="text-xs text-dark-400 mb-1">Win Rate</div>
-                      <div className="text-2xl font-bold text-white">{winRate.toFixed(1)}%</div>
+                      <div className="text-2xl font-semibold text-white">{winRate.toFixed(1)}%</div>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-base font-semibold text-blue-400">{totalTrades}</div>
+                    <div className="text-base font-medium text-blue-400">{totalTrades}</div>
                     <div className="text-xs text-dark-400 mt-0.5">Total Trades</div>
                   </div>
                 </div>
+              </div>
               </div>
             </motion.div>
 
@@ -637,7 +643,8 @@ export default function AnalyticsPage() {
               transition={{ delay: 0.25 }}
               className="flex-1"
             >
-              <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-xl p-5 hover:border-red-500/50 transition-all flex items-center">
+              <div className="h-full rounded-xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(0.75rem-1px)] p-5 hover:border-red-500/50 transition-all flex items-center">
                 <div className="flex items-center justify-between w-full">
                   <div className="flex items-center gap-3">
                     <div className="w-11 h-11 bg-red-500/20 border border-red-500/30 rounded-lg flex items-center justify-center">
@@ -645,16 +652,17 @@ export default function AnalyticsPage() {
                     </div>
                     <div>
                       <div className="text-xs text-dark-400 mb-1">Max Drawdown</div>
-                      <div className="text-2xl font-bold text-white">{maxDrawdown.toFixed(1)}%</div>
+                      <div className="text-2xl font-semibold text-white">{maxDrawdown.toFixed(1)}%</div>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-base font-semibold text-red-400">
+                    <div className="text-base font-medium text-red-400">
                       {Math.abs(maxDrawdown) < 5 ? 'Very safe' : Math.abs(maxDrawdown) < 10 ? 'Safe' : 'Moderate'}
                     </div>
                     <div className="text-xs text-dark-400 mt-0.5">Peak to trough</div>
                   </div>
                 </div>
+              </div>
               </div>
             </motion.div>
           </div>
@@ -670,13 +678,14 @@ export default function AnalyticsPage() {
             transition={{ delay: 0.3 }}
             className="lg:col-span-5"
           >
-            <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6 hover:border-accent-500/50 transition-all flex flex-col">
+            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+            <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-accent-500/50 transition-all flex flex-col">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 bg-accent-500/20 border border-accent-500/30 rounded-lg flex items-center justify-center">
                   <PieChart className="w-5 h-5 text-accent-400" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-white">Asset Distribution</h3>
+                  <h3 className="text-lg font-medium text-white">Asset Distribution</h3>
                   <p className="text-xs text-dark-400">Trading pairs breakdown</p>
                 </div>
               </div>
@@ -705,6 +714,7 @@ export default function AnalyticsPage() {
                 </div>
               )}
             </div>
+            </div>
           </motion.div>
 
           {/* Trading Stats */}
@@ -714,13 +724,14 @@ export default function AnalyticsPage() {
             transition={{ delay: 0.35 }}
             className="lg:col-span-7"
           >
-            <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6 hover:border-blue-500/50 transition-all flex flex-col">
+            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+            <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-blue-500/50 transition-all flex flex-col">
               <div className="flex items-center gap-3 mb-5">
                 <div className="w-10 h-10 bg-blue-500/20 border border-blue-500/30 rounded-lg flex items-center justify-center">
                   <Activity className="w-5 h-5 text-blue-400" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-white">Trading Statistics</h3>
+                  <h3 className="text-lg font-medium text-white">Trading Statistics</h3>
                   <p className="text-xs text-dark-400">Performance metrics</p>
                 </div>
               </div>
@@ -731,7 +742,7 @@ export default function AnalyticsPage() {
                     <BarChart3 className="w-4 h-4 text-blue-400" />
                     <div className="text-xs text-dark-400">Total Trades</div>
                   </div>
-                  <div className="text-xl font-bold text-white">{totalTrades}</div>
+                  <div className="text-xl font-medium text-white">{totalTrades}</div>
                   <div className="text-xs text-blue-400 mt-1">All bots combined</div>
                 </div>
 
@@ -740,7 +751,7 @@ export default function AnalyticsPage() {
                     <Clock className="w-4 h-4 text-purple-400" />
                     <div className="text-xs text-dark-400">Avg Hold Time</div>
                   </div>
-                  <div className="text-xl font-bold text-white">{tradingStats.avgHoldTime}</div>
+                  <div className="text-xl font-medium text-white">{tradingStats.avgHoldTime}</div>
                   <div className="text-xs text-purple-400 mt-1">
                     {tradingStats.avgHoldTime.includes('h') ? 'Swing trading' :
                      tradingStats.avgHoldTime.includes('m') && parseInt(tradingStats.avgHoldTime) > 10 ? 'Day trading' :
@@ -753,7 +764,7 @@ export default function AnalyticsPage() {
                     <Target className="w-4 h-4 text-green-400" />
                     <div className="text-xs text-dark-400">Win/Loss Ratio</div>
                   </div>
-                  <div className="text-xl font-bold text-white">{tradingStats.winLossRatio.toFixed(2)}:1</div>
+                  <div className="text-xl font-medium text-white">{tradingStats.winLossRatio.toFixed(2)}:1</div>
                   <div className="text-xs text-green-400 mt-1">{tradingStats.wins}W / {tradingStats.losses}L</div>
                 </div>
 
@@ -762,7 +773,7 @@ export default function AnalyticsPage() {
                     <TrendingUp className="w-4 h-4 text-green-400" />
                     <div className="text-xs text-dark-400">Average Win</div>
                   </div>
-                  <div className="text-xl font-bold text-green-400">+${tradingStats.avgWin.toFixed(2)}</div>
+                  <div className="text-xl font-medium text-green-400">+${tradingStats.avgWin.toFixed(2)}</div>
                   <div className="text-xs text-green-400 mt-1">
                     {totalInvested > 0 ? `${((tradingStats.avgWin / totalInvested) * 100).toFixed(2)}% of capital` : 'N/A'}
                   </div>
@@ -773,7 +784,7 @@ export default function AnalyticsPage() {
                     <TrendingDown className="w-4 h-4 text-red-400" />
                     <div className="text-xs text-dark-400">Average Loss</div>
                   </div>
-                  <div className="text-xl font-bold text-red-400">-${tradingStats.avgLoss.toFixed(2)}</div>
+                  <div className="text-xl font-medium text-red-400">-${tradingStats.avgLoss.toFixed(2)}</div>
                   <div className="text-xs text-red-400 mt-1">
                     {totalInvested > 0 ? `${((tradingStats.avgLoss / totalInvested) * 100).toFixed(2)}% of capital` : 'N/A'}
                   </div>
@@ -784,7 +795,7 @@ export default function AnalyticsPage() {
                     <Zap className="w-4 h-4 text-amber-400" />
                     <div className="text-xs text-dark-400">Profit Factor</div>
                   </div>
-                  <div className="text-xl font-bold text-amber-400">{tradingStats.profitFactor.toFixed(2)}</div>
+                  <div className="text-xl font-medium text-amber-400">{tradingStats.profitFactor.toFixed(2)}</div>
                   <div className={`text-xs mt-1 ${
                     tradingStats.profitFactor >= 2 ? 'text-green-400' :
                     tradingStats.profitFactor >= 1.5 ? 'text-yellow-400' :
@@ -803,7 +814,7 @@ export default function AnalyticsPage() {
                     <DollarSign className="w-4 h-4 text-cyan-400" />
                     <div className="text-xs text-dark-400">Total Volume</div>
                   </div>
-                  <div className="text-xl font-bold text-white">${(tradingStats.totalVolume / 1000).toFixed(0)}K</div>
+                  <div className="text-xl font-medium text-white">${(tradingStats.totalVolume / 1000).toFixed(0)}K</div>
                   <div className="text-xs text-cyan-400 mt-1">
                     {totalInvested > 0 ? `${(tradingStats.totalVolume / totalInvested).toFixed(1)}× capital turnover` : 'N/A'}
                   </div>
@@ -814,7 +825,7 @@ export default function AnalyticsPage() {
                     <Zap className="w-4 h-4 text-green-400" />
                     <div className="text-xs text-dark-400">Best Streak</div>
                   </div>
-                  <div className="text-xl font-bold text-green-400">{tradingStats.bestStreak} W</div>
+                  <div className="text-xl font-medium text-green-400">{tradingStats.bestStreak} W</div>
                   <div className="text-xs text-green-400 mt-1">
                     {tradingStats.bestStreak >= 10 ? 'Exceptional streak' :
                      tradingStats.bestStreak >= 7 ? 'Strong streak' :
@@ -829,10 +840,11 @@ export default function AnalyticsPage() {
                     <Award className="w-4 h-4 text-green-400" />
                     <div className="text-xs text-dark-400">Best Day</div>
                   </div>
-                  <div className="text-xl font-bold text-green-400">+${tradingStats.bestDay.toFixed(0)}</div>
+                  <div className="text-xl font-medium text-green-400">+${tradingStats.bestDay.toFixed(0)}</div>
                   <div className="text-xs text-dark-400 mt-1">{tradingStats.bestDayDate || 'N/A'}</div>
                 </div>
               </div>
+            </div>
             </div>
           </motion.div>
 
@@ -843,14 +855,15 @@ export default function AnalyticsPage() {
             transition={{ delay: 0.4 }}
             className="lg:col-span-6"
           >
-            <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-5 hover:border-green-500/50 transition-all flex flex-col">
+            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+            <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-5 hover:border-green-500/50 transition-all flex flex-col">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-green-500/20 border border-green-500/30 rounded-lg flex items-center justify-center">
                     <TrendingUp className="w-5 h-5 text-green-400" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-white">Top Winning Trades</h3>
+                    <h3 className="text-lg font-medium text-white">Top Winning Trades</h3>
                     <p className="text-xs text-dark-400">Best performers</p>
                   </div>
                 </div>
@@ -865,12 +878,12 @@ export default function AnalyticsPage() {
                           <ArrowUpRight className="w-4 h-4 text-green-400" />
                         </div>
                         <div>
-                          <div className="text-sm font-semibold text-white">{trade.pair}</div>
+                          <div className="text-sm font-normal text-white">{trade.pair}</div>
                           <div className="text-xs text-dark-400">{trade.botName} • {trade.date}</div>
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-sm font-bold text-green-400">+${trade.pnl.toFixed(2)}</div>
+                        <div className="text-sm font-medium text-green-400">+${trade.pnl.toFixed(2)}</div>
                         <div className="text-xs text-green-400/60">+{trade.pnlPercent.toFixed(2)}%</div>
                       </div>
                     </div>
@@ -879,6 +892,7 @@ export default function AnalyticsPage() {
                   <div className="flex items-center justify-center h-full text-dark-400">No winning trades yet</div>
                 )}
               </div>
+            </div>
             </div>
           </motion.div>
 
@@ -889,14 +903,15 @@ export default function AnalyticsPage() {
             transition={{ delay: 0.45 }}
             className="lg:col-span-6"
           >
-            <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-5 hover:border-red-500/50 transition-all flex flex-col">
+            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+            <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-5 hover:border-red-500/50 transition-all flex flex-col">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-red-500/20 border border-red-500/30 rounded-lg flex items-center justify-center">
                     <TrendingDown className="w-5 h-5 text-red-400" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-white">Recent Losing Trades</h3>
+                    <h3 className="text-lg font-medium text-white">Recent Losing Trades</h3>
                     <p className="text-xs text-dark-400">Areas to improve</p>
                   </div>
                 </div>
@@ -911,12 +926,12 @@ export default function AnalyticsPage() {
                           <ArrowDownRight className="w-4 h-4 text-red-400" />
                         </div>
                         <div>
-                          <div className="text-sm font-semibold text-white">{trade.pair}</div>
+                          <div className="text-sm font-normal text-white">{trade.pair}</div>
                           <div className="text-xs text-dark-400">{trade.botName} • {trade.date}</div>
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-sm font-bold text-red-400">${trade.pnl.toFixed(2)}</div>
+                        <div className="text-sm font-medium text-red-400">${trade.pnl.toFixed(2)}</div>
                         <div className="text-xs text-red-400/60">{trade.pnlPercent.toFixed(2)}%</div>
                       </div>
                     </div>
@@ -925,6 +940,7 @@ export default function AnalyticsPage() {
                   <div className="flex items-center justify-center h-full text-dark-400">No losing trades yet</div>
                 )}
               </div>
+            </div>
             </div>
           </motion.div>
 
@@ -936,14 +952,15 @@ export default function AnalyticsPage() {
               transition={{ delay: 0.5 }}
               className="lg:col-span-12"
             >
-              <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6 hover:border-primary-500/50 transition-all">
+              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-primary-500/50 transition-all">
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
                       <BarChart3 className="w-6 h-6 text-primary-400" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-bold text-white">Bots Performance Comparison</h2>
+                      <h2 className="text-xl font-medium text-white">Bots Performance Comparison</h2>
                       <p className="text-sm text-dark-400">Total profit by each bot</p>
                     </div>
                   </div>
@@ -961,6 +978,7 @@ export default function AnalyticsPage() {
                   type="bar"
                   height={350}
                 />
+              </div>
               </div>
             </motion.div>
           )}

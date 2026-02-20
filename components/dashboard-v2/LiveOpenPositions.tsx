@@ -54,13 +54,13 @@ export function LiveOpenPositions({ positions }: LiveOpenPositionsProps) {
               <Zap className="w-5 h-5 text-primary-400" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-white">Live Positions</h3>
+              <h3 className="text-lg font-medium text-white">Live Positions</h3>
               <p className="text-xs text-dark-400">0 active</p>
             </div>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-2 h-2 bg-dark-600 rounded-full" />
-            <span className="text-xs text-dark-500 font-semibold">Scanning</span>
+            <span className="text-xs text-dark-500 font-medium">Scanning</span>
           </div>
         </div>
 
@@ -88,7 +88,7 @@ export function LiveOpenPositions({ positions }: LiveOpenPositionsProps) {
             <Zap className="w-5 h-5 text-primary-400" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-white">Live Positions</h3>
+            <h3 className="text-lg font-medium text-white">Live Positions</h3>
             <p className="text-xs text-dark-400">{positions.length} active</p>
           </div>
         </div>
@@ -99,7 +99,7 @@ export function LiveOpenPositions({ positions }: LiveOpenPositionsProps) {
             <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
             <div className="absolute inset-0 w-2 h-2 bg-green-400 rounded-full animate-ping" />
           </div>
-          <span className="text-xs text-green-400 font-semibold">LIVE</span>
+          <span className="text-xs text-green-400 font-medium">LIVE</span>
         </div>
       </div>
 

@@ -116,7 +116,7 @@ export function AddFundsModal({ isOpen, onClose, bot, availableBalance, onAddFun
                       <DollarSign className="w-5 h-5 text-green-400" />
                     </div>
                     <div>
-                      <h2 className="text-lg font-bold text-white">Add Funds</h2>
+                      <h2 className="text-lg font-medium text-white">Add Funds</h2>
                       <p className="text-xs text-dark-400">{bot.name}</p>
                     </div>
                   </div>
@@ -133,16 +133,16 @@ export function AddFundsModal({ isOpen, onClose, bot, availableBalance, onAddFun
                   {/* Current Investment */}
                   <div className="p-4 bg-dark-900/50 rounded-xl border border-dark-700">
                     <p className="text-xs text-dark-400 mb-1">Current Investment</p>
-                    <p className="text-2xl font-bold text-white">${bot.invested.toLocaleString('en-US')}</p>
+                    <p className="text-2xl font-medium text-white">${bot.invested.toLocaleString('en-US')}</p>
                   </div>
 
                   {/* Amount Input */}
                   <div>
-                    <label className="block text-sm font-semibold text-white mb-3">
+                    <label className="block text-sm font-medium text-white mb-3">
                       Add Amount
                     </label>
                     <div className="relative">
-                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-dark-400 font-bold text-lg">
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-dark-400 font-medium text-lg">
                         $
                       </div>
                       <input
@@ -172,7 +172,7 @@ export function AddFundsModal({ isOpen, onClose, bot, availableBalance, onAddFun
                           key={quickAmount}
                           onClick={() => handleQuickAmount(quickAmount)}
                           disabled={quickAmount > availableBalance}
-                          className={`px-3 py-2 rounded-lg border text-sm font-semibold transition-all ${
+                          className={`px-3 py-2 rounded-lg border text-sm font-medium transition-all ${
                             quickAmount > availableBalance
                               ? 'bg-dark-800 border-dark-700 text-dark-600 cursor-not-allowed'
                               : 'bg-dark-800 border-dark-600 text-dark-300 hover:bg-green-500/10 hover:border-green-500/50 hover:text-green-400'
@@ -191,12 +191,12 @@ export function AddFundsModal({ isOpen, onClose, bot, availableBalance, onAddFun
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-dark-400">Available Balance</span>
-                      <span className="font-semibold text-white">${availableBalance.toLocaleString('en-US')}</span>
+                      <span className="font-normal text-white">${availableBalance.toLocaleString('en-US')}</span>
                     </div>
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-dark-400">New Investment</span>
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-green-400">${newInvestment.toLocaleString('en-US')}</span>
+                        <span className="font-normal text-green-400">${newInvestment.toLocaleString('en-US')}</span>
                         {amount && !error && (
                           <div className="flex items-center gap-1 text-xs text-green-400/70">
                             <TrendingUp className="w-3 h-3" />

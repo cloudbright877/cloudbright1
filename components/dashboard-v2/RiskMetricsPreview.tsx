@@ -57,7 +57,7 @@ export default function RiskMetricsPreview({ config }: RiskMetricsPreviewProps) 
     <div className="mb-4 p-4 bg-gradient-to-br from-purple-900/20 to-blue-900/20 border border-purple-500/30 rounded-lg">
       <div className="flex items-center justify-between mb-3">
         <div>
-          <h3 className="text-sm font-bold text-white flex items-center gap-2">
+          <h3 className="text-sm font-medium text-white flex items-center gap-2">
             <Target className="w-4 h-4 text-purple-400" />
             Expected Trading Outcomes
           </h3>
@@ -66,7 +66,7 @@ export default function RiskMetricsPreview({ config }: RiskMetricsPreviewProps) 
           </p>
         </div>
         <div className={`px-3 py-1 rounded border ${getProbabilityColor(metrics.profitProbability)}`}>
-          <span className="text-xs font-bold">{metrics.profitProbability} Profit Probability</span>
+          <span className="text-xs font-medium">{metrics.profitProbability} Profit Probability</span>
         </div>
       </div>
 
@@ -80,7 +80,7 @@ export default function RiskMetricsPreview({ config }: RiskMetricsPreviewProps) 
           </div>
           <div className="space-y-0.5">
             <div className="flex items-baseline gap-1">
-              <span className="text-lg font-bold text-white">
+              <span className="text-lg font-medium text-white">
                 {metrics.finalWinRate.toFixed(1)}%
               </span>
               {metrics.winsBecomingLosses > 0 && (
@@ -105,7 +105,7 @@ export default function RiskMetricsPreview({ config }: RiskMetricsPreviewProps) 
           </div>
           <div className="space-y-0.5">
             <div className="flex items-baseline gap-1">
-              <span className="text-lg font-bold text-white">
+              <span className="text-lg font-medium text-white">
                 {metrics.finalLossRate.toFixed(1)}%
               </span>
               {metrics.winsBecomingLosses > 0 && (
@@ -125,7 +125,7 @@ export default function RiskMetricsPreview({ config }: RiskMetricsPreviewProps) 
           </div>
           <div className="space-y-0.5">
             <div className="flex items-baseline gap-1">
-              <span className={`text-lg font-bold ${
+              <span className={`text-lg font-medium ${
                 metrics.expectedNetPnLPerTrade > 0 ? 'text-green-400' : 'text-red-400'
               }`}>
                 {metrics.expectedNetPnLPerTrade > 0 ? '+' : ''}{metrics.expectedNetPnLPerTrade.toFixed(2)}%
@@ -142,7 +142,7 @@ export default function RiskMetricsPreview({ config }: RiskMetricsPreviewProps) 
           </div>
           <div className="space-y-0.5">
             <div className="flex items-baseline gap-1">
-              <span className={`text-lg font-bold ${
+              <span className={`text-lg font-medium ${
                 metrics.riskRewardRatio >= 1.5 ? 'text-green-400' :
                 metrics.riskRewardRatio >= 1.0 ? 'text-yellow-400' : 'text-red-400'
               }`}>
@@ -158,13 +158,13 @@ export default function RiskMetricsPreview({ config }: RiskMetricsPreviewProps) 
         <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[10px]">
           <div className="flex justify-between">
             <span className="text-dark-500">Avg Win (gross):</span>
-            <span className="text-green-400 font-semibold">
+            <span className="text-green-400 font-normal">
               +{metrics.netAvgWin.toFixed(3)}%
             </span>
           </div>
           <div className="flex justify-between">
             <span className="text-dark-500">Expected Daily P&L:</span>
-            <span className={`font-semibold ${
+            <span className={`font-normal ${
               metrics.expectedDailyPnL > 0 ? 'text-green-400' : 'text-red-400'
             }`}>
               {metrics.expectedDailyPnL > 0 ? '+' : ''}{metrics.expectedDailyPnL.toFixed(2)}%
@@ -172,7 +172,7 @@ export default function RiskMetricsPreview({ config }: RiskMetricsPreviewProps) 
           </div>
           <div className="flex justify-between">
             <span className="text-dark-500">Avg Win (net):</span>
-            <span className={`font-semibold ${
+            <span className={`font-normal ${
               metrics.netAvgWin > 0 ? 'text-green-400' : 'text-red-400'
             }`}>
               {metrics.netAvgWin > 0 ? '+' : ''}{metrics.netAvgWin.toFixed(3)}%
@@ -180,19 +180,19 @@ export default function RiskMetricsPreview({ config }: RiskMetricsPreviewProps) 
           </div>
           <div className="flex justify-between">
             <span className="text-dark-500">Daily Target:</span>
-            <span className="text-blue-400 font-semibold">
+            <span className="text-blue-400 font-normal">
               {config.dailyTargetPercent.toFixed(2)}%
             </span>
           </div>
           <div className="flex justify-between">
             <span className="text-dark-500">Avg Loss:</span>
-            <span className="text-red-400 font-semibold">
+            <span className="text-red-400 font-normal">
               -{metrics.netAvgLoss.toFixed(2)}%
             </span>
           </div>
           <div className="flex justify-between">
             <span className="text-dark-500">Deviation:</span>
-            <span className={`font-semibold ${
+            <span className={`font-normal ${
               Math.abs(metrics.expectedDailyPnL - config.dailyTargetPercent) < config.dailyTargetPercent * 0.1
                 ? 'text-green-400'
                 : 'text-yellow-400'

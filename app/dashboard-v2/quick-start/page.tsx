@@ -128,7 +128,7 @@ export default function QuickStartPage() {
             <ChevronLeft className="w-6 h-6 text-dark-400 hover:text-white" />
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-white">Quick Start</h1>
+            <h1 className="text-3xl font-semibold text-white">Quick Start</h1>
             <p className="text-dark-300">Create your portfolio in 3 simple steps</p>
           </div>
         </motion.div>
@@ -172,12 +172,13 @@ export default function QuickStartPage() {
         </motion.div>
 
         {/* Step Content */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-8 mb-6"
-        >
+        <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] mb-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-8"
+          >
           <AnimatePresence mode="wait">
             {step === 1 && (
               <motion.div
@@ -242,7 +243,8 @@ export default function QuickStartPage() {
               </motion.div>
             )}
           </AnimatePresence>
-        </motion.div>
+          </motion.div>
+        </div>
 
         {/* Navigation */}
         {step < 4 && (

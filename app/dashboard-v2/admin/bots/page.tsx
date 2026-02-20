@@ -221,7 +221,7 @@ export default function AdminBotsPage() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-3">
+          <h1 className="text-3xl font-semibold text-white mb-2 flex items-center gap-3">
             <Settings className="w-8 h-8 text-primary-400" />
             Master Bot Management
           </h1>
@@ -239,7 +239,7 @@ export default function AdminBotsPage() {
             className="mb-6 p-4 bg-green-500/20 border border-green-500/50 rounded-lg flex items-center gap-2"
           >
             <Check className="w-5 h-5 text-green-400" />
-            <span className="text-green-400 font-semibold">{savedMessage}</span>
+            <span className="text-green-400 font-medium">{savedMessage}</span>
           </motion.div>
         )}
 
@@ -274,7 +274,7 @@ export default function AdminBotsPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className={isEditing
-                  ? "bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-6"
+                  ? "rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]"
                   : "bg-dark-800/50 border border-dark-700/50 rounded-lg p-3 hover:bg-dark-800/70 transition-colors"
                 }
               >
@@ -289,10 +289,10 @@ export default function AdminBotsPage() {
                         <div className="text-2xl">{bot.icon}</div>
                       )}
                       <div className="min-w-0">
-                        <h3 className="text-sm font-bold text-white truncate">{bot.name}</h3>
+                        <h3 className="text-sm font-medium text-white truncate">{bot.name}</h3>
                         <p className="text-xs text-dark-500">{bot.slug}</p>
                       </div>
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold whitespace-nowrap ${
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-medium whitespace-nowrap ${
                         bot.risk === 'low'
                           ? 'bg-green-500/20 text-green-400'
                           : bot.risk === 'medium'
@@ -307,23 +307,23 @@ export default function AdminBotsPage() {
                     <div className="flex items-center gap-4 text-xs text-dark-300">
                       <div className="text-center">
                         <div className="text-[10px] text-dark-500 uppercase">WR</div>
-                        <div className="font-semibold text-white">{(config.winRate * 100).toFixed(0)}%</div>
+                        <div className="font-normal text-white">{(config.winRate * 100).toFixed(0)}%</div>
                       </div>
                       <div className="text-center">
                         <div className="text-[10px] text-dark-500 uppercase">Target</div>
-                        <div className="font-semibold text-green-400">{config.dailyTargetPercent}%</div>
+                        <div className="font-normal text-green-400">{config.dailyTargetPercent}%</div>
                       </div>
                       <div className="text-center">
                         <div className="text-[10px] text-dark-500 uppercase">Leverage</div>
-                        <div className="font-semibold text-purple-400">{leverageDisplay}</div>
+                        <div className="font-normal text-purple-400">{leverageDisplay}</div>
                       </div>
                       <div className="text-center min-w-[120px]">
                         <div className="text-[10px] text-dark-500 uppercase">Pairs</div>
-                        <div className="font-semibold text-blue-400 truncate">{pairsDisplay}</div>
+                        <div className="font-normal text-blue-400 truncate">{pairsDisplay}</div>
                       </div>
                       <div className="text-center">
                         <div className="text-[10px] text-dark-500 uppercase">Trades/Day</div>
-                        <div className="font-semibold text-white">{config.tradesPerDay}</div>
+                        <div className="font-normal text-white">{config.tradesPerDay}</div>
                       </div>
                     </div>
 
@@ -346,6 +346,7 @@ export default function AdminBotsPage() {
                     </div>
                   </div>
                 ) : (
+                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
                   <div className="space-y-3">
                     {/* Header Row */}
                     <div className="flex items-center justify-between pb-2 border-b border-dark-700/50">
@@ -356,10 +357,10 @@ export default function AdminBotsPage() {
                         <div className="text-2xl">{bot.icon}</div>
                       )}
                         <div>
-                          <h3 className="text-sm font-bold text-white">{bot.name}</h3>
+                          <h3 className="text-sm font-medium text-white">{bot.name}</h3>
                           <p className="text-xs text-dark-500">{bot.slug}</p>
                         </div>
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-medium ${
                           bot.risk === 'low'
                             ? 'bg-green-500/20 text-green-400'
                             : bot.risk === 'medium'
@@ -407,7 +408,7 @@ export default function AdminBotsPage() {
                             <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
                           )}
                           <div className="flex-1">
-                            <h5 className={`text-xs font-bold mb-1 ${
+                            <h5 className={`text-xs font-medium mb-1 ${
                               validation.valid ? 'text-green-300' : 'text-red-300'
                             }`}>
                               {validation.valid ? 'Configuration Valid' : 'Configuration Invalid'}
@@ -443,7 +444,7 @@ export default function AdminBotsPage() {
                         <div className="col-span-2 p-3 bg-dark-900/30 rounded border border-dark-700/50">
                           <label className="text-xs text-dark-400 uppercase mb-2 block flex items-center justify-between">
                             <span>Daily Target</span>
-                            <span className="text-primary-400 font-bold">{presetInput.dailyTarget.toFixed(1)}%</span>
+                            <span className="text-primary-400 font-medium">{presetInput.dailyTarget.toFixed(1)}%</span>
                           </label>
                           <input
                             type="range"
@@ -522,10 +523,10 @@ export default function AdminBotsPage() {
                         <div className="col-span-2 p-3 bg-blue-900/20 rounded-lg border border-blue-500/30">
                           <div className="flex items-start gap-2">
                             <div className="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                              <span className="text-blue-400 text-xs font-bold">i</span>
+                              <span className="text-blue-400 text-xs font-medium">i</span>
                             </div>
                             <div className="flex-1">
-                              <h5 className="text-xs font-bold text-blue-300 mb-1">Adaptive Convergence System</h5>
+                              <h5 className="text-xs font-medium text-blue-300 mb-1">Adaptive Convergence System</h5>
                               <p className="text-[10px] text-blue-200/80 leading-relaxed">
                                 All other parameters (win rate, leverage, position size, TP/SL, variance) are automatically calculated
                                 from these 4 preset inputs. The system uses 6-layer convergence logic to minimize corrections and maintain realism.
@@ -553,6 +554,7 @@ export default function AdminBotsPage() {
                         </div>
                       </div>
                     )}
+                  </div>
                   </div>
                 )}
               </motion.div>

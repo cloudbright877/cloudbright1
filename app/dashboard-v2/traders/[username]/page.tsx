@@ -125,7 +125,10 @@ export default function TraderProfilePage({ params }: { params: Promise<{ userna
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-8 mb-6 hover:border-primary-500/30 transition-all"
+          className="mb-6"
+        >
+          <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+          <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-8 hover:border-primary-500/30 transition-all"
         >
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Left: Avatar & Basic Info */}
@@ -138,12 +141,12 @@ export default function TraderProfilePage({ params }: { params: Promise<{ userna
             {/* Verified Badge */}
             <div className="flex flex-wrap items-center justify-center gap-2 mb-4">
               {trader.verified && (
-                <span className="px-3 py-1 rounded-full text-xs font-bold bg-green-500/20 border border-green-500/30 text-green-400 flex items-center gap-1">
+                <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-500/20 border border-green-500/30 text-green-400 flex items-center gap-1">
                   <Shield className="w-3 h-3" />
                   VERIFIED
                 </span>
               )}
-              <span className="px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-primary-500 to-accent-500 text-white flex items-center gap-1">
+              <span className="px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-primary-500 to-accent-500 text-white flex items-center gap-1">
                 <Award className="w-3 h-3" />
                 {trader.tier}
               </span>
@@ -153,15 +156,15 @@ export default function TraderProfilePage({ params }: { params: Promise<{ userna
             <div className="grid grid-cols-2 gap-3 w-full">
               <div className="p-3 bg-dark-900/50 rounded-lg text-center">
                 <div className="text-xs text-dark-400">Copiers</div>
-                <div className="text-lg font-bold text-accent-400">{trader.stats.copiers}</div>
+                <div className="text-lg font-medium text-accent-400">{trader.stats.copiers}</div>
               </div>
               <div className="p-3 bg-dark-900/50 rounded-lg text-center">
                 <div className="text-xs text-dark-400">Win Rate</div>
-                <div className="text-lg font-bold text-green-400">{trader.stats.winRate}%</div>
+                <div className="text-lg font-medium text-green-400">{trader.stats.winRate}%</div>
               </div>
               <div className="p-3 bg-dark-900/50 rounded-lg text-center col-span-2">
                 <div className="text-xs text-dark-400">Invested</div>
-                <div className="text-lg font-bold text-blue-400">${trader.stats.totalInvested.toLocaleString()}</div>
+                <div className="text-lg font-medium text-blue-400">${trader.stats.totalInvested.toLocaleString()}</div>
               </div>
             </div>
           </div>
@@ -170,7 +173,7 @@ export default function TraderProfilePage({ params }: { params: Promise<{ userna
           <div className="flex-1 flex flex-col justify-between">
             {/* Name & Username */}
             <div className="mb-4">
-              <h1 className="text-4xl font-bold text-white mb-2">{trader.displayName}</h1>
+              <h1 className="text-4xl font-semibold text-white mb-2">{trader.displayName}</h1>
               <div className="flex items-center gap-3 text-dark-400 text-sm flex-wrap">
                 <span className="flex items-center gap-1">
                   <User className="w-4 h-4" />
@@ -201,7 +204,7 @@ export default function TraderProfilePage({ params }: { params: Promise<{ userna
                   <DollarSign className="w-3 h-3" />
                   Total Profit
                 </div>
-                <div className="text-2xl font-bold text-green-400">${trader.stats.totalProfit.toLocaleString()}</div>
+                <div className="text-2xl font-semibold text-green-400">${trader.stats.totalProfit.toLocaleString()}</div>
               </div>
 
               <div className="p-4 bg-dark-900/50 border border-dark-700 rounded-xl hover:border-primary-500/30 transition-all">
@@ -209,7 +212,7 @@ export default function TraderProfilePage({ params }: { params: Promise<{ userna
                   <TrendingUp className="w-3 h-3" />
                   Monthly Return
                 </div>
-                <div className="text-2xl font-bold text-white">+{trader.stats.monthlyReturn}%</div>
+                <div className="text-2xl font-medium text-white">+{trader.stats.monthlyReturn}%</div>
                 <div className="text-xs text-dark-400">Avg per month</div>
               </div>
 
@@ -218,7 +221,7 @@ export default function TraderProfilePage({ params }: { params: Promise<{ userna
                   <Users className="w-3 h-3" />
                   Copiers AUM
                 </div>
-                <div className="text-2xl font-bold text-accent-400">${(trader.stats.copiersAUM / 1000000).toFixed(1)}M</div>
+                <div className="text-2xl font-medium text-accent-400">${(trader.stats.copiersAUM / 1000000).toFixed(1)}M</div>
                 <div className="text-xs text-dark-400">{trader.stats.copiers} copiers</div>
               </div>
 
@@ -227,7 +230,7 @@ export default function TraderProfilePage({ params }: { params: Promise<{ userna
                   <BarChart3 className="w-3 h-3" />
                   Win Rate
                 </div>
-                <div className="text-2xl font-bold bg-gradient-to-r from-primary-400 to-accent-400 bg-clip-text text-transparent">{trader.stats.winRate}%</div>
+                <div className="text-2xl font-medium bg-gradient-to-r from-primary-400 to-accent-400 bg-clip-text text-transparent">{trader.stats.winRate}%</div>
                 <div className="text-xs text-dark-400">Success rate</div>
               </div>
             </div>
@@ -244,6 +247,8 @@ export default function TraderProfilePage({ params }: { params: Promise<{ userna
             </div>
           </div>
         </div>
+        </div>
+        </div>
       </motion.div>
 
       {/* Tabs */}
@@ -257,7 +262,7 @@ export default function TraderProfilePage({ params }: { params: Promise<{ userna
             <button
               key={key}
               onClick={() => setActiveTab(key)}
-              className={`px-6 py-3 font-semibold rounded-md text-sm transition-all flex items-center gap-2 ${
+              className={`px-6 py-3 font-medium rounded-md text-sm transition-all flex items-center gap-2 ${
                 activeTab === key
                   ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white shadow-lg shadow-primary-500/30'
                   : 'text-dark-300 hover:text-white'
@@ -281,87 +286,97 @@ export default function TraderProfilePage({ params }: { params: Promise<{ userna
             className="space-y-6"
           >
             {/* Performance Chart */}
-            <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6 hover:border-primary-500/30 transition-all">
-              <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+            <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6 hover:border-primary-500/30 transition-all">
+              <h3 className="text-lg font-medium text-white mb-4 flex items-center gap-2">
                 <TrendingUp className="w-5 h-5 text-primary-400" />
                 Portfolio Performance
                 <span className="ml-auto text-sm text-green-400">${trader.stats.totalProfit.toLocaleString()} Total Profit</span>
               </h3>
               <Chart options={performanceChartOptions} series={performanceChartOptions.series} type="area" height={300} />
             </div>
+            </div>
 
             {/* Performance Stats */}
             <div className="grid md:grid-cols-3 gap-4">
-              <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-xl p-6 hover:border-primary-500/30 transition-all">
-                <h4 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+              <div className="h-full rounded-xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(0.75rem-1px)] p-6 hover:border-primary-500/30 transition-all">
+                <h4 className="text-sm font-medium text-white mb-4 flex items-center gap-2">
                   <BarChart3 className="w-4 h-4 text-primary-400" />
                   Trading Stats
                 </h4>
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span className="text-sm text-dark-400">Total Profit:</span>
-                    <span className="text-sm font-bold text-green-400">${trader.stats.totalProfit.toLocaleString()}</span>
+                    <span className="text-sm font-medium text-green-400">${trader.stats.totalProfit.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-dark-400">Win Rate:</span>
-                    <span className="text-sm font-bold text-white">{trader.stats.winRate}%</span>
+                    <span className="text-sm font-medium text-white">{trader.stats.winRate}%</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-dark-400">Total Trades:</span>
-                    <span className="text-sm font-bold text-white">{trader.stats.totalTrades}</span>
+                    <span className="text-sm font-medium text-white">{trader.stats.totalTrades}</span>
                   </div>
                 </div>
               </div>
+              </div>
 
-              <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-xl p-6 hover:border-accent-500/30 transition-all">
-                <h4 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+              <div className="h-full rounded-xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(0.75rem-1px)] p-6 hover:border-accent-500/30 transition-all">
+                <h4 className="text-sm font-medium text-white mb-4 flex items-center gap-2">
                   <Users className="w-4 h-4 text-accent-400" />
                   Social Stats
                 </h4>
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span className="text-sm text-dark-400">Copiers:</span>
-                    <span className="text-sm font-bold text-primary-400">{trader.stats.copiers}</span>
+                    <span className="text-sm font-medium text-primary-400">{trader.stats.copiers}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-dark-400">Copiers AUM:</span>
-                    <span className="text-sm font-bold text-white">${(trader.stats.copiersAUM / 1000).toFixed(0)}k</span>
+                    <span className="text-sm font-medium text-white">${(trader.stats.copiersAUM / 1000).toFixed(0)}k</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-dark-400">Rank:</span>
-                    <span className="text-sm font-bold text-accent-400">#{trader.stats.rank}</span>
+                    <span className="text-sm font-medium text-accent-400">#{trader.stats.rank}</span>
                   </div>
                 </div>
               </div>
+              </div>
 
-              <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-xl p-6 hover:border-green-500/30 transition-all">
-                <h4 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+              <div className="h-full rounded-xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(0.75rem-1px)] p-6 hover:border-green-500/30 transition-all">
+                <h4 className="text-sm font-medium text-white mb-4 flex items-center gap-2">
                   <Target className="w-4 h-4 text-green-400" />
                   Performance
                 </h4>
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span className="text-sm text-dark-400">Total Trades:</span>
-                    <span className="text-sm font-bold text-white">{trader.stats.totalTrades}</span>
+                    <span className="text-sm font-medium text-white">{trader.stats.totalTrades}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-dark-400">Total Invested:</span>
-                    <span className="text-sm font-bold text-blue-400">${trader.stats.totalInvested.toLocaleString()}</span>
+                    <span className="text-sm font-medium text-blue-400">${trader.stats.totalInvested.toLocaleString()}</span>
                   </div>
                 </div>
+              </div>
               </div>
             </div>
 
             {/* Active Bots Summary */}
-            <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6 hover:border-primary-500/30 transition-all">
-              <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+            <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6 hover:border-primary-500/30 transition-all">
+              <h3 className="text-lg font-medium text-white mb-4 flex items-center gap-2">
                 <Bot className="w-5 h-5 text-primary-400" />
                 Active Trading Bots
               </h3>
               <div className="text-center py-8">
-                <div className="text-5xl font-bold bg-gradient-to-r from-primary-400 to-accent-400 bg-clip-text text-transparent mb-2">{trader.activeBotIds.length}</div>
+                <div className="text-5xl font-semibold bg-gradient-to-r from-primary-400 to-accent-400 bg-clip-text text-transparent mb-2">{trader.activeBotIds.length}</div>
                 <div className="text-dark-400">Bots Currently Running</div>
               </div>
+            </div>
             </div>
           </motion.div>
         )}
@@ -372,9 +387,10 @@ export default function TraderProfilePage({ params }: { params: Promise<{ userna
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6"
           >
-            <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
+            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+            <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6">
+            <h3 className="text-lg font-medium text-white mb-6 flex items-center gap-2">
               <Bot className="w-5 h-5 text-primary-400" />
               Active Bots ({trader.activeBotIds.length})
             </h3>
@@ -388,7 +404,7 @@ export default function TraderProfilePage({ params }: { params: Promise<{ userna
                         <Bot className="w-8 h-8" />
                       </div>
                       <div>
-                        <h4 className="text-xl font-bold text-white mb-1">Trading Bot {index + 1}</h4>
+                        <h4 className="text-xl font-medium text-white mb-1">Trading Bot {index + 1}</h4>
                         <div className="text-sm text-dark-400">Bot ID: {botId}</div>
                       </div>
                     </div>
@@ -403,6 +419,8 @@ export default function TraderProfilePage({ params }: { params: Promise<{ userna
                 </div>
               ))}
             </div>
+            </div>
+            </div>
           </motion.div>
         )}
 
@@ -412,9 +430,10 @@ export default function TraderProfilePage({ params }: { params: Promise<{ userna
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6"
           >
-            <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
+            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+            <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6">
+            <h3 className="text-lg font-medium text-white mb-6 flex items-center gap-2">
               <Archive className="w-5 h-5 text-amber-400" />
               Archived Bots
             </h3>
@@ -452,7 +471,7 @@ export default function TraderProfilePage({ params }: { params: Promise<{ userna
                               <Archive className="w-6 h-6 text-white" />
                             </div>
                             <div>
-                              <h4 className="text-base font-bold text-white mb-1">Bot Copy</h4>
+                              <h4 className="text-base font-medium text-white mb-1">Bot Copy</h4>
                               <div className="text-xs text-dark-400">Master Bot: {copy.masterBotId}</div>
                             </div>
                           </div>
@@ -467,13 +486,13 @@ export default function TraderProfilePage({ params }: { params: Promise<{ userna
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                           <div className="p-3 bg-dark-800/50 rounded-lg border border-dark-700/50">
                             <div className="text-xs text-dark-400 mb-1">Invested</div>
-                            <div className="text-sm font-bold text-white">
+                            <div className="text-sm font-medium text-white">
                               ${copy.investedAmount.toLocaleString()}
                             </div>
                           </div>
                           <div className="p-3 bg-dark-800/50 rounded-lg border border-dark-700/50">
                             <div className="text-xs text-dark-400 mb-1">Final P&L</div>
-                            <div className={`text-sm font-bold ${
+                            <div className={`text-sm font-medium ${
                               (copy.finalPnL || 0) >= 0 ? 'text-green-400' : 'text-red-400'
                             }`}>
                               {(copy.finalPnL || 0) >= 0 ? '+' : ''}${(copy.finalPnL || 0).toFixed(2)}
@@ -481,14 +500,14 @@ export default function TraderProfilePage({ params }: { params: Promise<{ userna
                           </div>
                           <div className="p-3 bg-dark-800/50 rounded-lg border border-dark-700/50">
                             <div className="text-xs text-dark-400 mb-1">Duration</div>
-                            <div className="text-sm font-bold text-white flex items-center gap-1">
+                            <div className="text-sm font-medium text-white flex items-center gap-1">
                               <Clock className="w-3 h-3" />
                               {duration} days
                             </div>
                           </div>
                           <div className="p-3 bg-dark-800/50 rounded-lg border border-dark-700/50">
                             <div className="text-xs text-dark-400 mb-1">Lock-in</div>
-                            <div className="text-sm font-bold text-white">
+                            <div className="text-sm font-medium text-white">
                               {lockInDays} days
                             </div>
                           </div>
@@ -497,7 +516,7 @@ export default function TraderProfilePage({ params }: { params: Promise<{ userna
                         <div className="mt-3 pt-3 border-t border-dark-700/50">
                           <div className="flex items-center justify-between">
                             <div className="text-xs text-dark-400">Effective Return</div>
-                            <div className={`text-sm font-bold ${
+                            <div className={`text-sm font-medium ${
                               effectiveReturn >= 0 ? 'text-green-400' : 'text-red-400'
                             }`}>
                               {effectiveReturn >= 0 ? '+' : ''}{effectiveReturn.toFixed(2)}%
@@ -510,6 +529,8 @@ export default function TraderProfilePage({ params }: { params: Promise<{ userna
                 </div>
               );
             })()}
+            </div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -520,9 +541,10 @@ export default function TraderProfilePage({ params }: { params: Promise<{ userna
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-gradient-to-br from-dark-800 to-dark-900 border border-dark-700 rounded-2xl p-6 max-w-lg w-full"
           >
-            <h3 className="text-2xl font-bold text-white mb-4">Copy {trader.displayName}'s Strategy</h3>
+            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+            <div className="bg-gradient-to-br from-dark-800 to-dark-900 rounded-[calc(1rem-1px)] p-6 max-w-lg w-full">
+            <h3 className="text-2xl font-medium text-white mb-4">Copy {trader.displayName}'s Strategy</h3>
 
             <div className="space-y-4 mb-6">
               <div>
@@ -543,7 +565,7 @@ export default function TraderProfilePage({ params }: { params: Promise<{ userna
 
               <div className="p-4 bg-primary-500/10 rounded-lg border border-primary-500/20">
                 <div className="text-xs text-dark-400 mb-2">Expected Monthly Return</div>
-                <div className="text-2xl font-bold text-green-400">+{trader.stats.monthlyReturn}%</div>
+                <div className="text-2xl font-semibold text-green-400">+{trader.stats.monthlyReturn}%</div>
                 <div className="text-xs text-dark-400 mt-1">Average per month</div>
               </div>
 
@@ -563,6 +585,8 @@ export default function TraderProfilePage({ params }: { params: Promise<{ userna
               <button className="flex-1 px-4 py-3 bg-gradient-to-r from-primary-500 to-accent-500 rounded-lg font-semibold text-white hover:shadow-lg transition-all">
                 Start Copying
               </button>
+            </div>
+            </div>
             </div>
           </motion.div>
         </div>

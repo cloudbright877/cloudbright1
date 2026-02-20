@@ -147,8 +147,9 @@ export default function DashboardV2Page() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: index * 0.05 }}
         whileHover={{ scale: 1.01, y: -4 }}
-        className="relative bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-5 hover:border-primary-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary-500/20"
       >
+        <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+        <div className="relative bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-5 hover:border-primary-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary-500/20">
         {/* Header */}
         <div className="flex items-start gap-3 mb-3">
           <Link href={`/dashboard-v2/traders/${event.traderUsername}`} className="group flex-shrink-0">
@@ -184,7 +185,7 @@ export default function DashboardV2Page() {
             {stats.map((s) => (
               <div key={s.label}>
                 <div className="text-xs text-dark-400">{s.label}</div>
-                <div className={`text-sm font-bold ${s.color}`}>{s.value}</div>
+                <div className={`text-sm font-medium ${s.color}`}>{s.value}</div>
               </div>
             ))}
           </div>
@@ -197,6 +198,8 @@ export default function DashboardV2Page() {
             <Heart className={`w-4 h-4 ${likeState.liked ? 'fill-red-400' : ''}`} />
             <span>{likeState.count}</span>
           </button>
+        </div>
+        </div>
         </div>
       </motion.div>
     );
@@ -217,7 +220,7 @@ export default function DashboardV2Page() {
             <button
               key={key}
               onClick={() => setActiveFilter(key)}
-              className={`px-6 py-3 font-semibold rounded-md text-sm transition-all whitespace-nowrap ${
+              className={`px-6 py-3 font-medium rounded-md text-sm transition-all whitespace-nowrap ${
                 activeFilter === key
                   ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white shadow-lg shadow-primary-500/30'
                   : 'text-dark-300 hover:text-white'
@@ -250,10 +253,12 @@ export default function DashboardV2Page() {
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6"
+          >
+            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+            <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6"
           >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+              <h3 className="text-lg font-medium text-white flex items-center gap-2">
                 <Fish className="w-5 h-5 text-blue-400" />
                 Whale Alerts
               </h3>
@@ -278,7 +283,7 @@ export default function DashboardV2Page() {
                           <Fish className="w-4 h-4 text-white" />
                         </div>
                         <div>
-                          <div className="text-sm font-semibold text-white">{alert.traderUsername}</div>
+                          <div className="text-sm font-normal text-white">{alert.traderUsername}</div>
                           <div className="text-xs text-dark-400 flex items-center gap-1">
                             <Clock className="w-3 h-3" />
                             {new Date(alert.timestamp).toLocaleTimeString()}
@@ -301,6 +306,8 @@ export default function DashboardV2Page() {
             >
               Watch All Whales
             </Link>
+          </div>
+          </div>
           </motion.div>
 
           {/* Leaderboard */}
@@ -308,10 +315,12 @@ export default function DashboardV2Page() {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6"
+          >
+            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+            <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6"
           >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+              <h3 className="text-lg font-medium text-white flex items-center gap-2">
                 <Trophy className="w-5 h-5 text-yellow-400" />
                 Weekly Top 3
               </h3>
@@ -331,10 +340,10 @@ export default function DashboardV2Page() {
                     {index + 1}
                   </div>
                   <div className="flex-1">
-                    <div className="text-sm font-semibold text-white">{trader.displayName}</div>
+                    <div className="text-sm font-normal text-white">{trader.displayName}</div>
                     <div className="text-xs text-dark-400">Profit: ${trader.stats.profit.toLocaleString()}</div>
                   </div>
-                  <div className="text-sm font-bold text-green-400">
+                  <div className="text-sm font-medium text-green-400">
                     {trader.stats.winRate.toFixed(1)}% WR
                   </div>
                 </Link>
@@ -344,13 +353,15 @@ export default function DashboardV2Page() {
             <div className="mt-4 p-3 bg-primary-500/10 border border-primary-500/20 rounded-lg">
               <div className="text-xs text-dark-400 mb-1">Your Position</div>
               <div className="flex items-center justify-between">
-                <span className="text-sm font-bold text-white">#{Math.min(calculateLeaderboard(getSocialTraders()).length, 50)} / {calculateLeaderboard(getSocialTraders()).length}</span>
-                <span className="text-xs font-semibold text-dark-400 flex items-center gap-1">
+                <span className="text-sm font-medium text-white">#{Math.min(calculateLeaderboard(getSocialTraders()).length, 50)} / {calculateLeaderboard(getSocialTraders()).length}</span>
+                <span className="text-xs font-medium text-dark-400 flex items-center gap-1">
                   <ChevronUp className="w-3 h-3" />
                   --
                 </span>
               </div>
             </div>
+          </div>
+          </div>
           </motion.div>
 
           {/* Your Bots */}
@@ -358,10 +369,12 @@ export default function DashboardV2Page() {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6"
+          >
+            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+            <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6"
           >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+              <h3 className="text-lg font-medium text-white flex items-center gap-2">
                 <Bot className="w-5 h-5 text-primary-400" />
                 Your Bots (3)
               </h3>
@@ -381,7 +394,7 @@ export default function DashboardV2Page() {
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-dark-400">$10,000</span>
-                  <span className="text-green-400 font-bold">+$2,345</span>
+                  <span className="text-green-400 font-medium">+$2,345</span>
                 </div>
               </Link>
 
@@ -396,7 +409,7 @@ export default function DashboardV2Page() {
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-dark-400">$8,000</span>
-                  <span className="text-green-400 font-bold">+$1,876</span>
+                  <span className="text-green-400 font-medium">+$1,876</span>
                 </div>
               </Link>
 
@@ -412,7 +425,7 @@ export default function DashboardV2Page() {
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-dark-400">$5,000</span>
-                  <span className="text-green-400 font-bold">+$543</span>
+                  <span className="text-green-400 font-medium">+$543</span>
                 </div>
               </Link>
             </div>
@@ -423,6 +436,8 @@ export default function DashboardV2Page() {
             >
               + Add New Bot
             </Link>
+          </div>
+          </div>
           </motion.div>
         </div>
       </div>

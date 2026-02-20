@@ -68,7 +68,7 @@ export function BotCarousel({ title, bots }: BotCarouselProps) {
                     )}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <h3 className="text-base font-semibold text-white truncate">
+                        <h3 className="text-base font-medium text-white truncate">
                           {bot.name}
                         </h3>
                         {bot.verified && (
@@ -81,11 +81,11 @@ export function BotCarousel({ title, bots }: BotCarouselProps) {
 
                   {/* Badges */}
                   <div className="flex gap-2 mb-4">
-                    <div className="inline-flex items-center px-2 py-1 rounded text-[10px] font-semibold border border-dark-700 bg-dark-900/50 text-dark-300">
+                    <div className="inline-flex items-center px-2 py-1 rounded text-[10px] font-medium border border-dark-700 bg-dark-900/50 text-dark-300">
                       {getRiskLabel(bot.risk)}
                     </div>
                     {bot.trending && (
-                      <span className="px-2 py-1 bg-dark-900/50 border border-dark-700 rounded text-[10px] font-semibold text-dark-300 flex items-center gap-1">
+                      <span className="px-2 py-1 bg-dark-900/50 border border-dark-700 rounded text-[10px] font-medium text-dark-300 flex items-center gap-1">
                         <TrendingUp className="w-3 h-3" />
                         HOT
                       </span>
@@ -97,9 +97,9 @@ export function BotCarousel({ title, bots }: BotCarouselProps) {
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
                         <BarChart3 className="w-3.5 h-3.5 text-dark-400" />
-                        <span className="text-[10px] font-semibold text-dark-400">30d Performance</span>
+                        <span className="text-[10px] font-medium text-dark-400">30d Performance</span>
                       </div>
-                      <div className={`text-sm font-semibold ${bot.stats.return30d >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      <div className={`text-sm font-normal ${bot.stats.return30d >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                         {bot.stats.return30d >= 0 ? '+' : ''}{bot.stats.return30d.toFixed(1)}%
                       </div>
                     </div>
@@ -114,17 +114,17 @@ export function BotCarousel({ title, bots }: BotCarouselProps) {
                   <div className="grid grid-cols-3 gap-3 mb-5">
                     <div className="text-center p-3 bg-dark-900/50 rounded-lg border border-dark-700">
                       <div className="text-[10px] text-dark-400 mb-1">1Y Return</div>
-                      <div className={`text-base font-semibold ${bot.stats.return1y >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      <div className={`text-base font-normal ${bot.stats.return1y >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                         {bot.stats.return1y >= 0 ? '+' : ''}{bot.stats.return1y.toFixed(0)}%
                       </div>
                     </div>
                     <div className="text-center p-3 bg-dark-900/50 rounded-lg border border-dark-700">
                       <div className="text-[10px] text-dark-400 mb-1">Win Rate</div>
-                      <div className="text-base font-semibold text-white">{bot.stats.winRate.toFixed(0)}%</div>
+                      <div className="text-base font-normal text-white">{bot.stats.winRate.toFixed(0)}%</div>
                     </div>
                     <div className="text-center p-3 bg-dark-900/50 rounded-lg border border-dark-700">
                       <div className="text-[10px] text-dark-400 mb-1">Copiers</div>
-                      <div className="text-base font-semibold text-white">
+                      <div className="text-base font-normal text-white">
                         {bot.stats.copiers > 999 ? `${(bot.stats.copiers / 1000).toFixed(1)}k` : bot.stats.copiers}
                       </div>
                     </div>
@@ -136,7 +136,7 @@ export function BotCarousel({ title, bots }: BotCarouselProps) {
                       <Clock className="w-3.5 h-3.5" />
                       <span>Capital Reservation</span>
                     </div>
-                    <span className="text-sm font-semibold text-white">
+                    <span className="text-sm font-normal text-white">
                       {bot.stats.reservationDays || 30} days
                     </span>
                   </div>

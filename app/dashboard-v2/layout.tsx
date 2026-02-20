@@ -20,7 +20,7 @@ export default function DashboardV2Layout({
   }, [pathname]);
 
   return (
-    <div ref={scrollRef} className="dark h-screen overflow-y-auto bg-gradient-to-br from-dark-900 via-dark-800 to-dark-900">
+    <div ref={scrollRef} className="dashboard-scope dark h-screen overflow-y-auto bg-gradient-to-br from-dark-900 via-dark-800 to-dark-900">
       {/* Global Toast Notifications */}
       <Toaster
         position="top-right"

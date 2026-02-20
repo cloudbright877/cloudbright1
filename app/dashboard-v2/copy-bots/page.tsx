@@ -62,7 +62,7 @@ export default function CopyBotsPage() {
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold">Copy Trading Bots</h1>
+          <h1 className="text-3xl font-semibold">Copy Trading Bots</h1>
           <p className="text-gray-500 mt-1">
             Status: {isConnected ? '🟢 Connected' : '🔴 Disconnected'}
           </p>
@@ -96,12 +96,12 @@ export default function CopyBotsPage() {
         <div className="grid grid-cols-4 gap-4 mb-6">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border">
             <div className="text-sm text-gray-500">Total Bots</div>
-            <div className="text-2xl font-bold">{aggStats.totalBots}</div>
+            <div className="text-2xl font-medium">{aggStats.totalBots}</div>
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border">
             <div className="text-sm text-gray-500">Total P&L</div>
             <div
-              className={`text-2xl font-bold ${
+              className={`text-2xl font-medium ${
                 aggStats.totalPnL >= 0 ? 'text-green-500' : 'text-red-500'
               }`}
             >
@@ -110,11 +110,11 @@ export default function CopyBotsPage() {
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border">
             <div className="text-sm text-gray-500">Avg Win Rate</div>
-            <div className="text-2xl font-bold">{aggStats.avgWinRate.toFixed(1)}%</div>
+            <div className="text-2xl font-medium">{aggStats.avgWinRate.toFixed(1)}%</div>
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border">
             <div className="text-sm text-gray-500">Positions / Trades</div>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-medium">
               {aggStats.totalPositions} / {aggStats.totalTrades}
             </div>
           </div>
@@ -162,7 +162,7 @@ function BotCard({ bot, onDelete }: { bot: BotStats; onDelete: () => void }) {
       {/* Header */}
       <div className="flex justify-between items-start mb-3">
         <div>
-          <h3 className="font-semibold text-lg">{bot.name}</h3>
+          <h3 className="font-medium text-lg">{bot.name}</h3>
           <span className="text-xs text-gray-500">{bot.id.slice(0, 12)}...</span>
         </div>
         <button
@@ -174,7 +174,7 @@ function BotCard({ bot, onDelete }: { bot: BotStats; onDelete: () => void }) {
       </div>
 
       {/* P&L */}
-      <div className={`text-3xl font-bold mb-4 ${isProfit ? 'text-green-500' : 'text-red-500'}`}>
+      <div className={`text-3xl font-semibold mb-4 ${isProfit ? 'text-green-500' : 'text-red-500'}`}>
         {isProfit ? '+' : ''}${bot.totalPnL.toFixed(2)}
       </div>
 

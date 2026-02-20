@@ -41,7 +41,7 @@ export function StepResults({ allocations, totalAmount, onConfirm, isProcessing 
             <CheckCircle2 className="w-8 h-8 text-green-400" />
           </div>
         </div>
-        <h3 className="text-2xl font-bold text-white mb-2">Your portfolio is ready!</h3>
+        <h3 className="text-2xl font-semibold text-white mb-2">Your portfolio is ready!</h3>
         <p className="text-dark-400">
           We have selected {allocations.length} bots for your ${totalAmount.toLocaleString()} investment
         </p>
@@ -70,16 +70,16 @@ export function StepResults({ allocations, totalAmount, onConfirm, isProcessing 
               <div className="flex-1">
                 <div className="flex items-start justify-between mb-2">
                   <div>
-                    <h4 className="text-lg font-bold text-white">{allocation.bot.name}</h4>
+                    <h4 className="text-lg font-medium text-white">{allocation.bot.name}</h4>
                     <div className="flex items-center gap-2 mt-1">
-                      <div className={`px-2 py-0.5 rounded text-xs font-semibold border ${getRiskColor(allocation.bot.risk)}`}>
+                      <div className={`px-2 py-0.5 rounded text-xs font-medium border ${getRiskColor(allocation.bot.risk)}`}>
                         {getRiskIcon(allocation.bot.risk)}
                         <span className="ml-1">{allocation.bot.risk.toUpperCase()} RISK</span>
                       </div>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-xl font-bold text-white">${allocation.amount.toFixed(2)}</p>
+                    <p className="text-xl font-medium text-white">${allocation.amount.toFixed(2)}</p>
                     <p className="text-sm text-dark-400">{allocation.allocationPercent}%</p>
                   </div>
                 </div>
@@ -96,7 +96,7 @@ export function StepResults({ allocations, totalAmount, onConfirm, isProcessing 
       <div className="p-4 bg-primary-500/10 border border-primary-500/30 rounded-xl">
         <div className="flex items-center justify-between">
           <span className="text-sm text-dark-400">Total Investment</span>
-          <span className="text-xl font-bold text-white">${totalAmount.toLocaleString()}</span>
+          <span className="text-xl font-semibold text-white">${totalAmount.toLocaleString()}</span>
         </div>
       </div>
 

@@ -83,8 +83,8 @@ export default function LeaderboardPage() {
             className="bg-gradient-to-r from-primary-500/20 to-accent-500/20 backdrop-blur-sm border-2 border-primary-500/50 rounded-2xl p-6 mb-8"
           >
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-white">Your Position</h2>
-              <div className="px-3 py-1 bg-primary-500/30 border border-primary-500/50 rounded-lg text-sm font-bold text-white">
+              <h2 className="text-lg font-medium text-white">Your Position</h2>
+              <div className="px-3 py-1 bg-primary-500/30 border border-primary-500/50 rounded-lg text-sm font-medium text-white">
                 {getRankBadge(currentUserEntry.rank)}
               </div>
             </div>
@@ -92,42 +92,42 @@ export default function LeaderboardPage() {
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
               <div className="bg-dark-900/50 rounded-lg p-3">
                 <div className="text-xs text-dark-400 mb-1">Profit</div>
-                <div className="text-lg font-bold text-green-400">
+                <div className="text-lg font-medium text-green-400">
                   ${currentUserEntry.stats.profit.toLocaleString()}
                 </div>
               </div>
 
               <div className="bg-dark-900/50 rounded-lg p-3">
                 <div className="text-xs text-dark-400 mb-1">Return</div>
-                <div className="text-lg font-bold text-white">
+                <div className="text-lg font-medium text-white">
                   +{currentUserEntry.stats.return}%
                 </div>
               </div>
 
               <div className="bg-dark-900/50 rounded-lg p-3">
                 <div className="text-xs text-dark-400 mb-1">Win Rate</div>
-                <div className="text-lg font-bold text-white">
+                <div className="text-lg font-medium text-white">
                   {currentUserEntry.stats.winRate}%
                 </div>
               </div>
 
               <div className="bg-dark-900/50 rounded-lg p-3">
                 <div className="text-xs text-dark-400 mb-1">Trades</div>
-                <div className="text-lg font-bold text-white">
+                <div className="text-lg font-medium text-white">
                   {currentUserEntry.stats.trades}
                 </div>
               </div>
 
               <div className="bg-dark-900/50 rounded-lg p-3">
                 <div className="text-xs text-dark-400 mb-1">Invested</div>
-                <div className="text-lg font-bold text-blue-400">
+                <div className="text-lg font-medium text-blue-400">
                   ${currentUserEntry.stats.invested.toLocaleString()}
                 </div>
               </div>
 
               <div className="bg-dark-900/50 rounded-lg p-3">
                 <div className="text-xs text-dark-400 mb-1">Rank Change</div>
-                <div className={`text-lg font-bold ${getRankChange(currentUserEntry.rank, currentUserEntry.previousRank).color}`}>
+                <div className={`text-lg font-medium ${getRankChange(currentUserEntry.rank, currentUserEntry.previousRank).color}`}>
                   {getRankChange(currentUserEntry.rank, currentUserEntry.previousRank).text}
                 </div>
               </div>
@@ -140,8 +140,9 @@ export default function LeaderboardPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
-          className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6 mb-8"
+          className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] mb-8"
         >
+          <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6">
           <div className="flex flex-col md:flex-row gap-6">
             {/* Time Frame */}
             <div className="flex-1">
@@ -234,6 +235,7 @@ export default function LeaderboardPage() {
               </div>
             </div>
           </div>
+          </div>
         </motion.div>
 
         {/* Search */}
@@ -274,13 +276,14 @@ export default function LeaderboardPage() {
               >
                 <motion.div
                   whileHover={{ scale: 1.02, y: -3 }}
-                  className={`bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border-2 rounded-2xl p-4 hover:shadow-2xl transition-all duration-300 ${
+                  className={`rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] hover:shadow-2xl transition-all duration-300 ${
                     index === 0
-                      ? 'border-yellow-500/50 hover:shadow-yellow-500/20'
+                      ? 'hover:shadow-yellow-500/20'
                       : index === 1
-                      ? 'border-gray-400/50 hover:shadow-gray-400/20'
-                      : 'border-orange-600/50 hover:shadow-orange-600/20'
+                      ? 'hover:shadow-gray-400/20'
+                      : 'hover:shadow-orange-600/20'
                   }`}>
+                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-4">
                   {/* Top: Medal + Avatar + Name */}
                   <div className="flex items-center gap-3 mb-3">
                     <div className="flex-shrink-0">{getRankBadge(entry.rank)}</div>
@@ -299,14 +302,14 @@ export default function LeaderboardPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5">
-                        <h3 className="text-sm font-bold text-white truncate group-hover:text-primary-400 transition-colors">
+                        <h3 className="text-sm font-medium text-white truncate group-hover:text-primary-400 transition-colors">
                           {entry.displayName}
                         </h3>
                         {entry.verified && <Shield className="w-3.5 h-3.5 text-accent-400 flex-shrink-0" />}
                       </div>
                       <div className="text-xs text-dark-400">@{entry.username}</div>
                     </div>
-                    <div className={`text-xs font-bold flex-shrink-0 ${getRankChange(entry.rank, entry.previousRank).color}`}>
+                    <div className={`text-xs font-medium flex-shrink-0 ${getRankChange(entry.rank, entry.previousRank).color}`}>
                       {getRankChange(entry.rank, entry.previousRank).text}
                     </div>
                   </div>
@@ -314,23 +317,24 @@ export default function LeaderboardPage() {
                   {/* Profit highlight */}
                   <div className="flex items-center justify-between bg-dark-900/50 rounded-lg px-3 py-2 mb-2">
                     <span className="text-[10px] text-dark-400">Profit</span>
-                    <span className="text-sm font-bold text-green-400">${entry.stats.profit.toLocaleString()}</span>
+                    <span className="text-sm font-medium text-green-400">${entry.stats.profit.toLocaleString()}</span>
                   </div>
 
                   {/* Stats row */}
                   <div className="grid grid-cols-3 gap-2">
                     <div className="bg-dark-900/50 rounded-lg px-2 py-1.5 text-center">
                       <div className="text-[10px] text-dark-400">Return</div>
-                      <div className="text-xs font-bold text-white">+{entry.stats.return}%</div>
+                      <div className="text-xs font-medium text-white">+{entry.stats.return}%</div>
                     </div>
                     <div className="bg-dark-900/50 rounded-lg px-2 py-1.5 text-center">
                       <div className="text-[10px] text-dark-400">Win Rate</div>
-                      <div className="text-xs font-bold text-white">{entry.stats.winRate}%</div>
+                      <div className="text-xs font-medium text-white">{entry.stats.winRate}%</div>
                     </div>
                     <div className="bg-dark-900/50 rounded-lg px-2 py-1.5 text-center">
                       <div className="text-[10px] text-dark-400">Invested</div>
-                      <div className="text-xs font-bold text-blue-400">${entry.stats.invested.toLocaleString()}</div>
+                      <div className="text-xs font-medium text-blue-400">${entry.stats.invested.toLocaleString()}</div>
                     </div>
+                  </div>
                   </div>
                 </motion.div>
               </Link>
@@ -343,8 +347,9 @@ export default function LeaderboardPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.35 }}
-          className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl overflow-hidden"
+          className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]"
         >
+          <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-dark-900/50">
@@ -372,7 +377,7 @@ export default function LeaderboardPage() {
                     }`}
                   >
                     <td className="p-4">
-                      <div className="text-lg font-bold text-white">
+                      <div className="text-lg font-medium text-white">
                         {getRankBadge(entry.rank)}
                       </div>
                     </td>
@@ -396,7 +401,7 @@ export default function LeaderboardPage() {
                         </div>
                         <div>
                           <div className="flex items-center gap-1">
-                            <span className="text-sm font-semibold text-white group-hover:text-primary-400 transition-colors">
+                            <span className="text-sm font-normal text-white group-hover:text-primary-400 transition-colors">
                               {entry.displayName}
                             </span>
                             {entry.verified && <Shield className="w-3 h-3 text-accent-400" />}
@@ -412,7 +417,7 @@ export default function LeaderboardPage() {
                       </span>
                     </td>
                     <td className="p-4 text-right">
-                      <div className="text-sm font-bold text-green-400">
+                      <div className="text-sm font-medium text-green-400">
                         ${entry.stats.profit.toLocaleString()}
                       </div>
                     </td>
@@ -437,7 +442,7 @@ export default function LeaderboardPage() {
                       </div>
                     </td>
                     <td className="p-4 text-center">
-                      <div className={`text-sm font-bold ${getRankChange(entry.rank, entry.previousRank).color}`}>
+                      <div className={`text-sm font-medium ${getRankChange(entry.rank, entry.previousRank).color}`}>
                         {getRankChange(entry.rank, entry.previousRank).text}
                       </div>
                     </td>
@@ -445,6 +450,7 @@ export default function LeaderboardPage() {
                 ))}
               </tbody>
             </table>
+          </div>
           </div>
         </motion.div>
       </div>

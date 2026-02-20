@@ -89,7 +89,7 @@ function BotSelectContent() {
           <span className="text-sm">Back to Compare</span>
         </Link>
 
-        <h1 className="text-3xl font-bold text-white mb-2">Select Bot</h1>
+        <h1 className="text-3xl font-semibold text-white mb-2">Select Bot</h1>
         <p className="text-dark-400">Choose a bot to add to comparison</p>
       </motion.div>
 
@@ -134,8 +134,9 @@ function BotSelectContent() {
               whileHover={{ scale: 1.01, x: 4 }}
               onClick={() => !isSelected && handleSelectBot(bot.slug)}
               disabled={isSelected}
-              className="p-5 bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl hover:border-primary-500/50 hover:bg-dark-800/50 transition-all text-left disabled:opacity-40 disabled:cursor-not-allowed shadow-lg hover:shadow-2xl"
+              className="p-5 rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] hover:bg-dark-800/50 transition-all text-left disabled:opacity-40 disabled:cursor-not-allowed shadow-lg hover:shadow-2xl"
             >
+              <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-5 hover:border-primary-500/50 transition-all">
               <div className="flex items-center gap-4">
                 {/* Bot Icon */}
                 {typeof bot.icon === 'string' && bot.icon.startsWith('/') ? (
@@ -148,11 +149,11 @@ function BotSelectContent() {
 
                 {/* Bot Info */}
                 <div className="flex-1 min-w-0">
-                  <div className="font-bold text-white flex items-center gap-2 mb-1">
+                  <div className="font-medium text-white flex items-center gap-2 mb-1">
                     {bot.name}
                     {bot.verified && <Shield className="w-4 h-4 text-accent-400 flex-shrink-0" />}
                     {isSelected && (
-                      <span className="px-2 py-0.5 text-[10px] bg-primary-500/20 border border-primary-500/30 text-primary-400 rounded-full font-semibold">
+                      <span className="px-2 py-0.5 text-[10px] bg-primary-500/20 border border-primary-500/30 text-primary-400 rounded-full font-medium">
                         Selected
                       </span>
                     )}
@@ -162,7 +163,7 @@ function BotSelectContent() {
 
                   {/* Tags Row */}
                   <div className="flex items-center gap-3 mt-2 flex-wrap">
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${getRiskColor(bot.risk)}`}>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-medium border ${getRiskColor(bot.risk)}`}>
                       {bot.risk === 'low' ? 'Low Risk' : bot.risk === 'medium' ? 'Medium Risk' : 'High Risk'}
                     </span>
                     <span className="flex items-center gap-1 text-[10px] text-dark-400">
@@ -178,16 +179,17 @@ function BotSelectContent() {
 
                 {/* Stats */}
                 <div className="text-right flex-shrink-0">
-                  <div className={`text-lg font-bold flex items-center gap-1 justify-end ${getPercentColor(bot.stats.return30d)}`}>
+                  <div className={`text-lg font-medium flex items-center gap-1 justify-end ${getPercentColor(bot.stats.return30d)}`}>
                     <TrendingUp className="w-4 h-4" />
                     {formatPercent(bot.stats.return30d)}
                   </div>
                   <div className="text-[10px] text-dark-400">30d return</div>
-                  <div className={`text-sm font-semibold mt-1 ${getPercentColor(bot.stats.return1y)}`}>
+                  <div className={`text-sm font-normal mt-1 ${getPercentColor(bot.stats.return1y)}`}>
                     {formatPercent(bot.stats.return1y)}
                   </div>
                   <div className="text-[10px] text-dark-400">1y return</div>
                 </div>
+              </div>
               </div>
             </motion.button>
           );

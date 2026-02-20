@@ -432,6 +432,7 @@ export default function DashboardPage() {
   const rawUnrealizedPnL = bots.reduce((sum, bot) => sum + bot.openPositions.reduce((s, p) => s + p.pnl, 0), 0);
   const unrealizedPnL = isNaN(rawUnrealizedPnL) || !isFinite(rawUnrealizedPnL) ? 0 : rawUnrealizedPnL;
   const totalRealizedPnL = bots.reduce((sum, bot) => sum + (bot.totalRealizedPnL || 0), 0);
+  const totalTrades = bots.reduce((sum, bot) => sum + bot.trades, 0);
 
   const handleRemoveBot = (botId: string) => {
     const bot = bots.find(b => b.id === botId);
@@ -483,7 +484,7 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-dark-950 text-white">
       <div className="max-w-[1800px] mx-auto p-4 lg:p-6">
         {/* Bento Grid Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 lg:grid-rows-[auto_1fr] gap-4 lg:gap-6">
           {/* Row 1: Hero + Action Cards */}
           <NetWorthHero
             portfolioValue={totalValue}
@@ -494,6 +495,9 @@ export default function DashboardPage() {
             activeBots={activeBots}
             totalBots={bots.length}
             totalRealizedPnL={totalRealizedPnL}
+            availableBalance={availableBalance}
+            unrealizedPnL={unrealizedPnL}
+            totalTrades={totalTrades}
           />
 
           {/* Quick Start Card */}
@@ -503,29 +507,31 @@ export default function DashboardPage() {
             transition={{ delay: 0.1 }}
             className="lg:col-span-4"
           >
-            <button
-              onClick={() => router.push('/dashboard-v2/quick-start')}
-              className="w-full relative overflow-hidden bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-5 hover:border-green-500/50 transition-all group"
-            >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/10 rounded-full blur-3xl opacity-100 group-hover:scale-150 transition-transform" />
-              <div className="relative flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-green-500/20 border border-green-500/30 rounded-xl flex items-center justify-center">
-                    <Zap className="w-6 h-6 text-green-400" />
+            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all hover:bg-[linear-gradient(135deg,rgba(74,222,128,0.2)_0%,rgba(74,222,128,0)_40%,rgba(74,222,128,0)_60%,rgba(74,222,128,0.2)_100%)]">
+              <button
+                onClick={() => router.push('/dashboard-v2/quick-start')}
+                className="w-full relative overflow-hidden bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-5 transition-all group"
+              >
+                <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/10 rounded-full blur-3xl opacity-100 group-hover:scale-150 transition-transform" />
+                <div className="relative flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-green-500/20 border border-green-500/30 rounded-xl flex items-center justify-center">
+                      <Zap className="w-6 h-6 text-green-400" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-dark-400 font-normal mb-1 text-left">Quick Start</p>
+                      <p className="text-3xl font-semibold text-white text-left">Start Now</p>
+                      <p className="text-xs text-green-400 mt-1 text-left">
+                        Get started in 3 clicks
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-xs text-dark-400 font-medium mb-1 text-left">Quick Start</p>
-                    <p className="text-3xl font-bold text-white text-left">Start Now</p>
-                    <p className="text-xs text-green-400 mt-1 text-left">
-                      Get started in 3 clicks
-                    </p>
+                  <div className="text-green-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <ChevronRight className="w-6 h-6" />
                   </div>
                 </div>
-                <div className="text-green-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <ChevronRight className="w-6 h-6" />
-                </div>
-              </div>
-            </button>
+              </button>
+            </div>
           </motion.div>
 
           {/* Add Bot Card */}
@@ -535,29 +541,31 @@ export default function DashboardPage() {
             transition={{ delay: 0.15 }}
             className="lg:col-span-4"
           >
-            <button
-              onClick={() => router.push('/dashboard-v2/bots')}
-              className="w-full relative overflow-hidden bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl p-5 hover:border-primary-500/50 transition-all group"
-            >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500/10 rounded-full blur-3xl opacity-100 group-hover:scale-150 transition-transform" />
-              <div className="relative flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
-                    <Plus className="w-6 h-6 text-primary-400" />
+            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all hover:bg-[linear-gradient(135deg,rgba(139,92,246,0.2)_0%,rgba(139,92,246,0)_40%,rgba(139,92,246,0)_60%,rgba(139,92,246,0.2)_100%)]">
+              <button
+                onClick={() => router.push('/dashboard-v2/bots')}
+                className="w-full relative overflow-hidden bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-5 transition-all group"
+              >
+                <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500/10 rounded-full blur-3xl opacity-100 group-hover:scale-150 transition-transform" />
+                <div className="relative flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
+                      <Plus className="w-6 h-6 text-primary-400" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-dark-400 font-normal mb-1 text-left">Add Bot</p>
+                      <p className="text-3xl font-semibold text-white text-left">Explore</p>
+                      <p className="text-xs text-primary-400 mt-1 text-left">
+                        Browse marketplace
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-xs text-dark-400 font-medium mb-1 text-left">Add Bot</p>
-                    <p className="text-3xl font-bold text-white text-left">Explore</p>
-                    <p className="text-xs text-primary-400 mt-1 text-left">
-                      Browse marketplace
-                    </p>
+                  <div className="text-primary-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <ChevronRight className="w-6 h-6" />
                   </div>
                 </div>
-                <div className="text-primary-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <ChevronRight className="w-6 h-6" />
-                </div>
-              </div>
-            </button>
+              </button>
+            </div>
           </motion.div>
 
           {/* Closed Positions History */}
@@ -565,42 +573,38 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="lg:col-span-8"
+            className="lg:col-span-8 h-full"
           >
-            <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl overflow-hidden">
-              <div className="p-5 border-b border-dark-700 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-primary-500/20 rounded-lg flex items-center justify-center">
-                    <Activity className="w-5 h-5 text-primary-400" />
+            <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+            <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] overflow-hidden flex flex-col">
+              <div className="px-4 py-3 border-b border-dark-700 flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 bg-primary-500/20 rounded-lg flex items-center justify-center">
+                    <Activity className="w-4 h-4 text-primary-400" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-white">Recent Closed Positions</h3>
-                    <p className="text-xs text-dark-400">Latest completed trades</p>
+                    <h3 className="text-sm font-medium text-white">Recent Trades</h3>
+                    <p className="text-[10px] text-dark-400">Latest closed positions</p>
                   </div>
                 </div>
-                <Link href="/dashboard-v2/history" className="text-xs text-primary-400 hover:text-primary-300 transition-colors flex items-center gap-1">
-                  View All
-                  <ChevronRight className="w-3 h-3" />
-                </Link>
               </div>
 
-              <div className="overflow-x-auto">
-                <table className="w-full">
+              <div className="overflow-x-auto flex-1">
+                <table className="w-full h-full">
                   <thead>
                     <tr className="border-b border-dark-700">
-                      <th className="text-left text-xs font-semibold text-dark-400 pt-3 pb-3 pr-4 pl-3">Bot</th>
-                      <th className="text-left text-xs font-semibold text-dark-400 pt-3 pb-3 px-4">Pair</th>
-                      <th className="text-center text-xs font-semibold text-dark-400 pt-3 pb-3 px-4">Side</th>
-                      <th className="text-center text-xs font-semibold text-dark-400 pt-3 pb-3 px-4">P&L</th>
-                      <th className="text-center text-xs font-semibold text-dark-400 pt-3 pb-3 px-4">Position Size</th>
-                      <th className="text-left text-xs font-semibold text-dark-400 pt-3 pb-3 px-4">Duration</th>
-                      <th className="text-left text-xs font-semibold text-dark-400 pt-3 pb-3 pl-4">Closed At</th>
+                      <th className="text-left text-xs font-medium text-dark-400 py-2.5 pr-2 pl-3 whitespace-nowrap">Bot</th>
+                      <th className="text-left text-xs font-medium text-dark-400 py-2.5 px-2 whitespace-nowrap">Pair</th>
+                      <th className="text-center text-xs font-medium text-dark-400 py-2.5 px-2 whitespace-nowrap">Side</th>
+                      <th className="text-right text-xs font-medium text-dark-400 py-2.5 px-2 whitespace-nowrap">P&L</th>
+                      <th className="text-right text-xs font-medium text-dark-400 py-2.5 px-2 whitespace-nowrap">Duration</th>
+                      <th className="text-right text-xs font-medium text-dark-400 py-2.5 pl-2 pr-3 whitespace-nowrap">Closed</th>
                     </tr>
                   </thead>
                   <tbody>
                     {closedPositions.length === 0 ? (
                       <tr>
-                        <td colSpan={7} className="py-8 text-center text-dark-400">
+                        <td colSpan={6} className="py-8 text-center text-dark-400">
                           <div className="flex flex-col items-center gap-2">
                             <Activity className="w-8 h-8 opacity-50" />
                             <p className="text-sm">No closed positions yet</p>
@@ -611,14 +615,14 @@ export default function DashboardPage() {
                     ) : (
                       closedPositions.slice(0, 3).map((position) => (
                         <tr key={position.id} className="border-b border-dark-800/50 hover:bg-dark-800/30 transition-colors">
-                          <td className="py-4 pr-4 pl-3">
-                            <span className="text-xs text-dark-400">{position.botName}</span>
+                          <td className="py-2.5 pr-2 pl-3 max-w-[100px]">
+                            <span className="text-xs text-dark-400 truncate block">{position.botName}</span>
                           </td>
-                          <td className="py-4 px-4">
-                            <div className="text-sm font-semibold text-white">{position.pair}</div>
+                          <td className="py-2.5 px-2 whitespace-nowrap">
+                            <span className="text-xs font-normal text-white">{position.pair}</span>
                           </td>
-                          <td className="py-4 px-4 text-center">
-                            <div className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold ${
+                          <td className="py-2.5 px-2 text-center whitespace-nowrap">
+                            <div className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs font-medium ${
                               position.side === 'LONG'
                                 ? 'bg-green-500/10 text-green-400'
                                 : 'bg-red-500/10 text-red-400'
@@ -628,30 +632,25 @@ export default function DashboardPage() {
                               ) : (
                                 <ArrowDownRight className="w-3 h-3" />
                               )}
-                              {position.side}×{position.leverage}
+                              {position.side[0]}×{position.leverage}
                             </div>
                           </td>
-                          <td className="py-4 px-4 text-center">
-                            <div>
-                              <div className={`text-sm font-bold ${
-                                position.pnl >= 0 ? 'text-green-400' : 'text-red-400'
-                              }`}>
-                                {position.pnl >= 0 ? '+' : ''}${position.pnl.toFixed(2)}
-                              </div>
-                              <div className={`text-xs ${
-                                position.pnl >= 0 ? 'text-green-400/70' : 'text-red-400/70'
-                              }`}>
-                                ({position.pnl >= 0 ? '+' : ''}{position.pnlPercent.toFixed(2)}%)
-                              </div>
+                          <td className="py-2.5 px-2 text-right whitespace-nowrap">
+                            <div className={`text-xs font-medium ${
+                              position.pnl >= 0 ? 'text-green-400' : 'text-red-400'
+                            }`}>
+                              {position.pnl >= 0 ? '+' : ''}${position.pnl.toFixed(2)}
+                            </div>
+                            <div className={`text-[10px] ${
+                              position.pnl >= 0 ? 'text-green-400/60' : 'text-red-400/60'
+                            }`}>
+                              {position.pnl >= 0 ? '+' : ''}{position.pnlPercent.toFixed(1)}%
                             </div>
                           </td>
-                          <td className="py-4 px-4 text-center text-sm text-dark-300">
-                            ${position.positionSize.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                          </td>
-                          <td className="py-4 px-4 text-left text-sm text-dark-300">
+                          <td className="py-2.5 px-2 text-right text-xs text-dark-300 whitespace-nowrap">
                             {position.duration}
                           </td>
-                          <td className="py-4 pl-4 text-left text-sm text-dark-400">
+                          <td className="py-2.5 pl-2 pr-3 text-right text-xs text-dark-400 whitespace-nowrap">
                             {position.closedAt}
                           </td>
                         </tr>
@@ -660,6 +659,7 @@ export default function DashboardPage() {
                   </tbody>
                 </table>
               </div>
+            </div>
             </div>
           </motion.div>
 
@@ -672,9 +672,8 @@ export default function DashboardPage() {
               transition={{ delay: 0.3 + index * 0.1 }}
               className="lg:col-span-6"
             >
-              <div className="h-full relative bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 hover:border-primary-500/50 rounded-2xl overflow-hidden transition-all group">
-                {/* Glow Effect */}
-                <div className="absolute -inset-1 bg-gradient-to-r from-primary-500/0 to-accent-500/0 group-hover:from-primary-500/20 group-hover:to-accent-500/20 blur-xl transition-all duration-500" />
+              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all">
+              <div className="h-full relative bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] overflow-hidden transition-all group">
 
                 <div className="relative p-5 h-full flex flex-col">
                   {/* Bot Header */}
@@ -688,7 +687,7 @@ export default function DashboardPage() {
                         </div>
                       )}
                       <div className="flex-1">
-                        <h3 className="text-lg font-bold text-white mb-2">{bot.name}</h3>
+                        <h3 className="text-lg font-medium text-white mb-2">{bot.name}</h3>
                         <div className="flex items-center gap-2 flex-wrap text-xs">
                           <span className="text-dark-400">{bot.trades} trades</span>
                           <span className="text-dark-400">•</span>
@@ -732,11 +731,11 @@ export default function DashboardPage() {
                   <div className="grid grid-cols-3 gap-3">
                     <div className="p-3 bg-dark-900/50 rounded-lg border border-dark-700/50">
                       <p className="text-xs text-dark-400 mb-1">Invested</p>
-                      <p className="text-base font-bold text-white">${bot.invested.toFixed(2)}</p>
+                      <p className="text-base font-medium text-white">${bot.invested.toFixed(2)}</p>
                     </div>
                     <div className="p-3 bg-dark-900/50 rounded-lg border border-dark-700/50">
                       <p className="text-xs text-dark-400 mb-1">Current Value</p>
-                      <p className="text-base font-bold text-white">${bot.currentValue.toFixed(2)}</p>
+                      <p className="text-base font-medium text-white">${bot.currentValue.toFixed(2)}</p>
                     </div>
                     <div className={`p-3 bg-gradient-to-br rounded-lg border ${
                       bot.profit >= 0
@@ -744,7 +743,7 @@ export default function DashboardPage() {
                         : 'from-red-500/10 to-red-500/5 border-red-500/20'
                     }`}>
                       <p className="text-xs mb-1 text-dark-400">P&L</p>
-                      <p className={`text-base font-bold ${bot.profit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      <p className={`text-base font-medium ${bot.profit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                         {bot.profit >= 0 ? '+' : ''}${bot.profit.toFixed(2)}
                       </p>
                       {bot.profit !== 0 && (
@@ -774,6 +773,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
               </div>
+              </div>
             </motion.div>
           ))}
 
@@ -784,24 +784,26 @@ export default function DashboardPage() {
             transition={{ delay: 0.5 }}
             className="col-span-12 lg:col-span-6"
           >
-            <Link
-              href="/dashboard-v2/leaderboard"
-              className="block h-full p-6 bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/30 hover:border-blue-500/50 rounded-2xl transition-all group relative overflow-hidden"
-            >
-              <div className="absolute -right-10 -top-10 w-40 h-40 bg-blue-500/20 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-500" />
-              <div className="relative flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 bg-blue-500/20 border border-blue-500/30 rounded-xl flex items-center justify-center">
-                    <Users className="w-7 h-7 text-blue-400" />
+            <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all hover:bg-[linear-gradient(135deg,rgba(59,130,246,0.2)_0%,rgba(59,130,246,0)_40%,rgba(59,130,246,0)_60%,rgba(59,130,246,0.2)_100%)]">
+              <Link
+                href="/dashboard-v2/leaderboard"
+                className="block h-full p-6 bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] transition-all group relative overflow-hidden"
+              >
+                <div className="absolute -right-10 -top-10 w-40 h-40 bg-blue-500/20 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-500" />
+                <div className="relative flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 bg-blue-500/20 border border-blue-500/30 rounded-xl flex items-center justify-center">
+                      <Users className="w-7 h-7 text-blue-400" />
+                    </div>
+                    <div>
+                      <p className="text-lg font-medium text-white mb-1">Copy Investor Strategies</p>
+                      <p className="text-sm text-dark-400">Join the community of successful investors</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-lg font-bold text-white mb-1">Copy Investor Strategies</p>
-                    <p className="text-sm text-dark-400">Join the community of successful investors</p>
-                  </div>
+                  <ChevronRight className="w-6 h-6 text-blue-400 group-hover:translate-x-1 transition-transform" />
                 </div>
-                <ChevronRight className="w-6 h-6 text-blue-400 group-hover:translate-x-1 transition-transform" />
-              </div>
-            </Link>
+              </Link>
+            </div>
           </motion.div>
 
           <motion.div
@@ -810,24 +812,26 @@ export default function DashboardPage() {
             transition={{ delay: 0.55 }}
             className="col-span-12 lg:col-span-6"
           >
-            <Link
-              href="/dashboard-v2/analytics"
-              className="block h-full p-6 bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/30 hover:border-purple-500/50 rounded-2xl transition-all group relative overflow-hidden"
-            >
-              <div className="absolute -right-10 -top-10 w-40 h-40 bg-purple-500/20 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-500" />
-              <div className="relative flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 bg-purple-500/20 border border-purple-500/30 rounded-xl flex items-center justify-center">
-                    <BarChart3 className="w-7 h-7 text-purple-400" />
+            <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all hover:bg-[linear-gradient(135deg,rgba(168,85,247,0.2)_0%,rgba(168,85,247,0)_40%,rgba(168,85,247,0)_60%,rgba(168,85,247,0.2)_100%)]">
+              <Link
+                href="/dashboard-v2/analytics"
+                className="block h-full p-6 bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] transition-all group relative overflow-hidden"
+              >
+                <div className="absolute -right-10 -top-10 w-40 h-40 bg-purple-500/20 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-500" />
+                <div className="relative flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 bg-purple-500/20 border border-purple-500/30 rounded-xl flex items-center justify-center">
+                      <BarChart3 className="w-7 h-7 text-purple-400" />
+                    </div>
+                    <div>
+                      <p className="text-lg font-medium text-white mb-1">Analytics</p>
+                      <p className="text-sm text-dark-400">Deep dive into your performance</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-lg font-bold text-white mb-1">Analytics</p>
-                    <p className="text-sm text-dark-400">Deep dive into your performance</p>
-                  </div>
+                  <ChevronRight className="w-6 h-6 text-purple-400 group-hover:translate-x-1 transition-transform" />
                 </div>
-                <ChevronRight className="w-6 h-6 text-purple-400 group-hover:translate-x-1 transition-transform" />
-              </div>
-            </Link>
+              </Link>
+            </div>
           </motion.div>
         </div>
       </div>

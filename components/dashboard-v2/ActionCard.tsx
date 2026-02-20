@@ -69,7 +69,7 @@ export function ActionCard({
 
         {/* Content */}
         <div className="relative z-10 h-full flex flex-col justify-end p-4 text-left">
-          <h3 className="text-lg font-bold text-white mb-1 group-hover:scale-105 transition-transform">
+          <h3 className="text-lg font-medium text-white mb-1 group-hover:scale-105 transition-transform">
             {title}
           </h3>
           <p className="text-xs text-dark-300">

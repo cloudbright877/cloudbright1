@@ -294,7 +294,7 @@ export default function NotificationsPage() {
                     {/* Content */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2 mb-1">
-                        <h3 className="text-base font-semibold text-white">{notification.title}</h3>
+                        <h3 className="text-base font-medium text-white">{notification.title}</h3>
                         {!notification.read && (
                           <div className="flex-shrink-0 w-2 h-2 bg-accent-500 rounded-full mt-2" />
                         )}
@@ -336,7 +336,7 @@ export default function NotificationsPage() {
               <div className="w-16 h-16 mx-auto mb-4 bg-dark-800 rounded-full flex items-center justify-center">
                 <Bell className="w-8 h-8 text-dark-400" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">No Notifications</h3>
+              <h3 className="text-xl font-medium text-white mb-2">No Notifications</h3>
               <p className="text-dark-300">You don't have any notifications yet</p>
             </div>
           </GlassCard>
@@ -368,7 +368,7 @@ export default function NotificationsPage() {
                   </div>
 
                   {/* Title */}
-                  <h3 className="text-xl font-bold text-white text-center mb-2">
+                  <h3 className="text-xl font-medium text-white text-center mb-2">
                     Delete All Notifications?
                   </h3>
 

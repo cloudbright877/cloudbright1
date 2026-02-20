@@ -69,28 +69,30 @@ export default function SettingsPage() {
             className="md:col-span-1 lg:col-span-4"
           >
             <Link href="/dashboard-v2/settings/profile" className="block h-full">
-              <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 hover:border-primary-500/40 rounded-2xl p-5 transition-all group">
+              <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 hover:border-primary-500/40 rounded-[calc(1rem-1px)] p-5 transition-all group">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-primary-500/20 rounded-lg flex items-center justify-center">
                       <User className="w-5 h-5 text-primary-400" />
                     </div>
-                    <h3 className="text-lg font-bold text-white">Profile</h3>
+                    <h3 className="text-lg font-medium text-white">Profile</h3>
                   </div>
                   <ChevronRight className="w-4 h-4 text-dark-500 group-hover:text-primary-400 group-hover:translate-x-0.5 transition-all" />
                 </div>
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-500 rounded-full flex items-center justify-center text-xl font-bold text-white flex-shrink-0">
+                  <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-500 rounded-full flex items-center justify-center text-xl font-medium text-white flex-shrink-0">
                     {data.profile.avatar}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-white font-semibold truncate">{data.profile.displayName}</p>
+                    <p className="text-white font-normal truncate">{data.profile.displayName}</p>
                     <p className="text-sm text-dark-400 truncate">@{data.profile.username}</p>
                   </div>
                 </div>
                 {data.profile.bio && (
                   <p className="text-xs text-dark-500 line-clamp-2">{data.profile.bio}</p>
                 )}
+              </div>
               </div>
             </Link>
           </motion.div>
@@ -103,13 +105,14 @@ export default function SettingsPage() {
             className="md:col-span-1 lg:col-span-4"
           >
             <Link href="/dashboard-v2/settings/security" className="block h-full">
-              <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 hover:border-primary-500/40 rounded-2xl p-5 transition-all group">
+              <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 hover:border-primary-500/40 rounded-[calc(1rem-1px)] p-5 transition-all group">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-primary-500/20 rounded-lg flex items-center justify-center">
                       <Shield className="w-5 h-5 text-primary-400" />
                     </div>
-                    <h3 className="text-lg font-bold text-white">Security</h3>
+                    <h3 className="text-lg font-medium text-white">Security</h3>
                   </div>
                   <ChevronRight className="w-4 h-4 text-dark-500 group-hover:text-primary-400 group-hover:translate-x-0.5 transition-all" />
                 </div>
@@ -133,6 +136,7 @@ export default function SettingsPage() {
                   </div>
                 </div>
               </div>
+              </div>
             </Link>
           </motion.div>
 
@@ -144,13 +148,14 @@ export default function SettingsPage() {
             className="md:col-span-1 lg:col-span-4"
           >
             <Link href="/dashboard-v2/settings/kyc" className="block h-full">
-              <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 hover:border-primary-500/40 rounded-2xl p-5 transition-all group">
+              <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 hover:border-primary-500/40 rounded-[calc(1rem-1px)] p-5 transition-all group">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-primary-500/20 rounded-lg flex items-center justify-center">
                       <FileCheck className="w-5 h-5 text-primary-400" />
                     </div>
-                    <h3 className="text-lg font-bold text-white">Verification</h3>
+                    <h3 className="text-lg font-medium text-white">Verification</h3>
                   </div>
                   <ChevronRight className="w-4 h-4 text-dark-500 group-hover:text-primary-400 group-hover:translate-x-0.5 transition-all" />
                 </div>
@@ -167,6 +172,7 @@ export default function SettingsPage() {
                     : 'Continue your verification process'}
                 </p>
               </div>
+              </div>
             </Link>
           </motion.div>
 
@@ -178,14 +184,15 @@ export default function SettingsPage() {
             className="md:col-span-1 lg:col-span-5"
           >
             <Link href="/dashboard-v2/settings/wallets" className="block h-full">
-              <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 hover:border-primary-500/40 rounded-2xl p-5 transition-all group">
+              <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 hover:border-primary-500/40 rounded-[calc(1rem-1px)] p-5 transition-all group">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-primary-500/20 rounded-lg flex items-center justify-center">
                       <Wallet className="w-5 h-5 text-primary-400" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-white">Saved Wallets</h3>
+                      <h3 className="text-lg font-medium text-white">Saved Wallets</h3>
                       <p className="text-xs text-dark-400">{data.wallets.addresses.length}/10 addresses</p>
                     </div>
                   </div>
@@ -208,6 +215,7 @@ export default function SettingsPage() {
                   </div>
                 )}
               </div>
+              </div>
             </Link>
           </motion.div>
 
@@ -219,13 +227,14 @@ export default function SettingsPage() {
             className="md:col-span-1 lg:col-span-4"
           >
             <Link href="/dashboard-v2/settings/notifications" className="block h-full">
-              <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 hover:border-primary-500/40 rounded-2xl p-5 transition-all group">
+              <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 hover:border-primary-500/40 rounded-[calc(1rem-1px)] p-5 transition-all group">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-primary-500/20 rounded-lg flex items-center justify-center">
                       <Bell className="w-5 h-5 text-primary-400" />
                     </div>
-                    <h3 className="text-lg font-bold text-white">Notifications</h3>
+                    <h3 className="text-lg font-medium text-white">Notifications</h3>
                   </div>
                   <ChevronRight className="w-4 h-4 text-dark-500 group-hover:text-primary-400 group-hover:translate-x-0.5 transition-all" />
                 </div>
@@ -243,6 +252,7 @@ export default function SettingsPage() {
                 </div>
                 <p className="text-xs text-dark-500 mt-3">{enabledNotifs}/3 enabled</p>
               </div>
+              </div>
             </Link>
           </motion.div>
 
@@ -254,13 +264,14 @@ export default function SettingsPage() {
             className="md:col-span-1 lg:col-span-3"
           >
             <Link href="/dashboard-v2/settings/preferences" className="block h-full">
-              <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 hover:border-primary-500/40 rounded-2xl p-5 transition-all group">
+              <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 hover:border-primary-500/40 rounded-[calc(1rem-1px)] p-5 transition-all group">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-primary-500/20 rounded-lg flex items-center justify-center">
                       <Settings className="w-5 h-5 text-primary-400" />
                     </div>
-                    <h3 className="text-lg font-bold text-white">Preferences</h3>
+                    <h3 className="text-lg font-medium text-white">Preferences</h3>
                   </div>
                   <ChevronRight className="w-4 h-4 text-dark-500 group-hover:text-primary-400 group-hover:translate-x-0.5 transition-all" />
                 </div>
@@ -278,6 +289,7 @@ export default function SettingsPage() {
                     <span className="text-xs text-white font-medium">Dark</span>
                   </div>
                 </div>
+              </div>
               </div>
             </Link>
           </motion.div>

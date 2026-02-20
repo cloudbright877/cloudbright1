@@ -83,7 +83,7 @@ export default function BotsPage() {
           <div className="flex items-center gap-0.5 rounded-lg bg-dark-900/50 border border-dark-700 p-1.5 inline-flex">
             <button
               onClick={() => setActiveTab('recommendation')}
-              className={`px-6 py-3 font-semibold rounded-md text-sm transition-all ${
+              className={`px-6 py-3 font-medium rounded-md text-sm transition-all ${
                 activeTab === 'recommendation'
                   ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white shadow-lg shadow-primary-500/30'
                   : 'text-dark-300 hover:text-white'
@@ -93,7 +93,7 @@ export default function BotsPage() {
             </button>
             <button
               onClick={() => setActiveTab('ranklist')}
-              className={`px-6 py-3 font-semibold rounded-md text-sm transition-all ${
+              className={`px-6 py-3 font-medium rounded-md text-sm transition-all ${
                 activeTab === 'ranklist'
                   ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white shadow-lg shadow-primary-500/30'
                   : 'text-dark-300 hover:text-white'
@@ -121,7 +121,7 @@ export default function BotsPage() {
               transition={{ delay: 0.2 }}
             >
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                <h2 className="text-2xl font-medium text-white flex items-center gap-2">
                   <TrendingUp className="w-6 h-6 text-green-400" />
                   Highest Annual Return
                 </h2>
@@ -143,7 +143,7 @@ export default function BotsPage() {
               transition={{ delay: 0.3 }}
             >
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                <h2 className="text-2xl font-medium text-white flex items-center gap-2">
                   <Shield className="w-6 h-6 text-blue-400" />
                   Low Risk And Stable Return
                 </h2>
@@ -165,7 +165,7 @@ export default function BotsPage() {
               transition={{ delay: 0.4 }}
             >
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                <h2 className="text-2xl font-medium text-white flex items-center gap-2">
                   <Target className="w-6 h-6 text-purple-400" />
                   High Win Rate
                 </h2>
@@ -190,10 +190,11 @@ export default function BotsPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6 mb-6"
+              className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] mb-6"
             >
+              <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6">
               <div className="flex items-center gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-dark-700 scrollbar-track-transparent">
-                <span className="text-sm font-semibold text-dark-300 flex-shrink-0">Sort by:</span>
+                <span className="text-sm font-normal text-dark-300 flex-shrink-0">Sort by:</span>
                 {[
                   { label: 'Return', value: 'return' },
                   { label: 'Copiers', value: 'copiers' },
@@ -203,7 +204,7 @@ export default function BotsPage() {
                   <button
                     key={option.value}
                     onClick={() => setSortBy(option.value as any)}
-                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all flex-shrink-0 ${
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex-shrink-0 ${
                       sortBy === option.value
                         ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white shadow-lg shadow-primary-500/30'
                         : 'bg-dark-900/50 border border-dark-700 text-dark-300 hover:text-white hover:border-primary-500/30'
@@ -212,6 +213,7 @@ export default function BotsPage() {
                     {option.label}
                   </button>
                 ))}
+              </div>
               </div>
             </motion.div>
 
@@ -223,12 +225,13 @@ export default function BotsPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.02 }}
-                  className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm border border-dark-700 rounded-2xl p-6"
+                  className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]"
                 >
+                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6">
                   <div className="flex items-center gap-4">
                     {/* Rank */}
                     <div className="flex-shrink-0 w-8 text-center">
-                      <span className="text-lg font-bold text-dark-500">
+                      <span className="text-lg font-medium text-dark-500">
                         {index + 1}
                       </span>
                     </div>
@@ -244,7 +247,7 @@ export default function BotsPage() {
                       )}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <h3 className="text-base font-semibold text-white truncate">
+                          <h3 className="text-base font-medium text-white truncate">
                             {bot.name}
                           </h3>
                           {bot.verified && (
@@ -261,25 +264,25 @@ export default function BotsPage() {
                     <div className="hidden md:flex items-center gap-8">
                       <div className="text-center">
                         <div className="text-[10px] text-dark-400 mb-1">Return</div>
-                        <div className={`text-sm font-semibold ${bot.stats.return1y >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                        <div className={`text-sm font-normal ${bot.stats.return1y >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                           {bot.stats.return1y >= 0 ? '+' : ''}{bot.stats.return1y.toFixed(0)}%
                         </div>
                       </div>
                       <div className="text-center">
                         <div className="text-[10px] text-dark-400 mb-1">Copiers</div>
-                        <div className="text-sm font-semibold text-white">
+                        <div className="text-sm font-normal text-white">
                           {bot.stats.copiers > 999 ? `${(bot.stats.copiers / 1000).toFixed(1)}k` : bot.stats.copiers}
                         </div>
                       </div>
                       <div className="text-center">
                         <div className="text-[10px] text-dark-400 mb-1">Win Rate</div>
-                        <div className="text-sm font-semibold text-white">
+                        <div className="text-sm font-normal text-white">
                           {bot.stats.winRate.toFixed(0)}%
                         </div>
                       </div>
                       <div className="text-center">
                         <div className="text-[10px] text-dark-400 mb-1">Risk</div>
-                        <div className="text-sm font-semibold text-white">
+                        <div className="text-sm font-normal text-white">
                           {getRiskLabel(bot.risk)}
                         </div>
                       </div>
@@ -300,6 +303,7 @@ export default function BotsPage() {
                         Copy
                       </Link>
                     </div>
+                  </div>
                   </div>
                 </motion.div>
               ))}
