@@ -79,19 +79,19 @@ export default function ArchiveBotPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-dark-950 flex items-center justify-center">
-        <div className="text-white">Loading...</div>
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-100 dark:bg-dark-950 flex items-center justify-center">
+        <div className="text-gray-900 dark:text-white">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-dark-950 text-white">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-100 dark:bg-dark-950 text-gray-900 dark:text-white">
       <div className="max-w-4xl mx-auto p-4 lg:p-6">
         {/* Back Link */}
         <Link
           href={`/dashboard-v2/copy/${copyId}`}
-          className="inline-flex items-center gap-2 text-dark-400 hover:text-white transition-colors mb-6"
+          className="inline-flex items-center gap-2 text-gray-600 dark:text-dark-400 hover:text-gray-900 dark:hover:text-white transition-colors mb-6"
         >
           <ArrowLeft className="w-4 h-4" />
           <span className="text-sm">Back to Bot</span>
@@ -103,16 +103,16 @@ export default function ArchiveBotPage() {
           animate={{ opacity: 1, y: 0 }}
         >
           <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-          <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 lg:p-8"
+          <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6 lg:p-8"
         >
           {/* Header */}
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-14 h-14 bg-amber-500/20 border border-amber-500/30 rounded-xl flex items-center justify-center">
-              <Archive className="w-7 h-7 text-amber-400" />
+            <div className="w-14 h-14 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
+              <Archive className="w-7 h-7 text-primary-400" />
             </div>
             <div>
-              <h1 className="text-2xl lg:text-3xl font-semibold text-white">Deactivate Bot</h1>
-              <p className="text-sm text-dark-400 mt-1">{botName}</p>
+              <h1 className="text-2xl lg:text-3xl font-semibold text-gray-900 dark:text-white">Deactivate Bot</h1>
+              <p className="text-sm text-gray-600 dark:text-dark-400 mt-1">{botName}</p>
             </div>
           </div>
 
@@ -149,21 +149,21 @@ export default function ArchiveBotPage() {
               </div>
             )}
 
-            <div className="flex justify-between p-3 bg-dark-800/50 rounded-lg">
-              <span className="text-dark-400">Invested capital</span>
-              <span className="font-medium text-white">
+            <div className="flex justify-between p-3 bg-gray-50 dark:bg-dark-800/50 rounded-lg">
+              <span className="text-gray-600 dark:text-dark-400">Invested capital</span>
+              <span className="font-medium text-gray-900 dark:text-white">
                 ${formatNumber(investedAmount)}
               </span>
             </div>
 
-            <div className="border-t border-dark-700 my-2" />
+            <div className="border-t border-gray-200 dark:border-dark-700 my-2" />
           </div>
 
           {/* Capital Return */}
           <div className="mb-6 p-5 bg-gradient-to-r from-primary-500/10 to-secondary-500/10 rounded-xl border border-primary-500/30">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-sm text-dark-400 mb-1">Capital returned to balance</div>
+                <div className="text-sm text-gray-600 dark:text-dark-400 mb-1">Capital returned to balance</div>
                 <div className="text-3xl font-semibold text-gradient">
                   ${formatNumber(investedAmount)}
                 </div>
@@ -182,14 +182,14 @@ export default function ArchiveBotPage() {
             <button
               onClick={() => router.back()}
               disabled={archiving}
-              className="flex-1 px-6 py-3 bg-dark-800 hover:bg-dark-700 disabled:bg-dark-900 border border-dark-700 rounded-lg text-white font-medium transition-colors disabled:cursor-not-allowed"
+              className="flex-1 px-6 py-3 bg-gray-200 dark:bg-dark-800 hover:bg-gray-300 dark:hover:bg-dark-700 disabled:bg-gray-100 dark:disabled:bg-dark-900 border border-gray-300 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white font-medium transition-colors disabled:cursor-not-allowed"
             >
               Cancel
             </button>
             <button
               onClick={handleArchive}
               disabled={archiving}
-              className="flex-1 px-6 py-3 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 disabled:from-amber-800 disabled:to-amber-900 rounded-lg text-white font-medium transition-all disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="flex-1 px-6 py-3 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 hover:border-red-500/50 disabled:opacity-50 rounded-lg text-red-400 font-medium transition-all disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {archiving ? (
                 <>

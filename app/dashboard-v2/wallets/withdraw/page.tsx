@@ -255,17 +255,17 @@ export default function WithdrawPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-dark-950 text-white flex items-center justify-center">
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-100 dark:bg-dark-950 text-gray-900 dark:text-white flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-dark-300">Loading...</p>
+          <p className="text-gray-700 dark:text-dark-300">Loading...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-dark-950 text-white">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-100 dark:bg-dark-950 text-gray-900 dark:text-white">
       <div className="max-w-[1400px] mx-auto p-4 lg:p-6">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -274,7 +274,7 @@ export default function WithdrawPage() {
         >
           <Link
             href="/dashboard-v2/wallets"
-            className="inline-flex items-center gap-2 text-dark-400 hover:text-white transition-colors mb-4"
+            className="inline-flex items-center gap-2 text-gray-600 dark:text-dark-400 hover:text-gray-900 dark:hover:text-white transition-colors mb-4"
           >
             <ChevronLeft className="w-5 h-5" />
             Back to Wallets
@@ -306,8 +306,8 @@ export default function WithdrawPage() {
                 {/* Step 1: Select Currency */}
                 {step === 1 && (
                   <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                    <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
-                    <h2 className="text-2xl font-medium text-white mb-6">Select Currency</h2>
+                    <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
+                    <h2 className="text-2xl font-medium text-gray-900 dark:text-white mb-6">Select Currency</h2>
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3">
                       {CURRENCIES.map((currency, index) => (
                         <CurrencyCard
@@ -329,12 +329,12 @@ export default function WithdrawPage() {
                 {/* Step 2: Withdrawal Details */}
                 {step === 2 && selectedCurrency && (
                   <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                    <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 space-y-6">
-                    <h2 className="text-2xl font-medium text-white">Withdrawal Details</h2>
+                    <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6 space-y-6">
+                    <h2 className="text-2xl font-medium text-gray-900 dark:text-white">Withdrawal Details</h2>
 
                     {/* Network Selection */}
                     <div>
-                      <label className="block text-sm font-medium text-dark-300 mb-3">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-3">
                         Select Network
                       </label>
                       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3">
@@ -350,14 +350,14 @@ export default function WithdrawPage() {
                               ${
                                 selectedNetwork?.id === network.id
                                   ? 'bg-primary-500/10 border-primary-500 shadow-lg shadow-primary-500/20'
-                                  : 'bg-dark-800/50 border-dark-700 hover:border-primary-500/50 hover:bg-dark-800'
+                                  : 'bg-gray-100 dark:bg-dark-800/50 border-gray-200 dark:border-dark-700 hover:border-primary-500/50 hover:bg-gray-200 dark:hover:bg-dark-800'
                               }
                             `}
                           >
                             <div className="flex-1 min-w-0">
-                              <div className="font-medium text-white text-sm truncate">{network.networkName}</div>
-                              <div className="text-xs text-dark-400 truncate">{network.name}</div>
-                              <div className="flex items-center gap-2 text-[11px] text-dark-500 mt-0.5">
+                              <div className="font-medium text-gray-900 dark:text-white text-sm truncate">{network.networkName}</div>
+                              <div className="text-xs text-gray-600 dark:text-dark-400 truncate">{network.name}</div>
+                              <div className="flex items-center gap-2 text-[11px] text-gray-500 dark:text-dark-500 mt-0.5">
                                 <span>Fee: {network.fee}</span>
                                 {network.minAmount > 0 && (
                                   <>
@@ -373,7 +373,7 @@ export default function WithdrawPage() {
                                 animate={{ scale: 1 }}
                                 className="absolute top-2 right-2 w-5 h-5 bg-gradient-to-br from-primary-500 to-accent-500 rounded-full flex items-center justify-center"
                               >
-                                <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-3 h-3 text-gray-900 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                                 </svg>
                               </motion.div>
@@ -385,7 +385,7 @@ export default function WithdrawPage() {
 
                     {/* Amount */}
                     <div>
-                      <label className="block text-sm font-medium text-dark-300 mb-3">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-3">
                         Amount ({selectedCurrency.symbol})
                       </label>
                       <div className="relative">
@@ -397,7 +397,7 @@ export default function WithdrawPage() {
                             if (/^\d*\.?\d*$/.test(val)) setAmount(val);
                           }}
                           placeholder="0.00"
-                          className="w-full px-4 py-3 bg-dark-800 border-2 border-dark-700 focus:border-primary-500 rounded-xl text-white outline-none pr-20"
+                          className="w-full px-4 py-3 bg-gray-50 dark:bg-dark-800 border-2 border-gray-200 dark:border-dark-700 focus:border-primary-500 rounded-xl text-gray-900 dark:text-white outline-none pr-20"
                         />
                         <button
                           onClick={handleMaxAmount}
@@ -407,7 +407,7 @@ export default function WithdrawPage() {
                         </button>
                       </div>
                       {selectedNetwork && (
-                        <div className="mt-2 text-sm text-dark-400">
+                        <div className="mt-2 text-sm text-gray-600 dark:text-dark-400">
                           Minimum: {selectedNetwork.minAmount} {selectedCurrency.symbol} • Available:{' '}
                           {formatNumber(availableBalance, 2)} {selectedCurrency.symbol}
                         </div>
@@ -416,7 +416,7 @@ export default function WithdrawPage() {
 
                     {/* Withdrawal Address */}
                     <div>
-                      <label className="block text-sm font-medium text-dark-300 mb-3">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-3">
                         Withdrawal Address
                       </label>
                       <input
@@ -424,7 +424,7 @@ export default function WithdrawPage() {
                         value={withdrawAddress}
                         onChange={(e) => setWithdrawAddress(e.target.value)}
                         placeholder="Enter wallet address"
-                        className="w-full px-4 py-3 bg-dark-800 border-2 border-dark-700 focus:border-primary-500 rounded-xl text-white outline-none"
+                        className="w-full px-4 py-3 bg-gray-50 dark:bg-dark-800 border-2 border-gray-200 dark:border-dark-700 focus:border-primary-500 rounded-xl text-gray-900 dark:text-white outline-none"
                       />
                     </div>
 
@@ -443,17 +443,17 @@ export default function WithdrawPage() {
                     </div>
 
                     {/* Buttons */}
-                    <div className="flex gap-4">
+                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                       <button
                         onClick={() => { setStep(1); setSelectedCurrency(null); setSelectedNetwork(null); setAmount(''); setWithdrawAddress(''); }}
-                        className="px-6 py-3 bg-dark-800 hover:bg-dark-700 border-2 border-dark-700 rounded-xl text-white font-medium transition-colors"
+                        className="px-6 py-3 bg-gray-50 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 border-2 border-gray-200 dark:border-dark-700 rounded-xl text-gray-900 dark:text-white font-medium transition-colors order-2 sm:order-1"
                       >
                         <ChevronLeft className="w-4 h-4 inline mr-2" />
                         Back
                       </button>
                       <button
                         onClick={handleContinueToSecurity}
-                        className="flex-1 px-6 py-4 bg-gradient-to-r from-primary-500 to-accent-500 hover:shadow-2xl rounded-xl text-white font-bold transition-all"
+                        className="flex-1 px-6 py-4 bg-gradient-to-r from-primary-500 to-accent-500 hover:shadow-2xl rounded-xl text-white font-bold transition-all order-1 sm:order-2"
                       >
                         Continue
                       </button>
@@ -465,21 +465,21 @@ export default function WithdrawPage() {
                 {/* Step 3: Security Verification */}
                 {step === 3 && (
                   <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                    <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 space-y-6">
+                    <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6 space-y-6">
                     <div className="flex items-center gap-3 mb-4">
                       <div className="w-12 h-12 bg-primary-500/20 rounded-xl flex items-center justify-center">
                         <Shield className="w-6 h-6 text-primary-400" />
                       </div>
                       <div>
-                        <h2 className="text-2xl font-medium text-white">Security Verification</h2>
-                        <p className="text-sm text-dark-400">Verify your identity to continue</p>
+                        <h2 className="text-2xl font-medium text-gray-900 dark:text-white">Security Verification</h2>
+                        <p className="text-sm text-gray-600 dark:text-dark-400">Verify your identity to continue</p>
                       </div>
                     </div>
 
                     {/* PIN Code */}
                     {userHasPIN && (
                       <div>
-                        <label className="block text-sm font-medium text-dark-300 mb-3">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-3">
                           Withdrawal PIN Code
                         </label>
                         <div className="flex gap-3 justify-center">
@@ -491,7 +491,7 @@ export default function WithdrawPage() {
                               maxLength={1}
                               value={digit}
                               onChange={(e) => handlePinInput(index, e.target.value)}
-                              className="w-16 h-16 bg-dark-800 border-2 border-dark-700 focus:border-primary-500 rounded-xl text-white text-center text-2xl outline-none"
+                              className="w-14 h-14 sm:w-16 sm:h-16 bg-gray-50 dark:bg-dark-800 border-2 border-gray-200 dark:border-dark-700 focus:border-primary-500 rounded-xl text-gray-900 dark:text-white text-center text-xl sm:text-2xl outline-none"
                             />
                           ))}
                         </div>
@@ -501,7 +501,7 @@ export default function WithdrawPage() {
                     {/* 2FA Code */}
                     {userHas2FA && (
                       <div>
-                        <label className="block text-sm font-medium text-dark-300 mb-3">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-3">
                           2FA Code (Google Authenticator)
                         </label>
                         <div className="flex gap-2 justify-center">
@@ -513,7 +513,7 @@ export default function WithdrawPage() {
                               maxLength={1}
                               value={digit}
                               onChange={(e) => handle2FAInput(index, e.target.value)}
-                              className="w-12 h-12 bg-dark-800 border-2 border-dark-700 focus:border-primary-500 rounded-xl text-white text-center text-xl outline-none"
+                              className="w-12 h-12 bg-gray-50 dark:bg-dark-800 border-2 border-gray-200 dark:border-dark-700 focus:border-primary-500 rounded-xl text-gray-900 dark:text-white text-center text-xl outline-none"
                             />
                           ))}
                         </div>
@@ -535,17 +535,17 @@ export default function WithdrawPage() {
                     </div>
 
                     {/* Buttons */}
-                    <div className="flex gap-4">
+                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                       <button
                         onClick={() => setStep(2)}
-                        className="flex-1 px-6 py-3 bg-dark-800 hover:bg-dark-700 border-2 border-dark-700 rounded-xl text-white font-medium transition-colors"
+                        className="flex-1 px-6 py-3 bg-gray-50 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 border-2 border-gray-200 dark:border-dark-700 rounded-xl text-gray-900 dark:text-white font-medium transition-colors order-2 sm:order-1"
                       >
                         <ChevronLeft className="w-4 h-4 inline mr-2" />
                         Back
                       </button>
                       <button
                         onClick={handleContinueToConfirm}
-                        className="flex-1 px-6 py-3 bg-gradient-to-r from-primary-500 to-accent-500 hover:shadow-2xl rounded-xl text-white font-bold transition-all"
+                        className="flex-1 px-6 py-3 bg-gradient-to-r from-primary-500 to-accent-500 hover:shadow-2xl rounded-xl text-white font-bold transition-all order-1 sm:order-2"
                       >
                         Continue
                       </button>
@@ -557,8 +557,8 @@ export default function WithdrawPage() {
                 {/* Step 4: Confirmation */}
                 {step === 4 && (
                   <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                    <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 space-y-6">
-                    <h2 className="text-2xl font-medium text-white">Review Withdrawal</h2>
+                    <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6 space-y-6">
+                    <h2 className="text-2xl font-medium text-gray-900 dark:text-white">Review Withdrawal</h2>
 
                     {/* Processing Time Info */}
                     <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl">
@@ -575,17 +575,17 @@ export default function WithdrawPage() {
                     </div>
 
                     {/* Buttons */}
-                    <div className="flex gap-4">
+                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                       <button
                         onClick={() => setStep(3)}
-                        className="flex-1 px-6 py-3 bg-dark-800 hover:bg-dark-700 border-2 border-dark-700 rounded-xl text-white font-medium transition-colors"
+                        className="flex-1 px-6 py-3 bg-gray-50 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 border-2 border-gray-200 dark:border-dark-700 rounded-xl text-gray-900 dark:text-white font-medium transition-colors order-2 sm:order-1"
                       >
                         <ChevronLeft className="w-4 h-4 inline mr-2" />
                         Back
                       </button>
                       <button
                         onClick={handleSubmitWithdrawal}
-                        className="flex-1 px-6 py-3 bg-gradient-to-r from-primary-500 to-accent-500 hover:shadow-2xl rounded-xl text-white font-bold transition-all"
+                        className="flex-1 px-6 py-3 bg-gradient-to-r from-primary-500 to-accent-500 hover:shadow-2xl rounded-xl text-white font-bold transition-all order-1 sm:order-2"
                       >
                         Submit Withdrawal
                       </button>
@@ -601,19 +601,19 @@ export default function WithdrawPage() {
           <div className="lg:col-span-5">
             <div className="sticky top-6">
               <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
-                <h3 className="text-xl font-medium text-white mb-6">Withdrawal Summary</h3>
+                <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
+                <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-6">Withdrawal Summary</h3>
 
                 {/* Currency Icon */}
-                <div className="flex items-center gap-3 mb-6 pb-6 border-b border-dark-700">
+                <div className="flex items-center gap-3 mb-6 pb-6 border-b border-gray-200 dark:border-dark-700">
                   {(() => {
                     const sym = selectedCurrency?.symbol || 'USDT';
                     const Icon = TOKEN_ICONS[sym];
-                    return Icon ? <Icon size={48} variant="branded" /> : <span className="text-white text-2xl font-medium">{sym.charAt(0)}</span>;
+                    return Icon ? <Icon size={48} variant="branded" /> : <span className="text-gray-900 dark:text-white text-2xl font-medium">{sym.charAt(0)}</span>;
                   })()}
                   <div>
-                    <div className="text-sm text-dark-400">Currency</div>
-                    <div className="text-xl font-medium text-white">
+                    <div className="text-sm text-gray-600 dark:text-dark-400">Currency</div>
+                    <div className="text-xl font-medium text-gray-900 dark:text-white">
                       {selectedCurrency ? `${selectedCurrency.symbol} (${selectedCurrency.name})` : 'Not selected'}
                     </div>
                   </div>
@@ -621,30 +621,30 @@ export default function WithdrawPage() {
 
                 {/* Summary Details */}
                 <div className="space-y-4">
-                  <div className="flex justify-between py-3 border-b border-dark-700">
-                    <span className="text-dark-400">Network</span>
-                    <span className="font-medium text-white">{selectedNetwork?.name || '—'}</span>
+                  <div className="flex justify-between py-3 border-b border-gray-200 dark:border-dark-700">
+                    <span className="text-gray-600 dark:text-dark-400">Network</span>
+                    <span className="font-medium text-gray-900 dark:text-white">{selectedNetwork?.name || '—'}</span>
                   </div>
-                  <div className="flex justify-between py-3 border-b border-dark-700">
-                    <span className="text-dark-400">Amount</span>
-                    <span className="font-medium text-white">
+                  <div className="flex justify-between py-3 border-b border-gray-200 dark:border-dark-700">
+                    <span className="text-gray-600 dark:text-dark-400">Amount</span>
+                    <span className="font-medium text-gray-900 dark:text-white">
                       {amount || '0.00'} {selectedCurrency?.symbol || ''}
                     </span>
                   </div>
-                  <div className="flex justify-between py-3 border-b border-dark-700">
-                    <span className="text-dark-400">Network Fee</span>
+                  <div className="flex justify-between py-3 border-b border-gray-200 dark:border-dark-700">
+                    <span className="text-gray-600 dark:text-dark-400">Network Fee</span>
                     <span className="font-medium text-red-400">- {selectedNetwork?.fee || '—'}</span>
                   </div>
-                  <div className="flex justify-between py-3 bg-dark-800/50 px-4 -mx-2 rounded-xl">
-                    <span className="font-medium text-white">You will receive</span>
+                  <div className="flex justify-between py-3 bg-gray-100 dark:bg-dark-800/50 px-4 -mx-2 rounded-xl">
+                    <span className="font-medium text-gray-900 dark:text-white">You will receive</span>
                     <span className="font-medium text-green-400">
                       {formatNumber(calculateTotal(), 2)} {selectedCurrency?.symbol || ''}
                     </span>
                   </div>
                   {withdrawAddress && (
-                    <div className="flex justify-between py-3 border-t border-dark-700">
-                      <span className="text-dark-400">Destination</span>
-                      <span className="font-mono text-sm text-white max-w-[200px] truncate">
+                    <div className="flex justify-between py-3 border-t border-gray-200 dark:border-dark-700">
+                      <span className="text-gray-600 dark:text-dark-400">Destination</span>
+                      <span className="font-mono text-sm text-gray-900 dark:text-white max-w-[200px] truncate">
                         {withdrawAddress}
                       </span>
                     </div>
@@ -652,9 +652,9 @@ export default function WithdrawPage() {
                 </div>
 
                 {/* Available Balance */}
-                <div className="mt-6 p-4 bg-green-500/10 border border-green-500/20 rounded-xl">
-                  <div className="text-xs text-green-400/70 mb-1">Available Balance</div>
-                  <div className="text-2xl font-semibold text-green-400">
+                <div className="mt-6 p-4 bg-primary-500/10 border border-primary-500/20 rounded-xl">
+                  <div className="text-xs text-primary-400/70 mb-1">Available Balance</div>
+                  <div className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white">
                     {formatNumber(availableBalance, 2)} {selectedCurrency?.symbol || 'USDT'}
                   </div>
                 </div>
@@ -681,11 +681,11 @@ export default function WithdrawPage() {
                 animate={{ scale: 1, y: 0 }}
                 exit={{ scale: 0.9, y: 20 }}
                 onClick={(e) => e.stopPropagation()}
-                className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6"
+                className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6"
               >
               <div className="text-center mb-6">
                 <motion.div
-                  className="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-4"
+                  className="w-16 h-16 bg-primary-500/20 rounded-full flex items-center justify-center mx-auto mb-4"
                   animate={{
                     scale: [1, 1.1, 1],
                   }}
@@ -694,22 +694,22 @@ export default function WithdrawPage() {
                     repeat: Infinity,
                   }}
                 >
-                  <Shield className="w-8 h-8 text-green-400" />
+                  <Shield className="w-8 h-8 text-primary-400" />
                 </motion.div>
-                <h3 className="text-2xl font-medium text-white mb-2">Confirm Withdrawal</h3>
-                <p className="text-dark-300">
+                <h3 className="text-2xl font-medium text-gray-900 dark:text-white mb-2">Confirm Withdrawal</h3>
+                <p className="text-gray-700 dark:text-dark-300">
                   You are about to withdraw{' '}
-                  <span className="font-medium text-white">{amount} {selectedCurrency?.symbol}</span>
+                  <span className="font-medium text-gray-900 dark:text-white">{amount} {selectedCurrency?.symbol}</span>
                 </p>
               </div>
 
-              <div className="space-y-3 mb-6 p-4 bg-dark-800/50 rounded-xl">
+              <div className="space-y-3 mb-6 p-4 bg-gray-100 dark:bg-dark-800/50 rounded-xl">
                 <div className="flex justify-between text-sm">
-                  <span className="text-dark-400">Processing Time</span>
-                  <span className="text-white font-medium">Up to 24 hours</span>
+                  <span className="text-gray-600 dark:text-dark-400">Processing Time</span>
+                  <span className="text-gray-900 dark:text-white font-medium">Up to 24 hours</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-dark-400">Status</span>
+                  <span className="text-gray-600 dark:text-dark-400">Status</span>
                   <span className="text-yellow-400 font-medium">Pending Review</span>
                 </div>
               </div>
@@ -723,13 +723,13 @@ export default function WithdrawPage() {
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowConfirmModal(false)}
-                  className="flex-1 px-6 py-3 bg-dark-800 hover:bg-dark-700 border-2 border-dark-700 rounded-xl text-white font-medium transition-colors"
+                  className="flex-1 px-6 py-3 bg-gray-50 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 border-2 border-gray-200 dark:border-dark-700 rounded-xl text-gray-900 dark:text-white font-medium transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleConfirmWithdrawal}
-                  className="flex-1 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 hover:shadow-2xl rounded-xl text-white font-bold transition-all flex items-center justify-center gap-2"
+                  className="flex-1 px-6 py-3 bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 hover:shadow-2xl rounded-xl text-white font-bold transition-all flex items-center justify-center gap-2"
                 >
                   <CheckCircle className="w-5 h-5" />
                   Confirm

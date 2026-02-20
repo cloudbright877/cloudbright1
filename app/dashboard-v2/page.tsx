@@ -481,10 +481,10 @@ export default function DashboardPage() {
 
 
   return (
-    <div className="min-h-screen bg-dark-950 text-white">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-100 dark:bg-dark-950 text-gray-900 dark:text-white">
       <div className="max-w-[1800px] mx-auto p-4 lg:p-6">
         {/* Bento Grid Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 lg:grid-rows-[auto_1fr] gap-4 lg:gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-12 lg:grid-rows-[auto_1fr] gap-3 lg:gap-6">
           {/* Row 1: Hero + Action Cards */}
           <NetWorthHero
             portfolioValue={totalValue}
@@ -505,29 +505,24 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="lg:col-span-4"
+            className="col-span-1 lg:col-span-4"
           >
-            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all hover:bg-[linear-gradient(135deg,rgba(74,222,128,0.2)_0%,rgba(74,222,128,0)_40%,rgba(74,222,128,0)_60%,rgba(74,222,128,0.2)_100%)]">
+            <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.02)_25%,rgba(0,0,0,0.02)_75%,rgba(0,0,0,0.04)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all hover:bg-[linear-gradient(135deg,rgba(139,92,246,0.5)_0%,rgba(139,92,246,0.1)_40%,rgba(139,92,246,0.1)_60%,rgba(139,92,246,0.5)_100%)]">
               <button
                 onClick={() => router.push('/dashboard-v2/quick-start')}
-                className="w-full relative overflow-hidden bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-5 transition-all group"
+                className="w-full h-full relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-4 lg:p-5 transition-all group"
               >
-                <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/10 rounded-full blur-3xl opacity-100 group-hover:scale-150 transition-transform" />
-                <div className="relative flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-green-500/20 border border-green-500/30 rounded-xl flex items-center justify-center">
-                      <Zap className="w-6 h-6 text-green-400" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-dark-400 font-normal mb-1 text-left">Quick Start</p>
-                      <p className="text-3xl font-semibold text-white text-left">Start Now</p>
-                      <p className="text-xs text-green-400 mt-1 text-left">
-                        Get started in 3 clicks
-                      </p>
-                    </div>
+                <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500/10 rounded-full blur-3xl opacity-100 group-hover:scale-150 transition-transform" />
+                <div className="relative flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                  <div className="w-10 h-10 lg:w-12 lg:h-12 bg-primary-500/20 border border-primary-500/30 group-hover:bg-primary-500/30 group-hover:border-primary-500/50 rounded-xl flex items-center justify-center transition-all flex-shrink-0">
+                    <Zap className="w-5 h-5 lg:w-6 lg:h-6 text-primary-400 group-hover:text-primary-300 transition-colors" />
                   </div>
-                  <div className="text-green-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <ChevronRight className="w-6 h-6" />
+                  <div className="min-w-0">
+                    <p className="text-xs text-gray-600 dark:text-dark-400 font-normal mb-0.5 text-left">Quick Start</p>
+                    <p className="text-xl lg:text-3xl font-semibold text-gray-900 dark:text-white text-left">Start Now</p>
+                    <p className="text-xs text-primary-400 mt-0.5 text-left hidden sm:block">
+                      Get started in 3 clicks
+                    </p>
                   </div>
                 </div>
               </button>
@@ -539,29 +534,24 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 }}
-            className="lg:col-span-4"
+            className="col-span-1 lg:col-span-4"
           >
-            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all hover:bg-[linear-gradient(135deg,rgba(139,92,246,0.2)_0%,rgba(139,92,246,0)_40%,rgba(139,92,246,0)_60%,rgba(139,92,246,0.2)_100%)]">
+            <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.02)_25%,rgba(0,0,0,0.02)_75%,rgba(0,0,0,0.04)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all hover:bg-[linear-gradient(135deg,rgba(139,92,246,0.5)_0%,rgba(139,92,246,0.1)_40%,rgba(139,92,246,0.1)_60%,rgba(139,92,246,0.5)_100%)]">
               <button
                 onClick={() => router.push('/dashboard-v2/bots')}
-                className="w-full relative overflow-hidden bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-5 transition-all group"
+                className="w-full h-full relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-4 lg:p-5 transition-all group"
               >
                 <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500/10 rounded-full blur-3xl opacity-100 group-hover:scale-150 transition-transform" />
-                <div className="relative flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
-                      <Plus className="w-6 h-6 text-primary-400" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-dark-400 font-normal mb-1 text-left">Add Bot</p>
-                      <p className="text-3xl font-semibold text-white text-left">Explore</p>
-                      <p className="text-xs text-primary-400 mt-1 text-left">
-                        Browse marketplace
-                      </p>
-                    </div>
+                <div className="relative flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                  <div className="w-10 h-10 lg:w-12 lg:h-12 bg-primary-500/20 border border-primary-500/30 group-hover:bg-primary-500/30 group-hover:border-primary-500/50 rounded-xl flex items-center justify-center transition-all flex-shrink-0">
+                    <Plus className="w-5 h-5 lg:w-6 lg:h-6 text-primary-400 group-hover:text-primary-300 transition-colors" />
                   </div>
-                  <div className="text-primary-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <ChevronRight className="w-6 h-6" />
+                  <div className="min-w-0">
+                    <p className="text-xs text-gray-600 dark:text-dark-400 font-normal mb-0.5 text-left">Add Bot</p>
+                    <p className="text-xl lg:text-3xl font-semibold text-gray-900 dark:text-white text-left">Explore</p>
+                    <p className="text-xs text-primary-400 mt-0.5 text-left hidden sm:block">
+                      Browse marketplace
+                    </p>
                   </div>
                 </div>
               </button>
@@ -573,18 +563,18 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="lg:col-span-8 h-full"
+            className="col-span-2 lg:col-span-8 h-full"
           >
-            <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-            <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] overflow-hidden flex flex-col">
-              <div className="px-4 py-3 border-b border-dark-700 flex items-center justify-between">
+            <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.02)_25%,rgba(0,0,0,0.02)_75%,rgba(0,0,0,0.04)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+            <div className="h-full bg-gradient-to-br from-gray-50 to-gray-100 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] overflow-hidden flex flex-col">
+              <div className="px-4 py-3 border-b border-gray-200 dark:border-dark-700 flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 bg-primary-500/20 rounded-lg flex items-center justify-center">
                     <Activity className="w-4 h-4 text-primary-400" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-medium text-white">Recent Trades</h3>
-                    <p className="text-[10px] text-dark-400">Latest closed positions</p>
+                    <h3 className="text-sm font-medium text-gray-900 dark:text-white">Recent Trades</h3>
+                    <p className="text-[10px] text-gray-600 dark:text-dark-400">Latest closed positions</p>
                   </div>
                 </div>
               </div>
@@ -592,19 +582,19 @@ export default function DashboardPage() {
               <div className="overflow-x-auto flex-1">
                 <table className="w-full h-full">
                   <thead>
-                    <tr className="border-b border-dark-700">
-                      <th className="text-left text-xs font-medium text-dark-400 py-2.5 pr-2 pl-3 whitespace-nowrap">Bot</th>
-                      <th className="text-left text-xs font-medium text-dark-400 py-2.5 px-2 whitespace-nowrap">Pair</th>
-                      <th className="text-center text-xs font-medium text-dark-400 py-2.5 px-2 whitespace-nowrap">Side</th>
-                      <th className="text-right text-xs font-medium text-dark-400 py-2.5 px-2 whitespace-nowrap">P&L</th>
-                      <th className="text-right text-xs font-medium text-dark-400 py-2.5 px-2 whitespace-nowrap">Duration</th>
-                      <th className="text-right text-xs font-medium text-dark-400 py-2.5 pl-2 pr-3 whitespace-nowrap">Closed</th>
+                    <tr className="border-b border-gray-200 dark:border-dark-700">
+                      <th className="hidden sm:table-cell text-left text-xs font-medium text-gray-600 dark:text-dark-400 py-2.5 pr-2 pl-3 whitespace-nowrap">Bot</th>
+                      <th className="text-left text-xs font-medium text-gray-600 dark:text-dark-400 py-2.5 px-2 whitespace-nowrap">Pair</th>
+                      <th className="text-center text-xs font-medium text-gray-600 dark:text-dark-400 py-2.5 px-2 whitespace-nowrap">Side</th>
+                      <th className="text-right text-xs font-medium text-gray-600 dark:text-dark-400 py-2.5 px-2 whitespace-nowrap">P&L</th>
+                      <th className="hidden sm:table-cell text-right text-xs font-medium text-gray-600 dark:text-dark-400 py-2.5 px-2 whitespace-nowrap">Duration</th>
+                      <th className="hidden sm:table-cell text-right text-xs font-medium text-gray-600 dark:text-dark-400 py-2.5 pl-2 pr-3 whitespace-nowrap">Closed</th>
                     </tr>
                   </thead>
                   <tbody>
                     {closedPositions.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="py-8 text-center text-dark-400">
+                        <td colSpan={6} className="py-8 text-center text-gray-600 dark:text-dark-400">
                           <div className="flex flex-col items-center gap-2">
                             <Activity className="w-8 h-8 opacity-50" />
                             <p className="text-sm">No closed positions yet</p>
@@ -614,12 +604,12 @@ export default function DashboardPage() {
                       </tr>
                     ) : (
                       closedPositions.slice(0, 3).map((position) => (
-                        <tr key={position.id} className="border-b border-dark-800/50 hover:bg-dark-800/30 transition-colors">
-                          <td className="py-2.5 pr-2 pl-3 max-w-[100px]">
-                            <span className="text-xs text-dark-400 truncate block">{position.botName}</span>
+                        <tr key={position.id} className="border-b border-gray-200 dark:border-dark-800/50 hover:bg-gray-100 dark:hover:bg-dark-800/30 transition-colors">
+                          <td className="hidden sm:table-cell py-2.5 pr-2 pl-3 max-w-[100px]">
+                            <span className="text-xs text-gray-600 dark:text-dark-400 truncate block">{position.botName}</span>
                           </td>
                           <td className="py-2.5 px-2 whitespace-nowrap">
-                            <span className="text-xs font-normal text-white">{position.pair}</span>
+                            <span className="text-xs font-normal text-gray-900 dark:text-white">{position.pair}</span>
                           </td>
                           <td className="py-2.5 px-2 text-center whitespace-nowrap">
                             <div className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs font-medium ${
@@ -647,10 +637,10 @@ export default function DashboardPage() {
                               {position.pnl >= 0 ? '+' : ''}{position.pnlPercent.toFixed(1)}%
                             </div>
                           </td>
-                          <td className="py-2.5 px-2 text-right text-xs text-dark-300 whitespace-nowrap">
+                          <td className="hidden sm:table-cell py-2.5 px-2 text-right text-xs text-gray-700 dark:text-dark-300 whitespace-nowrap">
                             {position.duration}
                           </td>
-                          <td className="py-2.5 pl-2 pr-3 text-right text-xs text-dark-400 whitespace-nowrap">
+                          <td className="hidden sm:table-cell py-2.5 pl-2 pr-3 text-right text-xs text-gray-600 dark:text-dark-400 whitespace-nowrap">
                             {position.closedAt}
                           </td>
                         </tr>
@@ -663,112 +653,124 @@ export default function DashboardPage() {
             </div>
           </motion.div>
 
-          {/* Active Bots - Full Width */}
+          {/* Active Bots */}
           {bots.map((bot, index) => (
             <motion.div
               key={bot.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 + index * 0.1 }}
-              className="lg:col-span-6"
+              className="col-span-2 lg:col-span-6"
             >
-              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all">
-              <div className="h-full relative bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] overflow-hidden transition-all group">
+              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.02)_25%,rgba(0,0,0,0.02)_75%,rgba(0,0,0,0.04)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all">
+              <div className="h-full relative bg-gradient-to-br from-gray-50 to-gray-100 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] overflow-hidden transition-all group">
 
-                <div className="relative p-5 h-full flex flex-col">
+                <div className="relative p-4 sm:p-5 h-full flex-col">
                   {/* Bot Header */}
-                  <div className="flex items-start justify-between mb-5">
-                    <div className="flex items-center gap-3 flex-1">
-                      {typeof bot.icon === 'string' && bot.icon.startsWith('/') ? (
-                        <img src={bot.icon} alt={bot.name} className="w-14 h-14 object-contain" />
-                      ) : (
-                        <div className="w-14 h-14 flex items-center justify-center text-2xl">
-                          {bot.icon}
+                  <div className="flex items-start gap-2.5 sm:gap-3 mb-3 sm:mb-5">
+                    {typeof bot.icon === 'string' && bot.icon.startsWith('/') ? (
+                      <img src={bot.icon} alt={bot.name} className="w-10 h-10 sm:w-14 sm:h-14 object-contain flex-shrink-0" />
+                    ) : (
+                      <div className="w-10 h-10 sm:w-14 sm:h-14 flex items-center justify-center text-xl sm:text-2xl flex-shrink-0">
+                        {bot.icon}
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-sm sm:text-lg font-medium text-gray-900 dark:text-white sm:mb-2 truncate">{bot.name}</h3>
+                      {/* Mobile: text stats + badges centered */}
+                      <div className="flex sm:hidden flex-col items-center gap-1 mt-0.5">
+                        <div className="flex items-center gap-1.5 text-[11px]">
+                          <span className="text-gray-600 dark:text-dark-400">{bot.trades} trades</span>
+                          <span className="text-gray-600 dark:text-dark-400">{bot.openPositions.length} open</span>
                         </div>
-                      )}
-                      <div className="flex-1">
-                        <h3 className="text-lg font-medium text-white mb-2">{bot.name}</h3>
-                        <div className="flex items-center gap-2 flex-wrap text-xs">
-                          <span className="text-dark-400">{bot.trades} trades</span>
-                          <span className="text-dark-400">•</span>
-                          <span className="text-dark-400">{bot.openPositions.length} open</span>
+                        <div className="flex items-center gap-1.5 text-[11px]">
                           {bot.status === 'active' && (
-                            <>
-                              <span className="text-dark-400">•</span>
-                              <div className="flex items-center gap-1.5 px-2 py-0.5 bg-green-500/20 border border-green-500/30 rounded-full">
-                                <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
-                                <span className="font-medium text-green-400">Live</span>
-                              </div>
-                            </>
+                            <div className="flex items-center gap-1 px-1.5 py-0.5 bg-green-500/20 border border-green-500/30 rounded-full">
+                              <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
+                              <span className="font-medium text-green-400">Live</span>
+                            </div>
                           )}
-                          <span className="text-dark-400">•</span>
-                          <div className={`px-2 py-0.5 rounded font-medium ${
+                          <div className={`px-1.5 py-0.5 rounded font-medium ${
                             bot.risk === 'low'
                               ? 'bg-green-500/20 text-green-400 border border-green-500/30'
                               : bot.risk === 'medium'
                               ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
                               : 'bg-red-500/20 text-red-400 border border-red-500/30'
                           }`}>
-                            {bot.risk === 'low' ? 'Low Risk' : bot.risk === 'medium' ? 'Medium Risk' : 'High Risk'}
+                            {bot.risk === 'low' ? 'Low Risk' : bot.risk === 'medium' ? 'Med Risk' : 'High Risk'}
                           </div>
                         </div>
                       </div>
+                      {/* Desktop: full badges */}
+                      <div className="hidden sm:flex items-center gap-2 flex-wrap text-xs">
+                        <span className="text-gray-600 dark:text-dark-400">{bot.trades} trades</span>
+                        <span className="text-gray-600 dark:text-dark-400">{bot.openPositions.length} open</span>
+                        {bot.status === 'active' && (
+                          <div className="flex items-center gap-1.5 px-2 py-0.5 bg-green-500/20 border border-green-500/30 rounded-full">
+                            <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
+                            <span className="font-medium text-green-400">Live</span>
+                          </div>
+                        )}
+                        <div className={`px-2 py-0.5 rounded font-medium ${
+                          bot.risk === 'low'
+                            ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                            : bot.risk === 'medium'
+                            ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
+                            : 'bg-red-500/20 text-red-400 border border-red-500/30'
+                        }`}>
+                          {bot.risk === 'low' ? 'Low Risk' : bot.risk === 'medium' ? 'Medium Risk' : 'High Risk'}
+                        </div>
+                      </div>
                     </div>
-
-                    <div className="flex items-center gap-2">
-                      {!bot.lockedIn && (
-                        <Link
-                          href={`/dashboard-v2/copy/${bot.id}/archive`}
-                          className="p-2 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 hover:border-amber-500/50 text-amber-400 hover:text-amber-300 transition-all"
-                        >
-                          <Archive className="w-4 h-4" />
-                        </Link>
-                      )}
-                    </div>
+                    {!bot.lockedIn && (
+                      <Link
+                        href={`/dashboard-v2/copy/${bot.id}/archive`}
+                        className="p-1.5 sm:p-2 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 transition-all flex-shrink-0"
+                      >
+                        <Archive className="w-4 h-4" />
+                      </Link>
+                    )}
                   </div>
 
-                  {/* Stats Grid */}
-                  <div className="grid grid-cols-3 gap-3">
-                    <div className="p-3 bg-dark-900/50 rounded-lg border border-dark-700/50">
-                      <p className="text-xs text-dark-400 mb-1">Invested</p>
-                      <p className="text-base font-medium text-white">${bot.invested.toFixed(2)}</p>
+                  {/* Stats: 2-col grid (Invested | Value), P&L below */}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
+                    <div className="p-2.5 sm:p-3 bg-gray-100 dark:bg-dark-900/50 rounded-lg border border-gray-200 dark:border-dark-700/50">
+                      <p className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400 mb-0.5 sm:mb-1">Invested</p>
+                      <p className="text-sm sm:text-base font-medium text-gray-900 dark:text-white">${bot.invested.toFixed(2)}</p>
                     </div>
-                    <div className="p-3 bg-dark-900/50 rounded-lg border border-dark-700/50">
-                      <p className="text-xs text-dark-400 mb-1">Current Value</p>
-                      <p className="text-base font-medium text-white">${bot.currentValue.toFixed(2)}</p>
+                    <div className="p-2.5 sm:p-3 bg-gray-100 dark:bg-dark-900/50 rounded-lg border border-gray-200 dark:border-dark-700/50">
+                      <p className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400 mb-0.5 sm:mb-1">Current Value</p>
+                      <p className="text-sm sm:text-base font-medium text-gray-900 dark:text-white">${bot.currentValue.toFixed(2)}</p>
                     </div>
-                    <div className={`p-3 bg-gradient-to-br rounded-lg border ${
+                    <div className={`col-span-2 sm:col-span-1 p-2.5 sm:p-3 bg-gradient-to-br rounded-lg border ${
                       bot.profit >= 0
                         ? 'from-green-500/10 to-emerald-500/5 border-green-500/20'
                         : 'from-red-500/10 to-red-500/5 border-red-500/20'
                     }`}>
-                      <p className="text-xs mb-1 text-dark-400">P&L</p>
-                      <p className={`text-base font-medium ${bot.profit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                        {bot.profit >= 0 ? '+' : ''}${bot.profit.toFixed(2)}
-                      </p>
-                      {bot.profit !== 0 && (
-                        <p className={`text-xs ${bot.profit >= 0 ? 'text-green-400/60' : 'text-red-400/60'}`}>
-                          {bot.profit >= 0 ? '+' : ''}{bot.profitPercent.toFixed(2)}%
-                        </p>
-                      )}
+                      <div className="flex sm:block items-center justify-between sm:text-left">
+                        <p className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400 sm:mb-1">P&L</p>
+                        <div className="flex items-center gap-2 sm:block">
+                          <p className={`text-sm sm:text-base font-semibold ${bot.profit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                            {bot.profit >= 0 ? '+' : ''}${bot.profit.toFixed(2)}
+                          </p>
+                          {bot.profit !== 0 && (
+                            <p className={`text-[10px] sm:text-xs ${bot.profit >= 0 ? 'text-green-400/60' : 'text-red-400/60'}`}>
+                              {bot.profit >= 0 ? '+' : ''}{bot.profitPercent.toFixed(2)}%
+                            </p>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
 
                   {/* Actions */}
-                  <div className="flex gap-2 mt-5">
+                  <div className="flex gap-2 mt-3 sm:mt-5">
                     <Link
                       href={`/dashboard-v2/copy/${bot.id}`}
-                      className="flex-1 px-4 py-2.5 bg-primary-500/10 hover:bg-primary-500/20 border border-primary-500/30 hover:border-primary-500/50 rounded-lg font-medium text-primary-400 hover:text-primary-300 transition-all text-center text-sm flex items-center justify-center gap-2"
+                      className="flex-1 px-3 sm:px-4 py-2 sm:py-2.5 bg-primary-500/10 hover:bg-primary-500/20 border border-primary-500/30 hover:border-primary-500/50 rounded-lg font-medium text-primary-400 hover:text-primary-300 transition-all text-center text-sm flex items-center justify-center gap-2"
                     >
                       <BarChart3 className="w-4 h-4" />
                       Details
-                    </Link>
-                    <Link
-                      href={`/dashboard-v2/copy/${bot.id}`}
-                      className="px-4 py-2.5 rounded-lg font-medium transition-all text-sm flex items-center gap-2 bg-dark-700/50 hover:bg-dark-700 border border-dark-600 hover:border-dark-500 text-dark-300 hover:text-white"
-                    >
-                      <Settings className="w-4 h-4" />
-                      Settings
                     </Link>
                   </div>
                 </div>
@@ -782,25 +784,25 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
-            className="col-span-12 lg:col-span-6"
+            className="col-span-2 lg:col-span-6"
           >
-            <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all hover:bg-[linear-gradient(135deg,rgba(59,130,246,0.2)_0%,rgba(59,130,246,0)_40%,rgba(59,130,246,0)_60%,rgba(59,130,246,0.2)_100%)]">
+            <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.02)_25%,rgba(0,0,0,0.02)_75%,rgba(0,0,0,0.04)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all hover:bg-[linear-gradient(135deg,rgba(139,92,246,0.2)_0%,rgba(139,92,246,0)_40%,rgba(139,92,246,0)_60%,rgba(139,92,246,0.2)_100%)]">
               <Link
                 href="/dashboard-v2/leaderboard"
-                className="block h-full p-6 bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] transition-all group relative overflow-hidden"
+                className="block h-full p-4 sm:p-6 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] transition-all group relative overflow-hidden"
               >
-                <div className="absolute -right-10 -top-10 w-40 h-40 bg-blue-500/20 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-500" />
-                <div className="relative flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 bg-blue-500/20 border border-blue-500/30 rounded-xl flex items-center justify-center">
-                      <Users className="w-7 h-7 text-blue-400" />
+                <div className="absolute -right-10 -top-10 w-40 h-40 bg-primary-500/20 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-500" />
+                <div className="relative flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                    <div className="w-11 h-11 sm:w-14 sm:h-14 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <Users className="w-5 h-5 sm:w-7 sm:h-7 text-primary-400" />
                     </div>
-                    <div>
-                      <p className="text-lg font-medium text-white mb-1">Copy Investor Strategies</p>
-                      <p className="text-sm text-dark-400">Join the community of successful investors</p>
+                    <div className="min-w-0">
+                      <p className="text-base sm:text-lg font-medium text-gray-900 dark:text-white mb-0.5 sm:mb-1 truncate">Copy Investor Strategies</p>
+                      <p className="text-xs sm:text-sm text-gray-600 dark:text-dark-400 truncate">Join the community of successful investors</p>
                     </div>
                   </div>
-                  <ChevronRight className="w-6 h-6 text-blue-400 group-hover:translate-x-1 transition-transform" />
+                  <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-primary-400 group-hover:translate-x-1 transition-transform flex-shrink-0" />
                 </div>
               </Link>
             </div>
@@ -810,25 +812,25 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.55 }}
-            className="col-span-12 lg:col-span-6"
+            className="col-span-2 lg:col-span-6"
           >
-            <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all hover:bg-[linear-gradient(135deg,rgba(168,85,247,0.2)_0%,rgba(168,85,247,0)_40%,rgba(168,85,247,0)_60%,rgba(168,85,247,0.2)_100%)]">
+            <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.02)_25%,rgba(0,0,0,0.02)_75%,rgba(0,0,0,0.04)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all hover:bg-[linear-gradient(135deg,rgba(139,92,246,0.2)_0%,rgba(139,92,246,0)_40%,rgba(139,92,246,0)_60%,rgba(139,92,246,0.2)_100%)]">
               <Link
                 href="/dashboard-v2/analytics"
-                className="block h-full p-6 bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] transition-all group relative overflow-hidden"
+                className="block h-full p-4 sm:p-6 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] transition-all group relative overflow-hidden"
               >
-                <div className="absolute -right-10 -top-10 w-40 h-40 bg-purple-500/20 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-500" />
-                <div className="relative flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 bg-purple-500/20 border border-purple-500/30 rounded-xl flex items-center justify-center">
-                      <BarChart3 className="w-7 h-7 text-purple-400" />
+                <div className="absolute -right-10 -top-10 w-40 h-40 bg-primary-500/20 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-500" />
+                <div className="relative flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                    <div className="w-11 h-11 sm:w-14 sm:h-14 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <BarChart3 className="w-5 h-5 sm:w-7 sm:h-7 text-primary-400" />
                     </div>
-                    <div>
-                      <p className="text-lg font-medium text-white mb-1">Analytics</p>
-                      <p className="text-sm text-dark-400">Deep dive into your performance</p>
+                    <div className="min-w-0">
+                      <p className="text-base sm:text-lg font-medium text-gray-900 dark:text-white mb-0.5 sm:mb-1">Analytics</p>
+                      <p className="text-xs sm:text-sm text-gray-600 dark:text-dark-400">Deep dive into your performance</p>
                     </div>
                   </div>
-                  <ChevronRight className="w-6 h-6 text-purple-400 group-hover:translate-x-1 transition-transform" />
+                  <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-primary-400 group-hover:translate-x-1 transition-transform flex-shrink-0" />
                 </div>
               </Link>
             </div>
@@ -849,6 +851,7 @@ export default function DashboardPage() {
           }}
         />
       )}
+
 
     </div>
   );

@@ -182,38 +182,19 @@ export default function NotificationsPage() {
 
   const getNotificationIcon = (title: string) => {
     const lowerTitle = title.toLowerCase();
-    if (lowerTitle.includes('deposit') || lowerTitle.includes('credited')) return <CreditCard className="w-6 h-6 text-blue-400" />;
-    if (lowerTitle.includes('withdrawal')) return <Wallet className="w-6 h-6 text-orange-400" />;
-    if (lowerTitle.includes('referral') || lowerTitle.includes('bonus')) return <Gift className="w-6 h-6 text-accent-400" />;
-    if (lowerTitle.includes('profit') || lowerTitle.includes('credited')) return <TrendingUp className="w-6 h-6 text-green-400" />;
+    if (lowerTitle.includes('deposit') || lowerTitle.includes('credited')) return <CreditCard className="w-6 h-6 text-primary-400" />;
+    if (lowerTitle.includes('withdrawal')) return <Wallet className="w-6 h-6 text-primary-400" />;
+    if (lowerTitle.includes('referral') || lowerTitle.includes('bonus')) return <Gift className="w-6 h-6 text-primary-400" />;
+    if (lowerTitle.includes('profit') || lowerTitle.includes('credited')) return <TrendingUp className="w-6 h-6 text-primary-400" />;
     if (lowerTitle.includes('copy') || lowerTitle.includes('bot')) return <Bot className="w-6 h-6 text-primary-400" />;
-    if (lowerTitle.includes('investment') || lowerTitle.includes('completed')) return <CheckCircle className="w-6 h-6 text-purple-400" />;
-    if (lowerTitle.includes('ip')) return <Globe className="w-6 h-6 text-yellow-400" />;
+    if (lowerTitle.includes('investment') || lowerTitle.includes('completed')) return <CheckCircle className="w-6 h-6 text-primary-400" />;
+    if (lowerTitle.includes('ip')) return <Globe className="w-6 h-6 text-primary-400" />;
     if (lowerTitle.includes('login')) return <Lock className="w-6 h-6 text-primary-400" />;
     return <Bell className="w-6 h-6 text-primary-400" />;
   };
 
-  const getNotificationColor = (title: string) => {
-    const lowerTitle = title.toLowerCase();
-    if (lowerTitle.includes('deposit') || lowerTitle.includes('credited')) {
-      return 'from-blue-500/20 to-blue-600/20 border-blue-500/30';
-    }
-    if (lowerTitle.includes('withdrawal')) {
-      return 'from-orange-500/20 to-orange-600/20 border-orange-500/30';
-    }
-    if (lowerTitle.includes('referral') || lowerTitle.includes('bonus')) {
-      return 'from-accent-500/20 to-pink-500/20 border-accent-500/30';
-    }
-    if (lowerTitle.includes('investment') || lowerTitle.includes('completed')) {
-      return 'from-purple-500/20 to-purple-600/20 border-purple-500/30';
-    }
-    if (lowerTitle.includes('ip')) {
-      return 'from-yellow-500/20 to-yellow-600/20 border-yellow-500/30';
-    }
-    if (lowerTitle.includes('login')) {
-      return 'from-primary-500/20 to-primary-600/20 border-primary-500/30';
-    }
-    return 'from-dark-700/20 to-dark-800/20 border-dark-600/30';
+  const getNotificationColor = () => {
+    return 'from-primary-500/20 to-primary-600/20 border-primary-500/30';
   };
 
   const timeAgo = (timestamp: number) => {
@@ -281,12 +262,12 @@ export default function NotificationsPage() {
                   <div
                     className={`
                       relative flex items-start gap-4 p-4
-                      ${!notification.read ? `bg-gradient-to-r ${getNotificationColor(notification.title)} border-l-4` : ''}
+                      ${!notification.read ? `bg-gradient-to-r ${getNotificationColor()} border-l-4` : ''}
                     `}
                   >
                     {/* Icon */}
                     <div className="flex-shrink-0">
-                      <div className="w-12 h-12 bg-dark-900/50 rounded-xl flex items-center justify-center text-2xl">
+                      <div className="w-12 h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center text-2xl">
                         {getNotificationIcon(notification.title)}
                       </div>
                     </div>
@@ -294,16 +275,16 @@ export default function NotificationsPage() {
                     {/* Content */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2 mb-1">
-                        <h3 className="text-base font-medium text-white">{notification.title}</h3>
+                        <h3 className="text-base font-medium text-gray-900 dark:text-white">{notification.title}</h3>
                         {!notification.read && (
                           <div className="flex-shrink-0 w-2 h-2 bg-accent-500 rounded-full mt-2" />
                         )}
                       </div>
                       <p
-                        className="text-sm text-dark-300 mb-2"
+                        className="text-sm text-gray-700 dark:text-dark-300 mb-2"
                         dangerouslySetInnerHTML={{ __html: notification.body }}
                       />
-                      <div className="flex items-center gap-3 text-xs text-dark-500">
+                      <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-dark-500">
                         <span>{timeAgo(notification.date)}</span>
                         <span>•</span>
                         <span>{formatDate(notification.date)}</span>
@@ -323,7 +304,7 @@ export default function NotificationsPage() {
               >
                 <button
                   onClick={handleLoadMore}
-                  className="px-8 py-3 bg-dark-800 hover:bg-dark-700 border-2 border-dark-700 hover:border-primary-500/50 rounded-xl text-white font-medium transition-all hover:scale-105"
+                  className="px-8 py-3 bg-gray-50 dark:bg-dark-800 hover:bg-gray-200 dark:bg-dark-700 border-2 border-gray-200 dark:border-dark-700 hover:border-primary-500/50 rounded-xl text-gray-900 dark:text-white font-medium transition-all hover:scale-105"
                 >
                   Load More ({notifications.length - displayCount} remaining)
                 </button>
@@ -333,11 +314,11 @@ export default function NotificationsPage() {
         ) : (
           <GlassCard>
             <div className="text-center py-16">
-              <div className="w-16 h-16 mx-auto mb-4 bg-dark-800 rounded-full flex items-center justify-center">
-                <Bell className="w-8 h-8 text-dark-400" />
+              <div className="w-16 h-16 mx-auto mb-4 bg-gray-50 dark:bg-dark-800 rounded-full flex items-center justify-center">
+                <Bell className="w-8 h-8 text-gray-600 dark:text-dark-400" />
               </div>
-              <h3 className="text-xl font-medium text-white mb-2">No Notifications</h3>
-              <p className="text-dark-300">You don't have any notifications yet</p>
+              <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-2">No Notifications</h3>
+              <p className="text-gray-700 dark:text-dark-300">You don't have any notifications yet</p>
             </div>
           </GlassCard>
         )}
@@ -368,12 +349,12 @@ export default function NotificationsPage() {
                   </div>
 
                   {/* Title */}
-                  <h3 className="text-xl font-medium text-white text-center mb-2">
+                  <h3 className="text-xl font-medium text-gray-900 dark:text-white text-center mb-2">
                     Delete All Notifications?
                   </h3>
 
                   {/* Description */}
-                  <p className="text-dark-300 text-center mb-6">
+                  <p className="text-gray-700 dark:text-dark-300 text-center mb-6">
                     This will permanently delete all {notifications.length} notification{notifications.length > 1 ? 's' : ''}. This action cannot be undone.
                   </p>
 
@@ -381,7 +362,7 @@ export default function NotificationsPage() {
                   <div className="flex gap-3">
                     <button
                       onClick={() => setShowDeleteModal(false)}
-                      className="flex-1 px-4 py-3 bg-dark-800 hover:bg-dark-700 border-2 border-dark-700 rounded-xl text-white font-medium transition-all hover:scale-105"
+                      className="flex-1 px-4 py-3 bg-gray-50 dark:bg-dark-800 hover:bg-gray-200 dark:bg-dark-700 border-2 border-gray-200 dark:border-dark-700 rounded-xl text-gray-900 dark:text-white font-medium transition-all hover:scale-105"
                     >
                       Cancel
                     </button>

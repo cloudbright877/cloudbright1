@@ -18,10 +18,10 @@ export function RiskMetricsCard({ trades, positions }: RiskMetricsCardProps) {
   const scheduledCount = positions.filter(p => p.scheduledCloseAt).length;
 
   return (
-    <div className="bg-gradient-to-br from-purple-500/10 via-pink-500/10 to-orange-500/10 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
+    <div className="bg-gradient-to-br from-primary-500/10 via-accent-500/10 to-primary-500/5 backdrop-blur-sm rounded-2xl p-6 border border-gray-200 dark:border-white/10">
       <div className="flex items-center gap-2 mb-6">
-        <Activity className="w-5 h-5 text-purple-400" />
-        <h3 className="text-lg font-medium text-white">Risk Metrics</h3>
+        <Activity className="w-5 h-5 text-primary-400" />
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white">Risk Metrics</h3>
       </div>
 
       <div className="space-y-6">
@@ -29,16 +29,16 @@ export function RiskMetricsCard({ trades, positions }: RiskMetricsCardProps) {
         {totalModes > 0 && (
           <div>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-gray-400">P&L Variance Distribution</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">P&L Variance Distribution</span>
             </div>
 
             <div className="flex gap-2 mb-2">
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs text-gray-400">🟢 Tight</span>
+                  <span className="text-xs text-gray-600 dark:text-gray-400">🟢 Tight</span>
                   <span className="text-xs text-green-400">{tightCount}/{totalModes}</span>
                 </div>
-                <div className="h-1.5 bg-black/30 rounded-full overflow-hidden">
+                <div className="h-1.5 bg-gray-200 dark:bg-black/30 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-green-500 transition-all duration-500"
                     style={{ width: `${(tightCount / totalModes) * 100}%` }}
@@ -48,10 +48,10 @@ export function RiskMetricsCard({ trades, positions }: RiskMetricsCardProps) {
 
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs text-gray-400">🔴 Wide</span>
+                  <span className="text-xs text-gray-600 dark:text-gray-400">🔴 Wide</span>
                   <span className="text-xs text-orange-400">{wideCount}/{totalModes}</span>
                 </div>
-                <div className="h-1.5 bg-black/30 rounded-full overflow-hidden">
+                <div className="h-1.5 bg-gray-200 dark:bg-black/30 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-orange-500 transition-all duration-500"
                     style={{ width: `${(wideCount / totalModes) * 100}%` }}
@@ -60,7 +60,7 @@ export function RiskMetricsCard({ trades, positions }: RiskMetricsCardProps) {
               </div>
             </div>
 
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-500 dark:text-gray-500">
               Target: 80% Tight / 20% Wide for realistic variance
             </p>
           </div>
@@ -71,10 +71,10 @@ export function RiskMetricsCard({ trades, positions }: RiskMetricsCardProps) {
           <div>
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-blue-400" />
-                <span className="text-sm text-gray-400">Staggered Closing</span>
+                <Clock className="w-4 h-4 text-primary-400" />
+                <span className="text-sm text-gray-600 dark:text-gray-400">Staggered Closing</span>
               </div>
-              <span className="text-sm font-normal text-blue-400">
+              <span className="text-sm font-normal text-primary-400">
                 {scheduledCount} scheduled
               </span>
             </div>
@@ -98,9 +98,9 @@ export function RiskMetricsCard({ trades, positions }: RiskMetricsCardProps) {
         )}
 
         {/* System Status */}
-        <div className="pt-4 border-t border-white/5">
+        <div className="pt-4 border-t border-gray-200 dark:border-white/5">
           <div className="flex items-center justify-between text-xs">
-            <span className="text-gray-500">Risk Management</span>
+            <span className="text-gray-500 dark:text-gray-500">Risk Management</span>
             <div className="flex items-center gap-1">
               <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
               <span className="text-green-400 font-medium">Active</span>

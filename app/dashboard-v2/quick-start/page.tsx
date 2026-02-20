@@ -3,18 +3,29 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { ChevronLeft, Check } from 'lucide-react';
+import Stepper from '@/components/ui/Stepper';
 import { selectBots, type QuizAnswers, type BotAllocation, type RiskProfile, type TimeHorizon } from '@/lib/quickStart';
 import { StepAmount } from '@/components/dashboard-v2/quick-start/StepAmount';
 import { StepRisk } from '@/components/dashboard-v2/quick-start/StepRisk';
-import { StepHorizon } from '@/components/dashboard-v2/quick-start/StepHorizon';
 import { StepResults } from '@/components/dashboard-v2/quick-start/StepResults';
 import { botsApi } from '@/lib/api/botsApi';
 import { getBalance } from '@/lib/balances';
 import { getCurrentUserId } from '@/lib/getCurrentUserId';
 
-type Step = 1 | 2 | 3 | 4;
+type Step = 1 | 2 | 3;
+
+const STEPS = [
+  { label: 'Amount', description: 'Set budget' },
+  { label: 'Risk', description: 'Pick profile' },
+  { label: 'Portfolio', description: 'Review bots' },
+];
+
+// Risk profile implies time horizon
+const RISK_TO_HORIZON: Record<RiskProfile, TimeHorizon> = {
+  conservative: 'short',
+  balanced: 'medium',
+  aggressive: 'long',
+};
 
 export default function QuickStartPage() {
   const router = useRouter();
@@ -24,7 +35,6 @@ export default function QuickStartPage() {
   // Quiz answers
   const [investmentAmount, setInvestmentAmount] = useState<number | null>(null);
   const [riskProfile, setRiskProfile] = useState<RiskProfile | null>(null);
-  const [timeHorizon, setTimeHorizon] = useState<TimeHorizon | null>(null);
 
   // Computed allocations
   const [allocations, setAllocations] = useState<BotAllocation[]>([]);
@@ -45,34 +55,34 @@ export default function QuickStartPage() {
     setRiskProfile(risk);
   };
 
-  const handleHorizonSelect = (horizon: TimeHorizon) => {
-    setTimeHorizon(horizon);
-  };
-
   const handleNext = () => {
-    if (step === 3 && investmentAmount && riskProfile && timeHorizon) {
+    if (step === 2 && investmentAmount && riskProfile) {
       // Compute allocations before moving to results
       const answers: QuizAnswers = {
         investmentAmount,
         riskProfile,
-        timeHorizon,
+        timeHorizon: RISK_TO_HORIZON[riskProfile],
       };
 
       try {
         const computed = selectBots(answers);
         setAllocations(computed);
-        setStep(4);
+        setStep(3);
       } catch (error) {
         console.error('[QuickStart] Error selecting bots:', error);
         alert('Failed to select bots. Please try again.');
       }
     } else {
-      setStep((prev) => Math.min(4, prev + 1) as Step);
+      setStep((prev) => Math.min(3, prev + 1) as Step);
     }
   };
 
   const handleBack = () => {
-    setStep((prev) => Math.max(1, prev - 1) as Step);
+    if (step === 1) {
+      router.push('/dashboard-v2');
+    } else {
+      setStep((prev) => (prev - 1) as Step);
+    }
   };
 
   const handleConfirm = async () => {
@@ -104,8 +114,6 @@ export default function QuickStartPage() {
       case 2:
         return riskProfile !== null;
       case 3:
-        return timeHorizon !== null;
-      case 4:
         return true;
       default:
         return false;
@@ -113,62 +121,16 @@ export default function QuickStartPage() {
   };
 
   return (
-    <div className="min-h-screen p-4 lg:p-6">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-100 dark:bg-dark-950 p-4 lg:p-6">
       <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-4 mb-8"
-        >
-          <Link
-            href="/dashboard-v2"
-            className="p-2 hover:bg-dark-800 rounded-lg transition-colors"
-          >
-            <ChevronLeft className="w-6 h-6 text-dark-400 hover:text-white" />
-          </Link>
-          <div>
-            <h1 className="text-3xl font-semibold text-white">Quick Start</h1>
-            <p className="text-dark-300">Create your portfolio in 3 simple steps</p>
-          </div>
-        </motion.div>
-
         {/* Progress Stepper */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.1 }}
-          className="flex items-center justify-center gap-3 mb-8"
+          className="mb-8"
         >
-          {[1, 2, 3, 4].map((dotStep) => (
-            <div key={dotStep} className="flex items-center">
-              <div className="relative">
-                {dotStep < step ? (
-                  // Completed step - green check
-                  <div className="w-10 h-10 rounded-full bg-green-500/20 border-2 border-green-500 flex items-center justify-center">
-                    <Check className="w-5 h-5 text-green-400" />
-                  </div>
-                ) : dotStep === step ? (
-                  // Current step - primary gradient with pulse
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-primary-500 to-accent-500 flex items-center justify-center animate-pulse">
-                    <span className="text-white font-bold">{dotStep}</span>
-                  </div>
-                ) : (
-                  // Future step - dark gray
-                  <div className="w-10 h-10 rounded-full bg-dark-800 border-2 border-dark-700 flex items-center justify-center">
-                    <span className="text-dark-500 font-bold">{dotStep}</span>
-                  </div>
-                )}
-              </div>
-              {dotStep < 4 && (
-                <div
-                  className={`w-12 h-0.5 mx-2 ${
-                    dotStep < step ? 'bg-green-500' : 'bg-dark-700'
-                  }`}
-                />
-              )}
-            </div>
-          ))}
+          <Stepper steps={STEPS} currentStep={step} />
         </motion.div>
 
         {/* Step Content */}
@@ -177,7 +139,7 @@ export default function QuickStartPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-8"
+            className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-4 sm:p-6 lg:p-8"
           >
           <AnimatePresence mode="wait">
             {step === 1 && (
@@ -219,21 +181,6 @@ export default function QuickStartPage() {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.2 }}
               >
-                <StepHorizon
-                  selectedHorizon={timeHorizon}
-                  onSelect={handleHorizonSelect}
-                />
-              </motion.div>
-            )}
-
-            {step === 4 && (
-              <motion.div
-                key="step4"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.2 }}
-              >
                 <StepResults
                   allocations={allocations}
                   totalAmount={investmentAmount || 0}
@@ -247,7 +194,7 @@ export default function QuickStartPage() {
         </div>
 
         {/* Navigation */}
-        {step < 4 && (
+        {step < 3 && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -256,17 +203,17 @@ export default function QuickStartPage() {
           >
             <button
               onClick={handleBack}
-              disabled={step === 1 || isProcessing}
-              className="px-6 py-3 rounded-lg bg-dark-800 hover:bg-dark-700 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              disabled={isProcessing}
+              className="px-6 py-3 rounded-lg bg-gray-50 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 text-gray-900 dark:text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
               Back
             </button>
             <button
               onClick={handleNext}
               disabled={!canProceed() || isProcessing}
-              className="px-6 py-3 rounded-lg bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 disabled:from-dark-700 disabled:to-dark-700 text-white font-medium disabled:cursor-not-allowed transition-all shadow-lg shadow-primary-500/30"
+              className="px-6 py-3 rounded-lg bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 disabled:from-gray-300 disabled:to-gray-300 dark:disabled:from-dark-700 dark:disabled:to-dark-700 text-white font-medium disabled:cursor-not-allowed transition-all shadow-lg shadow-primary-500/30"
             >
-              {step === 3 ? 'See Results' : 'Next'}
+              {step === 2 ? 'See Results' : 'Next'}
             </button>
           </motion.div>
         )}

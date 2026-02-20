@@ -54,14 +54,14 @@ export default function RiskMetricsPreview({ config }: RiskMetricsPreviewProps) 
   };
 
   return (
-    <div className="mb-4 p-4 bg-gradient-to-br from-purple-900/20 to-blue-900/20 border border-purple-500/30 rounded-lg">
+    <div className="mb-4 p-4 bg-gradient-to-br from-primary-900/20 to-primary-800/20 border border-primary-500/30 rounded-lg">
       <div className="flex items-center justify-between mb-3">
         <div>
-          <h3 className="text-sm font-medium text-white flex items-center gap-2">
-            <Target className="w-4 h-4 text-purple-400" />
+          <h3 className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-2">
+            <Target className="w-4 h-4 text-primary-400" />
             Expected Trading Outcomes
           </h3>
-          <p className="text-[10px] text-dark-400 mt-0.5">
+          <p className="text-[10px] text-gray-600 dark:text-dark-400 mt-0.5">
             Live prediction based on current settings
           </p>
         </div>
@@ -71,16 +71,16 @@ export default function RiskMetricsPreview({ config }: RiskMetricsPreviewProps) 
       </div>
 
       {/* Main Metrics Grid */}
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {/* Win Rate */}
-        <div className="p-3 bg-dark-900/50 rounded border border-dark-700/50">
+        <div className="p-3 bg-gray-50 dark:bg-dark-900/50 rounded border border-gray-200 dark:border-dark-700/50">
           <div className="flex items-center gap-2 mb-1">
             <TrendingUp className="w-3 h-3 text-green-400" />
-            <span className="text-[10px] text-dark-500 uppercase">Win Rate</span>
+            <span className="text-[10px] text-gray-600 dark:text-dark-500 uppercase">Win Rate</span>
           </div>
           <div className="space-y-0.5">
             <div className="flex items-baseline gap-1">
-              <span className="text-lg font-medium text-white">
+              <span className="text-lg font-medium text-gray-900 dark:text-white">
                 {metrics.finalWinRate.toFixed(1)}%
               </span>
               {metrics.winsBecomingLosses > 0 && (
@@ -90,7 +90,7 @@ export default function RiskMetricsPreview({ config }: RiskMetricsPreviewProps) 
               )}
             </div>
             {metrics.winsBecomingLosses > 0 && (
-              <div className="text-[9px] text-dark-500">
+              <div className="text-[9px] text-gray-500 dark:text-dark-500">
                 Base: {metrics.baseWinRate.toFixed(1)}%
               </div>
             )}
@@ -98,14 +98,14 @@ export default function RiskMetricsPreview({ config }: RiskMetricsPreviewProps) 
         </div>
 
         {/* Loss Rate */}
-        <div className="p-3 bg-dark-900/50 rounded border border-dark-700/50">
+        <div className="p-3 bg-gray-50 dark:bg-dark-900/50 rounded border border-gray-200 dark:border-dark-700/50">
           <div className="flex items-center gap-2 mb-1">
             <TrendingDown className="w-3 h-3 text-red-400" />
-            <span className="text-[10px] text-dark-500 uppercase">Loss Rate</span>
+            <span className="text-[10px] text-gray-600 dark:text-dark-500 uppercase">Loss Rate</span>
           </div>
           <div className="space-y-0.5">
             <div className="flex items-baseline gap-1">
-              <span className="text-lg font-medium text-white">
+              <span className="text-lg font-medium text-gray-900 dark:text-white">
                 {metrics.finalLossRate.toFixed(1)}%
               </span>
               {metrics.winsBecomingLosses > 0 && (
@@ -118,10 +118,10 @@ export default function RiskMetricsPreview({ config }: RiskMetricsPreviewProps) 
         </div>
 
         {/* Net P&L per Trade */}
-        <div className="p-3 bg-dark-900/50 rounded border border-dark-700/50">
+        <div className="p-3 bg-gray-50 dark:bg-dark-900/50 rounded border border-gray-200 dark:border-dark-700/50">
           <div className="flex items-center gap-2 mb-1">
-            <DollarSign className="w-3 h-3 text-blue-400" />
-            <span className="text-[10px] text-dark-500 uppercase">Net P&L/Trade</span>
+            <DollarSign className="w-3 h-3 text-primary-400" />
+            <span className="text-[10px] text-gray-600 dark:text-dark-500 uppercase">Net P&L/Trade</span>
           </div>
           <div className="space-y-0.5">
             <div className="flex items-baseline gap-1">
@@ -135,10 +135,10 @@ export default function RiskMetricsPreview({ config }: RiskMetricsPreviewProps) 
         </div>
 
         {/* R:R Ratio */}
-        <div className="p-3 bg-dark-900/50 rounded border border-dark-700/50">
+        <div className="p-3 bg-gray-50 dark:bg-dark-900/50 rounded border border-gray-200 dark:border-dark-700/50">
           <div className="flex items-center gap-2 mb-1">
-            <Target className="w-3 h-3 text-purple-400" />
-            <span className="text-[10px] text-dark-500 uppercase">R:R Ratio</span>
+            <Target className="w-3 h-3 text-primary-400" />
+            <span className="text-[10px] text-gray-600 dark:text-dark-500 uppercase">R:R Ratio</span>
           </div>
           <div className="space-y-0.5">
             <div className="flex items-baseline gap-1">
@@ -154,16 +154,16 @@ export default function RiskMetricsPreview({ config }: RiskMetricsPreviewProps) 
       </div>
 
       {/* Detailed Breakdown */}
-      <div className="mt-3 p-2 bg-dark-900/30 rounded border border-dark-700/30">
+      <div className="mt-3 p-2 bg-gray-50 dark:bg-dark-900/30 rounded border border-gray-200 dark:border-dark-700/30">
         <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[10px]">
           <div className="flex justify-between">
-            <span className="text-dark-500">Avg Win (gross):</span>
+            <span className="text-gray-600 dark:text-dark-500">Avg Win (gross):</span>
             <span className="text-green-400 font-normal">
               +{metrics.netAvgWin.toFixed(3)}%
             </span>
           </div>
           <div className="flex justify-between">
-            <span className="text-dark-500">Expected Daily P&L:</span>
+            <span className="text-gray-600 dark:text-dark-500">Expected Daily P&L:</span>
             <span className={`font-normal ${
               metrics.expectedDailyPnL > 0 ? 'text-green-400' : 'text-red-400'
             }`}>
@@ -171,7 +171,7 @@ export default function RiskMetricsPreview({ config }: RiskMetricsPreviewProps) 
             </span>
           </div>
           <div className="flex justify-between">
-            <span className="text-dark-500">Avg Win (net):</span>
+            <span className="text-gray-600 dark:text-dark-500">Avg Win (net):</span>
             <span className={`font-normal ${
               metrics.netAvgWin > 0 ? 'text-green-400' : 'text-red-400'
             }`}>
@@ -179,19 +179,19 @@ export default function RiskMetricsPreview({ config }: RiskMetricsPreviewProps) 
             </span>
           </div>
           <div className="flex justify-between">
-            <span className="text-dark-500">Daily Target:</span>
-            <span className="text-blue-400 font-normal">
+            <span className="text-gray-600 dark:text-dark-500">Daily Target:</span>
+            <span className="text-primary-400 font-normal">
               {config.dailyTargetPercent.toFixed(2)}%
             </span>
           </div>
           <div className="flex justify-between">
-            <span className="text-dark-500">Avg Loss:</span>
+            <span className="text-gray-600 dark:text-dark-500">Avg Loss:</span>
             <span className="text-red-400 font-normal">
               -{metrics.netAvgLoss.toFixed(2)}%
             </span>
           </div>
           <div className="flex justify-between">
-            <span className="text-dark-500">Deviation:</span>
+            <span className="text-gray-600 dark:text-dark-500">Deviation:</span>
             <span className={`font-normal ${
               Math.abs(metrics.expectedDailyPnL - config.dailyTargetPercent) < config.dailyTargetPercent * 0.1
                 ? 'text-green-400'
@@ -211,7 +211,7 @@ export default function RiskMetricsPreview({ config }: RiskMetricsPreviewProps) 
             ⚠️ <strong>CONFIGURATION INVALID:</strong> Cannot reach Daily Target with current settings!
           </div>
           <div className="grid grid-cols-2 gap-x-2 text-[9px] font-mono">
-            <span>Target:</span><span className="text-blue-400">{config.dailyTargetPercent.toFixed(1)}%</span>
+            <span>Target:</span><span className="text-primary-400">{config.dailyTargetPercent.toFixed(1)}%</span>
             <span>Expected:</span><span className="text-yellow-400">{metrics.expectedDailyPnL.toFixed(1)}%</span>
             <span>Deviation:</span><span className="text-red-300">{(metrics.expectedDailyPnL - config.dailyTargetPercent).toFixed(1)}%</span>
           </div>

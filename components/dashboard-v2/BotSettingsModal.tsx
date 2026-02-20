@@ -89,36 +89,33 @@ export function BotSettingsModal({ isOpen, onClose, bot }: BotSettingsModalProps
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-2xl bg-gradient-to-br from-dark-800 to-dark-900 border border-dark-700 rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+              className="relative w-full max-w-2xl bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800 dark:to-dark-900 border border-gray-200 dark:border-dark-700 rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
             >
-              {/* Glow Effect */}
-              <div className="absolute -inset-1 bg-gradient-to-r from-primary-500/20 to-accent-500/20 blur-xl opacity-50" />
-
               <div className="relative flex flex-col h-full">
                 {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-dark-700">
+                <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 dark:border-dark-700">
                   <div>
-                    <h2 className="text-xl font-medium text-white mb-1">Bot Settings</h2>
-                    <p className="text-sm text-dark-400">{config.name}</p>
+                    <h2 className="text-lg sm:text-xl font-medium text-gray-900 dark:text-white mb-1">Bot Settings</h2>
+                    <p className="text-sm text-gray-600 dark:text-dark-400 truncate max-w-[200px] sm:max-w-none">{config.name}</p>
                   </div>
                   <button
                     onClick={onClose}
-                    className="w-10 h-10 rounded-lg bg-dark-700 hover:bg-dark-600 border border-dark-600 flex items-center justify-center text-dark-400 hover:text-white transition-all"
+                    className="w-10 h-10 rounded-lg bg-gray-200 dark:bg-dark-700 hover:bg-gray-300 dark:hover:bg-dark-600 border border-gray-300 dark:border-dark-600 flex items-center justify-center text-gray-600 dark:text-dark-400 hover:text-gray-900 dark:hover:text-white transition-all"
                   >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
 
                 {/* Tabs */}
-                <div className="flex gap-2 px-6 pt-4 border-b border-dark-700">
+                <div className="flex gap-1 sm:gap-2 px-4 sm:px-6 pt-4 border-b border-gray-200 dark:border-dark-700 overflow-x-auto">
                   {tabs.map((tab) => (
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
-                      className={`flex items-center gap-2 px-4 py-3 rounded-t-lg font-medium transition-all ${
+                      className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 rounded-t-lg font-medium transition-all text-sm whitespace-nowrap ${
                         activeTab === tab.id
-                          ? 'bg-dark-700 text-white border-t border-x border-dark-600'
-                          : 'text-dark-400 hover:text-white hover:bg-dark-800'
+                          ? 'bg-gray-200 dark:bg-dark-700 text-gray-900 dark:text-white border-t border-x border-gray-300 dark:border-dark-600'
+                          : 'text-gray-600 dark:text-dark-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-dark-800'
                       }`}
                     >
                       <tab.icon className="w-4 h-4" />
@@ -128,14 +125,14 @@ export function BotSettingsModal({ isOpen, onClose, bot }: BotSettingsModalProps
                 </div>
 
                 {/* Content - Scrollable */}
-                <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
                   {/* Trading Tab */}
                   {activeTab === 'trading' && (
                     <>
                       {/* Leverage */}
                       <div>
                         <div className="flex items-center justify-between mb-3">
-                          <label className="text-sm font-medium text-white">Leverage</label>
+                          <label className="text-sm font-medium text-gray-900 dark:text-white">Leverage</label>
                           <span className="text-xl font-medium text-primary-400">×{leverage}</span>
                         </div>
                         <input
@@ -144,9 +141,9 @@ export function BotSettingsModal({ isOpen, onClose, bot }: BotSettingsModalProps
                           max="125"
                           value={leverage}
                           onChange={(e) => setLeverage(Number(e.target.value))}
-                          className="w-full h-2 bg-dark-700 rounded-lg appearance-none cursor-pointer accent-primary-500"
+                          className="w-full h-2 bg-gray-200 dark:bg-dark-700 rounded-lg appearance-none cursor-pointer accent-primary-500"
                         />
-                        <div className="flex justify-between text-xs text-dark-500 mt-2">
+                        <div className="flex justify-between text-xs text-gray-500 dark:text-dark-500 mt-2">
                           <span>×1</span>
                           <span>×25</span>
                           <span>×50</span>
@@ -156,7 +153,7 @@ export function BotSettingsModal({ isOpen, onClose, bot }: BotSettingsModalProps
 
                       {/* Allowed Sides */}
                       <div>
-                        <label className="text-sm font-medium text-white mb-3 block">Allowed Sides</label>
+                        <label className="text-sm font-medium text-gray-900 dark:text-white mb-3 block">Allowed Sides</label>
                         <div className="grid grid-cols-3 gap-2">
                           {(['LONG', 'SHORT', 'BOTH'] as const).map((side) => (
                             <button
@@ -165,7 +162,7 @@ export function BotSettingsModal({ isOpen, onClose, bot }: BotSettingsModalProps
                               className={`px-4 py-3 rounded-lg font-medium transition-all ${
                                 allowedSides === side
                                   ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white'
-                                  : 'bg-dark-700 text-dark-400 hover:text-white hover:bg-dark-600'
+                                  : 'bg-gray-200 dark:bg-dark-700 text-gray-600 dark:text-dark-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-300 dark:hover:bg-dark-600'
                               }`}
                             >
                               {side}
@@ -177,8 +174,8 @@ export function BotSettingsModal({ isOpen, onClose, bot }: BotSettingsModalProps
                       {/* Win Rate */}
                       <div>
                         <div className="flex items-center justify-between mb-3">
-                          <label className="text-sm font-medium text-white">Win Rate Target</label>
-                          <span className="text-xl font-medium text-green-400">{winRate.toFixed(1)}%</span>
+                          <label className="text-sm font-medium text-gray-900 dark:text-white">Win Rate Target</label>
+                          <span className="text-xl font-medium text-primary-400">{winRate.toFixed(1)}%</span>
                         </div>
                         <input
                           type="range"
@@ -187,9 +184,9 @@ export function BotSettingsModal({ isOpen, onClose, bot }: BotSettingsModalProps
                           step="0.5"
                           value={winRate}
                           onChange={(e) => setWinRate(Number(e.target.value))}
-                          className="w-full h-2 bg-dark-700 rounded-lg appearance-none cursor-pointer accent-green-500"
+                          className="w-full h-2 bg-gray-200 dark:bg-dark-700 rounded-lg appearance-none cursor-pointer accent-primary-500"
                         />
-                        <div className="flex justify-between text-xs text-dark-500 mt-2">
+                        <div className="flex justify-between text-xs text-gray-500 dark:text-dark-500 mt-2">
                           <span>50%</span>
                           <span>70%</span>
                           <span>95%</span>
@@ -222,7 +219,7 @@ export function BotSettingsModal({ isOpen, onClose, bot }: BotSettingsModalProps
                       <div>
                         <div className="flex items-center justify-between mb-3">
                           <label className="text-sm font-medium text-white">Trades Per Day</label>
-                          <span className="text-xl font-medium text-blue-400">{tradesPerDay}</span>
+                          <span className="text-xl font-medium text-primary-400">{tradesPerDay}</span>
                         </div>
                         <input
                           type="range"
@@ -230,7 +227,7 @@ export function BotSettingsModal({ isOpen, onClose, bot }: BotSettingsModalProps
                           max="200"
                           value={tradesPerDay}
                           onChange={(e) => setTradesPerDay(Number(e.target.value))}
-                          className="w-full h-2 bg-dark-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                          className="w-full h-2 bg-dark-700 rounded-lg appearance-none cursor-pointer accent-primary-500"
                         />
                         <div className="flex justify-between text-xs text-dark-500 mt-2">
                           <span>10</span>
@@ -260,7 +257,7 @@ export function BotSettingsModal({ isOpen, onClose, bot }: BotSettingsModalProps
                               step="50"
                               value={minPositionSize}
                               onChange={(e) => setMinPositionSize(Number(e.target.value))}
-                              className="w-full h-2 bg-dark-700 rounded-lg appearance-none cursor-pointer accent-green-500"
+                              className="w-full h-2 bg-dark-700 rounded-lg appearance-none cursor-pointer accent-primary-500"
                             />
                           </div>
                           <div>
@@ -275,7 +272,7 @@ export function BotSettingsModal({ isOpen, onClose, bot }: BotSettingsModalProps
                               step="100"
                               value={maxPositionSize}
                               onChange={(e) => setMaxPositionSize(Number(e.target.value))}
-                              className="w-full h-2 bg-dark-700 rounded-lg appearance-none cursor-pointer accent-red-500"
+                              className="w-full h-2 bg-dark-700 rounded-lg appearance-none cursor-pointer accent-primary-500"
                             />
                           </div>
                         </div>
@@ -418,7 +415,7 @@ export function BotSettingsModal({ isOpen, onClose, bot }: BotSettingsModalProps
                               step="5"
                               value={minDuration}
                               onChange={(e) => setMinDuration(Number(e.target.value))}
-                              className="w-full h-2 bg-dark-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                              className="w-full h-2 bg-dark-700 rounded-lg appearance-none cursor-pointer accent-primary-500"
                             />
                           </div>
                           <div>
@@ -433,7 +430,7 @@ export function BotSettingsModal({ isOpen, onClose, bot }: BotSettingsModalProps
                               step="10"
                               value={maxDuration}
                               onChange={(e) => setMaxDuration(Number(e.target.value))}
-                              className="w-full h-2 bg-dark-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                              className="w-full h-2 bg-dark-700 rounded-lg appearance-none cursor-pointer accent-primary-500"
                             />
                           </div>
                         </div>
@@ -443,7 +440,7 @@ export function BotSettingsModal({ isOpen, onClose, bot }: BotSettingsModalProps
                       <div>
                         <div className="flex items-center justify-between mb-3">
                           <label className="text-sm font-medium text-white">Max Slippage</label>
-                          <span className="text-xl font-medium text-yellow-400">{(maxSlippage / 100).toFixed(2)}%</span>
+                          <span className="text-xl font-medium text-primary-400">{(maxSlippage / 100).toFixed(2)}%</span>
                         </div>
                         <input
                           type="range"
@@ -451,7 +448,7 @@ export function BotSettingsModal({ isOpen, onClose, bot }: BotSettingsModalProps
                           max="200"
                           value={maxSlippage}
                           onChange={(e) => setMaxSlippage(Number(e.target.value))}
-                          className="w-full h-2 bg-dark-700 rounded-lg appearance-none cursor-pointer accent-yellow-500"
+                          className="w-full h-2 bg-dark-700 rounded-lg appearance-none cursor-pointer accent-primary-500"
                         />
                         <div className="flex justify-between text-xs text-dark-500 mt-2">
                           <span>0.1%</span>
@@ -475,21 +472,18 @@ export function BotSettingsModal({ isOpen, onClose, bot }: BotSettingsModalProps
                 </div>
 
                 {/* Footer */}
-                <div className="flex gap-3 p-6 border-t border-dark-700">
+                <div className="flex gap-3 p-4 sm:p-6 border-t border-gray-200 dark:border-dark-700">
                   <button
                     onClick={onClose}
-                    className="flex-1 px-4 py-3 bg-dark-700 hover:bg-dark-600 border border-dark-600 rounded-lg font-semibold text-white transition-all"
+                    className="flex-1 px-4 py-3 bg-gray-200 dark:bg-dark-700 hover:bg-gray-300 dark:hover:bg-dark-600 border border-gray-300 dark:border-dark-600 rounded-lg font-semibold text-gray-900 dark:text-white transition-all"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleSave}
-                    className="relative flex-1 group"
+                    className="flex-1 px-4 py-3 bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 rounded-lg font-semibold text-white transition-all"
                   >
-                    <div className="absolute -inset-0.5 bg-gradient-to-r from-primary-500 to-accent-500 rounded-lg blur opacity-60 group-hover:opacity-100 transition duration-300" />
-                    <div className="relative px-4 py-3 bg-gradient-to-r from-primary-500 to-accent-500 rounded-lg font-semibold text-white shadow-lg">
-                      Save Changes
-                    </div>
+                    Save Changes
                   </button>
                 </div>
               </div>

@@ -20,6 +20,7 @@ import {
   Clock,
   Award,
   AlertTriangle,
+  Info,
   Zap,
   ArrowLeft,
   BarChart3,
@@ -518,14 +519,33 @@ export default function UserCopyPage() {
 
   if (!botDetails || !botStats) {
     return (
-      <div className="min-h-screen bg-dark-950 flex items-center justify-center">
-        <div className="text-white">Loading...</div>
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-100 dark:bg-dark-950 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <svg width="64" height="64" viewBox="0 0 64 64" className="animate-spin" style={{ animationDuration: '2s' }}>
+            <polygon
+              points="32,2 58,17 58,47 32,62 6,47 6,17"
+              fill="none"
+              stroke="url(#hexGrad)"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeDasharray="120"
+              strokeDashoffset="40"
+            />
+            <defs>
+              <linearGradient id="hexGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#8b5cf6" />
+                <stop offset="100%" stopColor="#6366f1" />
+              </linearGradient>
+            </defs>
+          </svg>
+          <p className="text-sm text-primary-400/70 font-medium">Loading...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-dark-950 text-white">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-100 dark:bg-dark-950 text-gray-900 dark:text-white">
       <div className="max-w-[1800px] mx-auto p-4 lg:p-6">
         {/* Header */}
         <motion.div
@@ -535,30 +555,30 @@ export default function UserCopyPage() {
         >
           <Link
             href="/dashboard-v2"
-            className="inline-flex items-center gap-2 text-dark-400 hover:text-white transition-colors mb-4"
+            className="inline-flex items-center gap-2 text-gray-600 dark:text-dark-400 hover:text-gray-900 dark:hover:text-white transition-colors mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
             <span className="text-sm">Back to Dashboard</span>
           </Link>
 
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3 sm:gap-4">
               {botDetails.icon && typeof botDetails.icon === 'string' && botDetails.icon.startsWith('/') ? (
-                <img src={botDetails.icon} alt={botDetails.name} className="w-14 h-14 object-contain" />
+                <img src={botDetails.icon} alt={botDetails.name} className="w-10 h-10 sm:w-14 sm:h-14 object-contain" />
               ) : (
-                <div className="w-14 h-14 flex items-center justify-center text-2xl">
-                  <Layers className="w-7 h-7 text-primary-400" />
+                <div className="w-10 h-10 sm:w-14 sm:h-14 flex items-center justify-center text-2xl">
+                  <Layers className="w-6 h-6 sm:w-7 sm:h-7 text-primary-400" />
                 </div>
               )}
               <div>
-                <div className="flex items-center gap-3">
-                  <h1 className="text-3xl lg:text-4xl font-semibold text-white">{botDetails.name}</h1>
-                  <span className="px-3 py-1 bg-blue-500/20 border border-blue-500/30 text-blue-400 text-xs font-medium rounded-full flex items-center gap-1.5">
+                <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+                  <h1 className="text-xl sm:text-3xl lg:text-4xl font-semibold text-gray-900 dark:text-white">{botDetails.name}</h1>
+                  <span className="px-3 py-1 bg-primary-500/20 border border-primary-500/30 text-primary-400 text-xs font-medium rounded-full flex items-center gap-1.5">
                     <Copy className="w-3 h-3" />
                     Copy
                   </span>
                 </div>
-                <div className="flex items-center gap-3 mt-1">
+                <div className="flex items-center gap-2 sm:gap-3 mt-1 flex-wrap">
                   <div className="flex items-center gap-1.5">
                     <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
                     <span className="text-sm font-medium text-green-400">Active</span>
@@ -573,7 +593,7 @@ export default function UserCopyPage() {
                       <span className="text-dark-600">•</span>
                       <Link
                         href={`/dashboard-v2/bots/${masterBotSlug}`}
-                        className="flex items-center gap-1.5 text-xs text-dark-400 hover:text-primary-400 transition-colors"
+                        className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-dark-400 hover:text-primary-400 transition-colors"
                       >
                         Master: {masterBotName}
                         <ExternalLink className="w-3 h-3" />
@@ -584,10 +604,10 @@ export default function UserCopyPage() {
               </div>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex gap-2 sm:gap-3 flex-wrap">
               <button
                 onClick={() => setShowSettings(true)}
-                className="px-4 py-2 bg-dark-700/50 hover:bg-dark-700 border border-dark-600 hover:border-dark-500 rounded-lg font-semibold text-dark-300 hover:text-white transition-all flex items-center gap-2"
+                className="px-3 sm:px-4 py-2 bg-gray-200 dark:bg-dark-700/50 hover:bg-gray-300 dark:hover:bg-dark-700 border border-gray-300 dark:border-dark-600 hover:border-gray-400 dark:hover:border-dark-500 rounded-lg font-semibold text-gray-700 dark:text-dark-300 hover:text-gray-900 dark:hover:text-white transition-all flex items-center gap-2 text-sm"
               >
                 <Settings className="w-4 h-4" />
                 Settings
@@ -595,14 +615,14 @@ export default function UserCopyPage() {
               {!lockedIn && (
                 <Link
                   href={`/dashboard-v2/copy/${copyId}/archive`}
-                  className="px-4 py-2 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 hover:border-amber-500/50 rounded-lg font-semibold text-amber-400 hover:text-amber-300 transition-all flex items-center gap-2"
+                  className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 hover:border-red-500/50 rounded-lg font-semibold text-red-400 hover:text-red-300 transition-all flex items-center gap-2"
                 >
                   <Archive className="w-4 h-4" />
                   Archive
                 </Link>
               )}
               {lockedIn && lockInDaysRemaining > 0 && (
-                <div className="px-4 py-2 bg-dark-800/50 border border-dark-700 rounded-lg text-dark-400 flex items-center gap-2 text-sm">
+                <div className="px-4 py-2 bg-gray-50 dark:bg-dark-800/50 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-600 dark:text-dark-400 flex items-center gap-2 text-sm">
                   <Clock className="w-4 h-4" />
                   Lock-in: {lockInDaysRemaining}d left
                 </div>
@@ -612,15 +632,15 @@ export default function UserCopyPage() {
         </motion.div>
 
         {/* Quick Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6">
           {/* Realized P&L */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
             <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-            <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-green-500/50 transition-all">
-              <div className="flex items-center justify-between mb-4">
-                <div className={`w-12 h-12 ${(pnlBreakdown?.realizedPnL ?? 0) >= 0 ? 'bg-green-500/20 border-green-500/30' : 'bg-red-500/20 border-red-500/30'} border rounded-xl flex items-center justify-center`}>
+            <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-green-500/50 transition-all">
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <div className={`w-10 h-10 sm:w-12 sm:h-12 ${(pnlBreakdown?.realizedPnL ?? 0) >= 0 ? 'bg-green-500/20 border-green-500/30' : 'bg-red-500/20 border-red-500/30'} border rounded-xl flex items-center justify-center`}>
                   {(pnlBreakdown?.realizedPnL ?? 0) >= 0 ? (
-                    <TrendingUp className="w-6 h-6 text-green-400" />
+                    <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-green-400" />
                   ) : (
                     <TrendingDown className="w-6 h-6 text-red-400" />
                   )}
@@ -631,29 +651,29 @@ export default function UserCopyPage() {
                   Closed trades
                 </div>
               </div>
-              <div className="text-sm text-dark-400 mb-1">Realized P&L</div>
-              <div className={`text-2xl font-semibold mb-2 ${(pnlBreakdown?.realizedPnL ?? 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+              <div className="text-sm text-gray-600 dark:text-dark-400 mb-1">Realized P&L</div>
+              <div className={`text-xl sm:text-2xl font-semibold mb-2 ${(pnlBreakdown?.realizedPnL ?? 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                 {(pnlBreakdown?.realizedPnL ?? 0) >= 0 ? '+' : ''}${Math.abs(pnlBreakdown?.realizedPnL ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </div>
-              <div className="text-xs text-dark-400">Running for {botDetails.runningDays} days</div>
+              <div className="text-xs text-gray-600 dark:text-dark-400">Running for {botDetails.runningDays} days</div>
             </div>
             </div>
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
             <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-            <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-blue-500/50 transition-all">
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-blue-500/20 border border-blue-500/30 rounded-xl flex items-center justify-center">
-                  <Target className="w-6 h-6 text-blue-400" />
+            <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
+                  <Target className="w-5 h-5 sm:w-6 sm:h-6 text-primary-400" />
                 </div>
-                <div className="text-xs font-medium text-blue-400 bg-blue-500/10 px-2 py-1 rounded">
+                <div className="text-xs font-medium text-primary-400 bg-primary-500/10 px-2 py-1 rounded">
                   {botStats.totalTrades} trades
                 </div>
               </div>
-              <div className="text-sm text-dark-400 mb-1">Win Rate</div>
-              <div className="text-2xl font-semibold text-white mb-2">{(botStats.winRate || 0).toFixed(1)}%</div>
-              <div className="text-xs text-dark-400">{botStats.winningTrades}W / {botStats.losingTrades}L</div>
+              <div className="text-sm text-gray-600 dark:text-dark-400 mb-1">Win Rate</div>
+              <div className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white mb-2">{(botStats.winRate || 0).toFixed(1)}%</div>
+              <div className="text-xs text-gray-600 dark:text-dark-400">{botStats.winningTrades}W / {botStats.losingTrades}L</div>
             </div>
             </div>
           </motion.div>
@@ -661,13 +681,13 @@ export default function UserCopyPage() {
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
             <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-            <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-primary-500/50 transition-all">
-              <div className="flex items-center justify-between mb-4">
-                <div className={`w-12 h-12 ${botDetails.todayPnL >= 0 ? 'bg-green-500/20 border-green-500/30' : 'bg-red-500/20 border-red-500/30'} border rounded-xl flex items-center justify-center`}>
+            <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <div className={`w-10 h-10 sm:w-12 sm:h-12 ${botDetails.todayPnL >= 0 ? 'bg-green-500/20 border-green-500/30' : 'bg-red-500/20 border-red-500/30'} border rounded-xl flex items-center justify-center`}>
                   {botDetails.todayPnL >= 0 ? (
-                    <Activity className="w-6 h-6 text-green-400" />
+                    <Activity className="w-5 h-5 sm:w-6 sm:h-6 text-green-400" />
                   ) : (
-                    <Activity className="w-6 h-6 text-red-400" />
+                    <Activity className="w-5 h-5 sm:w-6 sm:h-6 text-red-400" />
                   )}
                 </div>
                 <div className={`text-xs font-medium px-2 py-1 rounded ${
@@ -676,30 +696,30 @@ export default function UserCopyPage() {
                   {botDetails.todayPnL >= 0 ? '+' : ''}{(botDetails.todayPnLPercent || 0).toFixed(2)}%
                 </div>
               </div>
-              <div className="text-sm text-dark-400 mb-1">Today's P&L</div>
-              <div className={`text-2xl font-semibold mb-2 ${botDetails.todayPnL >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+              <div className="text-sm text-gray-600 dark:text-dark-400 mb-1">Today's P&L</div>
+              <div className={`text-xl sm:text-2xl font-semibold mb-2 ${botDetails.todayPnL >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                 {botDetails.todayPnL >= 0 ? '+' : ''}${Math.abs(botDetails.todayPnL).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </div>
-              <div className="text-xs text-dark-400">Last 24 hours</div>
+              <div className="text-xs text-gray-600 dark:text-dark-400">Last 24 hours</div>
             </div>
             </div>
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
             <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-            <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-purple-500/50 transition-all">
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-purple-500/20 border border-purple-500/30 rounded-xl flex items-center justify-center">
-                  <Zap className="w-6 h-6 text-purple-400" />
+            <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
+                  <Zap className="w-5 h-5 sm:w-6 sm:h-6 text-primary-400" />
                 </div>
                 <div className="flex items-center gap-1">
                   <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
                   <span className="text-xs font-medium text-green-400">LIVE</span>
                 </div>
               </div>
-              <div className="text-sm text-dark-400 mb-1">Live Positions</div>
-              <div className="text-2xl font-semibold text-white mb-2">{livePositions.length} / {botDetails.maxPositions}</div>
-              <div className="text-xs text-dark-400">
+              <div className="text-sm text-gray-600 dark:text-dark-400 mb-1">Live Positions</div>
+              <div className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white mb-2">{livePositions.length} / {botDetails.maxPositions}</div>
+              <div className="text-xs text-gray-600 dark:text-dark-400">
                 {livePositions.length > 0 ? 'Updating every 2s' : 'Scanning markets'}
               </div>
             </div>
@@ -715,30 +735,30 @@ export default function UserCopyPage() {
               animate={{ opacity: 1, scale: 1 }}
             >
               <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-              <div className="bg-dark-800 rounded-[calc(1rem-1px)] p-6 max-w-md w-full mx-4 shadow-2xl">
+              <div className="bg-gray-50 dark:bg-dark-900 rounded-[calc(1rem-1px)] p-6 max-w-md w-full">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-medium text-white">Bot Settings</h3>
-                <button onClick={() => setShowSettings(false)} className="text-dark-400 hover:text-white">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white">Bot Settings</h3>
+                <button onClick={() => setShowSettings(false)} className="text-gray-600 dark:text-dark-400 hover:text-gray-900 dark:hover:text-white">
                   <CloseIcon className="w-5 h-5" />
                 </button>
               </div>
 
               <div className="space-y-5">
                 {/* Compounding Slider */}
-                <div className="p-4 bg-dark-900/50 rounded-xl border border-dark-700">
+                <div className="p-4 bg-gray-50 dark:bg-dark-900/50 rounded-xl border border-gray-200 dark:border-dark-700">
                   <div className="flex items-center justify-between mb-3">
-                    <div className="text-sm font-medium text-white">Compounding</div>
+                    <div className="text-sm font-medium text-gray-900 dark:text-white">Compounding</div>
                     <div className={`text-sm font-medium ${
-                      compoundingPercent === 0 ? 'text-blue-400' :
-                      compoundingPercent <= 30 ? 'text-green-400' :
-                      compoundingPercent <= 70 ? 'text-yellow-400' :
+                      compoundingPercent === 0 ? 'text-primary-400' :
+                      compoundingPercent <= 30 ? 'text-primary-400' :
+                      compoundingPercent <= 70 ? 'text-primary-400' :
                       'text-primary-400'
                     }`}>{compoundingPercent}%</div>
                   </div>
 
                   {/* Slider */}
                   <div
-                    className="relative w-full h-2 bg-dark-600 rounded-full cursor-pointer group"
+                    className="relative w-full h-2 bg-gray-200 dark:bg-dark-600 rounded-full cursor-pointer group"
                     onClick={(e) => {
                       const rect = e.currentTarget.getBoundingClientRect();
                       const pct = Math.round(Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100)));
@@ -763,9 +783,9 @@ export default function UserCopyPage() {
                     {/* Filled track */}
                     <div
                       className={`absolute inset-y-0 left-0 rounded-full pointer-events-none bg-gradient-to-r ${
-                        compoundingPercent === 0 ? 'from-blue-500 to-blue-400' :
-                        compoundingPercent <= 30 ? 'from-green-500 to-emerald-400' :
-                        compoundingPercent <= 70 ? 'from-yellow-500 to-amber-400' :
+                        compoundingPercent === 0 ? 'from-primary-500 to-primary-400' :
+                        compoundingPercent <= 30 ? 'from-primary-500 to-accent-400' :
+                        compoundingPercent <= 70 ? 'from-primary-500 to-accent-500' :
                         'from-primary-500 to-accent-500'
                       }`}
                       style={{ width: `${compoundingPercent}%` }}
@@ -773,9 +793,9 @@ export default function UserCopyPage() {
                     {/* Thumb */}
                     <div
                       className={`absolute top-1/2 -translate-y-1/2 w-5 h-5 rounded-full shadow-lg border-2 border-white/20 pointer-events-none ${
-                        compoundingPercent === 0 ? 'bg-blue-500' :
-                        compoundingPercent <= 30 ? 'bg-green-500' :
-                        compoundingPercent <= 70 ? 'bg-yellow-500' :
+                        compoundingPercent === 0 ? 'bg-primary-500' :
+                        compoundingPercent <= 30 ? 'bg-primary-500' :
+                        compoundingPercent <= 70 ? 'bg-primary-500' :
                         'bg-primary-500'
                       }`}
                       style={{ left: `calc(${compoundingPercent}% - 10px)` }}
@@ -790,11 +810,8 @@ export default function UserCopyPage() {
                         onClick={() => setCompoundingPercent(pct)}
                         className={`flex-1 px-2 py-1.5 rounded-lg text-xs font-medium transition-all ${
                           compoundingPercent === pct
-                            ? pct === 0 ? 'bg-blue-500/20 border border-blue-500/50 text-blue-400' :
-                              pct <= 30 ? 'bg-green-500/20 border border-green-500/50 text-green-400' :
-                              pct <= 70 ? 'bg-yellow-500/20 border border-yellow-500/50 text-yellow-400' :
-                              'bg-primary-500/20 border border-primary-500/50 text-primary-400'
-                            : 'bg-dark-700 text-dark-400 hover:bg-dark-600 hover:text-white'
+                            ? 'bg-primary-500/20 border border-primary-500/50 text-primary-400'
+                            : 'bg-gray-200 dark:bg-dark-700 text-gray-600 dark:text-dark-400 hover:bg-gray-300 dark:hover:bg-dark-600 hover:text-gray-900 dark:hover:text-white'
                         }`}
                       >
                         {pct}%
@@ -803,24 +820,24 @@ export default function UserCopyPage() {
                   </div>
 
                   {/* Split Description */}
-                  <div className="mt-4 p-3 bg-dark-800/80 rounded-lg border border-dark-700/50 space-y-1.5">
+                  <div className="mt-4 p-3 bg-gray-100 dark:bg-dark-800/80 rounded-lg border border-gray-200 dark:border-dark-700/50 space-y-1.5">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-dark-400">Reinvest into bot</span>
+                      <span className="text-gray-600 dark:text-dark-400">Reinvest into bot</span>
                       <span className="font-medium text-primary-400">{compoundingPercent}%</span>
                     </div>
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-dark-400">Send to Available Balance</span>
+                      <span className="text-gray-600 dark:text-dark-400">Send to Available Balance</span>
                       <span className="font-medium text-green-400">{100 - compoundingPercent}%</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Auto-close after Lock-in */}
-                <div className="p-4 bg-dark-900/50 rounded-xl border border-dark-700">
+                <div className="p-4 bg-gray-50 dark:bg-dark-900/50 rounded-xl border border-gray-200 dark:border-dark-700">
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-sm font-medium text-white">Auto-close after lock-in</div>
-                      <div className="text-xs text-dark-400 mt-0.5">
+                      <div className="text-sm font-medium text-gray-900 dark:text-white">Auto-close after lock-in</div>
+                      <div className="text-xs text-gray-600 dark:text-dark-400 mt-0.5">
                         {lockedIn
                           ? `Automatically archive bot when lock-in ends (${lockInDaysRemaining}d left)`
                           : 'Lock-in period has already ended'
@@ -830,7 +847,7 @@ export default function UserCopyPage() {
                     <button
                       onClick={() => setAutocloseAfterLockIn(!autocloseAfterLockIn)}
                       className={`relative w-12 h-6 rounded-full transition-colors flex-shrink-0 ${
-                        autocloseAfterLockIn ? 'bg-amber-500' : 'bg-dark-600'
+                        autocloseAfterLockIn ? 'bg-gradient-to-r from-primary-500 to-accent-500' : 'bg-dark-600'
                       }`}
                     >
                       <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
@@ -841,8 +858,8 @@ export default function UserCopyPage() {
                 </div>
 
                 {/* Lock-in Info */}
-                <div className="p-4 bg-dark-900/50 rounded-xl border border-dark-700">
-                  <div className="text-sm font-medium text-white mb-2">Lock-in Period</div>
+                <div className="p-4 bg-gray-50 dark:bg-dark-900/50 rounded-xl border border-gray-200 dark:border-dark-700">
+                  <div className="text-sm font-medium text-gray-900 dark:text-white mb-2">Lock-in Period</div>
                   {lockedIn ? (
                     <div className="flex items-center gap-2 text-amber-400">
                       <Clock className="w-4 h-4" />
@@ -860,7 +877,7 @@ export default function UserCopyPage() {
               <div className="flex gap-3 mt-6">
                 <button
                   onClick={() => setShowSettings(false)}
-                  className="flex-1 px-4 py-3 bg-dark-700 hover:bg-dark-600 border border-dark-600 rounded-lg text-white font-medium transition-colors"
+                  className="flex-1 px-4 py-3 bg-gray-200 dark:bg-dark-700 hover:bg-gray-300 dark:hover:bg-dark-600 border border-gray-300 dark:border-dark-600 rounded-lg text-gray-900 dark:text-white font-medium transition-colors"
                 >
                   Cancel
                 </button>
@@ -879,15 +896,15 @@ export default function UserCopyPage() {
 
         {/* Performance Chart + Bot Info */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 mb-6">
-          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }} className="lg:col-span-8">
-            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-            <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-primary-500/50 transition-all flex flex-col">
-              <div className="flex items-center justify-between mb-6 flex-shrink-0">
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }} className="lg:col-span-8 h-full">
+            <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+            <div className="h-full bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-primary-500/50 transition-all flex flex-col">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6 flex-shrink-0">
                 <div>
-                  <h2 className="text-xl font-medium text-white">Equity Curve</h2>
-                  <p className="text-xs text-dark-400">Portfolio value over time</p>
+                  <h2 className="text-lg sm:text-xl font-medium text-gray-900 dark:text-white">Equity Curve</h2>
+                  <p className="text-xs text-gray-600 dark:text-dark-400">Portfolio value over time</p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-1.5 sm:gap-2">
                   {(['day', 'week', 'month', 'all'] as const).map((period) => (
                     <button
                       key={period}
@@ -895,7 +912,7 @@ export default function UserCopyPage() {
                       className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                         equityPeriod === period
                           ? 'bg-primary-500 text-white'
-                          : 'bg-dark-700/50 text-dark-400 hover:bg-dark-700 hover:text-white'
+                          : 'bg-gray-200 dark:bg-dark-700/50 text-gray-600 dark:text-dark-400 hover:bg-gray-300 dark:hover:bg-dark-700 hover:text-gray-900 dark:hover:text-white'
                       }`}
                     >
                       {period === 'all' ? 'All Time' : period.charAt(0).toUpperCase() + period.slice(1)}
@@ -942,10 +959,22 @@ export default function UserCopyPage() {
                   <div className="flex-1 min-h-0 w-full">
                     <Chart
                       options={{
-                        chart: { type: 'line', toolbar: { show: false }, background: 'transparent', zoom: { enabled: false } },
+                        chart: { type: 'area', toolbar: { show: false }, background: 'transparent', zoom: { enabled: false } },
                         theme: { mode: 'dark' },
                         dataLabels: { enabled: false },
                         stroke: { curve: 'smooth', width: 3, colors: ['#10B981'] },
+                        fill: {
+                          type: 'gradient',
+                          gradient: {
+                            opacityFrom: 0.35,
+                            opacityTo: 0.05,
+                            colorStops: [
+                              { offset: 0, color: '#10B981', opacity: 0.35 },
+                              { offset: 50, color: '#10B981', opacity: 0.15 },
+                              { offset: 100, color: '#10B981', opacity: 0.02 }
+                            ]
+                          }
+                        },
                         grid: { borderColor: '#1e293b', strokeDashArray: 4, xaxis: { lines: { show: false } } },
                         xaxis: {
                           type: 'datetime',
@@ -980,7 +1009,7 @@ export default function UserCopyPage() {
                         markers: { size: 0, hover: { size: 5 } },
                       }}
                       series={[{ name: 'Portfolio Value', data: displayData.map(point => ({ x: point.timestamp, y: point.value })) }]}
-                      type="line"
+                      type="area"
                       height="100%"
                     />
                   </div>
@@ -992,53 +1021,53 @@ export default function UserCopyPage() {
 
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.35 }} className="lg:col-span-4">
             <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-            <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-accent-500/50 transition-all">
+            <div className="h-full bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-accent-500/50 transition-all">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-accent-500/20 border border-accent-500/30 rounded-lg flex items-center justify-center">
-                  <Shield className="w-5 h-5 text-accent-400" />
+                <div className="w-10 h-10 bg-primary-500/20 border border-primary-500/30 rounded-lg flex items-center justify-center">
+                  <Info className="w-5 h-5 text-primary-400" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-medium text-white">Bot Information</h3>
-                  <p className="text-xs text-dark-400">Configuration details</p>
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">Bot Information</h3>
+                  <p className="text-xs text-gray-600 dark:text-dark-400">Configuration details</p>
                 </div>
               </div>
 
               <div className="space-y-4">
-                <div className="p-4 bg-dark-900/50 rounded-xl border border-dark-700/50">
-                  <div className="text-xs text-dark-400 mb-1">Invested Capital</div>
-                  <div className="text-2xl font-semibold text-white">${(botDetails.invested || 0).toLocaleString('en-US')}</div>
+                <div className="p-4 bg-gray-50 dark:bg-dark-900/50 rounded-xl border border-gray-200 dark:border-dark-700/50">
+                  <div className="text-xs text-gray-600 dark:text-dark-400 mb-1">Invested Capital</div>
+                  <div className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white">${(botDetails.invested || 0).toLocaleString('en-US')}</div>
                 </div>
 
-                <div className="p-4 bg-dark-900/50 rounded-xl border border-dark-700/50">
-                  <div className="text-xs text-dark-400 mb-1">Current Value</div>
-                  <div className={`text-2xl font-semibold ${botDetails.profit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                <div className="p-4 bg-gray-50 dark:bg-dark-900/50 rounded-xl border border-gray-200 dark:border-dark-700/50">
+                  <div className="text-xs text-gray-600 dark:text-dark-400 mb-1">Current Value</div>
+                  <div className={`text-xl sm:text-2xl font-semibold ${botDetails.profit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                     ${(pnlBreakdown?.currentValue ?? botDetails.currentValue ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </div>
                 </div>
 
                 {pnlBreakdown && (
-                  <div className="p-3 bg-dark-900/50 rounded-xl border border-dark-700/50 space-y-2">
+                  <div className="p-3 bg-gray-50 dark:bg-dark-900/50 rounded-xl border border-gray-200 dark:border-dark-700/50 space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-xs text-dark-400">Total P&L</span>
+                      <span className="text-xs text-gray-600 dark:text-dark-400">Total P&L</span>
                       <span className={`text-xs font-medium ${pnlBreakdown.totalPnL >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                         {pnlBreakdown.totalPnL >= 0 ? '+' : ''}${pnlBreakdown.totalPnL.toFixed(2)}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-xs text-dark-400">Auto-Credited</span>
+                      <span className="text-xs text-gray-600 dark:text-dark-400">Auto-Credited</span>
                       <span className="text-xs font-medium text-green-400">${pnlBreakdown.totalAutoCredited.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-xs text-dark-400">Compounding</span>
-                      <span className={`text-xs font-medium ${compoundingPercent > 0 ? 'text-primary-400' : 'text-dark-400'}`}>
+                      <span className="text-xs text-gray-600 dark:text-dark-400">Compounding</span>
+                      <span className={`text-xs font-medium ${compoundingPercent > 0 ? 'text-primary-400' : 'text-gray-600 dark:text-dark-400'}`}>
                         {compoundingPercent > 0 ? 'On' : 'Off'}
                       </span>
                     </div>
                   </div>
                 )}
 
-                <div className="p-3 bg-dark-900/50 rounded-xl border border-dark-700/50">
-                  <div className="text-xs text-dark-400 mb-1">Risk Level</div>
+                <div className="p-3 bg-gray-50 dark:bg-dark-900/50 rounded-xl border border-gray-200 dark:border-dark-700/50">
+                  <div className="text-xs text-gray-600 dark:text-dark-400 mb-1">Risk Level</div>
                   <div className={`text-sm font-medium ${
                     botDetails.risk === 'low' ? 'text-green-400' :
                     botDetails.risk === 'medium' ? 'text-yellow-400' :
@@ -1048,8 +1077,8 @@ export default function UserCopyPage() {
                   </div>
                 </div>
 
-                <div className="p-3 bg-dark-900/50 rounded-xl border border-dark-700/50">
-                  <div className="text-xs text-dark-400 mb-2">Trading Pairs</div>
+                <div className="p-3 bg-gray-50 dark:bg-dark-900/50 rounded-xl border border-gray-200 dark:border-dark-700/50">
+                  <div className="text-xs text-gray-600 dark:text-dark-400 mb-2">Trading Pairs</div>
                   <div className="flex flex-wrap gap-2">
                     {botDetails.tradingPairs.map((pair, i) => (
                       <span key={i} className="px-2 py-1 bg-primary-500/10 border border-primary-500/30 rounded text-xs font-medium text-primary-400">
@@ -1059,14 +1088,14 @@ export default function UserCopyPage() {
                   </div>
                 </div>
 
-                <div className="p-3 bg-dark-900/50 rounded-xl border border-dark-700/50">
-                  <div className="text-xs text-dark-400 mb-1">Running Since</div>
+                <div className="p-3 bg-gray-50 dark:bg-dark-900/50 rounded-xl border border-gray-200 dark:border-dark-700/50">
+                  <div className="text-xs text-gray-600 dark:text-dark-400 mb-1">Running Since</div>
                   <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-dark-400" />
-                    <span className="text-sm font-medium text-white">
+                    <Calendar className="w-4 h-4 text-gray-600 dark:text-dark-400" />
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">
                       {botDetails.runningSince}
                     </span>
-                    <span className="text-xs text-dark-400">({botDetails.runningDays} days)</span>
+                    <span className="text-xs text-gray-600 dark:text-dark-400">({botDetails.runningDays} days)</span>
                   </div>
                 </div>
               </div>
@@ -1078,27 +1107,27 @@ export default function UserCopyPage() {
         {/* Trading Statistics */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="mb-6">
           <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-          <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-blue-500/50 transition-all">
+          <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-primary-500/50 transition-all">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 bg-blue-500/20 border border-blue-500/30 rounded-xl flex items-center justify-center">
-                <BarChart3 className="w-6 h-6 text-blue-400" />
+              <div className="w-12 h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
+                <BarChart3 className="w-6 h-6 text-primary-400" />
               </div>
               <div>
-                <h2 className="text-xl font-medium text-white">Trading Statistics</h2>
-                <p className="text-sm text-dark-400">Comprehensive performance metrics</p>
+                <h2 className="text-xl font-medium text-gray-900 dark:text-white">Trading Statistics</h2>
+                <p className="text-sm text-gray-600 dark:text-dark-400">Comprehensive performance metrics</p>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
               <StatCard
-                icon={<BarChart3 className="w-4 h-4 text-blue-400" />}
+                icon={<BarChart3 className="w-4 h-4 text-primary-400" />}
                 label="Total Trades"
                 value={(botStats.totalTrades || 0).toString()}
                 subtitle={botDetails.runningDays > 0 ? `${(botStats.totalTrades / botDetails.runningDays).toFixed(1)}/day` : 'Just started'}
-                subtitleColor="text-blue-400"
+                subtitleColor="text-primary-400"
               />
               <StatCard
-                icon={<Clock className="w-4 h-4 text-purple-400" />}
+                icon={<Clock className="w-4 h-4 text-primary-400" />}
                 label="Avg Hold Time"
                 value={botStats.averageHoldTime || '0h'}
                 subtitle={
@@ -1106,14 +1135,14 @@ export default function UserCopyPage() {
                   botStats.averageHoldTime.includes('m') && parseInt(botStats.averageHoldTime) > 10 ? 'Day trading' :
                   'Scalping'
                 }
-                subtitleColor="text-purple-400"
+                subtitleColor="text-primary-400"
               />
               <StatCard
-                icon={<Target className="w-4 h-4 text-green-400" />}
+                icon={<Target className="w-4 h-4 text-primary-400" />}
                 label="Win/Loss Ratio"
                 value={`${((botStats.winningTrades || 0) / Math.max(botStats.losingTrades || 1, 1)).toFixed(2)}:1`}
                 subtitle={`${botStats.winningTrades || 0}W / ${botStats.losingTrades || 0}L`}
-                subtitleColor="text-green-400"
+                subtitleColor="text-primary-400"
               />
               <StatCard
                 icon={<TrendingUp className="w-4 h-4 text-green-400" />}
@@ -1132,7 +1161,7 @@ export default function UserCopyPage() {
                 subtitleColor="text-red-400"
               />
               <StatCard
-                icon={<Zap className="w-4 h-4 text-amber-400" />}
+                icon={<Zap className="w-4 h-4 text-primary-400" />}
                 label="Profit Factor"
                 value={(botStats.profitFactor || 0).toFixed(2)}
                 subtitle={
@@ -1141,7 +1170,7 @@ export default function UserCopyPage() {
                   botStats.profitFactor >= 1 ? 'Profitable' :
                   'Needs improvement'
                 }
-                valueColor="text-amber-400"
+                valueColor="text-primary-400"
                 subtitleColor={
                   botStats.profitFactor >= 2 ? 'text-green-400' :
                   botStats.profitFactor >= 1.5 ? 'text-yellow-400' :
@@ -1168,11 +1197,11 @@ export default function UserCopyPage() {
                 }
               />
               <StatCard
-                icon={<DollarSign className="w-4 h-4 text-cyan-400" />}
+                icon={<DollarSign className="w-4 h-4 text-primary-400" />}
                 label="Total Volume"
                 value={`$${((botStats.totalVolume || 0) / 1000).toFixed(0)}K`}
                 subtitle={`${((botStats.totalVolume / (botDetails.invested || 1))).toFixed(1)}× capital turnover`}
-                subtitleColor="text-cyan-400"
+                subtitleColor="text-primary-400"
               />
               <StatCard
                 icon={<TrendingUp className="w-4 h-4 text-green-400" />}
@@ -1191,7 +1220,7 @@ export default function UserCopyPage() {
                 subtitleColor="text-red-400"
               />
               <StatCard
-                icon={<Zap className="w-4 h-4 text-green-400" />}
+                icon={<Zap className="w-4 h-4 text-primary-400" />}
                 label="Best Streak"
                 value={`${botStats.winStreak || 0} W`}
                 subtitle={
@@ -1212,15 +1241,15 @@ export default function UserCopyPage() {
         {/* Open Positions Table (LIVE V2) - GRID 1 */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }} className="mb-6">
           <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-          <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-primary-500/50 transition-all">
+          <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-primary-500/50 transition-all">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
                   <TrendingUpDown className="w-6 h-6 text-primary-400" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-medium text-white">Open Positions (Live)</h2>
-                  <p className="text-sm text-dark-400">{livePositions.length} active position{livePositions.length !== 1 ? 's' : ''} • Updates every 2s</p>
+                  <h2 className="text-xl font-medium text-gray-900 dark:text-white">Open Positions (Live)</h2>
+                  <p className="text-sm text-gray-600 dark:text-dark-400">{livePositions.length} active position{livePositions.length !== 1 ? 's' : ''} • Updates every 2s</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -1234,11 +1263,11 @@ export default function UserCopyPage() {
 
             {livePositions.length === 0 ? (
               <div className="text-center py-12">
-                <div className="w-16 h-16 bg-dark-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Layers className="w-8 h-8 text-dark-600" />
+                <div className="w-16 h-16 bg-gray-200 dark:bg-dark-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Layers className="w-8 h-8 text-gray-400 dark:text-dark-600" />
                 </div>
-                <p className="text-dark-400">No open positions</p>
-                <p className="text-xs text-dark-500 mt-1">Bot is analyzing markets...</p>
+                <p className="text-gray-600 dark:text-dark-400">No open positions</p>
+                <p className="text-xs text-gray-500 dark:text-dark-500 mt-1">Bot is analyzing markets...</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-3">
@@ -1248,12 +1277,12 @@ export default function UserCopyPage() {
                     layout
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="relative p-3 rounded-lg border border-dark-700 bg-dark-900/30 overflow-hidden"
+                    className="relative p-3 rounded-lg border border-gray-200 dark:border-dark-700 bg-gray-50 dark:bg-dark-900/30 overflow-hidden"
                   >
                     <div className="relative">
                     {/* Header Row */}
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
+                    <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <div className={`px-2 py-0.5 rounded text-xs font-medium ${
                           position.side === 'LONG'
                             ? 'bg-green-500/20 text-green-400 border border-green-500/30'
@@ -1261,19 +1290,19 @@ export default function UserCopyPage() {
                         }`}>
                           {position.side} ×{position.leverage}
                         </div>
-                        <span className="text-base font-medium text-white">{position.pair}</span>
+                        <span className="text-sm sm:text-base font-medium text-gray-900 dark:text-white">{position.pair}</span>
                         {/* SL/TP after pair */}
-                        <div className="flex items-center gap-1.5 ml-2">
+                        <div className="flex items-center gap-1.5">
                           {/* Stop Loss */}
-                          <div className="px-1.5 py-0.5 bg-dark-800/50 border border-dark-700 rounded flex items-center gap-1.5">
-                            <div className="text-[9px] text-dark-400">SL</div>
+                          <div className="px-1.5 py-0.5 bg-gray-200 dark:bg-dark-800/50 border border-gray-300 dark:border-dark-700 rounded flex items-center gap-1.5">
+                            <div className="text-[9px] text-gray-600 dark:text-dark-400">SL</div>
                             <div className="font-mono text-[10px] text-red-400 font-normal">
                               ${position.stopLoss.toFixed(0)}
                             </div>
                           </div>
                           {/* Take Profit */}
-                          <div className="px-1.5 py-0.5 bg-dark-800/50 border border-dark-700 rounded flex items-center gap-1.5">
-                            <div className="text-[9px] text-dark-400">TP</div>
+                          <div className="px-1.5 py-0.5 bg-gray-200 dark:bg-dark-800/50 border border-gray-300 dark:border-dark-700 rounded flex items-center gap-1.5">
+                            <div className="text-[9px] text-gray-600 dark:text-dark-400">TP</div>
                             <div className="font-mono text-[10px] text-green-400 font-normal">
                               ${position.takeProfit.toFixed(0)}
                             </div>
@@ -1281,22 +1310,22 @@ export default function UserCopyPage() {
                         </div>
                       </div>
                       {/* Timer stays on the right */}
-                      <div className="flex items-center gap-1.5 text-xs text-dark-400">
+                      <div className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-dark-400">
                         <Clock className="w-3 h-3" />
                         {position.duration}
                       </div>
                     </div>
 
                     {/* Price Grid */}
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
                       <div>
-                        <div className="text-[10px] text-dark-400 mb-0.5">Entry Price</div>
-                        <div className="font-mono text-sm text-white font-normal">
+                        <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-0.5">Entry Price</div>
+                        <div className="font-mono text-sm text-gray-900 dark:text-white font-normal">
                           ${position.entryPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </div>
                       </div>
                       <div>
-                        <div className="text-[10px] text-dark-400 mb-0.5 flex items-center gap-1">
+                        <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-0.5 flex items-center gap-1">
                           Current Price
                           {position.pnl >= 0 ? <ArrowUpRight className="w-2.5 h-2.5 text-green-400" /> : <ArrowDownRight className="w-2.5 h-2.5 text-red-400" />}
                         </div>
@@ -1316,19 +1345,19 @@ export default function UserCopyPage() {
                         </motion.div>
                       </div>
                       <div>
-                        <div className="text-[10px] text-dark-400 mb-0.5">Position Size</div>
-                        <div className="font-mono text-sm text-white font-normal">
+                        <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-0.5">Position Size</div>
+                        <div className="font-mono text-sm text-gray-900 dark:text-white font-normal">
                           ${position.positionSize.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </div>
                       </div>
                       <div>
-                        <div className="text-[10px] text-dark-400 mb-0.5">Amount</div>
-                        <div className="font-mono text-sm text-white font-normal">
+                        <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-0.5">Amount</div>
+                        <div className="font-mono text-sm text-gray-900 dark:text-white font-normal">
                           {position.amount.toFixed(8)}
                         </div>
                       </div>
                       <div>
-                        <div className="text-[10px] text-dark-400 mb-0.5">P&L</div>
+                        <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-0.5">P&L</div>
                         <motion.div
                           key={`pnl-${position.id}-${position.pnl}`}
                           className="font-mono text-sm font-normal"
@@ -1365,23 +1394,23 @@ export default function UserCopyPage() {
         {/* Trade History - GRID 1 */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="mb-6">
           <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-          <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-accent-500/50 transition-all">
-            <div className="flex items-center justify-between mb-6">
+          <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-accent-500/50 transition-all">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-6">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-accent-500/20 border border-accent-500/30 rounded-xl flex items-center justify-center">
-                  <Clock className="w-6 h-6 text-accent-400" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-accent-500/20 border border-accent-500/30 rounded-xl flex items-center justify-center">
+                  <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-accent-400" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-medium text-white">Trade History</h2>
-                  <p className="text-sm text-dark-400">{filteredTrades.length} trades</p>
+                  <h2 className="text-lg sm:text-xl font-medium text-gray-900 dark:text-white">Trade History</h2>
+                  <p className="text-sm text-gray-600 dark:text-dark-400">{filteredTrades.length} trades</p>
                 </div>
               </div>
 
-              <div className="flex gap-3">
+              <div className="flex gap-2 sm:gap-3 flex-wrap">
                 <select
                   value={filterPair}
                   onChange={(e) => { setFilterPair(e.target.value); setCurrentPage(1); }}
-                  className="px-3 py-2 bg-dark-800 border border-dark-600 rounded-lg text-sm text-white focus:outline-none focus:border-primary-500/50"
+                  className="px-2 sm:px-3 py-2 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-600 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:border-primary-500/50"
                 >
                   <option value="all">All Pairs</option>
                   {uniquePairs.map(pair => <option key={pair} value={pair}>{pair}</option>)}
@@ -1390,7 +1419,7 @@ export default function UserCopyPage() {
                 <select
                   value={filterResult}
                   onChange={(e) => { setFilterResult(e.target.value as 'all' | 'wins' | 'losses'); setCurrentPage(1); }}
-                  className="px-3 py-2 bg-dark-800 border border-dark-600 rounded-lg text-sm text-white focus:outline-none focus:border-primary-500/50"
+                  className="px-2 sm:px-3 py-2 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-600 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:border-primary-500/50"
                 >
                   <option value="all">All Results</option>
                   <option value="wins">Wins Only</option>
@@ -1403,15 +1432,15 @@ export default function UserCopyPage() {
               {paginatedTrades.map((trade) => {
                 const isExpanded = expandedTrades.has(trade.id);
                 return (
-                  <div key={trade.id} className="rounded-lg border border-dark-700 bg-dark-900/30 overflow-hidden">
+                  <div key={trade.id} className="rounded-lg border border-gray-200 dark:border-dark-700 bg-gray-50 dark:bg-dark-900/30 overflow-hidden">
                     {/* Compact Header - Always Visible */}
                     <div
-                      className="p-3 flex items-center justify-between gap-4 cursor-pointer hover:bg-dark-800/70 transition-colors"
+                      className="p-3 flex items-center justify-between gap-4 cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-800/70 transition-colors"
                       onClick={() => toggleTradeExpanded(trade.id)}
                     >
                       {/* Left: Pair & Side */}
                       <div className="flex items-center gap-2 flex-shrink-0">
-                        <span className="text-base font-normal text-white">{trade.pair}</span>
+                        <span className="text-base font-normal text-gray-900 dark:text-white">{trade.pair}</span>
                         <div className={`px-2 py-0.5 rounded text-xs font-medium whitespace-nowrap ${
                           trade.side === 'LONG' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
                         }`}>
@@ -1434,7 +1463,7 @@ export default function UserCopyPage() {
                       {/* Right: Timestamp & Arrow */}
                       <div className="flex items-center gap-3 flex-shrink-0">
                         <div className="text-right">
-                          <div className="text-[10px] text-dark-400 whitespace-nowrap">
+                          <div className="text-[10px] text-gray-600 dark:text-dark-400 whitespace-nowrap">
                             {new Date(trade.closedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                           </div>
                         </div>
@@ -1442,7 +1471,7 @@ export default function UserCopyPage() {
                           animate={{ rotate: isExpanded ? 180 : 0 }}
                           transition={{ duration: 0.2 }}
                         >
-                          <ChevronRight className="w-3 h-3 text-dark-400" />
+                          <ChevronRight className="w-3 h-3 text-gray-600 dark:text-dark-400" />
                         </motion.div>
                       </div>
                     </div>
@@ -1454,47 +1483,47 @@ export default function UserCopyPage() {
                       transition={{ duration: 0.2 }}
                       className="overflow-hidden"
                     >
-                      <div className="px-3 pb-3 pt-0 border-t border-dark-700/50">
+                      <div className="px-3 pb-3 pt-0 border-t border-gray-200 dark:border-dark-700/50">
                         {/* Row 1: Basic Details */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
                           <div>
-                            <div className="text-[10px] text-dark-400 mb-1">Entry Price</div>
-                            <div className="px-1.5 py-0.5 bg-dark-800/50 border border-dark-700 rounded inline-flex items-center">
-                              <div className="font-mono text-sm text-white font-normal">${trade.entryPrice.toFixed(2)}</div>
+                            <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-1">Entry Price</div>
+                            <div className="px-1.5 py-0.5 bg-gray-200 dark:bg-dark-800/50 border border-gray-300 dark:border-dark-700 rounded inline-flex items-center">
+                              <div className="font-mono text-sm text-gray-900 dark:text-white font-normal">${trade.entryPrice.toFixed(2)}</div>
                             </div>
                           </div>
                           <div>
-                            <div className="text-[10px] text-dark-400 mb-1">Exit Price</div>
-                            <div className="px-1.5 py-0.5 bg-dark-800/50 border border-dark-700 rounded inline-flex items-center">
-                              <div className="font-mono text-sm text-white font-normal">${trade.exitPrice.toFixed(2)}</div>
+                            <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-1">Exit Price</div>
+                            <div className="px-1.5 py-0.5 bg-gray-200 dark:bg-dark-800/50 border border-gray-300 dark:border-dark-700 rounded inline-flex items-center">
+                              <div className="font-mono text-sm text-gray-900 dark:text-white font-normal">${trade.exitPrice.toFixed(2)}</div>
                             </div>
                           </div>
                           <div>
-                            <div className="text-[10px] text-dark-400 mb-1">Position Size</div>
-                            <div className="font-mono text-sm text-white font-normal">${trade.positionSize.toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
+                            <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-1">Position Size</div>
+                            <div className="font-mono text-sm text-gray-900 dark:text-white font-normal">${trade.positionSize.toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
                           </div>
                           <div>
-                            <div className="text-[10px] text-dark-400 mb-1">Duration</div>
-                            <div className="text-sm text-white font-normal">{trade.duration}</div>
+                            <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-1">Duration</div>
+                            <div className="text-sm text-gray-900 dark:text-white font-normal">{trade.duration}</div>
                           </div>
                         </div>
 
                         {/* Row 2: Trading Costs */}
                         <div className="grid grid-cols-2 gap-3 mt-3">
                           <div>
-                            <div className="text-[10px] text-dark-400 mb-1">Total Fees</div>
+                            <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-1">Total Fees</div>
                             <div className="font-mono text-sm text-red-400 font-normal">
                               -${trade.totalFees.toFixed(2)}
                             </div>
                           </div>
                           <div>
-                            <div className="text-[10px] text-dark-400 mb-1">Slippage</div>
+                            <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-1">Slippage</div>
                             {trade.slippage > 0 ? (
                               <div className="font-mono text-sm text-amber-400 font-normal">
                                 {trade.slippage.toFixed(3)}%
                               </div>
                             ) : (
-                              <div className="font-mono text-sm text-dark-500 font-normal">
+                              <div className="font-mono text-sm text-gray-500 dark:text-dark-500 font-normal">
                                 0%
                               </div>
                             )}
@@ -1508,15 +1537,15 @@ export default function UserCopyPage() {
             </div>
 
             {totalPages > 1 && (
-              <div className="flex items-center justify-between pt-4 mt-4 border-t border-dark-700">
-                <div className="text-sm text-dark-400">
-                  Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, filteredTrades.length)} of {filteredTrades.length} trades
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-4 mt-4 border-t border-gray-200 dark:border-dark-700">
+                <div className="text-xs sm:text-sm text-gray-600 dark:text-dark-400">
+                  Showing {(currentPage - 1) * itemsPerPage + 1}-{Math.min(currentPage * itemsPerPage, filteredTrades.length)} of {filteredTrades.length}
                 </div>
                 <div className="flex gap-2">
                   <button
                     onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                     disabled={currentPage === 1}
-                    className="px-3 py-2 bg-dark-800 border border-dark-600 rounded-lg text-sm text-white hover:bg-dark-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                    className="px-3 py-2 bg-gray-200 dark:bg-dark-800 border border-gray-300 dark:border-dark-600 rounded-lg text-sm text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-dark-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
                   >
                     <ChevronLeft className="w-4 h-4" />
                     Previous
@@ -1538,7 +1567,7 @@ export default function UserCopyPage() {
                           key={pageNum}
                           onClick={() => setCurrentPage(pageNum)}
                           className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                            currentPage === pageNum ? 'bg-primary-500 text-white' : 'bg-dark-800 border border-dark-600 text-dark-300 hover:bg-dark-700'
+                            currentPage === pageNum ? 'bg-primary-500 text-white' : 'bg-gray-200 dark:bg-dark-800 border border-gray-300 dark:border-dark-600 text-gray-700 dark:text-dark-300 hover:bg-gray-300 dark:hover:bg-dark-700'
                           }`}
                         >
                           {pageNum}
@@ -1549,7 +1578,7 @@ export default function UserCopyPage() {
                   <button
                     onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                     disabled={currentPage === totalPages}
-                    className="px-3 py-2 bg-dark-800 border border-dark-600 rounded-lg text-sm text-white hover:bg-dark-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                    className="px-3 py-2 bg-gray-200 dark:bg-dark-800 border border-gray-300 dark:border-dark-600 rounded-lg text-sm text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-dark-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
                   >
                     Next
                     <ChevronRight className="w-4 h-4" />
@@ -1575,14 +1604,14 @@ interface StatCardProps {
   valueColor?: string;
 }
 
-function StatCard({ icon, label, value, subtitle, subtitleColor = 'text-green-400', valueColor = 'text-white' }: StatCardProps) {
+function StatCard({ icon, label, value, subtitle, subtitleColor = 'text-green-400', valueColor = 'text-gray-900 dark:text-white' }: StatCardProps) {
   return (
-    <div className="p-4 bg-dark-900/50 rounded-xl border border-dark-700/50 hover:border-blue-500/30 transition-all">
+    <div className="p-3 sm:p-4 bg-gray-50 dark:bg-dark-900/50 rounded-xl border border-gray-200 dark:border-dark-700/50 hover:border-primary-500/30 transition-all">
       <div className="flex items-center gap-2 mb-2">
         {icon}
-        <div className="text-xs text-dark-400">{label}</div>
+        <div className="text-xs text-gray-600 dark:text-dark-400">{label}</div>
       </div>
-      <div className={`text-xl font-medium ${valueColor}`}>{value}</div>
+      <div className={`text-lg sm:text-xl font-medium ${valueColor}`}>{value}</div>
       <div className={`text-xs ${subtitleColor} mt-1`}>{subtitle}</div>
     </div>
   );

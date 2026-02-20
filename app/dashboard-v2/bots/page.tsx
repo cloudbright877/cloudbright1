@@ -71,32 +71,32 @@ export default function BotsPage() {
   };
 
   return (
-    <div className="min-h-screen p-4 lg:p-8">
+    <div className="min-h-screen bg-gray-100 dark:bg-dark-950 p-4 lg:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Tabs + Compare */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="mb-6 flex items-center justify-between gap-4"
+          className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4"
         >
-          <div className="flex items-center gap-0.5 rounded-lg bg-dark-900/50 border border-dark-700 p-1.5 inline-flex">
+          <div className="flex items-center gap-0.5 rounded-lg bg-gray-50 dark:bg-dark-900/50 border border-gray-200 dark:border-dark-700 p-1.5">
             <button
               onClick={() => setActiveTab('recommendation')}
-              className={`px-6 py-3 font-medium rounded-md text-sm transition-all ${
+              className={`px-4 sm:px-6 py-2.5 sm:py-3 font-medium rounded-md text-sm transition-all ${
                 activeTab === 'recommendation'
                   ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white shadow-lg shadow-primary-500/30'
-                  : 'text-dark-300 hover:text-white'
+                  : 'text-gray-600 dark:text-dark-300 hover:text-gray-900 dark:hover:text-white'
               }`}
             >
               Recommendation
             </button>
             <button
               onClick={() => setActiveTab('ranklist')}
-              className={`px-6 py-3 font-medium rounded-md text-sm transition-all ${
+              className={`px-4 sm:px-6 py-2.5 sm:py-3 font-medium rounded-md text-sm transition-all ${
                 activeTab === 'ranklist'
                   ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white shadow-lg shadow-primary-500/30'
-                  : 'text-dark-300 hover:text-white'
+                  : 'text-gray-600 dark:text-dark-300 hover:text-gray-900 dark:hover:text-white'
               }`}
             >
               Rank List
@@ -121,8 +121,8 @@ export default function BotsPage() {
               transition={{ delay: 0.2 }}
             >
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-2xl font-medium text-white flex items-center gap-2">
-                  <TrendingUp className="w-6 h-6 text-green-400" />
+                <h2 className="text-2xl font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                  <TrendingUp className="w-6 h-6 text-primary-400" />
                   Highest Annual Return
                 </h2>
                 <button
@@ -143,8 +143,8 @@ export default function BotsPage() {
               transition={{ delay: 0.3 }}
             >
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-2xl font-medium text-white flex items-center gap-2">
-                  <Shield className="w-6 h-6 text-blue-400" />
+                <h2 className="text-2xl font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                  <Shield className="w-6 h-6 text-primary-400" />
                   Low Risk And Stable Return
                 </h2>
                 <button
@@ -165,8 +165,8 @@ export default function BotsPage() {
               transition={{ delay: 0.4 }}
             >
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-2xl font-medium text-white flex items-center gap-2">
-                  <Target className="w-6 h-6 text-purple-400" />
+                <h2 className="text-2xl font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                  <Target className="w-6 h-6 text-primary-400" />
                   High Win Rate
                 </h2>
                 <button
@@ -190,11 +190,11 @@ export default function BotsPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] mb-6"
+              className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] mb-6"
             >
-              <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6">
-              <div className="flex items-center gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-dark-700 scrollbar-track-transparent">
-                <span className="text-sm font-normal text-dark-300 flex-shrink-0">Sort by:</span>
+              <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6">
+              <div className="flex items-center gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-dark-700 scrollbar-track-transparent">
+                <span className="text-sm font-normal text-gray-700 dark:text-dark-300 flex-shrink-0">Sort by:</span>
                 {[
                   { label: 'Return', value: 'return' },
                   { label: 'Copiers', value: 'copiers' },
@@ -207,7 +207,7 @@ export default function BotsPage() {
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex-shrink-0 ${
                       sortBy === option.value
                         ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white shadow-lg shadow-primary-500/30'
-                        : 'bg-dark-900/50 border border-dark-700 text-dark-300 hover:text-white hover:border-primary-500/30'
+                        : 'bg-gray-50 dark:bg-dark-900/50 border border-gray-200 dark:border-dark-700 text-gray-700 dark:text-dark-300 hover:text-gray-900 dark:hover:text-white hover:border-primary-500/30'
                     }`}
                   >
                     {option.label}
@@ -225,13 +225,13 @@ export default function BotsPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.02 }}
-                  className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]"
+                  className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]"
                 >
-                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6">
-                  <div className="flex items-center gap-4">
+                  <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6">
+                  <div className="flex items-center gap-3 sm:gap-4">
                     {/* Rank */}
                     <div className="flex-shrink-0 w-8 text-center">
-                      <span className="text-lg font-medium text-dark-500">
+                      <span className="text-lg font-medium text-gray-400 dark:text-dark-500">
                         {index + 1}
                       </span>
                     </div>
@@ -247,14 +247,14 @@ export default function BotsPage() {
                       )}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <h3 className="text-base font-medium text-white truncate">
+                          <h3 className="text-base font-medium text-gray-900 dark:text-white truncate">
                             {bot.name}
                           </h3>
                           {bot.verified && (
                             <Shield className="w-4 h-4 text-accent-400 flex-shrink-0" />
                           )}
                         </div>
-                        <p className="text-xs text-dark-400 truncate">
+                        <p className="text-xs text-gray-600 dark:text-dark-400 truncate">
                           {bot.strategy}
                         </p>
                       </div>
@@ -263,26 +263,26 @@ export default function BotsPage() {
                     {/* Stats */}
                     <div className="hidden md:flex items-center gap-8">
                       <div className="text-center">
-                        <div className="text-[10px] text-dark-400 mb-1">Return</div>
+                        <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-1">Return</div>
                         <div className={`text-sm font-normal ${bot.stats.return1y >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                           {bot.stats.return1y >= 0 ? '+' : ''}{bot.stats.return1y.toFixed(0)}%
                         </div>
                       </div>
                       <div className="text-center">
-                        <div className="text-[10px] text-dark-400 mb-1">Copiers</div>
-                        <div className="text-sm font-normal text-white">
+                        <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-1">Copiers</div>
+                        <div className="text-sm font-normal text-gray-900 dark:text-white">
                           {bot.stats.copiers > 999 ? `${(bot.stats.copiers / 1000).toFixed(1)}k` : bot.stats.copiers}
                         </div>
                       </div>
                       <div className="text-center">
-                        <div className="text-[10px] text-dark-400 mb-1">Win Rate</div>
-                        <div className="text-sm font-normal text-white">
+                        <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-1">Win Rate</div>
+                        <div className="text-sm font-normal text-gray-900 dark:text-white">
                           {bot.stats.winRate.toFixed(0)}%
                         </div>
                       </div>
                       <div className="text-center">
-                        <div className="text-[10px] text-dark-400 mb-1">Risk</div>
-                        <div className="text-sm font-normal text-white">
+                        <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-1">Risk</div>
+                        <div className="text-sm font-normal text-gray-900 dark:text-white">
                           {getRiskLabel(bot.risk)}
                         </div>
                       </div>
@@ -292,13 +292,13 @@ export default function BotsPage() {
                     <div className="flex items-center gap-2 flex-shrink-0">
                       <Link
                         href={`/dashboard-v2/bots/${bot.slug}`}
-                        className="px-4 py-2 border border-dark-700 rounded-lg text-dark-300 hover:text-white hover:border-primary-500/50 hover:bg-primary-500/10 transition-all text-sm font-semibold"
+                        className="hidden sm:inline-block px-4 py-2 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-700 dark:text-dark-300 hover:text-gray-900 dark:hover:text-white hover:border-primary-500/50 hover:bg-primary-500/10 transition-all text-sm font-semibold"
                       >
                         Details
                       </Link>
                       <Link
                         href={`/dashboard-v2/bots/${bot.slug}`}
-                        className="px-4 py-2 bg-dark-900/50 border border-dark-700 rounded-lg text-white font-semibold hover:bg-gradient-to-r hover:from-primary-500/20 hover:to-accent-500/20 hover:border-primary-500/50 transition-all text-sm"
+                        className="px-3 sm:px-4 py-2 bg-gray-50 dark:bg-dark-900/50 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white font-semibold hover:bg-gradient-to-r hover:from-primary-500/20 hover:to-accent-500/20 hover:border-primary-500/50 transition-all text-sm"
                       >
                         Copy
                       </Link>

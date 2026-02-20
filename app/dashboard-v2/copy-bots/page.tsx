@@ -58,25 +58,25 @@ export default function CopyBotsPage() {
   const aggStats = botManager.getAggregatedStats();
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="p-4 sm:p-6 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
-          <h1 className="text-3xl font-semibold">Copy Trading Bots</h1>
+          <h1 className="text-2xl sm:text-3xl font-semibold">Copy Trading Bots</h1>
           <p className="text-gray-500 mt-1">
             Status: {isConnected ? '🟢 Connected' : '🔴 Disconnected'}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <button
             onClick={create10Bots}
-            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium"
+            className="px-4 py-2 bg-gradient-to-r from-primary-500 to-accent-500 text-white rounded-lg hover:from-primary-600 hover:to-accent-600 font-medium"
           >
             Create 10 Bots
           </button>
           <button
             onClick={createBot}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="px-4 py-2 bg-dark-800 border border-dark-700 text-white rounded-lg hover:bg-dark-700"
           >
             + Create Bot
           </button>
@@ -93,28 +93,28 @@ export default function CopyBotsPage() {
 
       {/* Aggregated Stats */}
       {stats.length > 0 && (
-        <div className="grid grid-cols-4 gap-4 mb-6">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+          <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border">
             <div className="text-sm text-gray-500">Total Bots</div>
-            <div className="text-2xl font-medium">{aggStats.totalBots}</div>
+            <div className="text-xl sm:text-2xl font-medium">{aggStats.totalBots}</div>
           </div>
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border">
+          <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border">
             <div className="text-sm text-gray-500">Total P&L</div>
             <div
-              className={`text-2xl font-medium ${
+              className={`text-xl sm:text-2xl font-medium ${
                 aggStats.totalPnL >= 0 ? 'text-green-500' : 'text-red-500'
               }`}
             >
               {aggStats.totalPnL >= 0 ? '+' : ''}${aggStats.totalPnL.toFixed(2)}
             </div>
           </div>
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border">
+          <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border">
             <div className="text-sm text-gray-500">Avg Win Rate</div>
-            <div className="text-2xl font-medium">{aggStats.avgWinRate.toFixed(1)}%</div>
+            <div className="text-xl sm:text-2xl font-medium">{aggStats.avgWinRate.toFixed(1)}%</div>
           </div>
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border">
+          <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border">
             <div className="text-sm text-gray-500">Positions / Trades</div>
-            <div className="text-2xl font-medium">
+            <div className="text-xl sm:text-2xl font-medium">
               {aggStats.totalPositions} / {aggStats.totalTrades}
             </div>
           </div>
@@ -123,18 +123,18 @@ export default function CopyBotsPage() {
 
       {/* Empty State */}
       {stats.length === 0 && (
-        <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border">
+        <div className="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg border">
           <p className="text-gray-500 text-lg mb-4">No bots yet</p>
           <div className="flex gap-3 justify-center">
             <button
               onClick={create10Bots}
-              className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium"
+              className="px-6 py-3 bg-gradient-to-r from-primary-500 to-accent-500 text-white rounded-lg hover:from-primary-600 hover:to-accent-600 font-medium"
             >
               Create 10 Bots
             </button>
             <button
               onClick={createBot}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              className="px-6 py-3 bg-dark-800 border border-dark-700 text-white rounded-lg hover:bg-dark-700"
             >
               Create 1 Bot
             </button>
@@ -158,7 +158,7 @@ function BotCard({ bot, onDelete }: { bot: BotStats; onDelete: () => void }) {
   const isProfit = bot.totalPnL >= 0;
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border hover:shadow-lg transition-shadow">
+    <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border hover:shadow-lg transition-shadow">
       {/* Header */}
       <div className="flex justify-between items-start mb-3">
         <div>
@@ -174,7 +174,7 @@ function BotCard({ bot, onDelete }: { bot: BotStats; onDelete: () => void }) {
       </div>
 
       {/* P&L */}
-      <div className={`text-3xl font-semibold mb-4 ${isProfit ? 'text-green-500' : 'text-red-500'}`}>
+      <div className={`text-2xl sm:text-3xl font-semibold mb-4 ${isProfit ? 'text-green-500' : 'text-red-500'}`}>
         {isProfit ? '+' : ''}${bot.totalPnL.toFixed(2)}
       </div>
 

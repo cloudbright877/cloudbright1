@@ -152,13 +152,30 @@ export default function TopBar() {
       kyc: 'KYC',
     };
 
+    // Segments that don't have their own page — redirect to a real one
+    const hrefOverrides: Record<string, string> = {
+      traders: '/dashboard-v2/leaderboard',
+    };
+
+    // Format dynamic segments (bot slugs, copy IDs, usernames) into readable labels
+    const formatSegment = (seg: string, parentSeg?: string): string => {
+      // Generated copy IDs like copy_1771519158389_zytz4ilul
+      if (/^copy_\d+/.test(seg)) return 'Active Copy';
+      // Slugs & usernames: replace hyphens/underscores with spaces, title case
+      return decodeURIComponent(seg)
+        .replace(/[-_]/g, ' ')
+        .replace(/\b\w/g, c => c.toUpperCase());
+    };
+
     let path = '/dashboard-v2';
     for (let i = 0; i < segments.length; i++) {
       const seg = segments[i];
       path += `/${seg}`;
-      const label = labelMap[seg] || decodeURIComponent(seg);
+      const parentSeg = i > 0 ? segments[i - 1] : undefined;
+      const label = labelMap[seg] || formatSegment(seg, parentSeg);
       const isLast = i === segments.length - 1;
-      crumbs.push({ label, href: isLast ? undefined : path });
+      const href = isLast ? undefined : (hrefOverrides[seg] || path);
+      crumbs.push({ label, href });
     }
 
     return crumbs;
@@ -201,30 +218,30 @@ export default function TopBar() {
     <motion.header
       initial={{ y: -60 }}
       animate={{ y: 0 }}
-      className="hidden lg:block h-16 bg-gradient-to-r from-dark-900/95 to-dark-800/95 backdrop-blur-sm border-b-2 border-dark-700 sticky top-0 z-30"
+      className="h-14 lg:h-16 bg-gradient-to-r from-gray-50/95 to-gray-100/95 dark:from-dark-900/95 dark:to-dark-800/95 backdrop-blur-sm border-b-2 border-gray-200 dark:border-dark-700 sticky top-0 z-30"
     >
-      <div className="h-full px-6 flex items-center justify-between">
+      <div className="h-full px-3 sm:px-4 lg:px-6 flex items-center justify-between">
         {/* Left: Breadcrumb */}
-        <div className="flex items-center gap-4">
+        <div className="hidden md:flex items-center gap-4">
           <nav className="flex items-center gap-2 text-sm">
             <Link
               href="/dashboard-v2"
-              className="text-dark-400 hover:text-primary-400 transition-colors"
+              className="text-gray-600 dark:text-dark-400 hover:text-primary-400 transition-colors"
             >
               Home
             </Link>
             {getBreadcrumbs().map((crumb, i) => (
               <span key={i} className="flex items-center gap-2">
-                <span className="text-dark-600">/</span>
+                <span className="text-gray-400 dark:text-dark-600">/</span>
                 {crumb.href ? (
                   <Link
                     href={crumb.href}
-                    className="text-dark-400 hover:text-primary-400 transition-colors"
+                    className="text-gray-600 dark:text-dark-400 hover:text-primary-400 transition-colors"
                   >
                     {crumb.label}
                   </Link>
                 ) : (
-                  <span className="text-white font-medium">{crumb.label}</span>
+                  <span className="text-gray-900 dark:text-white font-medium">{crumb.label}</span>
                 )}
               </span>
             ))}
@@ -232,12 +249,12 @@ export default function TopBar() {
         </div>
 
         {/* Right: Actions */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 ml-auto">
           {/* Notifications */}
           <div className="relative" ref={notificationsRef}>
             <button
               onClick={() => setShowNotifications(!showNotifications)}
-              className="relative p-2 hover:bg-dark-800 rounded-lg transition-colors text-dark-400 hover:text-white"
+              className="relative p-2.5 sm:p-2 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-lg transition-colors text-gray-600 dark:text-dark-400 hover:text-gray-900 dark:hover:text-white"
               aria-label="Notifications"
             >
               <Bell className="w-5 h-5" />
@@ -256,11 +273,11 @@ export default function TopBar() {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 10, scale: 0.95 }}
                   transition={{ duration: 0.2 }}
-                  className="absolute right-0 mt-2 w-96 bg-dark-900/95 backdrop-blur-sm border-2 border-dark-700 rounded-2xl shadow-2xl overflow-hidden"
+                  className="fixed right-2 left-2 sm:left-auto sm:absolute sm:right-0 mt-2 sm:w-96 bg-gray-50/95 dark:bg-dark-900/95 backdrop-blur-sm border-2 border-gray-200 dark:border-dark-700 rounded-2xl shadow-2xl overflow-hidden z-50"
                 >
                   {/* Header */}
-                  <div className="flex items-center justify-between p-4 border-b border-dark-700">
-                    <h3 className="text-lg font-bold text-white">Notifications</h3>
+                  <div className="flex items-center justify-between p-3 sm:p-4 border-b border-gray-200 dark:border-dark-700">
+                    <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">Notifications</h3>
                     <Link
                       href="/dashboard-v2/notifications"
                       className="text-xs text-primary-400 hover:text-primary-300 transition-colors"
@@ -271,13 +288,13 @@ export default function TopBar() {
                   </div>
 
                   {/* Notifications List */}
-                  <div className="max-h-96 overflow-y-auto">
+                  <div className="max-h-[60vh] sm:max-h-96 overflow-y-auto">
                     {displayNotifications.length > 0 ? (
                       displayNotifications.map((notif: NotificationProps) => (
                         <div
                           key={notif.id}
                           onClick={() => !notif.read && handleMarkAsRead(notif.id)}
-                          className={`p-4 border-b border-dark-800 hover:bg-dark-800/50 transition-colors cursor-pointer ${
+                          className={`p-3 sm:p-4 border-b border-gray-200 dark:border-dark-800 hover:bg-gray-50 dark:hover:bg-dark-800/50 transition-colors cursor-pointer ${
                             !notif.read ? 'bg-primary-500/5' : ''
                           }`}
                         >
@@ -287,7 +304,7 @@ export default function TopBar() {
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-start justify-between gap-2">
-                                <div className="text-sm font-semibold text-white">
+                                <div className="text-sm font-semibold text-gray-900 dark:text-white">
                                   {notif.title}
                                 </div>
                                 {!notif.read && (
@@ -295,10 +312,10 @@ export default function TopBar() {
                                 )}
                               </div>
                               <div
-                                className="text-xs text-dark-300 mt-1"
+                                className="text-xs text-gray-700 dark:text-dark-300 mt-1"
                                 dangerouslySetInnerHTML={{ __html: notif.body }}
                               />
-                              <div className="text-xs text-dark-500 mt-1">
+                              <div className="text-xs text-gray-500 dark:text-dark-500 mt-1">
                                 {timeAgo(notif.date)}
                               </div>
                             </div>
@@ -306,17 +323,17 @@ export default function TopBar() {
                         </div>
                       ))
                     ) : (
-                      <div className="p-8 text-center text-dark-400 text-sm">
+                      <div className="p-8 text-center text-gray-500 dark:text-dark-400 text-sm">
                         No notifications
                       </div>
                     )}
                   </div>
 
                   {/* Footer */}
-                  <div className="p-3 border-t border-dark-700 bg-dark-900/50">
+                  <div className="p-3 border-t border-gray-200 dark:border-dark-700 bg-gray-50/50 dark:bg-dark-900/50">
                     <button
                       onClick={handleMarkAllAsRead}
-                      className="w-full py-2 text-xs text-dark-400 hover:text-white transition-colors"
+                      className="w-full py-2 text-xs text-gray-600 dark:text-dark-400 hover:text-gray-900 dark:hover:text-white transition-colors"
                     >
                       Mark all as read
                     </button>
@@ -336,7 +353,7 @@ export default function TopBar() {
           <div className="relative" ref={userMenuRef}>
             <button
               onClick={() => setShowUserMenu(!showUserMenu)}
-              className="flex items-center gap-3 p-2 hover:bg-dark-800 rounded-lg transition-colors"
+              className="flex items-center gap-2 sm:gap-3 p-2 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-lg transition-colors"
             >
               {/* Avatar */}
               <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-accent-500 rounded-lg flex items-center justify-center text-white font-bold text-sm overflow-hidden">
@@ -352,10 +369,10 @@ export default function TopBar() {
                   <span>{userData.username[0].toUpperCase()}</span>
                 )}
               </div>
-              <span className="text-sm font-medium text-white hidden xl:block">
+              <span className="text-sm font-medium text-gray-900 dark:text-white hidden xl:block">
                 {userData.username}
               </span>
-              <ChevronDown className="w-4 h-4 text-dark-400" />
+              <ChevronDown className="w-4 h-4 text-gray-600 dark:text-dark-400" />
             </button>
 
             {/* User Dropdown */}
@@ -366,38 +383,38 @@ export default function TopBar() {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 10, scale: 0.95 }}
                   transition={{ duration: 0.2 }}
-                  className="absolute right-0 mt-2 w-56 bg-dark-900/95 backdrop-blur-sm border-2 border-dark-700 rounded-2xl shadow-2xl overflow-hidden"
+                  className="absolute right-0 mt-2 w-48 sm:w-56 bg-gray-50/95 dark:bg-dark-900/95 backdrop-blur-sm border-2 border-gray-200 dark:border-dark-700 rounded-2xl shadow-2xl overflow-hidden z-50"
                 >
                   <div className="p-2">
                     {/* User tier badge */}
                     <div className="px-4 py-3 mb-2 flex items-center gap-2">
                       <Gem className="w-4 h-4 text-accent-400" />
-                      <span className="text-xs text-dark-400">{userData.tier} Tier</span>
+                      <span className="text-xs text-gray-600 dark:text-dark-400">{userData.tier} Tier</span>
                     </div>
 
                     <Link
                       href={`/dashboard-v2/traders/${userData.username}`}
-                      className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-dark-800 transition-colors group"
+                      className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-800 transition-colors group"
                       onClick={() => setShowUserMenu(false)}
                     >
-                      <User className="w-4 h-4 text-dark-400 group-hover:text-white" />
-                      <span className="text-sm text-dark-300 group-hover:text-white">
+                      <User className="w-4 h-4 text-gray-600 dark:text-dark-400 group-hover:text-gray-900 dark:group-hover:text-white" />
+                      <span className="text-sm text-gray-700 dark:text-dark-300 group-hover:text-gray-900 dark:group-hover:text-white">
                         My Profile
                       </span>
                     </Link>
 
                     <Link
                       href="/dashboard-v2/settings"
-                      className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-dark-800 transition-colors group"
+                      className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-800 transition-colors group"
                       onClick={() => setShowUserMenu(false)}
                     >
-                      <Settings className="w-4 h-4 text-dark-400 group-hover:text-white" />
-                      <span className="text-sm text-dark-300 group-hover:text-white">
+                      <Settings className="w-4 h-4 text-gray-600 dark:text-dark-400 group-hover:text-gray-900 dark:group-hover:text-white" />
+                      <span className="text-sm text-gray-700 dark:text-dark-300 group-hover:text-gray-900 dark:group-hover:text-white">
                         Settings
                       </span>
                     </Link>
 
-                    <div className="h-px bg-dark-700 my-2" />
+                    <div className="h-px bg-gray-200 dark:bg-dark-700 my-2" />
 
                     <button
                       onClick={() => {
@@ -406,8 +423,8 @@ export default function TopBar() {
                       }}
                       className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-500/10 transition-colors group"
                     >
-                      <LogOut className="w-4 h-4 text-dark-400 group-hover:text-red-400" />
-                      <span className="text-sm text-dark-300 group-hover:text-red-400">
+                      <LogOut className="w-4 h-4 text-gray-600 dark:text-dark-400 group-hover:text-red-400" />
+                      <span className="text-sm text-gray-700 dark:text-dark-300 group-hover:text-red-400">
                         Logout
                       </span>
                     </button>

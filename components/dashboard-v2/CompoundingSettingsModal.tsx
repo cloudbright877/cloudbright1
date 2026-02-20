@@ -97,23 +97,23 @@ export function CompoundingSettingsModal({
 
   // Color based on compounding level
   const getCompoundingColor = () => {
-    if (compounding === 0) return 'text-blue-400';
-    if (compounding <= 30) return 'text-green-400';
-    if (compounding <= 70) return 'text-yellow-400';
+    if (compounding === 0) return 'text-primary-400';
+    if (compounding <= 30) return 'text-primary-400';
+    if (compounding <= 70) return 'text-primary-400';
     return 'text-primary-400';
   };
 
   const getBarGradient = () => {
-    if (compounding === 0) return 'from-blue-500 to-blue-400';
-    if (compounding <= 30) return 'from-green-500 to-emerald-400';
-    if (compounding <= 70) return 'from-yellow-500 to-amber-400';
+    if (compounding === 0) return 'from-primary-500 to-primary-400';
+    if (compounding <= 30) return 'from-primary-500 to-accent-400';
+    if (compounding <= 70) return 'from-primary-500 to-accent-500';
     return 'from-primary-500 to-accent-500';
   };
 
   const getThumbBorder = () => {
-    if (compounding === 0) return 'border-blue-400';
-    if (compounding <= 30) return 'border-green-400';
-    if (compounding <= 70) return 'border-yellow-400';
+    if (compounding === 0) return 'border-primary-400';
+    if (compounding <= 30) return 'border-primary-400';
+    if (compounding <= 70) return 'border-primary-400';
     return 'border-primary-400';
   };
 
@@ -136,26 +136,26 @@ export function CompoundingSettingsModal({
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-md bg-gradient-to-br from-dark-800 to-dark-900 border border-dark-700 rounded-2xl shadow-2xl overflow-hidden"
+              className="relative w-full max-w-md bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800 dark:to-dark-900 border border-gray-200 dark:border-dark-700 rounded-2xl shadow-2xl overflow-hidden"
             >
               {/* Glow Effect */}
               <div className="absolute -inset-1 bg-gradient-to-r from-primary-500/20 to-accent-500/20 blur-xl opacity-50" />
 
               <div className="relative">
                 {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-dark-700">
+                <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-dark-700">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-primary-500/20 border border-primary-500/30 rounded-lg flex items-center justify-center">
                       <Settings className="w-5 h-5 text-primary-400" />
                     </div>
                     <div>
-                      <h2 className="text-lg font-medium text-white">Copy Settings</h2>
-                      <p className="text-xs text-dark-400">{botName}</p>
+                      <h2 className="text-lg font-medium text-gray-900 dark:text-white">Copy Settings</h2>
+                      <p className="text-xs text-gray-600 dark:text-dark-400">{botName}</p>
                     </div>
                   </div>
                   <button
                     onClick={onClose}
-                    className="w-10 h-10 rounded-lg bg-dark-700 hover:bg-dark-600 border border-dark-600 flex items-center justify-center text-dark-400 hover:text-white transition-all"
+                    className="w-10 h-10 rounded-lg bg-gray-200 dark:bg-dark-700 hover:bg-gray-300 dark:hover:bg-dark-600 border border-gray-300 dark:border-dark-600 flex items-center justify-center text-gray-600 dark:text-dark-400 hover:text-gray-900 dark:hover:text-white transition-all"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -167,21 +167,21 @@ export function CompoundingSettingsModal({
                   <div>
                     <div className="flex items-center gap-2 mb-1">
                       <RefreshCw className="w-4 h-4 text-primary-400" />
-                      <label className="text-sm font-medium text-white">
+                      <label className="text-sm font-medium text-gray-900 dark:text-white">
                         Compounding
                       </label>
                     </div>
-                    <p className="text-xs text-dark-400 mb-4">
+                    <p className="text-xs text-gray-600 dark:text-dark-400 mb-4">
                       Percentage of profit to reinvest back into the bot
                     </p>
 
                     {/* Value display */}
                     <div className="flex items-center justify-between mb-3">
-                      <span className="text-xs text-dark-400">Withdraw</span>
+                      <span className="text-xs text-gray-600 dark:text-dark-400">Withdraw</span>
                       <span className={`text-2xl font-medium ${getCompoundingColor()}`}>
                         {compounding}%
                       </span>
-                      <span className="text-xs text-dark-400">Reinvest</span>
+                      <span className="text-xs text-gray-600 dark:text-dark-400">Reinvest</span>
                     </div>
 
                     {/* Custom slider track */}
@@ -198,7 +198,7 @@ export function CompoundingSettingsModal({
                       }}
                     >
                       {/* Track background */}
-                      <div className="absolute left-0 right-0 h-3 bg-dark-700 rounded-full overflow-hidden">
+                      <div className="absolute left-0 right-0 h-3 bg-gray-200 dark:bg-dark-700 rounded-full overflow-hidden">
                         {/* Filled portion */}
                         <motion.div
                           className={`absolute inset-y-0 left-0 bg-gradient-to-r ${getBarGradient()} rounded-full`}
@@ -219,7 +219,7 @@ export function CompoundingSettingsModal({
                     </div>
 
                     {/* Labels */}
-                    <div className="flex justify-between text-xs text-dark-500 mt-1">
+                    <div className="flex justify-between text-xs text-gray-500 dark:text-dark-500 mt-1">
                       <span>0%</span>
                       <span>25%</span>
                       <span>50%</span>
@@ -236,7 +236,7 @@ export function CompoundingSettingsModal({
                           className={`flex-1 px-2 py-1.5 rounded-lg text-xs font-medium transition-all ${
                             compounding === val
                               ? 'bg-primary-500/20 border border-primary-500/50 text-primary-400'
-                              : 'bg-dark-700/50 border border-dark-600 text-dark-400 hover:text-white hover:border-dark-500'
+                              : 'bg-gray-200 dark:bg-dark-700/50 border border-gray-300 dark:border-dark-600 text-gray-600 dark:text-dark-400 hover:text-gray-900 dark:hover:text-white hover:border-gray-400 dark:hover:border-dark-500'
                           }`}
                         >
                           {val}%
@@ -245,16 +245,16 @@ export function CompoundingSettingsModal({
                     </div>
 
                     {/* Explanation box */}
-                    <div className="mt-4 p-3 bg-dark-900/50 rounded-lg border border-dark-700 space-y-2">
+                    <div className="mt-4 p-3 bg-gray-50 dark:bg-dark-900/50 rounded-lg border border-gray-200 dark:border-dark-700 space-y-2">
                       <div className="flex items-center justify-between text-xs">
-                        <span className="text-dark-400">Profit to balance</span>
-                        <span className="font-normal text-blue-400">
+                        <span className="text-gray-600 dark:text-dark-400">Profit to balance</span>
+                        <span className="font-normal text-primary-400">
                           {100 - compounding}%
                         </span>
                       </div>
                       <div className="flex items-center justify-between text-xs">
-                        <span className="text-dark-400">Profit reinvested</span>
-                        <span className="font-normal text-green-400">
+                        <span className="text-gray-600 dark:text-dark-400">Profit reinvested</span>
+                        <span className="font-normal text-primary-400">
                           {compounding}%
                         </span>
                       </div>
@@ -262,19 +262,19 @@ export function CompoundingSettingsModal({
                   </div>
 
                   {/* Divider */}
-                  <div className="h-px bg-dark-700" />
+                  <div className="h-px bg-gray-200 dark:bg-dark-700" />
 
                   {/* Autoclose Toggle */}
                   <div>
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <Power className="w-4 h-4 text-amber-400" />
-                          <label className="text-sm font-medium text-white">
+                          <Power className="w-4 h-4 text-primary-400" />
+                          <label className="text-sm font-medium text-gray-900 dark:text-white">
                             Auto-close after lock-in
                           </label>
                         </div>
-                        <p className="text-xs text-dark-400">
+                        <p className="text-xs text-gray-600 dark:text-dark-400">
                           Automatically deactivate bot and return funds when lock-in period ends
                         </p>
                       </div>
@@ -285,7 +285,7 @@ export function CompoundingSettingsModal({
                         className={`relative ml-4 w-14 h-7 rounded-full transition-colors duration-200 flex-shrink-0 ${
                           autoclose
                             ? 'bg-gradient-to-r from-primary-500 to-accent-500'
-                            : 'bg-dark-600'
+                            : 'bg-gray-300 dark:bg-dark-600'
                         }`}
                       >
                         <motion.div
@@ -311,10 +311,10 @@ export function CompoundingSettingsModal({
                 </div>
 
                 {/* Footer */}
-                <div className="flex gap-3 p-6 border-t border-dark-700">
+                <div className="flex gap-3 p-6 border-t border-gray-200 dark:border-dark-700">
                   <button
                     onClick={onClose}
-                    className="flex-1 px-4 py-3 bg-dark-700 hover:bg-dark-600 border border-dark-600 rounded-lg font-semibold text-white transition-all"
+                    className="flex-1 px-4 py-3 bg-gray-200 dark:bg-dark-700 hover:bg-gray-300 dark:hover:bg-dark-600 border border-gray-300 dark:border-dark-600 rounded-lg font-semibold text-gray-900 dark:text-white transition-all"
                   >
                     Cancel
                   </button>

@@ -158,7 +158,7 @@ export default function WalletsPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-100 dark:bg-dark-950 text-gray-900 dark:text-white">
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-100 dark:bg-dark-950 text-gray-900 dark:text-white">
         <div className="max-w-[1800px] mx-auto p-4 lg:p-6">
           <div className="flex items-center justify-center min-h-[60vh]">
             <div className="text-center">
@@ -198,7 +198,7 @@ export default function WalletsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-dark-950 text-gray-900 dark:text-white">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-100 dark:bg-dark-950 text-gray-900 dark:text-white">
       <div className="max-w-[1800px] mx-auto p-4 lg:p-6">
         {/* Top Section: Left Actions + Right Stats */}
         <motion.div

@@ -103,26 +103,26 @@ export function AddFundsModal({ isOpen, onClose, bot, availableBalance, onAddFun
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-md bg-gradient-to-br from-dark-800 to-dark-900 border border-dark-700 rounded-2xl shadow-2xl overflow-hidden"
+              className="relative w-full max-w-md bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800 dark:to-dark-900 border border-gray-200 dark:border-dark-700 rounded-2xl shadow-2xl overflow-hidden"
             >
               {/* Glow Effect */}
-              <div className="absolute -inset-1 bg-gradient-to-r from-green-500/20 to-emerald-500/20 blur-xl opacity-50" />
+              <div className="absolute -inset-1 bg-gradient-to-r from-primary-500/20 to-accent-500/20 blur-xl opacity-50" />
 
               <div className="relative">
                 {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-dark-700">
+                <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-dark-700">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-green-500/20 border border-green-500/30 rounded-lg flex items-center justify-center">
-                      <DollarSign className="w-5 h-5 text-green-400" />
+                    <div className="w-10 h-10 bg-primary-500/20 border border-primary-500/30 rounded-lg flex items-center justify-center">
+                      <DollarSign className="w-5 h-5 text-primary-400" />
                     </div>
                     <div>
-                      <h2 className="text-lg font-medium text-white">Add Funds</h2>
-                      <p className="text-xs text-dark-400">{bot.name}</p>
+                      <h2 className="text-lg font-medium text-gray-900 dark:text-white">Add Funds</h2>
+                      <p className="text-xs text-gray-600 dark:text-dark-400">{bot.name}</p>
                     </div>
                   </div>
                   <button
                     onClick={onClose}
-                    className="w-10 h-10 rounded-lg bg-dark-700 hover:bg-dark-600 border border-dark-600 flex items-center justify-center text-dark-400 hover:text-white transition-all"
+                    className="w-10 h-10 rounded-lg bg-gray-200 dark:bg-dark-700 hover:bg-gray-300 dark:hover:bg-dark-600 border border-gray-300 dark:border-dark-600 flex items-center justify-center text-gray-600 dark:text-dark-400 hover:text-gray-900 dark:hover:text-white transition-all"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -131,18 +131,18 @@ export function AddFundsModal({ isOpen, onClose, bot, availableBalance, onAddFun
                 {/* Content */}
                 <div className="p-6 space-y-5">
                   {/* Current Investment */}
-                  <div className="p-4 bg-dark-900/50 rounded-xl border border-dark-700">
-                    <p className="text-xs text-dark-400 mb-1">Current Investment</p>
-                    <p className="text-2xl font-medium text-white">${bot.invested.toLocaleString('en-US')}</p>
+                  <div className="p-4 bg-gray-50 dark:bg-dark-900/50 rounded-xl border border-gray-200 dark:border-dark-700">
+                    <p className="text-xs text-gray-600 dark:text-dark-400 mb-1">Current Investment</p>
+                    <p className="text-2xl font-medium text-gray-900 dark:text-white">${bot.invested.toLocaleString('en-US')}</p>
                   </div>
 
                   {/* Amount Input */}
                   <div>
-                    <label className="block text-sm font-medium text-white mb-3">
+                    <label className="block text-sm font-medium text-gray-900 dark:text-white mb-3">
                       Add Amount
                     </label>
                     <div className="relative">
-                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-dark-400 font-medium text-lg">
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 dark:text-dark-400 font-medium text-lg">
                         $
                       </div>
                       <input
@@ -150,9 +150,9 @@ export function AddFundsModal({ isOpen, onClose, bot, availableBalance, onAddFun
                         value={amount}
                         onChange={(e) => handleAmountChange(e.target.value)}
                         placeholder="0.00"
-                        className={`w-full pl-10 pr-4 py-3 bg-dark-800 border ${
-                          error ? 'border-red-500/50' : 'border-dark-700'
-                        } rounded-xl text-white text-lg font-semibold focus:outline-none focus:border-green-500/50 transition-colors`}
+                        className={`w-full pl-10 pr-4 py-3 bg-gray-100 dark:bg-dark-800 border ${
+                          error ? 'border-red-500/50' : 'border-gray-200 dark:border-dark-700'
+                        } rounded-xl text-gray-900 dark:text-white text-lg font-semibold focus:outline-none focus:border-primary-500/50 transition-colors`}
                       />
                     </div>
                     {error && (
@@ -165,8 +165,8 @@ export function AddFundsModal({ isOpen, onClose, bot, availableBalance, onAddFun
 
                   {/* Quick Amounts */}
                   <div>
-                    <p className="text-xs text-dark-400 mb-2">Quick amounts</p>
-                    <div className="grid grid-cols-4 gap-2">
+                    <p className="text-xs text-gray-600 dark:text-dark-400 mb-2">Quick amounts</p>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                       {quickAmounts.map((quickAmount) => (
                         <button
                           key={quickAmount}
@@ -174,8 +174,8 @@ export function AddFundsModal({ isOpen, onClose, bot, availableBalance, onAddFun
                           disabled={quickAmount > availableBalance}
                           className={`px-3 py-2 rounded-lg border text-sm font-medium transition-all ${
                             quickAmount > availableBalance
-                              ? 'bg-dark-800 border-dark-700 text-dark-600 cursor-not-allowed'
-                              : 'bg-dark-800 border-dark-600 text-dark-300 hover:bg-green-500/10 hover:border-green-500/50 hover:text-green-400'
+                              ? 'bg-gray-200 dark:bg-dark-800 border-gray-300 dark:border-dark-700 text-gray-400 dark:text-dark-600 cursor-not-allowed'
+                              : 'bg-gray-200 dark:bg-dark-800 border-gray-300 dark:border-dark-600 text-gray-700 dark:text-dark-300 hover:bg-primary-500/10 hover:border-primary-500/50 hover:text-primary-400'
                           }`}
                         >
                           ${quickAmount}
@@ -185,16 +185,16 @@ export function AddFundsModal({ isOpen, onClose, bot, availableBalance, onAddFun
                   </div>
 
                   {/* Divider */}
-                  <div className="h-px bg-dark-700" />
+                  <div className="h-px bg-gray-200 dark:bg-dark-700" />
 
                   {/* Summary */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-dark-400">Available Balance</span>
-                      <span className="font-normal text-white">${availableBalance.toLocaleString('en-US')}</span>
+                      <span className="text-gray-600 dark:text-dark-400">Available Balance</span>
+                      <span className="font-normal text-gray-900 dark:text-white">${availableBalance.toLocaleString('en-US')}</span>
                     </div>
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-dark-400">New Investment</span>
+                      <span className="text-gray-600 dark:text-dark-400">New Investment</span>
                       <div className="flex items-center gap-2">
                         <span className="font-normal text-green-400">${newInvestment.toLocaleString('en-US')}</span>
                         {amount && !error && (
@@ -222,10 +222,10 @@ export function AddFundsModal({ isOpen, onClose, bot, availableBalance, onAddFun
                 </div>
 
                 {/* Footer */}
-                <div className="flex gap-3 p-6 border-t border-dark-700">
+                <div className="flex gap-3 p-6 border-t border-gray-200 dark:border-dark-700">
                   <button
                     onClick={onClose}
-                    className="flex-1 px-4 py-3 bg-dark-700 hover:bg-dark-600 border border-dark-600 rounded-lg font-semibold text-white transition-all"
+                    className="flex-1 px-4 py-3 bg-gray-200 dark:bg-dark-700 hover:bg-gray-300 dark:hover:bg-dark-600 border border-gray-300 dark:border-dark-600 rounded-lg font-semibold text-gray-900 dark:text-white transition-all"
                   >
                     Cancel
                   </button>
@@ -234,8 +234,8 @@ export function AddFundsModal({ isOpen, onClose, bot, availableBalance, onAddFun
                     disabled={!amount || !!error || parseFloat(amount) <= 0}
                     className="relative flex-1 group disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <div className="absolute -inset-0.5 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg blur opacity-60 group-hover:opacity-100 transition duration-300 group-disabled:opacity-30" />
-                    <div className="relative px-4 py-3 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg font-semibold text-white shadow-lg">
+                    <div className="absolute -inset-0.5 bg-gradient-to-r from-primary-500 to-accent-500 rounded-lg blur opacity-60 group-hover:opacity-100 transition duration-300 group-disabled:opacity-30" />
+                    <div className="relative px-4 py-3 bg-gradient-to-r from-primary-500 to-accent-500 rounded-lg font-semibold text-white shadow-lg">
                       Add ${parseFloat(amount) || 0}
                     </div>
                   </button>

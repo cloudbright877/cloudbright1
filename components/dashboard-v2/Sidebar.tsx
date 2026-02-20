@@ -42,8 +42,8 @@ const NavItem = ({ href, icon, label, active, badge, onClick, isCollapsed }: Nav
         transition-all duration-300
         ${isCollapsed ? 'justify-center px-3 py-3' : 'gap-3 px-4 py-3'}
         ${active
-          ? 'bg-gradient-to-r from-primary-500/20 to-accent-500/20 border-2 border-primary-500/30 text-white'
-          : 'text-dark-300 hover:text-white hover:bg-dark-800/50 border-2 border-transparent'
+          ? 'bg-gradient-to-r from-primary-500/20 to-accent-500/20 border-2 border-primary-500/30 text-gray-900 dark:text-white'
+          : 'text-gray-700 dark:text-dark-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-dark-800/50 border-2 border-transparent'
         }
       `}
     >
@@ -71,12 +71,16 @@ const NavItem = ({ href, icon, label, active, badge, onClick, isCollapsed }: Nav
 };
 
 const NavDivider = () => (
-  <div className="h-px bg-gradient-to-r from-transparent via-dark-700 to-transparent my-4" />
+  <div className="h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-dark-700 to-transparent my-4" />
 );
 
-export default function Sidebar() {
+interface SidebarProps {
+  isCollapsed: boolean;
+  onToggle: () => void;
+}
+
+export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
   const pathname = usePathname();
-  const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (
     <>
@@ -88,29 +92,36 @@ export default function Sidebar() {
           hidden lg:flex flex-col
           ${isCollapsed ? 'w-20' : 'w-64'}
           h-screen fixed left-0 top-0
-          bg-gradient-to-b from-dark-900/95 to-dark-800/95
-          backdrop-blur-sm border-r-2 border-dark-700
+          bg-gradient-to-b from-gray-50/95 to-gray-100/95 dark:from-dark-900/95 dark:to-dark-800/95
+          backdrop-blur-sm border-r-2 border-gray-200 dark:border-dark-700
           transition-all duration-300 z-40
         `}
       >
         {/* Logo */}
-        <div className="relative flex items-center justify-center p-6 border-b border-dark-700">
-          <Link href="/dashboard-v2" className="flex items-center justify-center group">
+        <div className={`flex items-center h-16 border-b border-gray-200 dark:border-dark-700 ${isCollapsed ? 'justify-center px-2' : 'px-4'}`}>
+          <Link href="/dashboard-v2" className="flex items-center gap-2.5 group" onClick={isCollapsed ? (e) => { e.preventDefault(); onToggle(); } : undefined}>
             <Image
               src="/logo2.svg"
               alt="CloudBright"
-              width={40}
-              height={40}
-              className="h-10 w-10"
+              width={32}
+              height={32}
+              className="h-8 w-8 flex-shrink-0"
             />
+            {!isCollapsed && (
+              <span className="text-gray-900 dark:text-white font-semibold whitespace-nowrap" style={{ fontSize: '0.95rem', letterSpacing: '0.07rem', transform: 'scaleY(0.88)', transformOrigin: 'center' }}>
+                CLOUDBRIGHT
+              </span>
+            )}
           </Link>
 
-          <button
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            className="absolute right-4 p-2 hover:bg-dark-800 rounded-lg transition-colors text-dark-400 hover:text-white"
-          >
-            {isCollapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
-          </button>
+          {!isCollapsed && (
+            <button
+              onClick={onToggle}
+              className="ml-auto p-1.5 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-lg transition-colors text-gray-600 dark:text-dark-400 hover:text-gray-900 dark:hover:text-white flex-shrink-0"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+          )}
         </div>
 
         {/* Navigation */}
@@ -135,7 +146,7 @@ export default function Sidebar() {
 
           {!isCollapsed && (
             <div className="px-2 mb-2">
-              <div className="text-xs font-medium text-dark-500 uppercase tracking-wider">
+              <div className="text-xs font-medium text-gray-500 dark:text-dark-500 uppercase tracking-wider">
                 Finance
               </div>
             </div>
@@ -215,14 +226,14 @@ export default function Sidebar() {
       </motion.aside>
 
       {/* Mobile Bottom Navigation */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-dark-900/95 backdrop-blur-sm border-t-2 border-dark-700">
-        <div className="grid grid-cols-5 gap-1 p-2">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-gray-50/95 dark:bg-dark-900/95 backdrop-blur-sm border-t-2 border-gray-200 dark:border-dark-700">
+        <div className="grid grid-cols-4 gap-1 p-2 pb-[env(safe-area-inset-bottom,8px)]">
           <Link
             href="/dashboard-v2"
             className={`flex flex-col items-center gap-1 py-2 rounded-lg transition-colors ${
               pathname === '/dashboard-v2'
                 ? 'bg-primary-500/20 text-primary-400'
-                : 'text-dark-400'
+                : 'text-gray-600 dark:text-dark-400'
             }`}
           >
             <Home className="w-5 h-5" />
@@ -234,7 +245,7 @@ export default function Sidebar() {
             className={`flex flex-col items-center gap-1 py-2 rounded-lg transition-colors ${
               pathname?.startsWith('/dashboard-v2/bots')
                 ? 'bg-primary-500/20 text-primary-400'
-                : 'text-dark-400'
+                : 'text-gray-600 dark:text-dark-400'
             }`}
           >
             <Bot className="w-5 h-5" />
@@ -246,7 +257,7 @@ export default function Sidebar() {
             className={`flex flex-col items-center gap-1 py-2 rounded-lg transition-colors ${
               pathname?.startsWith('/dashboard-v2/leaderboard') || pathname?.startsWith('/dashboard-v2/traders')
                 ? 'bg-primary-500/20 text-primary-400'
-                : 'text-dark-400'
+                : 'text-gray-600 dark:text-dark-400'
             }`}
           >
             <Users className="w-5 h-5" />
@@ -258,7 +269,7 @@ export default function Sidebar() {
             className={`flex flex-col items-center gap-1 py-2 rounded-lg transition-colors ${
               pathname?.startsWith('/dashboard-v2/settings')
                 ? 'bg-primary-500/20 text-primary-400'
-                : 'text-dark-400'
+                : 'text-gray-600 dark:text-dark-400'
             }`}
           >
             <Settings className="w-5 h-5" />

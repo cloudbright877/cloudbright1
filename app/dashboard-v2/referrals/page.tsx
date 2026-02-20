@@ -251,7 +251,7 @@ export default function ReferralsPage() {
   // Loading
   if (isLoading) {
     return (
-      <div className="min-h-screen p-4 lg:p-8">
+      <div className="min-h-screen bg-gray-100 dark:bg-dark-950 p-4 lg:p-8">
         <div className="max-w-7xl mx-auto flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
             <div className="w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
@@ -263,7 +263,7 @@ export default function ReferralsPage() {
   }
 
   return (
-    <div className="min-h-screen p-4 lg:p-8">
+    <div className="min-h-screen bg-gray-100 dark:bg-dark-950 p-4 lg:p-8">
       <div className="max-w-7xl mx-auto">
         {/* ══════════ STATS CARDS ══════════ */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">

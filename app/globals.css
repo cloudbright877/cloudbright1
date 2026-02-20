@@ -18,7 +18,7 @@ html {
 
 body {
   font-family: 'Inter', sans-serif;
-  background-color: #ffffff;
+  background-color: #e5e7eb; /* gray-200 - darker background for light theme */
   color: #111827;
   overflow-x: hidden;
 }

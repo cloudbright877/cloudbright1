@@ -56,7 +56,7 @@ export default function SettingsPage() {
   const enabledNotifs = [data.notifications.tradeAlerts, data.notifications.securityAlerts, data.notifications.weeklyReport].filter(Boolean).length;
 
   return (
-    <div className="min-h-screen p-4 lg:p-6">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-100 dark:bg-dark-950 p-4 lg:p-6">
       <div className="max-w-[1800px] mx-auto">
         {/* Bento Grid - 12 columns like main dashboard */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4 lg:gap-6">
@@ -70,27 +70,27 @@ export default function SettingsPage() {
           >
             <Link href="/dashboard-v2/settings/profile" className="block h-full">
               <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-              <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 hover:border-primary-500/40 rounded-[calc(1rem-1px)] p-5 transition-all group">
+              <div className="h-full bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 hover:border-primary-500/40 rounded-[calc(1rem-1px)] p-5 transition-all group">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-primary-500/20 rounded-lg flex items-center justify-center">
                       <User className="w-5 h-5 text-primary-400" />
                     </div>
-                    <h3 className="text-lg font-medium text-white">Profile</h3>
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white">Profile</h3>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-dark-500 group-hover:text-primary-400 group-hover:translate-x-0.5 transition-all" />
+                  <ChevronRight className="w-4 h-4 text-gray-500 dark:text-dark-500 group-hover:text-primary-400 group-hover:translate-x-0.5 transition-all" />
                 </div>
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-500 rounded-full flex items-center justify-center text-xl font-medium text-white flex-shrink-0">
                     {data.profile.avatar}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-white font-normal truncate">{data.profile.displayName}</p>
-                    <p className="text-sm text-dark-400 truncate">@{data.profile.username}</p>
+                    <p className="text-gray-900 dark:text-white font-normal truncate">{data.profile.displayName}</p>
+                    <p className="text-sm text-gray-600 dark:text-dark-400 truncate">@{data.profile.username}</p>
                   </div>
                 </div>
                 {data.profile.bio && (
-                  <p className="text-xs text-dark-500 line-clamp-2">{data.profile.bio}</p>
+                  <p className="text-xs text-gray-600 dark:text-dark-500 line-clamp-2">{data.profile.bio}</p>
                 )}
               </div>
               </div>
@@ -106,33 +106,33 @@ export default function SettingsPage() {
           >
             <Link href="/dashboard-v2/settings/security" className="block h-full">
               <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-              <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 hover:border-primary-500/40 rounded-[calc(1rem-1px)] p-5 transition-all group">
+              <div className="h-full bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 hover:border-primary-500/40 rounded-[calc(1rem-1px)] p-5 transition-all group">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-primary-500/20 rounded-lg flex items-center justify-center">
                       <Shield className="w-5 h-5 text-primary-400" />
                     </div>
-                    <h3 className="text-lg font-medium text-white">Security</h3>
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white">Security</h3>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-dark-500 group-hover:text-primary-400 group-hover:translate-x-0.5 transition-all" />
+                  <ChevronRight className="w-4 h-4 text-gray-500 dark:text-dark-500 group-hover:text-primary-400 group-hover:translate-x-0.5 transition-all" />
                 </div>
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3 bg-dark-900/50 rounded-lg border border-dark-700/50">
+                  <div className="flex items-center justify-between p-3 bg-gray-100 dark:bg-dark-900/50 rounded-lg border border-gray-200 dark:border-dark-700/50">
                     <div className="flex items-center gap-2">
-                      <Lock className="w-4 h-4 text-dark-400" />
-                      <span className="text-sm text-dark-300">Two-Factor Auth</span>
+                      <Lock className="w-4 h-4 text-gray-600 dark:text-dark-400" />
+                      <span className="text-sm text-gray-700 dark:text-dark-300">Two-Factor Auth</span>
                     </div>
                     <SettingsBadge
                       variant={data.security.twoFactorEnabled ? 'success' : 'warning'}
                       text={data.security.twoFactorEnabled ? 'On' : 'Off'}
                     />
                   </div>
-                  <div className="flex items-center justify-between p-3 bg-dark-900/50 rounded-lg border border-dark-700/50">
+                  <div className="flex items-center justify-between p-3 bg-gray-100 dark:bg-dark-900/50 rounded-lg border border-gray-200 dark:border-dark-700/50">
                     <div className="flex items-center gap-2">
-                      <Laptop className="w-4 h-4 text-dark-400" />
-                      <span className="text-sm text-dark-300">Active Sessions</span>
+                      <Laptop className="w-4 h-4 text-gray-600 dark:text-dark-400" />
+                      <span className="text-sm text-gray-700 dark:text-dark-300">Active Sessions</span>
                     </div>
-                    <span className="text-sm text-dark-400">{data.security.sessions.length}</span>
+                    <span className="text-sm text-gray-600 dark:text-dark-400">{data.security.sessions.length}</span>
                   </div>
                 </div>
               </div>
@@ -149,20 +149,20 @@ export default function SettingsPage() {
           >
             <Link href="/dashboard-v2/settings/kyc" className="block h-full">
               <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-              <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 hover:border-primary-500/40 rounded-[calc(1rem-1px)] p-5 transition-all group">
+              <div className="h-full bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 hover:border-primary-500/40 rounded-[calc(1rem-1px)] p-5 transition-all group">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-primary-500/20 rounded-lg flex items-center justify-center">
                       <FileCheck className="w-5 h-5 text-primary-400" />
                     </div>
-                    <h3 className="text-lg font-medium text-white">Verification</h3>
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white">Verification</h3>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-dark-500 group-hover:text-primary-400 group-hover:translate-x-0.5 transition-all" />
+                  <ChevronRight className="w-4 h-4 text-gray-500 dark:text-dark-500 group-hover:text-primary-400 group-hover:translate-x-0.5 transition-all" />
                 </div>
                 <div className="flex items-center gap-3 mb-3">
                   <SettingsBadge variant={kycBadge.variant} text={kycBadge.text} size="md" />
                 </div>
-                <p className="text-xs text-dark-500">
+                <p className="text-xs text-gray-600 dark:text-dark-500">
                   {data.kyc.status === 'approved'
                     ? `Verified on ${data.kyc.reviewedAt ? new Date(data.kyc.reviewedAt).toLocaleDateString() : 'N/A'}`
                     : data.kyc.status === 'not_started'
@@ -185,32 +185,32 @@ export default function SettingsPage() {
           >
             <Link href="/dashboard-v2/settings/wallets" className="block h-full">
               <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-              <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 hover:border-primary-500/40 rounded-[calc(1rem-1px)] p-5 transition-all group">
+              <div className="h-full bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 hover:border-primary-500/40 rounded-[calc(1rem-1px)] p-5 transition-all group">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-primary-500/20 rounded-lg flex items-center justify-center">
                       <Wallet className="w-5 h-5 text-primary-400" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-medium text-white">Saved Wallets</h3>
-                      <p className="text-xs text-dark-400">{data.wallets.addresses.length}/10 addresses</p>
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-white">Saved Wallets</h3>
+                      <p className="text-xs text-gray-600 dark:text-dark-400">{data.wallets.addresses.length}/10 addresses</p>
                     </div>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-dark-500 group-hover:text-primary-400 group-hover:translate-x-0.5 transition-all" />
+                  <ChevronRight className="w-4 h-4 text-gray-500 dark:text-dark-500 group-hover:text-primary-400 group-hover:translate-x-0.5 transition-all" />
                 </div>
                 {data.wallets.addresses.length === 0 ? (
-                  <p className="text-xs text-dark-500">No saved addresses. Add withdrawal addresses for quick transfers.</p>
+                  <p className="text-xs text-gray-600 dark:text-dark-500">No saved addresses. Add withdrawal addresses for quick transfers.</p>
                 ) : (
                   <div className="space-y-2">
                     {data.wallets.addresses.slice(0, 3).map((addr) => (
-                      <div key={addr.id} className="flex items-center gap-2 p-2 bg-dark-900/50 rounded-lg border border-dark-700/50">
+                      <div key={addr.id} className="flex items-center gap-2 p-2 bg-gray-100 dark:bg-dark-900/50 rounded-lg border border-gray-200 dark:border-dark-700/50">
                         <SettingsBadge variant="info" text={addr.network} size="sm" />
-                        <span className="text-xs text-white font-medium truncate">{addr.label}</span>
-                        <span className="text-xs text-dark-500 font-mono truncate ml-auto">{addr.address.slice(0, 6)}...{addr.address.slice(-4)}</span>
+                        <span className="text-xs text-gray-900 dark:text-white font-medium truncate">{addr.label}</span>
+                        <span className="text-xs text-gray-600 dark:text-dark-500 font-mono truncate ml-auto">{addr.address.slice(0, 6)}...{addr.address.slice(-4)}</span>
                       </div>
                     ))}
                     {data.wallets.addresses.length > 3 && (
-                      <p className="text-xs text-dark-500">+{data.wallets.addresses.length - 3} more</p>
+                      <p className="text-xs text-gray-600 dark:text-dark-500">+{data.wallets.addresses.length - 3} more</p>
                     )}
                   </div>
                 )}
@@ -228,15 +228,15 @@ export default function SettingsPage() {
           >
             <Link href="/dashboard-v2/settings/notifications" className="block h-full">
               <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-              <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 hover:border-primary-500/40 rounded-[calc(1rem-1px)] p-5 transition-all group">
+              <div className="h-full bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 hover:border-primary-500/40 rounded-[calc(1rem-1px)] p-5 transition-all group">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-primary-500/20 rounded-lg flex items-center justify-center">
                       <Bell className="w-5 h-5 text-primary-400" />
                     </div>
-                    <h3 className="text-lg font-medium text-white">Notifications</h3>
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white">Notifications</h3>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-dark-500 group-hover:text-primary-400 group-hover:translate-x-0.5 transition-all" />
+                  <ChevronRight className="w-4 h-4 text-gray-500 dark:text-dark-500 group-hover:text-primary-400 group-hover:translate-x-0.5 transition-all" />
                 </div>
                 <div className="space-y-2">
                   {[
@@ -244,13 +244,13 @@ export default function SettingsPage() {
                     { label: 'Security Alerts', on: data.notifications.securityAlerts },
                     { label: 'Weekly Report', on: data.notifications.weeklyReport },
                   ].map((item) => (
-                    <div key={item.label} className="flex items-center justify-between p-2 bg-dark-900/50 rounded-lg border border-dark-700/50">
-                      <span className="text-xs text-dark-300">{item.label}</span>
+                    <div key={item.label} className="flex items-center justify-between p-2 bg-gray-100 dark:bg-dark-900/50 rounded-lg border border-gray-200 dark:border-dark-700/50">
+                      <span className="text-xs text-gray-700 dark:text-dark-300">{item.label}</span>
                       <div className={`w-2 h-2 rounded-full ${item.on ? 'bg-green-400' : 'bg-dark-600'}`} />
                     </div>
                   ))}
                 </div>
-                <p className="text-xs text-dark-500 mt-3">{enabledNotifs}/3 enabled</p>
+                <p className="text-xs text-gray-600 dark:text-dark-500 mt-3">{enabledNotifs}/3 enabled</p>
               </div>
               </div>
             </Link>
@@ -265,28 +265,28 @@ export default function SettingsPage() {
           >
             <Link href="/dashboard-v2/settings/preferences" className="block h-full">
               <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-              <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 hover:border-primary-500/40 rounded-[calc(1rem-1px)] p-5 transition-all group">
+              <div className="h-full bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 hover:border-primary-500/40 rounded-[calc(1rem-1px)] p-5 transition-all group">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-primary-500/20 rounded-lg flex items-center justify-center">
                       <Settings className="w-5 h-5 text-primary-400" />
                     </div>
-                    <h3 className="text-lg font-medium text-white">Preferences</h3>
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white">Preferences</h3>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-dark-500 group-hover:text-primary-400 group-hover:translate-x-0.5 transition-all" />
+                  <ChevronRight className="w-4 h-4 text-gray-500 dark:text-dark-500 group-hover:text-primary-400 group-hover:translate-x-0.5 transition-all" />
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-dark-400">Language</span>
-                    <span className="text-xs text-white font-medium">{data.preferences.language.toUpperCase()}</span>
+                    <span className="text-xs text-gray-600 dark:text-dark-400">Language</span>
+                    <span className="text-xs text-gray-900 dark:text-white font-medium">{data.preferences.language.toUpperCase()}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-dark-400">Currency</span>
-                    <span className="text-xs text-white font-medium">{data.preferences.currency}</span>
+                    <span className="text-xs text-gray-600 dark:text-dark-400">Currency</span>
+                    <span className="text-xs text-gray-900 dark:text-white font-medium">{data.preferences.currency}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-dark-400">Theme</span>
-                    <span className="text-xs text-white font-medium">Dark</span>
+                    <span className="text-xs text-gray-600 dark:text-dark-400">Theme</span>
+                    <span className="text-xs text-gray-900 dark:text-white font-medium">Dark</span>
                   </div>
                 </div>
               </div>

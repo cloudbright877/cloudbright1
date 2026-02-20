@@ -217,7 +217,7 @@ export default function AdminBotsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-dark-900 via-dark-800 to-dark-900 p-6">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-100 dark:bg-dark-950 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
