@@ -213,10 +213,9 @@ export default function WalletsPage() {
               <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all hover:bg-[linear-gradient(135deg,rgba(139,92,246,0.2)_0%,rgba(139,92,246,0)_40%,rgba(139,92,246,0)_60%,rgba(139,92,246,0.2)_100%)]">
                 <Link
                   href="/dashboard-v2/wallets/deposit"
-                  className="relative group overflow-hidden bg-gradient-to-br bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-5 block h-full"
+                  className="relative group overflow-hidden bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-5 block h-full"
                 >
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500/10 rounded-full blur-3xl opacity-100 group-hover:scale-150 transition-transform" />
-                  <div className="relative z-10 flex items-center justify-between h-full">
+                  <div className="relative flex items-center justify-between h-full">
                     <div className="flex items-center gap-3 sm:gap-4">
                       <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center flex-shrink-0">
                         <ArrowDownLeft className="w-5 h-5 sm:w-6 sm:h-6 text-primary-400" />
@@ -236,10 +235,9 @@ export default function WalletsPage() {
               <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all hover:bg-[linear-gradient(135deg,rgba(255,255,255,0.2)_0%,rgba(255,255,255,0)_40%,rgba(255,255,255,0)_60%,rgba(255,255,255,0.2)_100%)]">
                 <Link
                   href="/dashboard-v2/wallets/withdraw"
-                  className="relative group overflow-hidden bg-gradient-to-br bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-5 block h-full"
+                  className="relative group overflow-hidden bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-5 block h-full"
                 >
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-dark-500/10 rounded-full blur-3xl opacity-100 group-hover:scale-150 transition-transform" />
-                  <div className="relative z-10 flex items-center justify-between h-full">
+                  <div className="relative flex items-center justify-between h-full">
                     <div className="flex items-center gap-3 sm:gap-4">
                       <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-200 dark:bg-dark-700/50 border border-gray-300 dark:border-dark-600 rounded-xl flex items-center justify-center flex-shrink-0">
                         <ArrowUpLeft className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700 dark:text-dark-300" />
@@ -315,7 +313,7 @@ export default function WalletsPage() {
 
             {/* Funds Flow */}
             <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-            <div className="relative overflow-hidden bg-gradient-to-br bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-4">
+            <div className="relative overflow-hidden bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-4">
               <div className="relative flex items-center justify-center gap-4 sm:gap-8">
                 <div>
                   <div className="text-xs text-gray-600 dark:text-dark-400 mb-0.5">Total In</div>
@@ -365,7 +363,7 @@ export default function WalletsPage() {
 
           {/* Table */}
           <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-          <div className="bg-gradient-to-br bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] overflow-hidden">
+          <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] overflow-hidden">
             {filteredTransactions.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="w-full">
@@ -386,7 +384,7 @@ export default function WalletsPage() {
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.03 }}
-                        className="border-b border-gray-300 dark:border-dark-800/50 hover:bg-gray-50 dark:bg-dark-800/30 transition-colors"
+                        className="border-b border-gray-200 dark:border-dark-800/50 hover:bg-gray-100 dark:hover:bg-dark-800/30 transition-colors"
                       >
                         <td className="py-4 px-3 sm:px-5">
                           <div className="text-sm text-gray-900 dark:text-white">{formatDate(tx.date)}</div>
@@ -444,7 +442,7 @@ export default function WalletsPage() {
                       <button
                         onClick={() => setCurrentPage(currentPage - 1)}
                         disabled={currentPage === 1}
-                        className="flex items-center gap-1.5 px-4 py-2 bg-gray-50 dark:bg-dark-800 hover:bg-gray-200 dark:bg-dark-700 disabled:opacity-40 border border-gray-200 dark:border-dark-700 rounded-lg text-sm text-gray-900 dark:text-white font-medium transition-all disabled:cursor-not-allowed"
+                        className="flex items-center gap-1.5 px-4 py-2 bg-gray-50 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 disabled:opacity-40 border border-gray-200 dark:border-dark-700 rounded-lg text-sm text-gray-900 dark:text-white font-medium transition-all disabled:cursor-not-allowed"
                       >
                         <ChevronLeft className="w-4 h-4" />
                         Previous
@@ -452,7 +450,7 @@ export default function WalletsPage() {
                       <button
                         onClick={() => setCurrentPage(currentPage + 1)}
                         disabled={currentPage === totalPages}
-                        className="flex items-center gap-1.5 px-4 py-2 bg-gray-50 dark:bg-dark-800 hover:bg-gray-200 dark:bg-dark-700 disabled:opacity-40 border border-gray-200 dark:border-dark-700 rounded-lg text-sm text-gray-900 dark:text-white font-medium transition-all disabled:cursor-not-allowed"
+                        className="flex items-center gap-1.5 px-4 py-2 bg-gray-50 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 disabled:opacity-40 border border-gray-200 dark:border-dark-700 rounded-lg text-sm text-gray-900 dark:text-white font-medium transition-all disabled:cursor-not-allowed"
                       >
                         Next
                         <ChevronRight className="w-4 h-4" />
