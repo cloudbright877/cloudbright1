@@ -816,7 +816,7 @@ export default function ReferralsPage() {
                                     ? 'bg-green-500/20 text-green-400'
                                     : isUnlocked
                                       ? 'bg-yellow-500/20 text-yellow-400'
-                                      : 'bg-dark-700 text-dark-400'
+                                      : 'bg-gray-200 dark:bg-dark-700 text-gray-700 dark:text-dark-400'
                                 }`}
                               >
                                 LVL {level.level}
@@ -842,7 +842,7 @@ export default function ReferralsPage() {
                                 ? 'text-green-400'
                                 : isUnlocked
                                   ? 'text-yellow-400'
-                                  : 'text-dark-500'
+                                  : 'text-gray-600 dark:text-dark-500'
                             }`}
                           >
                             ${formatNumber(level.bonus)}
