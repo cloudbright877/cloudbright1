@@ -25,13 +25,13 @@ These Terms apply to all users of the platform, including visitors, registered u
 
 Custodial Wallets: Upon registration, you receive protected custodial wallets supporting 7+ cryptocurrencies (USDT, BTC, ETH, BNB, USDC, SOL, TRX, and others). Your funds are stored in AES-256 encrypted wallets with 2FA authentication and hardware security module protection. Deposits are credited instantly.
 
-Bot Marketplace: Cloudbright hosts 100+ verified trading bots. Each bot has a public profile with full transparency: real-time active trades, complete trade history, equity curves, win rate, Sharpe ratio, max drawdown, and other statistical data. You can browse, compare, and filter bots by performance metrics before making any investment decision.
+Bot Marketplace: Cloudbright hosts a curated selection of verified trading bots. Each bot has a public profile with full transparency: real-time active trades, complete trade history, equity curves, win rate, Sharpe ratio, max drawdown, and other statistical data. You can browse, compare, and filter bots by performance metrics before making any investment decision.
 
-Copy Trading: When you copy a bot, you choose your investment amount (minimum $50) and a lock-in period (7 to 180 days). The master bot then trades automatically with your capital. You can monitor every trade in real time from your dashboard. You do not make individual trading decisions — the bot handles all trading activity.
+Copy Trading: When you copy a bot, you choose your investment amount (minimum $50) and a capital reservation period (15 to 180 days). The master bot then trades automatically with your capital. You can monitor every trade in real time from your dashboard. You do not make individual trading decisions — the bot handles all trading activity.
 
-Profit Collection: You can collect realized profits from your copied bots at any time. Once your lock-in period ends, your full investment capital is available for withdrawal.
+Profit Collection: You can collect realized profits from your copied bots at any time. Once your capital reservation period ends, your full investment capital is available for withdrawal.
 
-Commission Model: Cloudbright charges commission only on realized profit. No monthly subscriptions, no setup fees, no hidden charges. If you do not profit, you do not pay.
+Fee Model: Cloudbright charges a flat 2% commission on all withdrawals, plus a fixed network fee depending on the cryptocurrency and blockchain used. No monthly subscriptions, no setup fees, no hidden charges. Deposits are free.
 
 Social Community: Cloudbright includes social features — leaderboards, bot rankings, community interaction, and the ability to follow and compare top-performing bots.`
         },
@@ -63,7 +63,7 @@ The trading bots available on Cloudbright execute trades automatically based on 
 
 By copying a bot, you authorize the bot to execute trades with your invested capital. You acknowledge that you have reviewed the bot's transparent performance data before making your investment decision. Cloudbright does not provide investment advice, and the display of bot statistics on our platform should not be construed as a recommendation to copy any particular bot.
 
-You understand that lock-in periods (7 to 180 days) mean your invested capital is committed for the chosen duration. While you can collect realized profits at any time, the principal investment is locked until the period ends. You understand that technical issues, including platform outages or software errors, may temporarily affect your ability to monitor or manage your investments. We recommend that you never invest more than you can afford to lose.`
+You understand that capital reservation periods (15 to 180 days) mean your invested capital is committed for the chosen duration. While you can collect realized profits at any time, the principal investment is reserved until the period ends. You understand that technical issues, including platform outages or software errors, may temporarily affect your ability to monitor or manage your investments. We recommend that you never invest more than you can afford to lose.`
         },
         {
           title: "Custodial Wallet Terms",
@@ -73,7 +73,7 @@ Your funds are held in custodial wallets operated and secured by Cloudbright. We
 
 Deposits are credited instantly upon blockchain confirmation. Minimum investment per bot copy is $50 USD equivalent. We support USDT, BTC, ETH, BNB, USDC, SOL, TRX, and other major cryptocurrencies.
 
-Withdrawals of available funds (profits and unlocked capital) are processed according to our standard procedures. Funds locked in active bot copies are not available for withdrawal until the lock-in period expires.
+Withdrawals of available funds (profits and unlocked capital) are processed according to our standard procedures. Funds reserved in active bot copies are not available for withdrawal until the capital reservation period expires.
 
 Cloudbright reserves the right to delay or refuse withdrawals in cases of: (a) suspected fraudulent activity; (b) incomplete KYC/AML verification; (c) ongoing compliance investigations; (d) requests from law enforcement or regulatory authorities; or (e) technical issues requiring resolution. We will notify you of any such delays and the reasons therefor.`
         },
@@ -99,9 +99,9 @@ Some jurisdictions do not allow the exclusion of certain warranties or the limit
           title: "Termination",
           content: `Cloudbright reserves the right to suspend or terminate your account and access to the platform at any time, with or without cause, for any reason including but not limited to: (a) violation of these Terms or any applicable law; (b) fraudulent or abusive behavior; (c) failure to complete required KYC/AML verification; (d) suspected money laundering or other illegal activity; (e) extended periods of inactivity; or (f) requests by law enforcement or government agencies.
 
-Upon termination, your right to use the platform will immediately cease. Active bot copies will be stopped, and any locked funds will be released after the lock-in period expires or as required by applicable law. Cloudbright reserves the right to withhold funds if required to comply with legal obligations or ongoing investigations.
+Upon termination, your right to use the platform will immediately cease. Active bot copies will be stopped, and any reserved funds will be released after the capital reservation period expires or as required by applicable law. Cloudbright reserves the right to withhold funds if required to comply with legal obligations or ongoing investigations.
 
-You may terminate your account at any time by following the account closure procedures on the platform or by contacting support. Upon voluntary termination, active bot copies will be stopped. Funds in locked periods will be released upon lock-in expiry. You remain responsible for any obligations incurred prior to termination.
+You may terminate your account at any time by following the account closure procedures on the platform or by contacting support. Upon voluntary termination, active bot copies will be stopped. Funds in active reservations will be released upon reservation expiry. You remain responsible for any obligations incurred prior to termination.
 
 All provisions of these Terms that by their nature should survive termination shall survive, including without limitation intellectual property rights, limitation of liability, and dispute resolution provisions.`
         },

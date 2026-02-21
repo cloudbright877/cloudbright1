@@ -47,7 +47,9 @@ import { TokenIcon } from '@token-icons/react';
 import { getDemoBotBySlug } from '@/lib/demoMarketplace';
 import type { DemoBot } from '@/lib/demoMarketplace';
 import { botsApi } from '@/lib/api/botsApi';
-import type { BotConfig } from '@/lib/trading/types';
+import type { BotConfig, Trade as BotTrade } from '@/lib/trading/types';
+import { LoadingScreen } from '@/components/dashboard-v2/LoadingScreen';
+import { formatNumber, formatDateTime } from '@/lib/formatters';
 import type {
   MasterBotData,
   BotStats,
@@ -69,6 +71,12 @@ interface Trade {
   profit: number;
   roi: number;
   date: string;
+}
+
+interface OrderBookEntry {
+  price: number;
+  size: string;
+  total: number;
 }
 
 /**
@@ -140,7 +148,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
   const [cpuUsage, setCpuUsage] = useState(23);
   const [memUsage, setMemUsage] = useState(30);
   const [apiLatency, setApiLatency] = useState(12);
-  const [orderBook, setOrderBook] = useState<{ asks: any[], bids: any[] }>({ asks: [], bids: [] });
+  const [orderBook, setOrderBook] = useState<{ asks: OrderBookEntry[], bids: OrderBookEntry[] }>({ asks: [], bids: [] });
   const [equityPeriod, setEquityPeriod] = useState<'1D' | '7D' | '30D' | '90D' | 'ALL'>('ALL');
 
   const [isDark, setIsDark] = useState(true);
@@ -179,7 +187,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
   };
 
   // Convert DemoBot to MasterBotData format
-  const convertDemoBotToMasterData = (demoBot: DemoBot): any => {
+  const convertDemoBotToMasterData = (demoBot: DemoBot): MasterBotData => {
     const config = demoBot.config;
 
     // Fill missing config fields with defaults
@@ -204,22 +212,27 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
       activePositions: 0, // Will be overridden with real data
       maxPositions: completeConfig.maxConcurrentPositions,
       stats: {
-        ...demoBot.stats, // Preserve original stats for UI display
-        winRate: 0, // Will be overridden with real data
-        totalTrades: 0, // Will be overridden with real data
-        winningTrades: 0, // Will be overridden with real data
-        losingTrades: 0, // Will be overridden with real data
-        profitFactor: 0, // Will be overridden with real data
+        ...demoBot.stats,
+        winRate: 0,
+        totalTrades: 0,
+        winningTrades: 0,
+        losingTrades: 0,
+        profitFactor: 0,
         sharpeRatio: demoBot.stats.sharpeRatio || 2.5,
         maxDrawdown: Math.abs(demoBot.stats.maxDD || 0),
-        averageWin: 0, // Will be overridden with real data
-        averageLoss: 0, // Will be overridden with real data
-        bestTrade: 0, // Will be overridden with real data
-        totalVolume: 0, // Will be overridden with real data
+        averageWin: 0,
+        averageLoss: 0,
+        bestTrade: 0,
+        worstTrade: 0,
+        totalVolume: 0,
+        averageHoldTime: '0h',
+        winStreak: 0,
+        recoveryFactor: 0,
+        avgTradeSize: 0,
       },
-      openPositions: [],
-      recentTrades: [],
-    };
+      openPositions: [] as OpenPosition[],
+      recentTrades: [] as ApiTrade[],
+    } as unknown as MasterBotData;
   };
 
   // Load Master Bot Data on mount
@@ -250,8 +263,8 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
         masterData.totalCopiers = aggStats.totalCopiers;
         masterData.totalInvestedByAll = aggStats.totalInvested;
         masterData.aggregateProfit = aggStats.masterBotStats.totalPnL;
-        masterData.openPositions = aggStats.masterBotStats.positions || [];
-        masterData.recentTrades = aggStats.masterBotStats.trades || [];
+        masterData.openPositions = (aggStats.masterBotStats.positions || []) as unknown as OpenPosition[];
+        masterData.recentTrades = (aggStats.masterBotStats.trades || []) as unknown as ApiTrade[];
 
         // Replace mocked stats with real data
         masterData.activePositions = aggStats.masterBotStats.positions.length;
@@ -331,7 +344,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
           }));
 
           // Convert Trade[] to add botName and realistic metrics
-          const recentTrades: ApiTrade[] = trades.map((t: any) => {
+          const recentTrades: ApiTrade[] = trades.map((t: BotTrade) => {
             // Calculate realistic metrics if not present
             const feeRate = 0.04;
             const posSize = t.positionSize || 0;
@@ -398,7 +411,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
       if (profit > 400) level = 2;
       if (profit > 600) level = 3;
       if (profit > 800) level = 4;
-      days.push({ date: date.toLocaleDateString(), level, profit: profit.toFixed(2) });
+      days.push({ date: date.toLocaleDateString(), level, profit: formatNumber(profit) });
     }
     const weeks = [];
     for (let i = 0; i < days.length; i += 7) {
@@ -414,7 +427,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
     let cumulative = 0;
     for (let i = 0; i < days; i++) {
       cumulative += (Math.random() * 2000) + 1000;
-      data.push(parseFloat(cumulative.toFixed(2)));
+      data.push(parseFloat(formatNumber(cumulative)));
     }
     return data;
   }, []);
@@ -513,12 +526,12 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
       const basePrice = 51234.50 + (Math.random() - 0.5) * 100; // Fluctuating base price
       const asks = Array.from({ length: 15 }, (_, i) => ({
         price: basePrice + (i + 1) * 10,
-        size: (Math.random() * 2).toFixed(4),
+        size: formatNumber(Math.random() * 2, 4),
         total: 0
       }));
       const bids = Array.from({ length: 15 }, (_, i) => ({
         price: basePrice - (i + 1) * 10,
-        size: (Math.random() * 2).toFixed(4),
+        size: formatNumber(Math.random() * 2, 4),
         total: 0
       }));
       setOrderBook({ asks: asks.reverse(), bids });
@@ -551,7 +564,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
     yaxis: {
       labels: {
         style: { colors: '#94a3b8', fontSize: '10px' },
-        formatter: (val: number) => '$' + val.toLocaleString()
+        formatter: (val: number) => '$' + formatNumber(val, 0)
       }
     },
     grid: { borderColor: '#334155', strokeDashArray: 5 },
@@ -641,9 +654,9 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
     fill: { type: 'gradient' as const, gradient: { opacityFrom: 0.6, opacityTo: 0.1 } },
     xaxis: {
       type: 'numeric' as const,
-      labels: { style: { colors: '#94a3b8', fontSize: '10px' }, formatter: (val: number) => val.toFixed(0) }
+      labels: { style: { colors: '#94a3b8', fontSize: '10px' }, formatter: (val: number) => formatNumber(val, 0) }
     },
-    yaxis: { labels: { style: { colors: '#94a3b8', fontSize: '10px' }, formatter: (val: number) => val.toFixed(1) } },
+    yaxis: { labels: { style: { colors: '#94a3b8', fontSize: '10px' }, formatter: (val: number) => formatNumber(val, 1) } },
     grid: { borderColor: '#334155', strokeDashArray: 5 },
     tooltip: { theme: 'dark' as const },
     legend: { show: true, position: 'top' as const, labels: { colors: '#94a3b8' } }
@@ -677,7 +690,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
     yaxis: {
       labels: {
         style: { colors: '#94a3b8', fontSize: '10px' },
-        formatter: (val: number) => '$' + val.toLocaleString()
+        formatter: (val: number) => '$' + formatNumber(val, 0)
       }
     },
     grid: { borderColor: '#334155', strokeDashArray: 5 },
@@ -703,8 +716,8 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
 
   const predictionChartOptions = {
     series: [
-      { name: 'Predicted', data: Array.from({ length: 30 }, () => parseFloat(((Math.random() * 4) - 1).toFixed(2))) },
-      { name: 'Actual', data: Array.from({ length: 30 }, () => parseFloat(((Math.random() * 4) - 1).toFixed(2))) }
+      { name: 'Predicted', data: Array.from({ length: 30 }, () => parseFloat(formatNumber((Math.random() * 4) - 1))) },
+      { name: 'Actual', data: Array.from({ length: 30 }, () => parseFloat(formatNumber((Math.random() * 4) - 1))) }
     ],
     chart: { type: 'line' as const, height: 300, background: 'transparent', toolbar: { show: false } },
     stroke: { curve: 'smooth' as const, width: 2 },
@@ -713,7 +726,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
     yaxis: {
       labels: {
         style: { colors: '#94a3b8', fontSize: '10px' },
-        formatter: (val: number) => val.toFixed(1) + '%'
+        formatter: (val: number) => formatNumber(val, 1) + '%'
       }
     },
     grid: { borderColor: '#334155', strokeDashArray: 5 },
@@ -770,7 +783,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
         for (let j = 0; j < 30; j++) {
           value *= (1 + (Math.random() * 0.04 - 0.01));
         }
-        return parseFloat(value.toFixed(2));
+        return parseFloat(formatNumber(value));
       })
     })),
     chart: { type: 'line' as const, height: 300, background: 'transparent', toolbar: { show: false } },
@@ -780,7 +793,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
     yaxis: {
       labels: {
         style: { colors: '#94a3b8', fontSize: '10px' },
-        formatter: (val: number) => val.toFixed(0) + '%'
+        formatter: (val: number) => formatNumber(val, 0) + '%'
       }
     },
     grid: { borderColor: '#334155', strokeDashArray: 5 },
@@ -792,7 +805,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
       name: 'Drawdown',
       data: Array.from({ length: 90 }, () => {
         const value = (Math.random() * 20) - 5;
-        return parseFloat((Math.min(value, 0)).toFixed(2));
+        return parseFloat(formatNumber(Math.min(value, 0)));
       })
     }],
     chart: { type: 'area' as const, height: 250, background: 'transparent', toolbar: { show: false } },
@@ -813,7 +826,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
     yaxis: {
       labels: {
         style: { colors: '#94a3b8', fontSize: '10px' },
-        formatter: (val: number) => val.toFixed(1) + '%'
+        formatter: (val: number) => formatNumber(val, 1) + '%'
       }
     },
     grid: { borderColor: '#334155', strokeDashArray: 5 },
@@ -830,11 +843,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
 
   // Show loading state
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-100 dark:bg-transparent flex items-center justify-center">
-        <Loader2 className="w-16 h-16 text-primary-400 animate-spin" />
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   // Show error state
@@ -897,7 +906,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] mb-3"
+          className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px] mb-3"
         >
           <div className="bg-gradient-to-br from-white to-gray-50 dark:from-[#152033] dark:to-dark-900 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6">
           {/* Mobile: stacked centered layout | Desktop: horizontal layout */}
@@ -923,7 +932,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                 <div className="flex items-center gap-3 text-xs flex-wrap font-mono">
                   <div className="flex items-center gap-1">
                     <Users className="w-3 h-3 text-accent-400" />
-                    <span className="text-accent-400">{masterBotData.totalCopiers.toLocaleString()}</span>
+                    <span className="text-accent-400">{formatNumber(masterBotData.totalCopiers, 0)}</span>
                     <span className="text-gray-500 dark:text-slate-400">copiers</span>
                   </div>
                   <div className="flex items-center gap-1">
@@ -932,6 +941,13 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                     <span className="text-gray-500 dark:text-slate-400">Global</span>
                   </div>
                 </div>
+                <Link
+                  href={`/dashboard-v2/bots/${slug}/copy`}
+                  className="mt-4 px-6 py-2.5 rounded-xl text-white font-semibold text-sm bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 transition-all inline-flex items-center gap-2 shadow-lg shadow-primary-500/30"
+                >
+                  <Rocket className="w-4 h-4" />
+                  Copy This Bot
+                </Link>
               </div>
             </div>
           </div>
@@ -979,7 +995,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
               {/* Header Cards */}
               <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                 {/* Total Invested */}
-                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                   <div className="h-full bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
                     <div className="flex items-center justify-between mb-2 sm:mb-4">
                       <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
@@ -988,7 +1004,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                     </div>
                     <div className="text-[10px] sm:text-sm text-gray-600 dark:text-dark-400 mb-0.5 sm:mb-1">Total Invested</div>
                     <div className="text-base sm:text-2xl font-semibold text-gray-900 dark:text-white mb-0.5 sm:mb-2">
-                      ${masterBotData.totalInvestedByAll.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                      ${formatNumber(masterBotData.totalInvestedByAll, 0)}
                     </div>
                     <div className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400">
                       By all copiers
@@ -997,19 +1013,19 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                 </div>
 
                 {/* Aggregate P&L */}
-                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                   <div className="h-full bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-green-500/50 transition-all">
                     <div className="flex items-center justify-between mb-2 sm:mb-4">
                       <div className="w-8 h-8 sm:w-12 sm:h-12 bg-green-500/20 border border-green-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
                         <TrendingUp className="w-4 h-4 sm:w-6 sm:h-6 text-green-400" />
                       </div>
                       <div className="text-[10px] sm:text-xs font-medium text-green-400 bg-green-500/10 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded">
-                        +{masterBotData.aggregateProfitPercent.toFixed(1)}%
+                        +{formatNumber(masterBotData.aggregateProfitPercent, 1)}%
                       </div>
                     </div>
                     <div className="text-[10px] sm:text-sm text-gray-600 dark:text-dark-400 mb-0.5 sm:mb-1">Aggregate P&L</div>
                     <div className="text-base sm:text-2xl font-semibold text-green-400 mb-0.5 sm:mb-2">
-                      +${masterBotData.aggregateProfit.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                      +${formatNumber(masterBotData.aggregateProfit, 0)}
                     </div>
                     <div className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400">
                       Total profit (all copiers)
@@ -1018,7 +1034,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                 </div>
 
                 {/* Win Rate */}
-                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                   <div className="h-full bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
                     <div className="flex items-center justify-between mb-2 sm:mb-4">
                       <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
@@ -1027,7 +1043,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                     </div>
                     <div className="text-[10px] sm:text-sm text-gray-600 dark:text-dark-400 mb-0.5 sm:mb-1">Win Rate</div>
                     <div className="text-base sm:text-2xl font-semibold text-gray-900 dark:text-white mb-0.5 sm:mb-2">
-                      {masterBotData.stats.winRate.toFixed(1)}%
+                      {formatNumber(masterBotData.stats.winRate, 1)}%
                     </div>
                     <div className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400">
                       {masterBotData.stats.winningTrades}W / {masterBotData.stats.losingTrades}L
@@ -1036,7 +1052,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                 </div>
 
                 {/* Active Positions */}
-                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                   <div className="h-full bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
                     <div className="flex items-center justify-between mb-2 sm:mb-4">
                       <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
@@ -1058,7 +1074,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
               </div>
 
               {/* Equity Curve */}
-              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                 <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-6">
                   <div className="flex items-center gap-3">
@@ -1090,7 +1106,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                 <Chart
                   options={{
                     chart: {
-                      type: 'area',
+                      type: 'area' as const,
                       toolbar: { show: false },
                       background: 'transparent',
                       zoom: { enabled: false },
@@ -1098,7 +1114,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                     theme: { mode: isDark ? 'dark' as const : 'light' as const },
                     dataLabels: { enabled: false },
                     stroke: {
-                      curve: 'smooth',
+                      curve: 'smooth' as const,
                       width: 3,
                       colors: ['#10B981'],
                     },
@@ -1131,19 +1147,18 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                     yaxis: {
                       labels: {
                         style: { colors: '#64748b', fontSize: '12px' },
-                        formatter: (val: number) => `$${val.toLocaleString('en-US')}`,
+                        formatter: (val: number) => `$${formatNumber(val, 0)}`,
                       },
                     },
                     tooltip: {
                       theme: 'dark',
                       x: {
                         formatter: (val: number) => {
-                          const date = new Date(val);
-                          return date.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false });
+                          return formatDateTime(val);
                         }
                       },
                       y: {
-                        formatter: (val: number) => `$${val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+                        formatter: (val: number) => `$${formatNumber(val)}`,
                       },
                     },
                   }}
@@ -1164,7 +1179,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
               </div>
 
               {/* Performance Statistics */}
-              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                 <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
                 <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
                   <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
@@ -1181,7 +1196,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                     icon={<BarChart3 className="w-4 h-4 text-primary-400" />}
                     label="Total Trades"
                     value={masterBotData.stats.totalTrades.toString()}
-                    subtitle={`${(masterBotData.stats.totalTrades / Math.max(masterBotData.recentTrades.length > 0 ? 30 : 1, 1)).toFixed(1)}/day`}
+                    subtitle={`${formatNumber(masterBotData.stats.totalTrades / Math.max(masterBotData.recentTrades.length > 0 ? 30 : 1, 1), 1)}/day`}
                     subtitleColor="text-primary-400"
                   />
                   <MasterStatCard
@@ -1194,30 +1209,30 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                   <MasterStatCard
                     icon={<Target className="w-4 h-4 text-primary-400" />}
                     label="Win/Loss Ratio"
-                    value={`${(masterBotData.stats.winningTrades / Math.max(masterBotData.stats.losingTrades, 1)).toFixed(2)}:1`}
+                    value={`${formatNumber(masterBotData.stats.winningTrades / Math.max(masterBotData.stats.losingTrades, 1))}:1`}
                     subtitle={`${masterBotData.stats.winningTrades}W / ${masterBotData.stats.losingTrades}L`}
                     subtitleColor="text-primary-400"
                   />
                   <MasterStatCard
                     icon={<TrendingUp className="w-4 h-4 text-green-400" />}
                     label="Average Win"
-                    value={`+$${masterBotData.stats.averageWin.toFixed(0)}`}
-                    subtitle={`${((masterBotData.stats.averageWin / Math.max(masterBotData.totalInvestedByAll || 1, 1)) * 100).toFixed(2)}% of capital`}
+                    value={`+$${formatNumber(masterBotData.stats.averageWin, 0)}`}
+                    subtitle={`${formatNumber((masterBotData.stats.averageWin / Math.max(masterBotData.totalInvestedByAll || 1, 1)) * 100)}% of capital`}
                     valueColor="text-green-400"
                     subtitleColor="text-green-400"
                   />
                   <MasterStatCard
                     icon={<TrendingDown className="w-4 h-4 text-red-400" />}
                     label="Average Loss"
-                    value={`$${masterBotData.stats.averageLoss.toFixed(0)}`}
-                    subtitle={`${((Math.abs(masterBotData.stats.averageLoss) / Math.max(masterBotData.totalInvestedByAll || 1, 1)) * 100).toFixed(2)}% of capital`}
+                    value={`$${formatNumber(masterBotData.stats.averageLoss, 0)}`}
+                    subtitle={`${formatNumber((Math.abs(masterBotData.stats.averageLoss) / Math.max(masterBotData.totalInvestedByAll || 1, 1)) * 100)}% of capital`}
                     valueColor="text-red-400"
                     subtitleColor="text-red-400"
                   />
                   <MasterStatCard
                     icon={<Zap className="w-4 h-4 text-primary-400" />}
                     label="Profit Factor"
-                    value={masterBotData.stats.profitFactor.toFixed(2)}
+                    value={formatNumber(masterBotData.stats.profitFactor)}
                     subtitle={
                       masterBotData.stats.profitFactor >= 2 ? 'Excellent' :
                       masterBotData.stats.profitFactor >= 1.5 ? 'Good' :
@@ -1235,7 +1250,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                   <MasterStatCard
                     icon={<AlertTriangle className="w-4 h-4 text-red-400" />}
                     label="Max Drawdown"
-                    value={`${masterBotData.stats.maxDrawdown.toFixed(1)}%`}
+                    value={`${formatNumber(masterBotData.stats.maxDrawdown, 1)}%`}
                     subtitle={
                       masterBotData.stats.maxDrawdown < 5 ? 'Very safe' :
                       masterBotData.stats.maxDrawdown < 10 ? 'Safe' :
@@ -1253,23 +1268,23 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                   <MasterStatCard
                     icon={<DollarSign className="w-4 h-4 text-primary-400" />}
                     label="Total Volume"
-                    value={`$${(masterBotData.stats.totalVolume / 1000).toFixed(0)}K`}
-                    subtitle={`${(masterBotData.stats.totalVolume / Math.max(masterBotData.totalInvestedByAll || 1, 1)).toFixed(1)}× turnover`}
+                    value={`$${formatNumber(masterBotData.stats.totalVolume / 1000, 0)}K`}
+                    subtitle={`${formatNumber(masterBotData.stats.totalVolume / Math.max(masterBotData.totalInvestedByAll || 1, 1), 1)}× turnover`}
                     subtitleColor="text-primary-400"
                   />
                   <MasterStatCard
                     icon={<TrendingUp className="w-4 h-4 text-green-400" />}
                     label="Best Trade"
-                    value={`+$${masterBotData.stats.bestTrade.toFixed(0)}`}
-                    subtitle={`${((masterBotData.stats.bestTrade / Math.max(masterBotData.totalInvestedByAll || 1, 1)) * 100).toFixed(2)}% gain`}
+                    value={`+$${formatNumber(masterBotData.stats.bestTrade, 0)}`}
+                    subtitle={`${formatNumber((masterBotData.stats.bestTrade / Math.max(masterBotData.totalInvestedByAll || 1, 1)) * 100)}% gain`}
                     valueColor="text-green-400"
                     subtitleColor="text-green-400"
                   />
                   <MasterStatCard
                     icon={<TrendingDown className="w-4 h-4 text-red-400" />}
                     label="Worst Trade"
-                    value={`$${(masterBotData.stats.worstTrade || 0).toFixed(0)}`}
-                    subtitle={`${((Math.abs(masterBotData.stats.worstTrade || 0) / Math.max(masterBotData.totalInvestedByAll || 1, 1)) * 100).toFixed(2)}% loss`}
+                    value={`$${formatNumber(masterBotData.stats.worstTrade || 0, 0)}`}
+                    subtitle={`${formatNumber((Math.abs(masterBotData.stats.worstTrade || 0) / Math.max(masterBotData.totalInvestedByAll || 1, 1)) * 100)}% loss`}
                     valueColor="text-red-400"
                     subtitleColor="text-red-400"
                   />
@@ -1290,7 +1305,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                   <MasterStatCard
                     icon={<Trophy className="w-4 h-4 text-yellow-400" />}
                     label="Sharpe Ratio"
-                    value={(masterBotData.stats.sharpeRatio || 0).toFixed(2)}
+                    value={formatNumber(masterBotData.stats.sharpeRatio || 0)}
                     subtitle={
                       (masterBotData.stats.sharpeRatio || 0) >= 3 ? 'Excellent' :
                       (masterBotData.stats.sharpeRatio || 0) >= 2 ? 'Very good' :
@@ -1310,7 +1325,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
               </div>
 
               {/* Open Positions (Live Grid) */}
-              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                 <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
                 <div className="flex items-center justify-between mb-4 sm:mb-6">
                   <div className="flex items-center gap-2 sm:gap-3">
@@ -1362,13 +1377,13 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                               <div className="px-1.5 py-0.5 bg-gray-100 dark:bg-dark-800/50 border border-gray-200 dark:border-dark-700 rounded flex items-center gap-1.5">
                                 <div className="text-[9px] text-gray-600 dark:text-dark-400">SL</div>
                                 <div className="font-mono text-[10px] text-red-400 font-normal">
-                                  ${position.stopLoss.toFixed(0)}
+                                  ${formatNumber(position.stopLoss, 0)}
                                 </div>
                               </div>
                               <div className="px-1.5 py-0.5 bg-gray-100 dark:bg-dark-800/50 border border-gray-200 dark:border-dark-700 rounded flex items-center gap-1.5">
                                 <div className="text-[9px] text-gray-600 dark:text-dark-400">TP</div>
                                 <div className="font-mono text-[10px] text-green-400 font-normal">
-                                  ${position.takeProfit.toFixed(0)}
+                                  ${formatNumber(position.takeProfit, 0)}
                                 </div>
                               </div>
                             </div>
@@ -1382,13 +1397,13 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                             <div className="px-1.5 py-0.5 bg-gray-100 dark:bg-dark-800/50 border border-gray-200 dark:border-dark-700 rounded flex items-center gap-1.5">
                               <div className="text-[9px] text-gray-600 dark:text-dark-400">SL</div>
                               <div className="font-mono text-[10px] text-red-400 font-normal">
-                                ${position.stopLoss.toFixed(0)}
+                                ${formatNumber(position.stopLoss, 0)}
                               </div>
                             </div>
                             <div className="px-1.5 py-0.5 bg-gray-100 dark:bg-dark-800/50 border border-gray-200 dark:border-dark-700 rounded flex items-center gap-1.5">
                               <div className="text-[9px] text-gray-600 dark:text-dark-400">TP</div>
                               <div className="font-mono text-[10px] text-green-400 font-normal">
-                                ${position.takeProfit.toFixed(0)}
+                                ${formatNumber(position.takeProfit, 0)}
                               </div>
                             </div>
                           </div>
@@ -1399,7 +1414,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                           <div className="bg-gray-100 dark:bg-dark-900/50 rounded-lg px-2.5 py-2">
                             <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-0.5">Entry Price</div>
                             <div className="font-mono text-sm text-gray-900 dark:text-white font-normal">
-                              ${position.entryPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              ${formatNumber(position.entryPrice)}
                             </div>
                           </div>
                           <div className="bg-gray-100 dark:bg-dark-900/50 rounded-lg px-2.5 py-2">
@@ -1408,25 +1423,25 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                               {position.pnl >= 0 ? <ArrowUpRight className="w-2.5 h-2.5 text-green-400" /> : <ArrowDownRight className="w-2.5 h-2.5 text-red-400" />}
                             </div>
                             <div className="font-mono text-sm text-gray-900 dark:text-white font-normal">
-                              ${position.currentPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              ${formatNumber(position.currentPrice)}
                             </div>
                           </div>
                           <div className="bg-gray-100 dark:bg-dark-900/50 rounded-lg px-2.5 py-2">
                             <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-0.5">Position Size</div>
                             <div className="font-mono text-sm text-gray-900 dark:text-white font-normal">
-                              ${position.positionSize.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              ${formatNumber(position.positionSize)}
                             </div>
                           </div>
                           <div className="bg-gray-100 dark:bg-dark-900/50 rounded-lg px-2.5 py-2">
                             <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-0.5">Amount</div>
                             <div className="font-mono text-sm text-gray-900 dark:text-white font-normal">
-                              {position.amount.toFixed(8)}
+                              {formatNumber(position.amount, 8)}
                             </div>
                           </div>
                           <div className={`col-span-2 sm:col-span-1 rounded-lg px-2.5 py-2 ${position.pnl >= 0 ? 'bg-green-500/10' : 'bg-red-500/10'}`}>
                             <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-0.5">P&L</div>
                             <div className={`font-mono text-sm font-normal ${position.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                              {position.pnl >= 0 ? '+' : ''}${Math.abs(position.pnl).toFixed(2)} <span className="text-[10px] opacity-70">({position.pnl >= 0 ? '+' : ''}{position.pnlPercent.toFixed(2)}%)</span>
+                              {position.pnl >= 0 ? '+' : ''}${formatNumber(Math.abs(position.pnl))} <span className="text-[10px] opacity-70">({position.pnl >= 0 ? '+' : ''}{formatNumber(position.pnlPercent)}%)</span>
                             </div>
                           </div>
                         </div>
@@ -1438,7 +1453,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
               </div>
 
               {/* Recent Trades (Detailed Grid) */}
-              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                 <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
                   <div className="flex items-center gap-2 sm:gap-3">
@@ -1535,16 +1550,16 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                                 {/* P&L — inline on sm+ */}
                                 <div className="hidden sm:block text-right">
                                   <div className={`text-sm font-normal ${trade.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                    {trade.pnl >= 0 ? '+' : ''}${trade.pnl.toFixed(2)}
+                                    {trade.pnl >= 0 ? '+' : ''}${formatNumber(trade.pnl)}
                                   </div>
                                   <div className={`text-[10px] font-normal opacity-70 ${trade.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                    {trade.pnl >= 0 ? '+' : ''}{trade.pnlPercent.toFixed(2)}%
+                                    {trade.pnl >= 0 ? '+' : ''}{formatNumber(trade.pnlPercent)}%
                                   </div>
                                 </div>
                                 {/* Timestamp — inline on sm+ */}
                                 <div className="hidden sm:block text-right">
                                   <div className="text-[10px] text-gray-600 dark:text-dark-400 whitespace-nowrap">
-                                    {new Date(trade.closedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                    {formatDateTime(new Date(trade.closedAt).getTime())}
                                   </div>
                                 </div>
                                 <motion.div
@@ -1559,14 +1574,14 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                             <div className="flex sm:hidden items-center justify-between mt-1.5">
                               <div className="flex items-center gap-2">
                                 <div className={`text-sm font-normal ${trade.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                  {trade.pnl >= 0 ? '+' : ''}${trade.pnl.toFixed(2)}
+                                  {trade.pnl >= 0 ? '+' : ''}${formatNumber(trade.pnl)}
                                 </div>
                                 <div className={`text-[10px] font-normal opacity-70 ${trade.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                  {trade.pnl >= 0 ? '+' : ''}{trade.pnlPercent.toFixed(2)}%
+                                  {trade.pnl >= 0 ? '+' : ''}{formatNumber(trade.pnlPercent)}%
                                 </div>
                               </div>
                               <div className="text-[10px] text-gray-600 dark:text-dark-400">
-                                {new Date(trade.closedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                {formatDateTime(new Date(trade.closedAt).getTime())}
                               </div>
                             </div>
                           </div>
@@ -1582,15 +1597,15 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 mt-3">
                                 <div className="bg-gray-100 dark:bg-dark-900/50 rounded-lg px-2.5 py-2">
                                   <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-0.5">Entry Price</div>
-                                  <div className="font-mono text-sm text-gray-900 dark:text-white font-normal">${trade.entryPrice.toFixed(2)}</div>
+                                  <div className="font-mono text-sm text-gray-900 dark:text-white font-normal">${formatNumber(trade.entryPrice)}</div>
                                 </div>
                                 <div className="bg-gray-100 dark:bg-dark-900/50 rounded-lg px-2.5 py-2">
                                   <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-0.5">Exit Price</div>
-                                  <div className="font-mono text-sm text-gray-900 dark:text-white font-normal">${trade.exitPrice.toFixed(2)}</div>
+                                  <div className="font-mono text-sm text-gray-900 dark:text-white font-normal">${formatNumber(trade.exitPrice)}</div>
                                 </div>
                                 <div className="bg-gray-100 dark:bg-dark-900/50 rounded-lg px-2.5 py-2">
                                   <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-0.5">Position Size</div>
-                                  <div className="font-mono text-sm text-gray-900 dark:text-white font-normal">${trade.positionSize.toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
+                                  <div className="font-mono text-sm text-gray-900 dark:text-white font-normal">${formatNumber(trade.positionSize, 0)}</div>
                                 </div>
                                 <div className="bg-gray-100 dark:bg-dark-900/50 rounded-lg px-2.5 py-2">
                                   <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-0.5">Duration</div>
@@ -1598,7 +1613,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                                 </div>
                                 <div className="col-span-2 sm:col-span-1 bg-red-500/10 rounded-lg px-2.5 py-2">
                                   <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-0.5">Total Fees</div>
-                                  <div className="font-mono text-sm text-red-400 font-normal">-${trade.totalFees.toFixed(2)}</div>
+                                  <div className="font-mono text-sm text-red-400 font-normal">-${formatNumber(trade.totalFees)}</div>
                                 </div>
                               </div>
                             </div>
@@ -1634,7 +1649,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 {/* Left: Copiers Growth Chart */}
                 <div className="lg:col-span-8">
-                  <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                  <div className="h-full rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                     <div className="h-full bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
                     <div className="flex items-center justify-between mb-4 sm:mb-6">
                       <div className="flex items-center gap-2 sm:gap-3">
@@ -1654,17 +1669,17 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                     <Chart
                       options={{
                         chart: {
-                          type: 'area',
+                          type: 'area' as const,
                           height: 270,
                           toolbar: { show: false },
                           background: 'transparent',
                           zoom: { enabled: false },
                           sparkline: { enabled: false },
                         },
-                        theme: { mode: 'dark' },
+                        theme: { mode: 'dark' as const },
                         dataLabels: { enabled: false },
                         stroke: {
-                          curve: 'smooth',
+                          curve: 'smooth' as const,
                           width: 2,
                           colors: ['#6B7FFF'],
                         },
@@ -1696,7 +1711,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                           theme: 'dark',
                           x: { show: true },
                           y: {
-                            formatter: (val: number) => val.toLocaleString() + ' copiers',
+                            formatter: (val: number) => formatNumber(val, 0) + ' copiers',
                           },
                           style: {
                             fontSize: '12px',
@@ -1735,13 +1750,13 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                         <div>
                           <div className="text-xs text-gray-600 dark:text-dark-400 mb-1">Avg Investment</div>
                           <div className="text-xl sm:text-2xl font-medium text-gray-900 dark:text-white">
-                            ${(masterBotData.totalInvestedByAll / masterBotData.totalCopiers).toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                            ${formatNumber(masterBotData.totalInvestedByAll / masterBotData.totalCopiers, 0)}
                           </div>
                         </div>
                       </div>
                       <div className="text-right">
                         <div className="text-sm text-gray-600 dark:text-dark-400">Total AUM</div>
-                        <div className="text-base font-normal text-green-400">${(masterBotData.totalInvestedByAll / 1000000).toFixed(1)}M</div>
+                        <div className="text-base font-normal text-green-400">${formatNumber(masterBotData.totalInvestedByAll / 1000000, 1)}M</div>
                       </div>
                     </div>
                   </div>
@@ -1789,7 +1804,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
               {/* Middle Section: Geography Chart + Trading Pairs Distribution */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Geography Donut Chart */}
-                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                   <div className="h-full bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
                   <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
                     <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
@@ -1803,13 +1818,13 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                   <Chart
                     options={{
                       chart: {
-                        type: 'donut',
+                        type: 'donut' as const,
                         background: 'transparent',
                         dropShadow: {
                           enabled: false,
                         },
                       },
-                      theme: { mode: 'dark' },
+                      theme: { mode: 'dark' as const },
                       labels: ['🇺🇸 USA', '🇬🇧 UK', '🇩🇪 Germany', '🇯🇵 Japan', '🇸🇬 Singapore'],
                       colors: ['#6B7FFF', '#4A90E2', '#8B5CF6', '#5865F2', '#6BA3FF'],
                       legend: {
@@ -1843,14 +1858,14 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                                 fontSize: '24px',
                                 color: '#fff',
                                 fontWeight: 'bold',
-                                formatter: () => masterBotData.totalCopiers.toLocaleString(),
+                                formatter: () => formatNumber(masterBotData.totalCopiers, 0),
                               },
                               total: {
                                 show: true,
                                 label: 'Total Copiers',
                                 fontSize: '11px',
                                 color: '#64748b',
-                                formatter: () => masterBotData.totalCopiers.toLocaleString(),
+                                formatter: () => formatNumber(masterBotData.totalCopiers, 0),
                               },
                             },
                           },
@@ -1888,7 +1903,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                 </div>
 
                 {/* Trading Pairs Distribution */}
-                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                   <div className="h-full bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
                   <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
                     <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
@@ -1942,7 +1957,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
               {/* Bottom Section: Leaderboard + Top Copiers + Reviews */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 {/* Global Leaderboard */}
-                <div className="lg:col-span-6 rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="lg:col-span-6 rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                   <div className="h-full bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
                   <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
                     <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
@@ -1993,7 +2008,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                 </div>
 
                 {/* Top Copiers */}
-                <div className="lg:col-span-6 rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="lg:col-span-6 rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                   <div className="h-full bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
                   <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
                     <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
@@ -2045,7 +2060,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
               {/* Heatmap & Terminal Grid */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                 {/* Activity Heatmap */}
-                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                   <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 flex flex-col">
                   <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
                     <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
@@ -2092,7 +2107,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                 </div>
 
                 {/* Terminal */}
-                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                   <div className="bg-black rounded-[calc(1rem-1px)] overflow-hidden">
                   <div className="bg-gray-50 dark:bg-dark-900 px-3 py-2 border-b border-gray-200 dark:border-dark-700 flex items-center gap-2">
                     <div className="w-3 h-3 bg-red-500 rounded-full"></div>
@@ -2126,7 +2141,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
 
               {/* Trading Hours & Days */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                   <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6">
                   <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
                     <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
@@ -2141,7 +2156,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                   </div>
                 </div>
 
-                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                   <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6">
                   <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
                     <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
@@ -2158,7 +2173,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
               </div>
 
               {/* Market Conditions */}
-              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                 <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6">
                 <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
                   <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
@@ -2208,28 +2223,28 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
             >
               {/* Advanced Metrics */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                   <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
                     <div className="text-xs text-slate-400 mb-2">SORTINO RATIO</div>
                     <div className="text-xl sm:text-2xl font-medium text-primary-400 mb-2">3.12</div>
                     <div className="text-xs text-gray-600 dark:text-dark-400">Downside: 2.1%</div>
                   </div>
                 </div>
-                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                   <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
                     <div className="text-xs text-slate-400 mb-2">CALMAR RATIO</div>
                     <div className="text-xl sm:text-2xl font-medium text-primary-400 mb-2">2.87</div>
                     <div className="text-xs text-gray-600 dark:text-dark-400">Return/MaxDD</div>
                   </div>
                 </div>
-                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                   <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
                     <div className="text-xs text-slate-400 mb-2">OMEGA RATIO</div>
                     <div className="text-xl sm:text-2xl font-medium text-primary-400 mb-2">2.34</div>
                     <div className="text-xs text-gray-600 dark:text-dark-400">Threshold: 0%</div>
                   </div>
                 </div>
-                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                   <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-accent-500/50 transition-all">
                     <div className="text-xs text-slate-400 mb-2">TREYNOR RATIO</div>
                     <div className="text-xl sm:text-2xl font-medium text-accent-400 mb-2">1.89</div>
@@ -2239,7 +2254,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
               </div>
 
               {/* Risk/Reward Scatter */}
-              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                 <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6">
                 <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
                   <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
@@ -2256,21 +2271,21 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
 
               {/* Consecutive Stats */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                   <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
                     <div className="text-xs text-slate-400 mb-2">MAX WIN STREAK</div>
                     <div className="text-3xl font-medium text-primary-400 mb-2">47</div>
                     <div className="text-xs text-gray-600 dark:text-dark-400">Consecutive wins</div>
                   </div>
                 </div>
-                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                   <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-red-500/50 transition-all">
                     <div className="text-xs text-slate-400 mb-2">MAX LOSS STREAK</div>
                     <div className="text-3xl font-medium text-red-400 mb-2">3</div>
                     <div className="text-xs text-gray-600 dark:text-dark-400">Consecutive losses</div>
                   </div>
                 </div>
-                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                   <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-accent-500/50 transition-all">
                     <div className="text-xs text-slate-400 mb-2">AVG HOLD TIME</div>
                     <div className="text-3xl font-medium text-accent-400 mb-2">4.2h</div>
@@ -2280,7 +2295,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
               </div>
 
               {/* Order Book - Full Width */}
-              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                 <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6">
                 <div className="flex items-center justify-between mb-4 sm:mb-6">
                   <div className="flex items-center gap-2 sm:gap-3">
@@ -2309,9 +2324,9 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                     <div className="space-y-0.5">
                       {orderBook.asks.map((ask, idx) => (
                         <div key={idx} className="grid grid-cols-3 gap-4 py-1.5 px-2 bg-gradient-to-r from-transparent to-red-500/10 hover:to-red-500/20 transition-colors font-mono text-xs rounded">
-                          <div className="text-red-400 font-normal">{ask.price.toFixed(2)}</div>
+                          <div className="text-red-400 font-normal">{formatNumber(ask.price)}</div>
                           <div className="text-right text-gray-900 dark:text-white">{ask.size}</div>
-                          <div className="text-right text-slate-400">{(ask.price * parseFloat(ask.size)).toFixed(2)}</div>
+                          <div className="text-right text-slate-400">{formatNumber(ask.price * parseFloat(ask.size))}</div>
                         </div>
                       ))}
                     </div>
@@ -2327,9 +2342,9 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                     <div className="space-y-0.5">
                       {orderBook.bids.map((bid, idx) => (
                         <div key={idx} className="grid grid-cols-3 gap-4 py-1.5 px-2 bg-gradient-to-r from-transparent to-green-500/10 hover:to-green-500/20 transition-colors font-mono text-xs rounded">
-                          <div className="text-green-400 font-normal">{bid.price.toFixed(2)}</div>
+                          <div className="text-green-400 font-normal">{formatNumber(bid.price)}</div>
                           <div className="text-right text-gray-900 dark:text-white">{bid.size}</div>
-                          <div className="text-right text-slate-400">{(bid.price * parseFloat(bid.size)).toFixed(2)}</div>
+                          <div className="text-right text-slate-400">{formatNumber(bid.price * parseFloat(bid.size))}</div>
                         </div>
                       ))}
                     </div>
@@ -2338,7 +2353,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
 
                 {/* Current Price Separator */}
                 <div className="text-center py-4 my-4 bg-gray-100 dark:bg-dark-800/50 rounded-lg border border-gray-200 dark:border-dark-700">
-                  <div className="text-3xl font-medium text-gray-900 dark:text-white font-mono">{orderBook.bids[0]?.price.toFixed(2) || '51,234.50'}</div>
+                  <div className="text-3xl font-medium text-gray-900 dark:text-white font-mono">{orderBook.bids[0]?.price ? formatNumber(orderBook.bids[0].price) : '51,234.50'}</div>
                   <div className="text-xs text-slate-500 font-mono mt-1">CURRENT MARKET PRICE</div>
                   <div className="text-sm text-green-400 font-mono mt-1">+2.45% ↗</div>
                 </div>
@@ -2346,7 +2361,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
               </div>
 
               {/* Neural Network Visualization */}
-              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                 <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6">
                 <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
                   <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
@@ -2402,7 +2417,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
 
               {/* Fees & Correlation */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                   <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6">
                   <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
                     <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
@@ -2436,7 +2451,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                   </div>
                 </div>
 
-                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                   <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-6 flex flex-col">
                   <div className="flex items-center gap-3 mb-4 sm:mb-6">
                     <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
@@ -2476,7 +2491,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                                              'bg-orange-400';
                                 return (
                                   <div key={j} className={`w-9 h-9 sm:w-14 sm:h-14 ${color} text-white text-[10px] sm:text-sm flex items-center justify-center font-medium border border-gray-300 dark:border-dark-700 rounded transition-all hover:scale-110 cursor-pointer`}>
-                                    {value.toFixed(2)}
+                                    {formatNumber(value)}
                                   </div>
                                 );
                               })}
@@ -2492,7 +2507,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
 
               {/* Feature Importance & Predictions */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                   <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6">
                   <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
                     <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
@@ -2507,7 +2522,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                   </div>
                 </div>
 
-                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                   <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6">
                   <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
                     <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
@@ -2530,7 +2545,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                   { label: 'GAMMA (Γ)', value: '0.12', desc: 'Delta sensitivity', color: 'text-primary-400', border: 'hover:border-primary-500/50' },
                   { label: 'THETA (Θ)', value: '-0.08', desc: 'Time decay', color: 'text-primary-400', border: 'hover:border-primary-500/50' },
                 ].map((greek, idx) => (
-                  <div key={idx} className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                  <div key={idx} className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                     <div className={`bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 ${greek.border} transition-all`}>
                       <h3 className="text-sm font-medium mb-4 text-gray-900 dark:text-white">{greek.label}</h3>
                       <div className={`text-4xl font-semibold mb-2 ${greek.color}`}>{greek.value}</div>
@@ -2553,28 +2568,28 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
             >
               {/* VaR Metrics */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                   <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
                     <div className="text-xs text-slate-400 mb-2">VAR (95%)</div>
                     <div className="text-xl sm:text-2xl font-medium text-red-400 mb-2">-$1,234</div>
                     <div className="text-xs text-gray-600 dark:text-dark-400">Daily VaR</div>
                   </div>
                 </div>
-                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                   <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-red-500/50 transition-all">
                     <div className="text-xs text-slate-400 mb-2">CVAR (95%)</div>
                     <div className="text-xl sm:text-2xl font-medium text-red-400 mb-2">-$1,567</div>
                     <div className="text-xs text-gray-600 dark:text-dark-400">Conditional VaR</div>
                   </div>
                 </div>
-                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                   <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
                     <div className="text-xs text-slate-400 mb-2">BETA (vs BTC)</div>
                     <div className="text-xl sm:text-2xl font-medium text-primary-400 mb-2">0.74</div>
                     <div className="text-xs text-gray-600 dark:text-dark-400">Market correlation</div>
                   </div>
                 </div>
-                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                   <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
                     <div className="text-xs text-slate-400 mb-2">ALPHA</div>
                     <div className="text-xl sm:text-2xl font-medium text-green-400 mb-2">+12.4%</div>
@@ -2584,7 +2599,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
               </div>
 
               {/* Monte Carlo Simulation */}
-              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                 <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6">
                 <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
                   <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
@@ -2614,7 +2629,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
               </div>
 
               {/* Underwater Chart */}
-              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                 <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6">
                 <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
                   <div className="w-8 h-8 sm:w-12 sm:h-12 bg-red-500/20 border border-red-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
@@ -2630,7 +2645,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
               </div>
 
               {/* System Health */}
-              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                 <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6">
                 <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
                   <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
@@ -2655,7 +2670,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                   <div>
                     <div className="flex justify-between mb-2 text-sm">
                       <span className="text-slate-400 font-mono">MEMORY</span>
-                      <span className="text-green-400 font-mono">{(memUsage * 0.04).toFixed(1)}GB / 4GB</span>
+                      <span className="text-green-400 font-mono">{formatNumber(memUsage * 0.04, 1)}GB / 4GB</span>
                     </div>
                     <div className="h-2 bg-gray-200 dark:bg-dark-800 rounded-full overflow-hidden">
                       <div className="h-full bg-gradient-to-r from-green-500 to-emerald-500 transition-all" style={{ width: `${memUsage}%` }}></div>
@@ -2729,12 +2744,12 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
             <div className="min-w-0">
               <div className="text-sm font-semibold text-gray-900 dark:text-white truncate">{masterBotData.name}</div>
               <div className="text-xs text-gray-500 dark:text-slate-400 font-mono">
-                from ${masterBotData.minInvestment} &middot; {(masterBotData as any).reservationDays || 30}d reservation
+                from ${masterBotData.minInvestment} &middot; {masterBotData.reservationDays || masterBotData.lockInDays || 30}d reservation
               </div>
             </div>
             <div className="flex-shrink-0 text-right pl-3 border-l border-gray-200 dark:border-dark-700">
               <div className="text-xs text-gray-500 dark:text-slate-400">Est. 30d ROI</div>
-              <div className="text-sm font-bold text-green-400">+{(masterBotData.stats as any).return30d || 0}%</div>
+              <div className="text-sm font-bold text-green-400">+{masterBotData.stats.return30d || 0}%</div>
             </div>
           </div>
           <Link

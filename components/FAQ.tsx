@@ -89,7 +89,7 @@ export const faqs: FaqItem[] = [
   // Top 5 — shown on home page
   {
     question: 'How does Cloudbright work?',
-    answer: 'It\'s simple: deposit crypto to your protected wallet, browse 100+ verified trading bots in our marketplace, and copy the one you like with one click. The master bot trades automatically 24/7 with your capital — you just watch the trades, track live stats, and collect profits. Full transparency: see every active trade, trade history, equity curves, and detailed bot statistics in real time.',
+    answer: 'It\'s simple: deposit crypto to your protected wallet, browse verified trading bots in our marketplace, and copy the one you like with one click. The master bot trades automatically 24/7 with your capital — you just watch the trades, track live stats, and collect profits. Full transparency: see every active trade, trade history, equity curves, and detailed bot statistics in real time.',
     icon: '🤖',
     category: 'Getting Started',
   },
@@ -107,7 +107,7 @@ export const faqs: FaqItem[] = [
   },
   {
     question: 'What does it cost to use the platform?',
-    answer: 'Cloudbright is free to use. No monthly subscriptions, no setup fees, no hidden charges. We charge a small commission only when you collect realized profit. If you don\'t profit, you don\'t pay. It\'s that simple.',
+    answer: 'Cloudbright is free to use. No monthly subscriptions, no setup fees, no hidden charges. The only fee is a flat 2% commission on withdrawals. Deposits are free, and there are no charges on your trading profits.',
     icon: '💰',
     category: 'Pricing & Investments',
   },
@@ -125,8 +125,8 @@ export const faqs: FaqItem[] = [
     category: 'Trading Bots',
   },
   {
-    question: 'What are the lock-in periods?',
-    answer: 'When you copy a bot, you choose a lock-in period from 7 to 180 days. Longer lock-in periods typically offer higher potential returns. You can collect realized profits anytime. Once the lock-in period ends, your full investment is available for withdrawal.',
+    question: 'What is capital reservation?',
+    answer: 'When you copy a bot, you choose a capital reservation period from 15 to 180 days. Longer periods typically offer higher potential returns. You can collect realized profits anytime. Once the reservation period ends, your full investment is available for withdrawal.',
     icon: '⚡',
     category: 'Pricing & Investments',
   },
@@ -137,8 +137,14 @@ export const faqs: FaqItem[] = [
     category: 'Pricing & Investments',
   },
   {
+    question: 'How does my balance work?',
+    answer: 'You can deposit funds in any supported cryptocurrency — USDT, BTC, ETH, BNB, USDC, SOL, TRX. Once received, all deposits are automatically converted to USDT, which is the base currency used across the platform for bot activation, profit tracking, and all internal operations. When you withdraw, you choose any supported currency — the platform converts your USDT balance to the selected coin at the current market rate. Referral commissions and turnover bonuses are also credited automatically in USDT.',
+    icon: '💵',
+    category: 'Deposits & Withdrawals',
+  },
+  {
     question: 'What makes Cloudbright different?',
-    answer: 'Full transparency and community. Unlike other platforms, you see everything: every active trade the bot makes, full trade history, live P&L, and detailed statistical data. Plus, Cloudbright is a social copy trading community — follow top bots, compare strategies on leaderboards, and learn from the community. 100+ verified bots, custodial wallets for 7+ cryptocurrencies, and commission only on profit.',
+    answer: 'Full transparency and community. Unlike other platforms, you see everything: every active trade the bot makes, full trade history, live P&L, and detailed statistical data. Plus, Cloudbright is a social copy trading community — follow top bots, compare strategies on leaderboards, and learn from the community. A wide selection of verified bots, custodial wallets for multiple cryptocurrencies, and no fees until you withdraw.',
     icon: '🌟',
     category: 'Getting Started',
   },
@@ -170,10 +176,10 @@ export const faqs: FaqItem[] = [
   },
   {
     question: 'How do withdrawals work and how long do they take?',
-    answer: 'To withdraw, navigate to your Wallet, choose the cryptocurrency and amount, and confirm the transaction with 2FA. Withdrawal requests are processed within 24 hours. Most withdrawals are completed within 1–2 hours during business hours. There is no limit on the number of withdrawals. Your realized profits are available for withdrawal at any time, even during an active lock-in period. Withdrawal fees: a fixed network fee + 2% of the withdrawal amount applies to all cryptocurrencies.',
+    answer: 'To withdraw, navigate to your Wallet, choose the cryptocurrency and amount, and confirm the transaction with 2FA. Withdrawal requests are processed within 24 hours. Most withdrawals are completed within 1–2 hours during business hours. There is no limit on the number of withdrawals. Your realized profits are available for withdrawal at any time, even during an active capital reservation period. Withdrawal fees: a fixed network fee + 2% of the withdrawal amount applies to all cryptocurrencies.',
     content: (
       <>
-        <p>To withdraw, navigate to your Wallet, choose the cryptocurrency and amount, and confirm the transaction with 2FA. Withdrawal requests are processed within 24 hours. Most withdrawals are completed within 1–2 hours during business hours. There is no limit on the number of withdrawals. Your realized profits are available for withdrawal at any time, even during an active lock-in period.</p>
+        <p>To withdraw, navigate to your Wallet, choose the cryptocurrency and amount, and confirm the transaction with 2FA. Withdrawal requests are processed within 24 hours. Most withdrawals are completed within 1–2 hours during business hours. There is no limit on the number of withdrawals. Your realized profits are available for withdrawal at any time, even during an active capital reservation period.</p>
         <p className="mt-3 font-medium text-gray-900 dark:text-white">Withdrawal fees: fixed network fee + 2% of the withdrawal amount.</p>
         <WithdrawalFeesTable />
       </>
@@ -182,8 +188,8 @@ export const faqs: FaqItem[] = [
     category: 'Deposits & Withdrawals',
   },
   {
-    question: 'Can I withdraw my capital during a lock-in period?',
-    answer: 'Your initial capital is locked for the duration of the chosen lock-in period (7–180 days) to allow the bot to execute its strategy effectively. However, realized profits generated during this period can be withdrawn at any time. Once the lock-in period expires, your full capital is released and available for withdrawal or reinvestment.',
+    question: 'Can I withdraw my capital during a capital reservation period?',
+    answer: 'Your initial capital is reserved for the duration of the chosen capital reservation period (15–180 days) to allow the bot to execute its strategy effectively. However, realized profits generated during this period can be withdrawn at any time. Once the reservation period expires, your full capital is released and available for withdrawal or reinvestment.',
     icon: '🔐',
     category: 'Deposits & Withdrawals',
   },
@@ -194,14 +200,14 @@ export const faqs: FaqItem[] = [
     category: 'Trading Bots',
   },
   {
-    question: 'Can I deactivate a bot before the lock-in period ends?',
-    answer: 'No, early deactivation is not available. Once you activate a bot and select a lock-in period (7–180 days), the capital remains allocated to the bot until the period expires. This is by design — trading strategies require a consistent capital base to execute properly and deliver expected returns. You can still withdraw realized profits at any time during the lock-in period. When the period ends, your full capital is released automatically.',
+    question: 'Can I deactivate a bot before the capital reservation ends?',
+    answer: 'No, early deactivation is not available. Once you activate a bot and select a capital reservation period (15–180 days), the capital remains allocated to the bot until the period expires. This is by design — trading strategies require a consistent capital base to execute properly and deliver expected returns. You can still withdraw realized profits at any time during the reservation period. When the period ends, your full capital is released automatically.',
     icon: '🚫',
     category: 'Trading Bots',
   },
   {
     question: 'Can I copy multiple bots at the same time?',
-    answer: 'Yes, you can diversify by copying multiple bots simultaneously. Each bot operates independently with its own allocated capital and lock-in period. This allows you to spread risk across different strategies, timeframes, and trading pairs. Many experienced users run 3–5 bots with different risk profiles to balance returns and stability.',
+    answer: 'Yes, you can diversify by copying multiple bots simultaneously. Each bot operates independently with its own allocated capital and reservation period. This allows you to spread risk across different strategies, timeframes, and trading pairs. Many experienced users run 3–5 bots with different risk profiles to balance returns and stability.',
     icon: '🔀',
     category: 'Trading Bots',
   },

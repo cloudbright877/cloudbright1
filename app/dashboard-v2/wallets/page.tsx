@@ -20,9 +20,11 @@ import {
 import { TokenUSDT } from '@web3icons/react';
 import { SettingsDrawer } from '@/components/settings/SettingsDrawer';
 import { Pagination } from '@/components/dashboard-v2/Pagination';
+import { LoadingScreen } from '@/components/dashboard-v2/LoadingScreen';
 import { getBalance, getUserTransactions } from '@/lib/balances';
 import type { BalanceTransaction } from '@/lib/balances';
 import { getCurrentUserId } from '@/lib/getCurrentUserId';
+import { formatNumber, formatDateTime } from '@/lib/formatters';
 
 type TabType = 'all' | 'replenishment' | 'withdrawals' | 'referral-bonuses';
 
@@ -132,7 +134,7 @@ export default function WalletsPage() {
 
         setIsLoading(false);
       } catch (error) {
-        console.error('[Wallets] Error loading:', error);
+        // Error handled silently
         setIsLoading(false);
       }
     }
@@ -162,12 +164,6 @@ export default function WalletsPage() {
     setCurrentPage(1);
   }, [activeTab, allTransactions]);
 
-  const formatNumber = (num: number, decimals = 2) =>
-    new Intl.NumberFormat('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals }).format(num);
-
-  const formatDate = (timestamp: number) =>
-    new Date(timestamp).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-
   const getTypeColor = (type: string) => {
     switch (type) {
       case 'Accrual': return 'text-green-400 bg-green-500/10 border-green-500/30';
@@ -196,18 +192,7 @@ export default function WalletsPage() {
   };
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-100 dark:bg-transparent text-gray-900 dark:text-white">
-        <div className="max-w-[1800px] mx-auto p-4 lg:p-6">
-          <div className="flex items-center justify-center min-h-[60vh]">
-            <div className="text-center">
-              <div className="w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-              <p className="text-gray-700 dark:text-dark-300">Loading wallet data...</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+    return <LoadingScreen message="Loading wallet data..." />;
   }
 
   const totalBalance = balance ? balance.available + balance.frozen : 0;
@@ -249,7 +234,7 @@ export default function WalletsPage() {
           {/* LEFT: Deposit/Withdraw */}
           <div className="lg:col-span-6">
             <div className="grid grid-cols-2 gap-2.5 sm:gap-4 h-full">
-              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all hover:bg-[linear-gradient(135deg,rgba(139,92,246,0.5)_0%,rgba(139,92,246,0.1)_40%,rgba(139,92,246,0.1)_60%,rgba(139,92,246,0.5)_100%)] dark:hover:bg-[linear-gradient(135deg,rgba(139,92,246,0.5)_0%,rgba(139,92,246,0.1)_40%,rgba(139,92,246,0.1)_60%,rgba(139,92,246,0.5)_100%)]">
+              <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px] transition-all hover:bg-[linear-gradient(135deg,rgba(139,92,246,0.5)_0%,rgba(139,92,246,0.1)_40%,rgba(139,92,246,0.1)_60%,rgba(139,92,246,0.5)_100%)] dark:hover:bg-[linear-gradient(135deg,rgba(139,92,246,0.5)_0%,rgba(139,92,246,0.1)_40%,rgba(139,92,246,0.1)_60%,rgba(139,92,246,0.5)_100%)]">
                 <Link
                   href="/dashboard-v2/wallets/deposit"
                   className="relative group overflow-hidden bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] py-5 px-3 sm:p-5 block h-full"
@@ -269,7 +254,7 @@ export default function WalletsPage() {
                 </Link>
               </div>
 
-              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all hover:bg-[linear-gradient(135deg,rgba(139,92,246,0.5)_0%,rgba(139,92,246,0.1)_40%,rgba(139,92,246,0.1)_60%,rgba(139,92,246,0.5)_100%)] dark:hover:bg-[linear-gradient(135deg,rgba(139,92,246,0.5)_0%,rgba(139,92,246,0.1)_40%,rgba(139,92,246,0.1)_60%,rgba(139,92,246,0.5)_100%)]">
+              <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px] transition-all hover:bg-[linear-gradient(135deg,rgba(139,92,246,0.5)_0%,rgba(139,92,246,0.1)_40%,rgba(139,92,246,0.1)_60%,rgba(139,92,246,0.5)_100%)] dark:hover:bg-[linear-gradient(135deg,rgba(139,92,246,0.5)_0%,rgba(139,92,246,0.1)_40%,rgba(139,92,246,0.1)_60%,rgba(139,92,246,0.5)_100%)]">
                 <Link
                   href="/dashboard-v2/wallets/withdraw"
                   className="relative group overflow-hidden bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] py-5 px-3 sm:p-5 block h-full"
@@ -295,7 +280,7 @@ export default function WalletsPage() {
           <div className="lg:col-span-6 flex flex-col gap-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Total Balance */}
-              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                 <div className="relative overflow-hidden bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-5">
                   <div className="relative">
                     <div className="flex items-center gap-2 mb-2">
@@ -312,7 +297,7 @@ export default function WalletsPage() {
               </div>
 
               {/* Available */}
-              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                 <div className="relative overflow-hidden bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-5">
                   <div className="relative">
                     <div className="flex items-center gap-2 mb-2">
@@ -329,7 +314,7 @@ export default function WalletsPage() {
               </div>
 
               {/* In Copies */}
-              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                 <div className="relative overflow-hidden bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-5">
                   <div className="relative">
                     <div className="flex items-center gap-2 mb-2">
@@ -347,7 +332,7 @@ export default function WalletsPage() {
             </div>
 
             {/* Funds Flow */}
-            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+            <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
             <div className="relative overflow-hidden bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-4">
               <div className="relative flex items-center justify-center gap-4 sm:gap-8">
                 <div>
@@ -397,7 +382,7 @@ export default function WalletsPage() {
           </div>
 
           {/* Table */}
-          <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+          <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
           <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] overflow-hidden">
             {filteredTransactions.length > 0 ? (
               <div className="overflow-x-auto">
@@ -423,7 +408,7 @@ export default function WalletsPage() {
                         className="border-b border-gray-200 dark:border-dark-800/50 hover:bg-gray-100 dark:hover:bg-dark-800/30 transition-colors cursor-pointer"
                       >
                         <td className="py-4 px-3 sm:px-5">
-                          <div className="text-sm text-gray-900 dark:text-white">{formatDate(tx.date)}</div>
+                          <div className="text-sm text-gray-900 dark:text-white">{formatDateTime(tx.date)}</div>
                         </td>
                         <td className="py-4 px-3 sm:px-5">
                           <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium border ${getTypeColor(tx.type)}`}>
@@ -449,7 +434,8 @@ export default function WalletsPage() {
                           {(tx.type === 'Replenishment' || tx.type === 'Withdrawal') ? (
                             <button
                               onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(tx.id); }}
-                              className="flex items-center gap-2 text-xs group/tx"
+                              className="flex items-center gap-2 text-xs group/tx focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:outline-none rounded"
+                              aria-label="Copy transaction ID"
                               title="Copy TX ID"
                             >
                               <Link2 className="w-4 h-4 text-gray-500 dark:text-dark-500 group-hover/tx:text-primary-400 transition-colors flex-shrink-0" />
@@ -508,7 +494,7 @@ export default function WalletsPage() {
                   {formatNumber(selectedTransaction.amount)} USDT
                 </div>
                 <div className="text-sm text-gray-500 dark:text-dark-400">
-                  {formatDate(selectedTransaction.date)}
+                  {formatDateTime(selectedTransaction.date)}
                 </div>
               </div>
 
@@ -565,7 +551,8 @@ export default function WalletsPage() {
                       <span className="font-mono text-xs text-primary-400 truncate flex-1">{selectedTransaction.id}</span>
                       <button
                         onClick={() => handleCopyTxId(selectedTransaction.id)}
-                        className="flex-shrink-0 w-8 h-8 rounded-lg bg-gray-200 dark:bg-dark-800 hover:bg-gray-300 dark:hover:bg-dark-700 flex items-center justify-center transition-colors"
+                        className="flex-shrink-0 w-8 h-8 rounded-lg bg-gray-200 dark:bg-dark-800 hover:bg-gray-300 dark:hover:bg-dark-700 flex items-center justify-center transition-colors focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:outline-none"
+                        aria-label="Copy transaction ID"
                         title="Copy TX ID"
                       >
                         {txCopied ? (

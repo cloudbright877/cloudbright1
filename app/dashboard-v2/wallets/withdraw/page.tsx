@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useRef } from 'react';
+import type { ComponentType } from 'react';
 import Link from 'next/link';
 import {
   TokenBTC,
@@ -24,13 +25,15 @@ import {
 } from 'lucide-react';
 import Stepper from '@/components/ui/Stepper';
 import CurrencyCard from '@/components/wallet/CurrencyCard';
+import { LoadingScreen } from '@/components/dashboard-v2/LoadingScreen';
 import { useToast } from '@/context/ToastContext';
 import { getBalance } from '@/lib/balances';
 import { getWalletsSettings, getSecuritySettings } from '@/lib/settings/settingsService';
 import type { SavedWalletAddress, NetworkType } from '@/lib/settings/settingsTypes';
+import { formatNumber } from '@/lib/formatters';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const TOKEN_ICONS: Record<string, any> = {
+type TokenIconProps = { size?: number; variant?: string; className?: string };
+const TOKEN_ICONS: Record<string, ComponentType<TokenIconProps>> = {
   BTC: TokenBTC,
   ETH: TokenETH,
   USDT: TokenUSDT,
@@ -157,7 +160,7 @@ export default function WithdrawPage() {
         setAvailableBalance(balance.available);
         setIsLoading(false);
       } catch (error) {
-        console.error('[Withdraw] Error loading balance:', error);
+        // Error handled silently
         setIsLoading(false);
       }
     }
@@ -285,13 +288,6 @@ export default function WithdrawPage() {
     }
   };
 
-  const formatNumber = (num: number, decimals = 2) => {
-    return new Intl.NumberFormat('en-US', {
-      minimumFractionDigits: decimals,
-      maximumFractionDigits: decimals,
-    }).format(num);
-  };
-
   const calculateTotal = () => {
     if (!amount || !selectedNetwork) return 0;
     const amountNum = parseFloat(amount);
@@ -300,14 +296,7 @@ export default function WithdrawPage() {
   };
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-100 dark:bg-transparent text-gray-900 dark:text-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-700 dark:text-dark-300">Loading...</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   return (
@@ -351,7 +340,7 @@ export default function WithdrawPage() {
               >
                 {/* Step 1: Select Currency */}
                 {step === 1 && (
-                  <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                  <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                     <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
                     <h2 className="text-2xl font-medium text-gray-900 dark:text-white mb-6">Select Currency</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -374,7 +363,7 @@ export default function WithdrawPage() {
 
                 {/* Step 2: Withdrawal Details */}
                 {step === 2 && selectedCurrency && (
-                  <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                  <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                     <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6 space-y-6">
                     <h2 className="text-2xl font-medium text-gray-900 dark:text-white">Withdrawal Details</h2>
 
@@ -578,7 +567,7 @@ export default function WithdrawPage() {
 
                 {/* Step 3: Security Verification */}
                 {step === 3 && (
-                  <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                  <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                     <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6 space-y-6">
                     <div className="flex items-center gap-3 mb-4">
                       <div className="w-12 h-12 bg-primary-500/20 rounded-xl flex items-center justify-center">
@@ -700,7 +689,7 @@ export default function WithdrawPage() {
 
                 {/* Step 4: Confirmation */}
                 {step === 4 && (
-                  <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                  <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                     <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6 space-y-6">
                     <h2 className="text-2xl font-medium text-gray-900 dark:text-white">Review Withdrawal</h2>
 
@@ -744,7 +733,7 @@ export default function WithdrawPage() {
           {/* Live Summary Sidebar - col-span-5, sticky */}
           <div className="lg:col-span-5">
             <div className="sticky top-6">
-              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                 <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
                 <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-6">Withdrawal Summary</h3>
 
@@ -819,7 +808,7 @@ export default function WithdrawPage() {
             className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
             onClick={() => setShowConfirmModal(false)}
           >
-            <div className="max-w-md w-full rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+            <div className="max-w-md w-full rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
               <motion.div
                 initial={{ scale: 0.9, y: 20 }}
                 animate={{ scale: 1, y: 0 }}

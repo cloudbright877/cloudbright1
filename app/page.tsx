@@ -58,7 +58,7 @@ const platformFeatures: {
   tags?: string[];
   visual?: 'exchanges' | 'currencies';
 }[] = [
-  { icon: Store, title: 'Bot Marketplace', description: 'Browse, compare, and filter verified trading bots by risk level, performance, and win rate.', span: 'md:col-span-2', iconGradient: 'from-violet-500/15 to-indigo-500/15', iconColor: 'text-violet-400', bigNumber: '100+', tags: ['Low Risk', 'Medium Risk', 'High Risk'] },
+  { icon: Store, title: 'Bot Marketplace', description: 'Browse, compare, and filter verified trading bots by risk level, performance, and win rate.', span: 'md:col-span-2', iconGradient: 'from-violet-500/15 to-indigo-500/15', iconColor: 'text-violet-400', tags: ['Low Risk', 'Medium Risk', 'High Risk'] },
   { icon: BarChart3, title: 'Deep Bot Analytics', description: 'Equity curves, trade history, Sharpe ratio, and max drawdown for every bot.', span: '', iconGradient: 'from-violet-500/15 to-indigo-500/15', iconColor: 'text-violet-400', tags: ['Equity Curve', 'Win Rate', 'Sharpe'] },
   { icon: Copy, title: '1-Click Copy Trading', description: 'Set your amount, tap copy. The bot trades automatically around the clock.', span: '', iconGradient: 'from-violet-500/15 to-indigo-500/15', iconColor: 'text-violet-400', bigNumber: '24/7' },
   { icon: Globe, title: 'Multi-Exchange', description: 'Trade across all major exchanges from one unified interface.', span: '', iconGradient: 'from-violet-500/15 to-indigo-500/15', iconColor: 'text-violet-400', bigNumber: '9+', visual: 'exchanges' },
@@ -220,7 +220,7 @@ const stepItems = [
   },
   {
     title: 'Pick a Proven Bot',
-    description: 'Compare 100+ bots by win rate, returns, drawdown, and risk level. Use Quick Start wizard or browse the full marketplace.',
+    description: 'Compare bots by win rate, returns, drawdown, and risk level. Use Quick Start wizard or browse the full marketplace.',
     icon: <Search className="w-7 h-7 text-white" />,
     gradient: 'from-blue-500 to-indigo-500',
     preview: <BotCardPreview />,
@@ -250,8 +250,8 @@ const securityFeatures = [
     icon: Lock,
     title: 'Full Control & Transparency',
     description:
-      'Choose investment plans from 7 to 180 days. Collect realized profits anytime. Every trade and transaction visible in real time.',
-    items: ['Plans from 7 to 180 days', 'Collect profits on your schedule', 'Full transaction history', 'Withdraw when plan ends'],
+      'Copy bot trades automatically with capital reservation from 15 to 180 days. Profits accumulate on your balance in real time. Every trade and transaction fully visible.',
+    items: ['Capital reservation from 15 to 180 days', 'Automatic profit accumulation', 'Full transaction history', 'Withdraw profits anytime'],
   },
   {
     icon: Building2,
@@ -290,7 +290,7 @@ const testimonials = [
     name: 'soph_lin',
     avatar: '/testimonials/soph_lin.webp',
     gradient: 'from-amber-500 to-orange-500',
-    text: 'Commission only on profit is the fairest model I\'ve seen. If I don\'t make money, they don\'t make money. That alignment of incentives matters.',
+    text: 'A flat 2% withdrawal fee and nothing else — no subscriptions, no hidden charges. The simplest and fairest fee model I\'ve seen on any trading platform.',
     stats: 'Early access user',
   },
   {
@@ -391,7 +391,7 @@ export default function Home() {
                 <div className="space-y-4 mb-10">
                   {[
                     { label: '40+ employees', value: 'across engineering, quant research & support' },
-                    { label: '100+ bot strategies', value: 'verified, all stats public' },
+                    { label: 'Diverse bot strategies', value: 'verified, all stats public' },
                   ].map((fact) => (
                     <div key={fact.label} className="flex items-start gap-3">
                       <Check className="w-5 h-5 text-primary-500 mt-0.5 shrink-0" />
@@ -763,7 +763,7 @@ export default function Home() {
                   <div key={stat.label} className="text-center group">
                     <div className="flex items-center justify-center gap-2 mb-1">
                       <stat.Icon className="w-5 h-5 text-primary-400 opacity-70 group-hover:opacity-100 transition-opacity" />
-                      <div className="text-3xl sm:text-4xl font-bold text-gradient">
+                      <div className="text-3xl sm:text-4xl font-bold text-primary-400">
                         <AnimatedCounter value={stat.value} suffix={stat.suffix} duration={1400} />
                       </div>
                     </div>

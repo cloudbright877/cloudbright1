@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Gauge, TrendingUp, TrendingDown } from 'lucide-react';
+import { formatNumber } from '@/lib/formatters';
 
 interface NetWorthHeroProps {
   portfolioValue: number;
@@ -55,7 +56,7 @@ export function NetWorthHero({
 
           <div className="mb-4 sm:mb-5 text-center sm:text-left">
             <p className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-semibold text-gray-900 dark:text-white mb-2">
-              ${portfolioValue.toFixed(2)}
+              ${formatNumber(portfolioValue)}
             </p>
             <div className="flex items-center justify-center sm:justify-start gap-2">
               <div className={`flex items-center gap-1 px-2.5 py-0.5 rounded-lg ${
@@ -65,11 +66,11 @@ export function NetWorthHero({
               }`}>
                 {totalProfit >= 0 ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
                 <span className="text-sm font-medium">
-                  {totalProfit >= 0 ? '+' : ''}${totalProfit.toFixed(0)}
+                  {totalProfit >= 0 ? '+' : ''}${formatNumber(totalProfit, 0)}
                 </span>
               </div>
               <span className={`text-sm font-medium ${totalProfit >= 0 ? 'text-green-400/70' : 'text-red-400/70'}`}>
-                {totalProfit >= 0 ? '+' : ''}{totalProfitPercent.toFixed(2)}%
+                {totalProfit >= 0 ? '+' : ''}{formatNumber(totalProfitPercent)}%
               </span>
             </div>
           </div>
@@ -79,13 +80,13 @@ export function NetWorthHero({
             <div className="flex items-center p-3 bg-gray-100/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-dark-700">
               <div className="flex-1">
                 <p className="text-xs text-gray-600 dark:text-dark-400 mb-0.5">Invested</p>
-                <p className="text-base font-medium text-gray-900 dark:text-white">${totalInvested.toLocaleString()}</p>
+                <p className="text-base font-medium text-gray-900 dark:text-white">${formatNumber(totalInvested, 0)}</p>
               </div>
               <div className="w-px h-10 bg-gray-200 dark:bg-dark-700 mx-3" />
               <div className="flex-1 text-right">
                 <p className="text-xs text-gray-600 dark:text-dark-400 mb-0.5">Realized P&L</p>
                 <p className={`text-base font-medium ${totalRealizedPnL >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                  {totalRealizedPnL >= 0 ? '+' : ''}${totalRealizedPnL.toFixed(2)}
+                  {totalRealizedPnL >= 0 ? '+' : ''}${formatNumber(totalRealizedPnL)}
                 </p>
               </div>
             </div>
@@ -94,13 +95,13 @@ export function NetWorthHero({
             <div className="flex items-center p-3 bg-gray-100/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-dark-700">
               <div className="flex-1">
                 <p className="text-xs text-gray-600 dark:text-dark-400 mb-0.5">Available</p>
-                <p className="text-base font-medium text-gray-900 dark:text-white">${availableBalance.toFixed(2)}</p>
+                <p className="text-base font-medium text-gray-900 dark:text-white">${formatNumber(availableBalance)}</p>
               </div>
               <div className="w-px h-10 bg-gray-200 dark:bg-dark-700 mx-3" />
               <div className="flex-1 text-right">
                 <p className="text-xs text-gray-600 dark:text-dark-400 mb-0.5">Unrealized P&L</p>
                 <p className={`text-base font-medium ${unrealizedPnL >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                  {unrealizedPnL >= 0 ? '+' : ''}${unrealizedPnL.toFixed(2)}
+                  {unrealizedPnL >= 0 ? '+' : ''}${formatNumber(unrealizedPnL)}
                 </p>
               </div>
             </div>
@@ -109,7 +110,7 @@ export function NetWorthHero({
               <div className="flex-1 p-2.5 bg-gray-100/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-dark-700">
                 <p className="text-xs text-gray-600 dark:text-dark-400 mb-0.5">Today</p>
                 <p className={`text-base font-medium ${todayPnL >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                  {todayPnL >= 0 ? '+' : ''}${todayPnL.toFixed(1)}
+                  {todayPnL >= 0 ? '+' : ''}${formatNumber(todayPnL, 1)}
                 </p>
               </div>
               <div className="flex-1 p-2.5 bg-gray-100/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-dark-700">

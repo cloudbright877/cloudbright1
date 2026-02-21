@@ -6,41 +6,26 @@ import { getAllDemoBots } from './demoMarketplace';
  * This creates 3 initial copies to demo the functionality
  */
 export function seedUserCopies(): void {
-  if (typeof window === 'undefined') {
-    console.log('[Seed] Skipping seed (SSR environment)');
-    return;
-  }
+  if (typeof window === 'undefined') return;
 
   const existingCopies = getAllUserCopies();
-  if (existingCopies.length > 0) {
-    console.log(`[Seed] Copies already exist (${existingCopies.length}), skipping seed`);
-    return;
-  }
-
-  console.log('[Seed] Creating initial user copies...');
+  if (existingCopies.length > 0) return;
 
   const demoBots = getAllDemoBots();
 
-  // Create 3 copies of different bots with different investment amounts
   const seedData = [
-    { demoBot: demoBots[0], investment: 2000 }, // BTC Scalper Pro
-    { demoBot: demoBots[1], investment: 3000 }, // ETH Trend Master
-    { demoBot: demoBots[3], investment: 5000 }, // SOL Breakout Hunter
+    { demoBot: demoBots[0], investment: 2000 },
+    { demoBot: demoBots[1], investment: 3000 },
+    { demoBot: demoBots[3], investment: 5000 },
   ];
-
-  let createdCount = 0;
 
   seedData.forEach(({ demoBot, investment }) => {
     if (demoBot) {
       try {
-        const copyId = createUserCopy(demoBot.id, investment);
-        console.log(`[Seed] Created copy ${copyId} of ${demoBot.name} ($${investment})`);
-        createdCount++;
-      } catch (err) {
-        console.error(`[Seed] Failed to create copy of ${demoBot.name}:`, err);
+        createUserCopy(demoBot.id, investment);
+      } catch {
+        // silently skip failed seeds
       }
     }
   });
-
-  console.log(`[Seed] Successfully created ${createdCount} user copies`);
 }

@@ -64,7 +64,7 @@ export default function Footer() {
 
               <p className="text-gray-600 dark:text-dark-300 mb-6 max-w-sm leading-relaxed">
                 Copy verified trading bots and earn passive income.
-                Licensed company. Commission only on profit.
+                Licensed company. No fees until you withdraw.
               </p>
 
               {/* Social links */}

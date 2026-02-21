@@ -18,6 +18,7 @@ import {
   MessageCircle,
   Gauge,
   ShieldCheck,
+  HelpCircle,
   Wallet,
   Gift,
   Menu,
@@ -119,7 +120,8 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
           {!isCollapsed && (
             <button
               onClick={onToggle}
-              className="ml-auto p-1.5 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-lg transition-colors text-gray-600 dark:text-dark-400 hover:text-gray-900 dark:hover:text-white flex-shrink-0"
+              className="ml-auto p-1.5 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-lg transition-colors text-gray-600 dark:text-dark-400 hover:text-gray-900 dark:hover:text-white flex-shrink-0 focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:outline-none"
+              aria-label="Collapse sidebar"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -231,6 +233,14 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
           />
 
           <NavItem
+            href="/dashboard-v2/help"
+            icon={<HelpCircle className="w-6 h-6" />}
+            label="Help & FAQ"
+            active={pathname?.startsWith('/dashboard-v2/help')}
+            isCollapsed={isCollapsed}
+          />
+
+          <NavItem
             href="/dashboard-v2/admin/bots"
             icon={<ShieldCheck className="w-6 h-6" />}
             label="Bot Admin"
@@ -277,6 +287,7 @@ const mobileMenuSections = [
     label: 'System',
     items: [
       { href: '/dashboard-v2/settings', icon: Settings, label: 'Settings' },
+      { href: '/dashboard-v2/help', icon: HelpCircle, label: 'Help & FAQ' },
       { href: '/dashboard-v2/admin/bots', icon: ShieldCheck, label: 'Bot Admin' },
     ],
   },
@@ -459,7 +470,9 @@ function MobileNav({ pathname }: { pathname: string | null }) {
             {/* More button */}
             <button
               onClick={() => setMenuOpen(prev => !prev)}
-              className="flex flex-col items-center gap-1 pt-1.5 pb-2"
+              className="flex flex-col items-center gap-1 pt-1.5 pb-2 focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:outline-none"
+              aria-label="Toggle navigation menu"
+              aria-expanded={menuOpen}
             >
               {moreActive ? (
                 <motion.div

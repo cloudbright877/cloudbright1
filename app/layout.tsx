@@ -4,8 +4,11 @@ import "./fonts.css";
 import Providers from "@/components/Providers";
 
 export const metadata: Metadata = {
-  title: "Cloudbright — Bot Marketplace & Copy Trading Platform",
-  description: "Copy 100+ verified trading bots and earn passive income. Transparent real-time statistics, social copy trading community, secure custodial wallets for 7+ cryptocurrencies.",
+  title: {
+    default: "Cloudbright — Bot Marketplace & Copy Trading Platform",
+    template: "%s | Cloudbright",
+  },
+  description: "Copy verified trading bots and earn passive income. Transparent real-time statistics, social copy trading community, secure custodial wallets for multiple cryptocurrencies.",
   keywords: "crypto copy trading, passive income, trading bots, bot marketplace, custodial wallets, Binance, Bybit, OKX",
   authors: [{ name: "HONG KONG CLOUD BRIGHT SOFTWARE LIMITED" }],
   robots: {
@@ -23,7 +26,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Cloudbright — Bot Marketplace & Copy Trading",
-    description: "Copy 100+ verified trading bots and earn passive income. Transparent statistics, social community, secure custodial wallets.",
+    description: "Copy verified trading bots and earn passive income. Transparent statistics, social community, secure custodial wallets.",
     type: "website",
   },
 };

@@ -121,7 +121,7 @@ export function Pagination({
   if (totalPages <= 1 && !onItemsPerPageChange) return null;
 
   const btnBase =
-    'flex items-center justify-center gap-1.5 px-2.5 sm:px-3 py-2 bg-gray-100 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 border border-gray-200 dark:border-dark-700 rounded-lg text-sm text-gray-900 dark:text-white font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed';
+    'flex items-center justify-center gap-1.5 px-2.5 sm:px-3 py-2 bg-gray-100 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 border border-gray-200 dark:border-dark-700 rounded-lg text-sm text-gray-900 dark:text-white font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:outline-none';
   const activeBtnClass =
     'bg-primary-500 text-white border-primary-500 hover:bg-primary-600';
 
@@ -182,7 +182,7 @@ export function Pagination({
                 key={page}
                 onClick={() => onPageChange(page)}
                 aria-current={currentPage === page ? 'page' : undefined}
-                className={`min-w-[36px] px-2 py-2 rounded-lg text-sm font-medium transition-all border ${
+                className={`min-w-[36px] px-2 py-2 rounded-lg text-sm font-medium transition-all border focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:outline-none ${
                   currentPage === page
                     ? activeBtnClass
                     : 'bg-gray-100 dark:bg-dark-800 border-gray-200 dark:border-dark-700 text-gray-700 dark:text-dark-300 hover:bg-gray-200 dark:hover:bg-dark-700'
@@ -209,7 +209,7 @@ export function Pagination({
                 key={page}
                 onClick={() => onPageChange(page)}
                 aria-current={currentPage === page ? 'page' : undefined}
-                className={`min-w-[32px] px-1.5 py-1.5 rounded-lg text-xs font-medium transition-all border ${
+                className={`min-w-[32px] px-1.5 py-1.5 rounded-lg text-xs font-medium transition-all border focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:outline-none ${
                   currentPage === page
                     ? activeBtnClass
                     : 'bg-gray-100 dark:bg-dark-800 border-gray-200 dark:border-dark-700 text-gray-700 dark:text-dark-300 hover:bg-gray-200 dark:hover:bg-dark-700'

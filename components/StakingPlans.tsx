@@ -19,7 +19,7 @@ const benefits = [
   {
     icon: '/icons/light.png',
     title: 'Instant Access',
-    description: 'Lock-in periods from 7 to 180 days',
+    description: 'Capital reservation from 15 to 180 days',
   },
   {
     icon: '/icons/graph.png',
@@ -154,11 +154,11 @@ export default function StakingPlans() {
           className="text-center mb-16"
         >
           <h2 className="text-4xl sm:text-5xl font-bold mb-6 text-white">
-            Choose Your <span className="text-gradient">Investment Plan</span>
+            Start <span className="text-gradient">Copy Trading</span>
           </h2>
           <p className="text-xl text-dark-200 max-w-3xl mx-auto">
-            Start earning consistent daily returns with flexible plans designed
-            for every investor. All investments are 100% protected by our insurance fund.
+            Copy proven bot strategies and earn consistent daily returns.
+            All capital is 100% protected by our insurance fund.
           </p>
         </motion.div>
 
@@ -233,7 +233,7 @@ export default function StakingPlans() {
                   <div className="mb-6 p-3 bg-dark-800/50 rounded-lg border border-dark-700">
                     <div className="flex items-center justify-center gap-2">
                       <span className="text-dark-400 text-xs">🔒</span>
-                      <span className="text-white text-sm font-medium">30 Business Days Lock-in</span>
+                      <span className="text-white text-sm font-medium">30 Days Capital Reservation</span>
                     </div>
                   </div>
 

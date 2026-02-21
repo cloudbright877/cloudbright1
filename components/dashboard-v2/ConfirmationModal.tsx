@@ -47,7 +47,7 @@ export function ConfirmationModal({
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-md bg-gradient-to-br from-dark-800 to-dark-900 border border-dark-700 rounded-2xl shadow-2xl overflow-hidden"
+              className="relative w-full max-w-md bg-gradient-to-br from-white to-gray-50 dark:from-dark-800 dark:to-dark-900 border border-gray-200 dark:border-dark-700 rounded-2xl shadow-2xl overflow-hidden"
             >
               {/* Glow Effect */}
               <div className={`absolute -inset-1 ${
@@ -58,7 +58,7 @@ export function ConfirmationModal({
 
               <div className="relative">
                 {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-dark-700">
+                <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-dark-700">
                   <div className="flex items-center gap-3">
                     {icon && (
                       <div className={`w-10 h-10 rounded-lg flex items-center justify-center border ${
@@ -69,11 +69,11 @@ export function ConfirmationModal({
                         {icon}
                       </div>
                     )}
-                    <h2 className="text-lg font-medium text-white">{title}</h2>
+                    <h2 className="text-lg font-medium text-gray-900 dark:text-white">{title}</h2>
                   </div>
                   <button
                     onClick={onClose}
-                    className="w-10 h-10 rounded-lg bg-dark-700 hover:bg-dark-600 border border-dark-600 flex items-center justify-center text-dark-400 hover:text-white transition-all"
+                    className="w-10 h-10 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-dark-700 dark:hover:bg-dark-600 border border-gray-300 dark:border-dark-600 flex items-center justify-center text-gray-500 hover:text-gray-700 dark:text-dark-400 dark:hover:text-white transition-all"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -82,7 +82,7 @@ export function ConfirmationModal({
                 {/* Content */}
                 <div className="p-6 space-y-5">
                   {/* Description */}
-                  <p className="text-sm text-dark-300 leading-relaxed">
+                  <p className="text-sm text-gray-600 dark:text-dark-300 leading-relaxed">
                     {description}
                   </p>
 
@@ -112,10 +112,10 @@ export function ConfirmationModal({
                 </div>
 
                 {/* Footer */}
-                <div className="flex gap-3 p-6 border-t border-dark-700">
+                <div className="flex gap-3 p-6 border-t border-gray-200 dark:border-dark-700">
                   <button
                     onClick={onClose}
-                    className="flex-1 px-4 py-3 bg-dark-700 hover:bg-dark-600 border border-dark-600 rounded-lg font-semibold text-white transition-all"
+                    className="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 dark:bg-dark-700 dark:hover:bg-dark-600 border border-gray-300 dark:border-dark-600 rounded-lg font-semibold text-gray-700 dark:text-white transition-all"
                   >
                     Cancel
                   </button>

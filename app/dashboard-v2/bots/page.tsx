@@ -2,13 +2,14 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { BotCarousel } from '@/components/dashboard-v2/BotCarousel';
 import { Shield, ChevronRight, Bot, Scale, TrendingUp, Target } from 'lucide-react';
 import { getAllDemoBots } from '@/lib/demoMarketplace';
 import type { DemoBot } from '@/lib/demoMarketplace';
 import { priceService } from '@/lib/PriceService';
 import { botManager } from '@/lib/BotManager';
+import { formatNumber } from '@/lib/formatters';
 
 export default function BotsPage() {
   const [activeTab, setActiveTab] = useState<'recommendation' | 'ranklist'>(
@@ -45,7 +46,7 @@ export default function BotsPage() {
   }, []);
 
   // Filter and sort bots for Rank List
-  const filteredAndSortedBots = [...bots].sort((a, b) => {
+  const filteredAndSortedBots = useMemo(() => [...bots].sort((a, b) => {
     switch (sortBy) {
       case 'return':
         return b.stats.return1y - a.stats.return1y;
@@ -53,18 +54,19 @@ export default function BotsPage() {
         return b.stats.copiers - a.stats.copiers;
       case 'winRate':
         return b.stats.winRate - a.stats.winRate;
-      case 'risk':
+      case 'risk': {
         const riskOrder = { low: 1, medium: 2, high: 3 };
         return riskOrder[a.risk] - riskOrder[b.risk];
+      }
       default:
         return 0;
     }
-  });
+  }), [bots, sortBy]);
 
   // Categorize bots for Recommendation tab
-  const highestReturnBots = [...bots].sort((a, b) => b.stats.return1y - a.stats.return1y).slice(0, 10);
-  const lowRiskBots = bots.filter(b => b.risk === 'low').slice(0, 10);
-  const highWinRateBots = [...bots].sort((a, b) => b.stats.winRate - a.stats.winRate).slice(0, 10);
+  const highestReturnBots = useMemo(() => [...bots].sort((a, b) => b.stats.return1y - a.stats.return1y).slice(0, 10), [bots]);
+  const lowRiskBots = useMemo(() => bots.filter(b => b.risk === 'low').slice(0, 10), [bots]);
+  const highWinRateBots = useMemo(() => [...bots].sort((a, b) => b.stats.winRate - a.stats.winRate).slice(0, 10), [bots]);
 
   const getRiskLabel = (risk: string) => {
     if (risk === 'low') return 'Low Risk';
@@ -192,21 +194,21 @@ export default function BotsPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] mb-6"
+              className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px] mb-6"
             >
               <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6">
               <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                 <span className="text-sm font-normal text-gray-700 dark:text-dark-300 flex-shrink-0">Sort by:</span>
                 <div className="grid grid-cols-2 sm:flex sm:items-center gap-2">
                   {[
-                    { label: 'Return', value: 'return' },
-                    { label: 'Copiers', value: 'copiers' },
-                    { label: 'Win Rate', value: 'winRate' },
-                    { label: 'Risk Band', value: 'risk' },
+                    { label: 'Return', value: 'return' as const },
+                    { label: 'Copiers', value: 'copiers' as const },
+                    { label: 'Win Rate', value: 'winRate' as const },
+                    { label: 'Risk Band', value: 'risk' as const },
                   ].map((option) => (
                     <button
                       key={option.value}
-                      onClick={() => setSortBy(option.value as any)}
+                      onClick={() => setSortBy(option.value)}
                       className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                         sortBy === option.value
                           ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white shadow-lg shadow-primary-500/30'
@@ -229,7 +231,7 @@ export default function BotsPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.02 }}
-                  className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]"
+                  className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]"
                 >
                   <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6">
                   {/* Row 1: Rank + Icon + Name (+ desktop stats + desktop actions) */}
@@ -265,19 +267,19 @@ export default function BotsPage() {
                       <div className="text-center">
                         <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-1">Return</div>
                         <div className={`text-sm font-normal ${bot.stats.return1y >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                          {bot.stats.return1y >= 0 ? '+' : ''}{bot.stats.return1y.toFixed(0)}%
+                          {bot.stats.return1y >= 0 ? '+' : ''}{formatNumber(bot.stats.return1y, 0)}%
                         </div>
                       </div>
                       <div className="text-center">
                         <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-1">Copiers</div>
                         <div className="text-sm font-normal text-gray-900 dark:text-white">
-                          {bot.stats.copiers > 999 ? `${(bot.stats.copiers / 1000).toFixed(1)}k` : bot.stats.copiers}
+                          {bot.stats.copiers > 999 ? `${formatNumber(bot.stats.copiers / 1000, 1)}k` : bot.stats.copiers}
                         </div>
                       </div>
                       <div className="text-center">
                         <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-1">Win Rate</div>
                         <div className="text-sm font-normal text-gray-900 dark:text-white">
-                          {bot.stats.winRate.toFixed(0)}%
+                          {formatNumber(bot.stats.winRate, 0)}%
                         </div>
                       </div>
                       <div className="text-center">
@@ -310,17 +312,17 @@ export default function BotsPage() {
                     <div className="flex items-center justify-between bg-gray-50 dark:bg-dark-900/30 rounded-lg px-3 py-2">
                       <span className="text-xs text-gray-500 dark:text-dark-500">1y Return</span>
                       <span className={`text-sm font-medium ${bot.stats.return1y >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                        {bot.stats.return1y >= 0 ? '+' : ''}{bot.stats.return1y.toFixed(0)}%
+                        {bot.stats.return1y >= 0 ? '+' : ''}{formatNumber(bot.stats.return1y, 0)}%
                       </span>
                     </div>
                     <div className="flex items-center justify-between bg-gray-50 dark:bg-dark-900/30 rounded-lg px-3 py-2">
                       <span className="text-xs text-gray-500 dark:text-dark-500">Win Rate</span>
-                      <span className="text-sm font-medium text-gray-900 dark:text-white">{bot.stats.winRate.toFixed(0)}%</span>
+                      <span className="text-sm font-medium text-gray-900 dark:text-white">{formatNumber(bot.stats.winRate, 0)}%</span>
                     </div>
                     <div className="flex items-center justify-between bg-gray-50 dark:bg-dark-900/30 rounded-lg px-3 py-2">
                       <span className="text-xs text-gray-500 dark:text-dark-500">Copiers</span>
                       <span className="text-sm font-medium text-gray-900 dark:text-white">
-                        {bot.stats.copiers > 999 ? `${(bot.stats.copiers / 1000).toFixed(1)}k` : bot.stats.copiers}
+                        {bot.stats.copiers > 999 ? `${formatNumber(bot.stats.copiers / 1000, 1)}k` : bot.stats.copiers}
                       </span>
                     </div>
                     <div className="flex items-center justify-between bg-gray-50 dark:bg-dark-900/30 rounded-lg px-3 py-2">

@@ -69,7 +69,7 @@ export default function SettingsPage() {
             className="md:col-span-1 lg:col-span-4"
           >
             <Link href="/dashboard-v2/settings/profile" className="block h-full">
-              <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="h-full rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
               <div className="h-full bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 hover:border-primary-500/40 rounded-[calc(1rem-1px)] p-5 transition-all group">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
@@ -105,7 +105,7 @@ export default function SettingsPage() {
             className="md:col-span-1 lg:col-span-4"
           >
             <Link href="/dashboard-v2/settings/wallets" className="block h-full">
-              <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="h-full rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
               <div className="h-full bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 hover:border-primary-500/40 rounded-[calc(1rem-1px)] p-5 transition-all group">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
@@ -148,7 +148,7 @@ export default function SettingsPage() {
             className="md:col-span-1 lg:col-span-4"
           >
             <Link href="/dashboard-v2/settings/kyc" className="block h-full">
-              <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="h-full rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
               <div className="h-full bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 hover:border-primary-500/40 rounded-[calc(1rem-1px)] p-5 transition-all group">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
@@ -184,7 +184,7 @@ export default function SettingsPage() {
             className="md:col-span-1 lg:col-span-5"
           >
             <Link href="/dashboard-v2/settings/security" className="block h-full">
-              <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="h-full rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
               <div className="h-full bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 hover:border-primary-500/40 rounded-[calc(1rem-1px)] p-5 transition-all group">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
@@ -237,7 +237,7 @@ export default function SettingsPage() {
             className="md:col-span-1 lg:col-span-4"
           >
             <Link href="/dashboard-v2/settings/notifications" className="block h-full">
-              <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="h-full rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
               <div className="h-full bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 hover:border-primary-500/40 rounded-[calc(1rem-1px)] p-5 transition-all group">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
@@ -275,7 +275,7 @@ export default function SettingsPage() {
             className="md:col-span-1 lg:col-span-3"
           >
             <Link href="/dashboard-v2/settings/preferences" className="block h-full">
-              <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="h-full rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
               <div className="h-full bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 hover:border-primary-500/40 rounded-[calc(1rem-1px)] p-5 transition-all group">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">

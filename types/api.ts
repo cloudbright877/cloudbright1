@@ -87,6 +87,12 @@ export interface BotStats {
   winStreak: number;          // Max consecutive wins
   recoveryFactor: number;     // Total P&L / Max Drawdown
   avgTradeSize: number;       // Average trade size in USD
+
+  // Optional historical return data (from DemoBot.stats)
+  return30d?: number;         // 30-day return percentage
+  return7d?: number;          // 7-day return percentage
+  return90d?: number;         // 90-day return percentage
+  return1y?: number;          // 1-year return percentage
 }
 
 // ============================================================================
@@ -329,6 +335,11 @@ export interface MasterBotData {
   // Additional Info
   minInvestment: number;         // Minimum investment to copy
   tags: string[];                // Tags (e.g., ["BTC", "ETH", "Low Risk"])
+
+  // Optional fields from DemoBot (for backward compatibility with UI)
+  reservationDays?: number;      // Capital lock-in period in days (from DemoBot.stats)
+  lockInDays?: number;           // Alias for reservationDays (from DemoBot)
+  return30d?: number;            // 30-day return percentage (from DemoBot.stats)
 }
 
 /**

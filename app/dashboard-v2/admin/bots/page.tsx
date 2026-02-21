@@ -195,7 +195,7 @@ export default function AdminBotsPage() {
     }
   };
 
-  const updatePresetField = (field: keyof PresetInput, value: any) => {
+  const updatePresetField = <K extends keyof PresetInput>(field: K, value: PresetInput[K]) => {
     setPresetInput(prev => {
       if (!prev) return null;
       return {
@@ -274,7 +274,7 @@ export default function AdminBotsPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className={isEditing
-                  ? "rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]"
+                  ? "rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]"
                   : "bg-dark-800/50 border border-dark-700/50 rounded-lg p-3 hover:bg-dark-800/70 transition-colors"
                 }
               >

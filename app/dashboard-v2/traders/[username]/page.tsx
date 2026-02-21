@@ -138,7 +138,7 @@ export default function TraderProfilePage({ params }: { params: Promise<{ userna
           animate={{ opacity: 1, y: 0 }}
           className="mb-6"
         >
-          <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+          <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
           <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-4 sm:p-6 lg:p-8 hover:border-primary-500/30 transition-all"
         >
         <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8">
@@ -297,7 +297,7 @@ export default function TraderProfilePage({ params }: { params: Promise<{ userna
             className="space-y-6"
           >
             {/* Performance Chart */}
-            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+            <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
             <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6 hover:border-primary-500/30 transition-all">
               <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                 <TrendingUp className="w-5 h-5 text-primary-400" />
@@ -310,7 +310,7 @@ export default function TraderProfilePage({ params }: { params: Promise<{ userna
 
             {/* Performance Stats */}
             <div className="grid md:grid-cols-3 gap-4">
-              <div className="h-full rounded-xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="h-full rounded-xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
               <div className="h-full bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(0.75rem-1px)] p-6 hover:border-primary-500/30 transition-all">
                 <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                   <BarChart3 className="w-4 h-4 text-primary-400" />
@@ -333,7 +333,7 @@ export default function TraderProfilePage({ params }: { params: Promise<{ userna
               </div>
               </div>
 
-              <div className="h-full rounded-xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="h-full rounded-xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
               <div className="h-full bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(0.75rem-1px)] p-6 hover:border-primary-500/50 transition-all">
                 <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                   <Users className="w-4 h-4 text-primary-400" />
@@ -356,7 +356,7 @@ export default function TraderProfilePage({ params }: { params: Promise<{ userna
               </div>
               </div>
 
-              <div className="h-full rounded-xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="h-full rounded-xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
               <div className="h-full bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(0.75rem-1px)] p-6 hover:border-primary-500/50 transition-all">
                 <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                   <Target className="w-4 h-4 text-primary-400" />
@@ -377,7 +377,7 @@ export default function TraderProfilePage({ params }: { params: Promise<{ userna
             </div>
 
             {/* Active Bots Summary */}
-            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+            <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
             <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6 hover:border-primary-500/30 transition-all">
               <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                 <Bot className="w-5 h-5 text-primary-400" />
@@ -399,7 +399,7 @@ export default function TraderProfilePage({ params }: { params: Promise<{ userna
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
           >
-            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+            <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
             <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6">
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-6 flex items-center gap-2">
               <Bot className="w-5 h-5 text-primary-400" />
@@ -442,7 +442,7 @@ export default function TraderProfilePage({ params }: { params: Promise<{ userna
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
           >
-            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+            <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
             <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6">
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-6 flex items-center gap-2">
               <Archive className="w-5 h-5 text-primary-400" />
@@ -517,7 +517,7 @@ export default function TraderProfilePage({ params }: { params: Promise<{ userna
                             </div>
                           </div>
                           <div className="p-3 bg-gray-50 dark:bg-dark-800/50 rounded-lg border border-gray-200 dark:border-dark-700/50">
-                            <div className="text-xs text-gray-600 dark:text-dark-400 mb-1">Lock-in</div>
+                            <div className="text-xs text-gray-600 dark:text-dark-400 mb-1">Reservation</div>
                             <div className="text-sm font-medium text-gray-900 dark:text-white">
                               {lockInDays} days
                             </div>
@@ -553,7 +553,7 @@ export default function TraderProfilePage({ params }: { params: Promise<{ userna
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
           >
-            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+            <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
             <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800 dark:to-dark-900 rounded-[calc(1rem-1px)] p-6 max-w-lg w-full">
             <h3 className="text-2xl font-medium text-gray-900 dark:text-white mb-4">Copy {trader.displayName}'s Strategy</h3>
 

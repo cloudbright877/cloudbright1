@@ -61,7 +61,6 @@ export function QuickStartModal({
         setAllocations(computed);
         setStep(4);
       } catch (error) {
-        console.error('[QuickStart] Error selecting bots:', error);
         alert('Failed to select bots. Please try again.');
       }
     } else {
@@ -78,7 +77,6 @@ export function QuickStartModal({
     try {
       await onComplete(allocations);
     } catch (error) {
-      console.error('[QuickStart] Error creating portfolio:', error);
       alert('Failed to create portfolio. Please try again.');
     } finally {
       setIsProcessing(false);
@@ -120,25 +118,25 @@ export function QuickStartModal({
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="relative w-full max-w-2xl bg-dark-900 border border-dark-700 rounded-2xl shadow-2xl overflow-hidden"
+        className="relative w-full max-w-2xl bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-2xl shadow-2xl overflow-hidden"
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-dark-700">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-dark-700">
           <div>
-            <h2 className="text-2xl font-semibold text-white">Quick Start</h2>
-            <p className="text-sm text-dark-400">Get started in 3 clicks</p>
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">Quick Start</h2>
+            <p className="text-sm text-gray-500 dark:text-dark-400">Get started in 3 clicks</p>
           </div>
           <button
             onClick={handleClose}
             disabled={isProcessing}
-            className="p-2 rounded-lg bg-dark-800 hover:bg-dark-700 text-dark-400 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-dark-800 dark:hover:bg-dark-700 text-gray-500 hover:text-gray-900 dark:text-dark-400 dark:hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Progress indicator */}
-        <div className="flex items-center justify-center gap-2 p-4 bg-dark-800/50">
+        <div className="flex items-center justify-center gap-2 p-4 bg-gray-50 dark:bg-dark-800/50">
           {[1, 2, 3, 4].map((dotStep) => (
             <div
               key={dotStep}
@@ -147,7 +145,7 @@ export function QuickStartModal({
                   ? 'bg-primary-500 w-8'
                   : dotStep < step
                   ? 'bg-green-500'
-                  : 'bg-dark-600'
+                  : 'bg-gray-300 dark:bg-dark-600'
               }`}
             />
           ))}
@@ -213,6 +211,7 @@ export function QuickStartModal({
                 <StepResults
                   allocations={allocations}
                   totalAmount={investmentAmount || 0}
+                  userBalance={userBalance}
                   onConfirm={handleConfirm}
                   isProcessing={isProcessing}
                 />
@@ -223,18 +222,18 @@ export function QuickStartModal({
 
         {/* Footer - Navigation */}
         {step < 4 && (
-          <div className="flex items-center justify-between p-6 border-t border-dark-700">
+          <div className="flex items-center justify-between p-6 border-t border-gray-200 dark:border-dark-700">
             <button
               onClick={handleBack}
               disabled={step === 1 || isProcessing}
-              className="px-6 py-3 rounded-lg bg-dark-800 hover:bg-dark-700 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="px-6 py-3 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-dark-800 dark:hover:bg-dark-700 text-gray-900 dark:text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
               Back
             </button>
             <button
               onClick={handleNext}
               disabled={!canProceed() || isProcessing}
-              className="px-6 py-3 rounded-lg bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 disabled:from-dark-700 disabled:to-dark-700 text-white font-medium disabled:cursor-not-allowed transition-all shadow-lg shadow-primary-500/30"
+              className="px-6 py-3 rounded-lg bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 disabled:from-gray-300 disabled:to-gray-300 dark:disabled:from-dark-700 dark:disabled:to-dark-700 text-white font-medium disabled:cursor-not-allowed transition-all shadow-lg shadow-primary-500/30"
             >
               {step === 3 ? 'See Results' : 'Next'}
             </button>

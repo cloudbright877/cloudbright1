@@ -46,7 +46,7 @@ const marketplaceFeatures = [
     number: '01',
     icon: Store,
     title: 'Bot Marketplace',
-    description: 'Browse 100+ verified bots ranked by performance, risk level, and copier count. Full stats for every strategy.',
+    description: 'Browse verified bots ranked by performance, risk level, and copier count. Full stats for every strategy.',
   },
   {
     number: '02',
@@ -307,7 +307,7 @@ export default function PlatformPage() {
                   <ul className="flex flex-col gap-4 mb-8">
                     {[
                       'Real-time P&L, win rate, and live status for every bot',
-                      'Collect profits anytime based on your lock-in period',
+                      'Collect profits anytime during capital reservation',
                       'Quick Start wizard builds your portfolio in 4 steps',
                       'Full trade history, equity curves, and risk metrics',
                     ].map((text) => (
@@ -583,10 +583,10 @@ export default function PlatformPage() {
                     <span className="text-7xl font-bold text-gray-200/40 dark:text-dark-800/30 absolute top-4 right-6 select-none pointer-events-none">02</span>
                     <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">Flexible Profit Collection</h3>
                     <p className="text-gray-600 dark:text-dark-300 leading-relaxed mb-5">
-                      Lock-in periods from 7 to 180 days. Longer terms offer higher potential returns. Collect profits anytime.
+                      Capital reservation from 15 to 180 days. Longer terms offer higher potential returns. Collect profits anytime.
                     </p>
                     <div className="flex flex-wrap gap-2">
-                      {['7-180 Day Lock-in', 'Collect Anytime', 'From $50', 'Higher Returns'].map((tag) => (
+                      {['15-180 Day Reservation', 'Collect Anytime', 'From $50', 'Higher Returns'].map((tag) => (
                         <span key={tag} className="px-3 py-1 text-[11px] font-medium rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                           {tag}
                         </span>

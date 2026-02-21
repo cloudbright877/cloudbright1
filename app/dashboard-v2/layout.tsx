@@ -30,6 +30,37 @@ export default function DashboardV2Layout({
 
   useEffect(() => {
     scrollRef.current?.scrollTo(0, 0);
+
+    const pageTitles: Record<string, string> = {
+      '/dashboard-v2': 'Dashboard',
+      '/dashboard-v2/analytics': 'Analytics',
+      '/dashboard-v2/bots': 'Bots Marketplace',
+      '/dashboard-v2/bots/compare': 'Compare Bots',
+      '/dashboard-v2/bots/compare/select': 'Select Bots to Compare',
+      '/dashboard-v2/copy-bots': 'My Copies',
+      '/dashboard-v2/feed': 'Social Feed',
+      '/dashboard-v2/leaderboard': 'Leaderboard',
+      '/dashboard-v2/notifications': 'Notifications',
+      '/dashboard-v2/quick-start': 'Quick Start',
+      '/dashboard-v2/referrals': 'Referral Program',
+      '/dashboard-v2/settings': 'Settings',
+      '/dashboard-v2/settings/profile': 'Profile',
+      '/dashboard-v2/settings/preferences': 'Preferences',
+      '/dashboard-v2/settings/security': 'Security',
+      '/dashboard-v2/settings/kyc': 'KYC Verification',
+      '/dashboard-v2/settings/wallets': 'Wallet Settings',
+      '/dashboard-v2/settings/notifications': 'Notification Settings',
+      '/dashboard-v2/transactions': 'Transactions',
+      '/dashboard-v2/wallets': 'Wallets',
+      '/dashboard-v2/wallets/deposit': 'Deposit',
+      '/dashboard-v2/wallets/withdraw': 'Withdraw',
+      '/dashboard-v2/whales': 'Whale Alerts',
+      '/dashboard-v2/help': 'Help & FAQ',
+      '/dashboard-v2/admin/bots': 'Admin: Bots',
+    };
+
+    const title = pageTitles[pathname] || 'Dashboard';
+    document.title = `${title} | Cloudbright`;
   }, [pathname]);
 
   return (

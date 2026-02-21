@@ -162,7 +162,7 @@ export default function CopyBotPage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]"
+          className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]"
         >
           <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 lg:p-8">
           {/* Header */}
@@ -314,12 +314,12 @@ export default function CopyBotPage() {
                 className="p-4 bg-dark-900/50 border-t border-dark-700 space-y-4"
               >
                 <p className="text-xs text-dark-400 leading-relaxed">
-                  Your capital will be locked for <strong className="text-white">{bot.lockInDays} days</strong> after activation. During this period you cannot deactivate the bot. This gives the strategy enough time to demonstrate its performance.
+                  Your capital will be reserved for <strong className="text-white">{bot.lockInDays} days</strong> after activation. During this period you cannot deactivate the bot. This gives the strategy enough time to demonstrate its performance.
                 </p>
 
                 <div className="p-3 bg-dark-800/50 border border-dark-700 rounded-lg space-y-2">
                   <div className="flex justify-between text-xs">
-                    <span className="text-dark-400">Lock-in period</span>
+                    <span className="text-dark-400">Capital reservation</span>
                     <span className="font-normal text-white">{bot.lockInDays} days</span>
                   </div>
                   <div className="flex justify-between text-xs">

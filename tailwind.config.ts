@@ -57,6 +57,8 @@ const config: Config = {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
         'gradient-primary': 'linear-gradient(135deg, #4F46E5 0%, #06B6D4 100%)',
+        'bento-border': 'linear-gradient(135deg, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.04) 25%, rgba(0,0,0,0.04) 75%, rgba(0,0,0,0.05) 100%)',
+        'bento-border-dark': 'linear-gradient(135deg, rgba(255,255,255,0.20) 0%, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.04) 75%, rgba(255,255,255,0.05) 100%)',
       },
       animation: {
         'float': 'float 3s ease-in-out infinite',

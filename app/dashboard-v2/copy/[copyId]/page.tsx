@@ -10,8 +10,11 @@ import { getUserCopy, updateUserCopy } from '@/lib/userCopies';
 import { getUserCopyPnLBreakdown, type PnLBreakdown } from '@/lib/userCopyStats';
 import { isLockedIn, getDaysRemainingInReservation } from '@/lib/capitalReservation';
 import { getDemoBotById } from '@/lib/demoMarketplace';
+import { formatNumber } from '@/lib/formatters';
+import { LoadingScreen } from '@/components/dashboard-v2/LoadingScreen';
 import { Pagination } from '@/components/dashboard-v2/Pagination';
 import { FilterDropdown } from '@/components/dashboard-v2/FilterDropdown';
+import type { Position as BotPosition, Trade as BotTrade } from '@/lib/trading/types';
 import {
   TrendingUp,
   TrendingDown,
@@ -204,7 +207,7 @@ export default function UserCopyPage() {
       if (!stats) return;
 
       // Convert BotManager data to UI format
-      const convertedPositions: LivePosition[] = stats.positions.map((pos: any) => ({
+      const convertedPositions: LivePosition[] = stats.positions.map((pos: BotPosition) => ({
         id: pos.id,
         pair: pos.pair,
         side: pos.side,
@@ -225,7 +228,7 @@ export default function UserCopyPage() {
         stopLossPnL: 0,
       }));
 
-      const convertedTrades: Trade[] = stats.trades.slice(0, 50).map((trade: any) => {
+      const convertedTrades: Trade[] = stats.trades.slice(0, 50).map((trade: BotTrade) => {
         // Calculate realistic metrics if not present
         const feeRate = 0.04;
         const posSize = trade.positionSize || 0;
@@ -342,7 +345,7 @@ export default function UserCopyPage() {
           totalPoints: validPoints.length,
           points: validPoints.map(p => ({
             time: new Date(p.timestamp).toISOString(),
-            value: p.value.toFixed(2)
+            value: formatNumber(p.value)
           }))
         });
 
@@ -423,9 +426,9 @@ export default function UserCopyPage() {
         const avgMs = totalDurationMs / trades.length;
         const avgHours = avgMs / (60 * 60 * 1000);
         const avgMinutes = avgMs / (60 * 1000);
-        if (avgHours >= 1) averageHoldTime = `${avgHours.toFixed(1)}h`;
-        else if (avgMinutes >= 1) averageHoldTime = `${avgMinutes.toFixed(0)}m`;
-        else averageHoldTime = `${(avgMs / 1000).toFixed(0)}s`;
+        if (avgHours >= 1) averageHoldTime = `${formatNumber(avgHours, 1)}h`;
+        else if (avgMinutes >= 1) averageHoldTime = `${formatNumber(avgMinutes, 0)}m`;
+        else averageHoldTime = `${formatNumber(avgMs / 1000, 0)}s`;
       }
 
       // Profit Factor (total wins / total losses)
@@ -554,30 +557,7 @@ export default function UserCopyPage() {
   };
 
   if (!botDetails || !botStats) {
-    return (
-      <div className="min-h-screen bg-gray-100 dark:bg-transparent flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <svg width="64" height="64" viewBox="0 0 64 64" className="animate-spin" style={{ animationDuration: '2s' }}>
-            <polygon
-              points="32,2 58,17 58,47 32,62 6,47 6,17"
-              fill="none"
-              stroke="url(#hexGrad)"
-              strokeWidth="3"
-              strokeLinecap="round"
-              strokeDasharray="120"
-              strokeDashoffset="40"
-            />
-            <defs>
-              <linearGradient id="hexGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#8b5cf6" />
-                <stop offset="100%" stopColor="#6366f1" />
-              </linearGradient>
-            </defs>
-          </svg>
-          <p className="text-sm text-primary-400/70 font-medium">Loading...</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   return (
@@ -665,7 +645,7 @@ export default function UserCopyPage() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6">
           {/* Realized P&L */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+            <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
             <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-green-500/50 transition-all">
               <div className="flex items-center justify-between mb-2 sm:mb-4">
                 <div className={`w-8 h-8 sm:w-12 sm:h-12 ${(pnlBreakdown?.realizedPnL ?? 0) >= 0 ? 'bg-green-500/20 border-green-500/30' : 'bg-red-500/20 border-red-500/30'} border rounded-lg sm:rounded-xl flex items-center justify-center`}>
@@ -683,7 +663,7 @@ export default function UserCopyPage() {
               </div>
               <div className="text-[10px] sm:text-sm text-gray-600 dark:text-dark-400 mb-0.5 sm:mb-1">Realized P&L</div>
               <div className={`text-base sm:text-2xl font-semibold mb-0.5 sm:mb-2 ${(pnlBreakdown?.realizedPnL ?? 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                {(pnlBreakdown?.realizedPnL ?? 0) >= 0 ? '+' : ''}${Math.abs(pnlBreakdown?.realizedPnL ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                {(pnlBreakdown?.realizedPnL ?? 0) >= 0 ? '+' : ''}${formatNumber(Math.abs(pnlBreakdown?.realizedPnL ?? 0))}
               </div>
               <div className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400">Running for {botDetails.runningDays} days</div>
             </div>
@@ -691,7 +671,7 @@ export default function UserCopyPage() {
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+            <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
             <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
               <div className="flex items-center justify-between mb-2 sm:mb-4">
                 <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
@@ -702,7 +682,7 @@ export default function UserCopyPage() {
                 </div>
               </div>
               <div className="text-[10px] sm:text-sm text-gray-600 dark:text-dark-400 mb-0.5 sm:mb-1">Win Rate</div>
-              <div className="text-base sm:text-2xl font-semibold text-gray-900 dark:text-white mb-0.5 sm:mb-2">{(botStats.winRate || 0).toFixed(1)}%</div>
+              <div className="text-base sm:text-2xl font-semibold text-gray-900 dark:text-white mb-0.5 sm:mb-2">{formatNumber(botStats.winRate || 0, 1)}%</div>
               <div className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400">{botStats.winningTrades}W / {botStats.losingTrades}L</div>
             </div>
             </div>
@@ -710,7 +690,7 @@ export default function UserCopyPage() {
 
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+            <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
             <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
               <div className="flex items-center justify-between mb-2 sm:mb-4">
                 <div className={`w-8 h-8 sm:w-12 sm:h-12 ${botDetails.todayPnL >= 0 ? 'bg-green-500/20 border-green-500/30' : 'bg-red-500/20 border-red-500/30'} border rounded-lg sm:rounded-xl flex items-center justify-center`}>
@@ -723,12 +703,12 @@ export default function UserCopyPage() {
                 <div className={`text-[10px] sm:text-xs font-medium px-1.5 py-0.5 sm:px-2 sm:py-1 rounded ${
                   botDetails.todayPnL >= 0 ? 'text-green-400 bg-green-500/10' : 'text-red-400 bg-red-500/10'
                 }`}>
-                  {botDetails.todayPnL >= 0 ? '+' : ''}{(botDetails.todayPnLPercent || 0).toFixed(2)}%
+                  {botDetails.todayPnL >= 0 ? '+' : ''}{formatNumber(botDetails.todayPnLPercent || 0)}%
                 </div>
               </div>
               <div className="text-[10px] sm:text-sm text-gray-600 dark:text-dark-400 mb-0.5 sm:mb-1">Today's P&L</div>
               <div className={`text-base sm:text-2xl font-semibold mb-0.5 sm:mb-2 ${botDetails.todayPnL >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                {botDetails.todayPnL >= 0 ? '+' : ''}${Math.abs(botDetails.todayPnL).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                {botDetails.todayPnL >= 0 ? '+' : ''}${formatNumber(Math.abs(botDetails.todayPnL))}
               </div>
               <div className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400">Last 24 hours</div>
             </div>
@@ -736,7 +716,7 @@ export default function UserCopyPage() {
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
-            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+            <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
             <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
               <div className="flex items-center justify-between mb-2 sm:mb-4">
                 <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
@@ -764,7 +744,7 @@ export default function UserCopyPage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
             >
-              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
               <div className="bg-gray-50 dark:bg-dark-900 rounded-[calc(1rem-1px)] p-6 max-w-md w-full">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white">Bot Settings</h3>
@@ -866,11 +846,11 @@ export default function UserCopyPage() {
                 <div className="p-4 bg-gray-50 dark:bg-dark-900/50 rounded-xl border border-gray-200 dark:border-dark-700">
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-sm font-medium text-gray-900 dark:text-white">Auto-close after lock-in</div>
+                      <div className="text-sm font-medium text-gray-900 dark:text-white">Auto-close after reservation</div>
                       <div className="text-xs text-gray-600 dark:text-dark-400 mt-0.5">
                         {lockedIn
-                          ? `Automatically archive bot when lock-in ends (${lockInDaysRemaining}d left)`
-                          : 'Lock-in period has already ended'
+                          ? `Automatically archive bot when reservation ends (${lockInDaysRemaining}d left)`
+                          : 'Capital reservation has already ended'
                         }
                       </div>
                     </div>
@@ -889,7 +869,7 @@ export default function UserCopyPage() {
 
                 {/* Lock-in Info */}
                 <div className="p-4 bg-gray-50 dark:bg-dark-900/50 rounded-xl border border-gray-200 dark:border-dark-700">
-                  <div className="text-sm font-medium text-gray-900 dark:text-white mb-2">Lock-in Period</div>
+                  <div className="text-sm font-medium text-gray-900 dark:text-white mb-2">Capital Reservation</div>
                   {lockedIn ? (
                     <div className="flex items-center gap-2 text-amber-400">
                       <Clock className="w-4 h-4" />
@@ -898,7 +878,7 @@ export default function UserCopyPage() {
                   ) : (
                     <div className="flex items-center gap-2 text-green-400">
                       <CheckCircle2 className="w-4 h-4" />
-                      <span className="text-sm">Lock-in period ended</span>
+                      <span className="text-sm">Capital reservation ended</span>
                     </div>
                   )}
                 </div>
@@ -927,7 +907,7 @@ export default function UserCopyPage() {
         {/* Performance Chart + Bot Info */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 mb-6">
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }} className="lg:col-span-8 h-full">
-            <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+            <div className="h-full rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
             <div className="h-full bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all flex flex-col">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4 sm:mb-6 flex-shrink-0">
                 <div>
@@ -1011,7 +991,7 @@ export default function UserCopyPage() {
                         yaxis: {
                           labels: {
                             style: { colors: '#64748b', fontSize: '12px' },
-                            formatter: (val: number) => `$${val.toLocaleString('en-US')}`,
+                            formatter: (val: number) => `$${formatNumber(val, 0)}`,
                           }
                         },
                         tooltip: {
@@ -1028,7 +1008,7 @@ export default function UserCopyPage() {
                               });
                             }
                           },
-                          y: { formatter: (val: number) => `$${val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` }
+                          y: { formatter: (val: number) => `$${formatNumber(val)}` }
                         },
                         markers: { size: 0, hover: { size: 5 } },
                       }}
@@ -1044,7 +1024,7 @@ export default function UserCopyPage() {
           </motion.div>
 
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.35 }} className="lg:col-span-4">
-            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+            <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
             <div className="h-full bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-accent-500/50 transition-all">
               <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
                 <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary-500/20 border border-primary-500/30 rounded-lg flex items-center justify-center">
@@ -1059,13 +1039,13 @@ export default function UserCopyPage() {
               <div className="space-y-3 sm:space-y-4">
                 <div className="p-2.5 sm:p-4 bg-gray-50 dark:bg-dark-900/50 rounded-xl border border-gray-200 dark:border-dark-700/50">
                   <div className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400 mb-0.5 sm:mb-1">Invested Capital</div>
-                  <div className="text-base sm:text-2xl font-semibold text-gray-900 dark:text-white">${(botDetails.invested || 0).toLocaleString('en-US')}</div>
+                  <div className="text-base sm:text-2xl font-semibold text-gray-900 dark:text-white">${formatNumber(botDetails.invested || 0, 0)}</div>
                 </div>
 
                 <div className="p-2.5 sm:p-4 bg-gray-50 dark:bg-dark-900/50 rounded-xl border border-gray-200 dark:border-dark-700/50">
                   <div className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400 mb-0.5 sm:mb-1">Current Value</div>
                   <div className={`text-base sm:text-2xl font-semibold ${botDetails.profit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                    ${(pnlBreakdown?.currentValue ?? botDetails.currentValue ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    ${formatNumber(pnlBreakdown?.currentValue ?? botDetails.currentValue ?? 0)}
                   </div>
                 </div>
 
@@ -1074,12 +1054,12 @@ export default function UserCopyPage() {
                     <div className="flex justify-between">
                       <span className="text-xs text-gray-600 dark:text-dark-400">Total P&L</span>
                       <span className={`text-xs font-medium ${pnlBreakdown.totalPnL >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                        {pnlBreakdown.totalPnL >= 0 ? '+' : ''}${pnlBreakdown.totalPnL.toFixed(2)}
+                        {pnlBreakdown.totalPnL >= 0 ? '+' : ''}${formatNumber(pnlBreakdown.totalPnL)}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-xs text-gray-600 dark:text-dark-400">Auto-Credited</span>
-                      <span className="text-xs font-medium text-green-400">${pnlBreakdown.totalAutoCredited.toFixed(2)}</span>
+                      <span className="text-xs font-medium text-green-400">${formatNumber(pnlBreakdown.totalAutoCredited)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-xs text-gray-600 dark:text-dark-400">Compounding</span>
@@ -1130,7 +1110,7 @@ export default function UserCopyPage() {
 
         {/* Trading Statistics */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="mb-6">
-          <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+          <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
           <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
             <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
               <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
@@ -1147,7 +1127,7 @@ export default function UserCopyPage() {
                 icon={<BarChart3 className="w-4 h-4 text-primary-400" />}
                 label="Total Trades"
                 value={(botStats.totalTrades || 0).toString()}
-                subtitle={botDetails.runningDays > 0 ? `${(botStats.totalTrades / botDetails.runningDays).toFixed(1)}/day` : 'Just started'}
+                subtitle={botDetails.runningDays > 0 ? `${formatNumber(botStats.totalTrades / botDetails.runningDays, 1)}/day` : 'Just started'}
                 subtitleColor="text-primary-400"
               />
               <StatCard
@@ -1164,30 +1144,30 @@ export default function UserCopyPage() {
               <StatCard
                 icon={<Target className="w-4 h-4 text-primary-400" />}
                 label="Win/Loss Ratio"
-                value={`${((botStats.winningTrades || 0) / Math.max(botStats.losingTrades || 1, 1)).toFixed(2)}:1`}
+                value={`${formatNumber((botStats.winningTrades || 0) / Math.max(botStats.losingTrades || 1, 1))}:1`}
                 subtitle={`${botStats.winningTrades || 0}W / ${botStats.losingTrades || 0}L`}
                 subtitleColor="text-primary-400"
               />
               <StatCard
                 icon={<TrendingUp className="w-4 h-4 text-green-400" />}
                 label="Average Win"
-                value={`+$${(botStats.averageWin || 0).toFixed(2)}`}
-                subtitle={`${((botStats.averageWin / (botDetails.invested || 1)) * 100).toFixed(2)}% of capital`}
+                value={`+$${formatNumber(botStats.averageWin || 0)}`}
+                subtitle={`${formatNumber((botStats.averageWin / (botDetails.invested || 1)) * 100)}% of capital`}
                 valueColor="text-green-400"
                 subtitleColor="text-green-400"
               />
               <StatCard
                 icon={<TrendingDown className="w-4 h-4 text-red-400" />}
                 label="Average Loss"
-                value={`$${(botStats.averageLoss || 0).toFixed(2)}`}
-                subtitle={`${((Math.abs(botStats.averageLoss) / (botDetails.invested || 1)) * 100).toFixed(2)}% of capital`}
+                value={`$${formatNumber(botStats.averageLoss || 0)}`}
+                subtitle={`${formatNumber((Math.abs(botStats.averageLoss) / (botDetails.invested || 1)) * 100)}% of capital`}
                 valueColor="text-red-400"
                 subtitleColor="text-red-400"
               />
               <StatCard
                 icon={<Zap className="w-4 h-4 text-primary-400" />}
                 label="Profit Factor"
-                value={(botStats.profitFactor || 0).toFixed(2)}
+                value={formatNumber(botStats.profitFactor || 0)}
                 subtitle={
                   botStats.profitFactor >= 2 ? 'Excellent' :
                   botStats.profitFactor >= 1.5 ? 'Good' :
@@ -1205,7 +1185,7 @@ export default function UserCopyPage() {
               <StatCard
                 icon={<AlertTriangle className="w-4 h-4 text-red-400" />}
                 label="Max Drawdown"
-                value={`${(botStats.maxDrawdown || 0).toFixed(1)}%`}
+                value={`${formatNumber(botStats.maxDrawdown || 0, 1)}%`}
                 subtitle={
                   Math.abs(botStats.maxDrawdown) < 5 ? 'Very safe' :
                   Math.abs(botStats.maxDrawdown) < 10 ? 'Safe' :
@@ -1223,23 +1203,23 @@ export default function UserCopyPage() {
               <StatCard
                 icon={<DollarSign className="w-4 h-4 text-primary-400" />}
                 label="Total Volume"
-                value={`$${((botStats.totalVolume || 0) / 1000).toFixed(0)}K`}
-                subtitle={`${((botStats.totalVolume / (botDetails.invested || 1))).toFixed(1)}× capital turnover`}
+                value={`$${formatNumber((botStats.totalVolume || 0) / 1000, 0)}K`}
+                subtitle={`${formatNumber(botStats.totalVolume / (botDetails.invested || 1), 1)}× capital turnover`}
                 subtitleColor="text-primary-400"
               />
               <StatCard
                 icon={<TrendingUp className="w-4 h-4 text-green-400" />}
                 label="Best Trade"
-                value={`+$${(botStats.bestTrade || 0).toFixed(2)}`}
-                subtitle={`${((botStats.bestTrade / (botDetails.invested || 1)) * 100).toFixed(2)}% gain`}
+                value={`+$${formatNumber(botStats.bestTrade || 0)}`}
+                subtitle={`${formatNumber((botStats.bestTrade / (botDetails.invested || 1)) * 100)}% gain`}
                 valueColor="text-green-400"
                 subtitleColor="text-green-400"
               />
               <StatCard
                 icon={<TrendingDown className="w-4 h-4 text-red-400" />}
                 label="Worst Trade"
-                value={`$${(botStats.worstTrade || 0).toFixed(2)}`}
-                subtitle={`${((Math.abs(botStats.worstTrade) / (botDetails.invested || 1)) * 100).toFixed(2)}% loss`}
+                value={`$${formatNumber(botStats.worstTrade || 0)}`}
+                subtitle={`${formatNumber((Math.abs(botStats.worstTrade) / (botDetails.invested || 1)) * 100)}% loss`}
                 valueColor="text-red-400"
                 subtitleColor="text-red-400"
               />
@@ -1260,7 +1240,7 @@ export default function UserCopyPage() {
               <StatCard
                 icon={<Trophy className="w-4 h-4 text-yellow-400" />}
                 label="Sharpe Ratio"
-                value={(botStats.sharpeRatio || 0).toFixed(2)}
+                value={formatNumber(botStats.sharpeRatio || 0)}
                 subtitle={
                   (botStats.sharpeRatio || 0) >= 3 ? 'Excellent' :
                   (botStats.sharpeRatio || 0) >= 2 ? 'Very good' :
@@ -1282,7 +1262,7 @@ export default function UserCopyPage() {
 
         {/* Open Positions Table (LIVE V2) - GRID 1 */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }} className="mb-6">
-          <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+          <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
           <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
             <div className="flex items-center justify-between mb-4 sm:mb-6">
               <div className="flex items-center gap-2 sm:gap-3">
@@ -1338,13 +1318,13 @@ export default function UserCopyPage() {
                           <div className="px-1.5 py-0.5 bg-gray-200 dark:bg-dark-800/50 border border-gray-300 dark:border-dark-700 rounded flex items-center gap-1.5">
                             <div className="text-[9px] text-gray-600 dark:text-dark-400">SL</div>
                             <div className="font-mono text-[10px] text-red-400 font-normal">
-                              ${position.stopLoss.toFixed(0)}
+                              ${formatNumber(position.stopLoss, 0)}
                             </div>
                           </div>
                           <div className="px-1.5 py-0.5 bg-gray-200 dark:bg-dark-800/50 border border-gray-300 dark:border-dark-700 rounded flex items-center gap-1.5">
                             <div className="text-[9px] text-gray-600 dark:text-dark-400">TP</div>
                             <div className="font-mono text-[10px] text-green-400 font-normal">
-                              ${position.takeProfit.toFixed(0)}
+                              ${formatNumber(position.takeProfit, 0)}
                             </div>
                           </div>
                         </div>
@@ -1358,13 +1338,13 @@ export default function UserCopyPage() {
                         <div className="px-1.5 py-0.5 bg-gray-200 dark:bg-dark-800/50 border border-gray-300 dark:border-dark-700 rounded flex items-center gap-1.5">
                           <div className="text-[9px] text-gray-600 dark:text-dark-400">SL</div>
                           <div className="font-mono text-[10px] text-red-400 font-normal">
-                            ${position.stopLoss.toFixed(0)}
+                            ${formatNumber(position.stopLoss, 0)}
                           </div>
                         </div>
                         <div className="px-1.5 py-0.5 bg-gray-200 dark:bg-dark-800/50 border border-gray-300 dark:border-dark-700 rounded flex items-center gap-1.5">
                           <div className="text-[9px] text-gray-600 dark:text-dark-400">TP</div>
                           <div className="font-mono text-[10px] text-green-400 font-normal">
-                            ${position.takeProfit.toFixed(0)}
+                            ${formatNumber(position.takeProfit, 0)}
                           </div>
                         </div>
                       </div>
@@ -1375,7 +1355,7 @@ export default function UserCopyPage() {
                       <div className="bg-gray-100 dark:bg-dark-900/50 rounded-lg px-2.5 py-2">
                         <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-0.5">Entry Price</div>
                         <div className="font-mono text-sm text-gray-900 dark:text-white font-normal">
-                          ${position.entryPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          ${formatNumber(position.entryPrice)}
                         </div>
                       </div>
                       <div className="bg-gray-100 dark:bg-dark-900/50 rounded-lg px-2.5 py-2">
@@ -1390,19 +1370,19 @@ export default function UserCopyPage() {
                           animate={{ opacity: [0.5, 1, 1, 0.85], color: position.priceDirection === 'up' ? 'rgb(74, 222, 128)' : 'rgb(248, 113, 113)' }}
                           transition={{ duration: 1.5, times: [0, 0.2, 0.8, 1], ease: 'easeInOut' }}
                         >
-                          ${position.currentPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          ${formatNumber(position.currentPrice)}
                         </motion.div>
                       </div>
                       <div className="bg-gray-100 dark:bg-dark-900/50 rounded-lg px-2.5 py-2">
                         <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-0.5">Position Size</div>
                         <div className="font-mono text-sm text-gray-900 dark:text-white font-normal">
-                          ${position.positionSize.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          ${formatNumber(position.positionSize)}
                         </div>
                       </div>
                       <div className="bg-gray-100 dark:bg-dark-900/50 rounded-lg px-2.5 py-2">
                         <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-0.5">Amount</div>
                         <div className="font-mono text-sm text-gray-900 dark:text-white font-normal">
-                          {position.amount.toFixed(8)}
+                          {formatNumber(position.amount, 8)}
                         </div>
                       </div>
                       <div className={`col-span-2 sm:col-span-1 rounded-lg px-2.5 py-2 ${position.pnl >= 0 ? 'bg-green-500/10' : 'bg-red-500/10'}`}>
@@ -1414,7 +1394,7 @@ export default function UserCopyPage() {
                           animate={{ opacity: [0.5, 1, 1, 1], color: position.pnl >= 0 ? 'rgb(74, 222, 128)' : 'rgb(248, 113, 113)' }}
                           transition={{ duration: 1.5, times: [0, 0.2, 0.8, 1], ease: 'easeInOut' }}
                         >
-                          {position.pnl >= 0 ? '+' : ''}${Math.abs(position.pnl).toFixed(2)} <span className="text-[10px] opacity-70">({position.pnl >= 0 ? '+' : ''}{position.pnlPercent.toFixed(2)}%)</span>
+                          {position.pnl >= 0 ? '+' : ''}${formatNumber(Math.abs(position.pnl))} <span className="text-[10px] opacity-70">({position.pnl >= 0 ? '+' : ''}{formatNumber(position.pnlPercent)}%)</span>
                         </motion.div>
                       </div>
                     </div>
@@ -1437,7 +1417,7 @@ export default function UserCopyPage() {
 
         {/* Trade History - GRID 1 */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="mb-6">
-          <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+          <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
           <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-accent-500/50 transition-all">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
               <div className="flex items-center gap-2 sm:gap-3">
@@ -1517,10 +1497,10 @@ export default function UserCopyPage() {
                           {/* P&L — inline on sm+ */}
                           <div className="hidden sm:block text-right">
                             <div className={`text-sm font-medium ${trade.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                              {trade.pnl >= 0 ? '+' : ''}${trade.pnl.toFixed(2)}
+                              {trade.pnl >= 0 ? '+' : ''}${formatNumber(trade.pnl)}
                             </div>
                             <div className={`text-[10px] font-medium opacity-70 ${trade.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                              {trade.pnl >= 0 ? '+' : ''}{trade.pnlPercent.toFixed(2)}%
+                              {trade.pnl >= 0 ? '+' : ''}{formatNumber(trade.pnlPercent)}%
                             </div>
                           </div>
                           {/* Timestamp — inline on sm+ */}
@@ -1541,10 +1521,10 @@ export default function UserCopyPage() {
                       <div className="flex sm:hidden items-center justify-between mt-1.5">
                         <div className="flex items-center gap-2">
                           <div className={`text-sm font-medium ${trade.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                            {trade.pnl >= 0 ? '+' : ''}${trade.pnl.toFixed(2)}
+                            {trade.pnl >= 0 ? '+' : ''}${formatNumber(trade.pnl)}
                           </div>
                           <div className={`text-[10px] font-medium opacity-70 ${trade.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                            {trade.pnl >= 0 ? '+' : ''}{trade.pnlPercent.toFixed(2)}%
+                            {trade.pnl >= 0 ? '+' : ''}{formatNumber(trade.pnlPercent)}%
                           </div>
                         </div>
                         <div className="text-[10px] text-gray-600 dark:text-dark-400">
@@ -1564,15 +1544,15 @@ export default function UserCopyPage() {
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 mt-3">
                           <div className="bg-gray-100 dark:bg-dark-900/50 rounded-lg px-2.5 py-2">
                             <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-0.5">Entry Price</div>
-                            <div className="font-mono text-sm text-gray-900 dark:text-white font-normal">${trade.entryPrice.toFixed(2)}</div>
+                            <div className="font-mono text-sm text-gray-900 dark:text-white font-normal">${formatNumber(trade.entryPrice)}</div>
                           </div>
                           <div className="bg-gray-100 dark:bg-dark-900/50 rounded-lg px-2.5 py-2">
                             <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-0.5">Exit Price</div>
-                            <div className="font-mono text-sm text-gray-900 dark:text-white font-normal">${trade.exitPrice.toFixed(2)}</div>
+                            <div className="font-mono text-sm text-gray-900 dark:text-white font-normal">${formatNumber(trade.exitPrice)}</div>
                           </div>
                           <div className="bg-gray-100 dark:bg-dark-900/50 rounded-lg px-2.5 py-2">
                             <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-0.5">Position Size</div>
-                            <div className="font-mono text-sm text-gray-900 dark:text-white font-normal">${trade.positionSize.toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
+                            <div className="font-mono text-sm text-gray-900 dark:text-white font-normal">${formatNumber(trade.positionSize, 0)}</div>
                           </div>
                           <div className="bg-gray-100 dark:bg-dark-900/50 rounded-lg px-2.5 py-2">
                             <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-0.5">Duration</div>
@@ -1580,7 +1560,7 @@ export default function UserCopyPage() {
                           </div>
                           <div className="col-span-2 sm:col-span-1 bg-red-500/10 rounded-lg px-2.5 py-2">
                             <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-0.5">Total Fees</div>
-                            <div className="font-mono text-sm text-red-400 font-normal">-${trade.totalFees.toFixed(2)}</div>
+                            <div className="font-mono text-sm text-red-400 font-normal">-${formatNumber(trade.totalFees)}</div>
                           </div>
                         </div>
                       </div>

@@ -34,7 +34,7 @@ export default function Hero() {
           >
             <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
             <span className="text-sm font-medium text-primary-600 dark:text-primary-200">
-              Commission Only on Profit
+              Automated Trading 24/7
             </span>
           </div>
 
@@ -55,7 +55,7 @@ export default function Hero() {
           >
             Top up your balance, copy a verified bot, and earn passive income automatically.{' '}
             <span className="text-gray-900 dark:text-white font-semibold">
-              No monthly fees &mdash; pay only when you profit.
+              No monthly fees &mdash; only a flat 2% on withdrawals.
             </span>
           </p>
 

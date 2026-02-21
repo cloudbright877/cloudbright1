@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, memo, useMemo } from 'react';
 import Image from 'next/image';
 import {
   Users,
@@ -19,7 +19,6 @@ import {
   Share2,
   Shield,
   Crown,
-  Wallet,
   FileText,
   Presentation,
   Download,
@@ -30,23 +29,15 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { SettingsDrawer } from '@/components/settings/SettingsDrawer';
-import {
-  TokenUSDT,
-  TokenBTC,
-  TokenETH,
-  TokenBNB,
-  TokenSOL,
-  TokenUSDC,
-  TokenTRX,
-  TokenMATIC,
-} from '@web3icons/react';
 import { Pagination } from '@/components/dashboard-v2/Pagination';
-import { getUser, getAllReferrals } from '@/lib/users';
-import { getTotalEarned, getUserCommissions } from '@/lib/referralCommissions';
+import { LoadingScreen } from '@/components/dashboard-v2/LoadingScreen';
+import { getUser, getAllReferrals, type User } from '@/lib/users';
+import { getTotalEarned, getUserCommissions, type ReferralCommission } from '@/lib/referralCommissions';
 import { calculateTeamTurnover, getTurnoverStats, TURNOVER_LEVELS } from '@/lib/turnoverBonuses';
 import { getBalance } from '@/lib/balances';
 import { getAvatarStyle } from '@/lib/social/tier-utils';
 import { getActiveUserCopies } from '@/lib/userCopies';
+import { formatNumber, formatDate, timeAgo } from '@/lib/formatters';
 
 /* ═══════════════════════════════════════════════════════════════
    CONSTANTS (matching affiliate page)
@@ -68,16 +59,6 @@ const cashflowLevels = [
   { level: 5, impact: '10%' },
 ];
 
-const PAYOUT_CURRENCIES = [
-  { symbol: 'USDT', name: 'Tether', icon: TokenUSDT, network: 'TRC-20' },
-  { symbol: 'USDC', name: 'USD Coin', icon: TokenUSDC, network: 'ERC-20' },
-  { symbol: 'BTC', name: 'Bitcoin', icon: TokenBTC, network: 'Bitcoin' },
-  { symbol: 'ETH', name: 'Ethereum', icon: TokenETH, network: 'ERC-20' },
-  { symbol: 'BNB', name: 'BNB', icon: TokenBNB, network: 'BEP-20' },
-  { symbol: 'SOL', name: 'Solana', icon: TokenSOL, network: 'Solana' },
-  { symbol: 'TRX', name: 'Tron', icon: TokenTRX, network: 'TRC-20' },
-  { symbol: 'MATIC', name: 'Polygon', icon: TokenMATIC, network: 'Polygon' },
-];
 
 /* ═══════════════════════════════════════════════════════════════
    HELPERS
@@ -94,26 +75,6 @@ async function calculateReferralLevel(
   if (uplineIndex === -1) return 0;
   return pathParts.length - uplineIndex;
 }
-
-const formatNumber = (num: number) =>
-  new Intl.NumberFormat('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(num);
-
-const formatDate = (timestamp: number) =>
-  new Date(timestamp).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
-
-const timeAgo = (timestamp: number) => {
-  const hours = Math.floor((Date.now() - timestamp) / (1000 * 60 * 60));
-  if (hours < 1) return 'Just now';
-  if (hours < 24) return `${hours}h ago`;
-  return `${Math.floor(hours / 24)}d ago`;
-};
 
 /* ═══════════════════════════════════════════════════════════════
    PAGE
@@ -185,6 +146,14 @@ interface BranchData {
   branchTurnover: number;
 }
 
+interface RecentCommissionItem {
+  id: string;
+  amount: number;
+  from: string;
+  level: number;
+  date: number;
+}
+
 const CASHFLOW_WEIGHTS = [1.0, 0.5, 0.25, 0.1, 0.1];
 
 function buildBranchTree(
@@ -237,7 +206,7 @@ function buildBranchTree(
   };
 }
 
-function BranchTreeNode({
+const BranchTreeNode = memo(function BranchTreeNode({
   node,
   depth,
   defaultExpanded,
@@ -324,7 +293,7 @@ function BranchTreeNode({
       </AnimatePresence>
     </div>
   );
-}
+});
 
 export default function ReferralsPage() {
   const [copied, setCopied] = useState(false);
@@ -338,17 +307,14 @@ export default function ReferralsPage() {
   const referralsPerPage = 5;
 
   // Data state
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [totalEarned, setTotalEarned] = useState(0);
   const [teamTurnover, setTeamTurnover] = useState(0);
-  const [referrals, setReferrals] = useState<any[]>(MOCK_REFERRALS);
-  const [recentCommissions, setRecentCommissions] = useState<any[]>([]);
-  const [turnoverStats, setTurnoverStats] = useState<any>(null);
+  const [referrals, setReferrals] = useState<ReferralItem[]>(MOCK_REFERRALS);
+  const [recentCommissions, setRecentCommissions] = useState<RecentCommissionItem[]>([]);
+  const [turnoverStats, setTurnoverStats] = useState<Awaited<ReturnType<typeof getTurnoverStats>> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [referrerUser, setReferrerUser] = useState<any>(null);
-  const [payoutCurrency, setPayoutCurrency] = useState('USDT');
-  const [currencyDropdownOpen, setCurrencyDropdownOpen] = useState(false);
-  const currencyDropdownRef = useRef<HTMLDivElement>(null);
+  const [referrerUser, setReferrerUser] = useState<User | null>(null);
 
   // Referral drawer state
   const [selectedReferral, setSelectedReferral] = useState<ReferralItem | null>(null);
@@ -438,7 +404,7 @@ export default function ReferralsPage() {
 
         setIsLoading(false);
       } catch (error) {
-        console.error('[Referrals] Error loading data:', error);
+        // Error handled silently
         setIsLoading(false);
       }
     }
@@ -448,20 +414,10 @@ export default function ReferralsPage() {
     return () => clearInterval(interval);
   }, []);
 
-  // Payout currency from localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem('referralPayoutCurrency');
-    if (saved && PAYOUT_CURRENCIES.some((c) => c.symbol === saved)) {
-      setPayoutCurrency(saved);
-    }
-  }, []);
 
   // Close dropdowns on outside click
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (currencyDropdownRef.current && !currencyDropdownRef.current.contains(e.target as Node)) {
-        setCurrencyDropdownOpen(false);
-      }
       if (sortDropdownRef.current && !sortDropdownRef.current.contains(e.target as Node)) {
         setSortDropdownOpen(false);
       }
@@ -485,14 +441,6 @@ export default function ReferralsPage() {
 
   const claimedLevels = turnoverStats?.currentLevel || 0;
 
-  const selectedCurrency = PAYOUT_CURRENCIES.find((c) => c.symbol === payoutCurrency) || PAYOUT_CURRENCIES[0];
-
-  const handleCurrencySelect = (symbol: string) => {
-    setPayoutCurrency(symbol);
-    localStorage.setItem('referralPayoutCurrency', symbol);
-    setCurrencyDropdownOpen(false);
-  };
-
   const handleCopy = async () => {
     await navigator.clipboard.writeText(referralLink);
     setCopied(true);
@@ -504,56 +452,48 @@ export default function ReferralsPage() {
     setBranchData(buildBranchTree(referral.id, referrals));
   };
 
-  // Filter & search referrals
-  const filteredReferrals =
-    activeLevel === 'all'
+  // Filter & search referrals (memoized to avoid recalculation on every render)
+  const sortedReferrals = useMemo(() => {
+    const filtered = activeLevel === 'all'
       ? referrals
-      : referrals.filter((ref: any) => ref.level === activeLevel);
+      : referrals.filter((ref) => ref.level === activeLevel);
 
-  const searchedReferrals = searchQuery
-    ? filteredReferrals.filter(
-        (r: any) =>
-          r.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          r.email?.toLowerCase().includes(searchQuery.toLowerCase()),
-      )
-    : filteredReferrals;
+    const searched = searchQuery
+      ? filtered.filter(
+          (r) =>
+            r.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            r.email?.toLowerCase().includes(searchQuery.toLowerCase()),
+        )
+      : filtered;
 
-  const sortedReferrals = [...searchedReferrals].sort((a: any, b: any) => {
-    const dir = sortDir === 'asc' ? 1 : -1;
-    switch (sortBy) {
-      case 'deposits': return (a.deposits - b.deposits) * dir;
-      case 'bonus': return (a.bonus - b.bonus) * dir;
-      case 'date': return (a.date - b.date) * dir;
-      case 'level': return (a.level - b.level) * dir;
-      case 'username': return a.username.localeCompare(b.username) * dir;
-      case 'status': return a.status.localeCompare(b.status) * dir;
-      default: return 0;
-    }
-  });
+    return [...searched].sort((a, b) => {
+      const dir = sortDir === 'asc' ? 1 : -1;
+      switch (sortBy) {
+        case 'deposits': return (a.deposits - b.deposits) * dir;
+        case 'bonus': return (a.bonus - b.bonus) * dir;
+        case 'date': return (a.date - b.date) * dir;
+        case 'level': return (a.level - b.level) * dir;
+        case 'username': return a.username.localeCompare(b.username) * dir;
+        case 'status': return a.status.localeCompare(b.status) * dir;
+        default: return 0;
+      }
+    });
+  }, [referrals, activeLevel, searchQuery, sortBy, sortDir]);
 
-  const paginatedReferrals = sortedReferrals.slice(
+  const paginatedReferrals = useMemo(() => sortedReferrals.slice(
     (currentPage - 1) * referralsPerPage,
     currentPage * referralsPerPage,
-  );
+  ), [sortedReferrals, currentPage, referralsPerPage]);
 
   // Level counts (1-5)
   const levelCounts = [1, 2, 3, 4, 5].map((level) => ({
     level,
-    count: referrals.filter((ref: any) => ref.level === level).length,
+    count: referrals.filter((ref) => ref.level === level).length,
   }));
 
   // Loading
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-100 dark:bg-transparent p-4 lg:p-8">
-        <div className="max-w-7xl mx-auto flex items-center justify-center min-h-[60vh]">
-          <div className="text-center">
-            <div className="w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-gray-700 dark:text-dark-300">Loading referral data...</p>
-          </div>
-        </div>
-      </div>
-    );
+    return <LoadingScreen message="Loading referral data..." />;
   }
 
   return (
@@ -566,7 +506,7 @@ export default function ReferralsPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
           >
-            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all">
+            <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px] transition-all">
               <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-6 text-center">
                 <Users className="w-5 h-5 sm:w-8 sm:h-8 text-primary-400 mx-auto mb-1 sm:mb-2" />
                 <div className="text-base sm:text-2xl font-semibold text-gray-900 dark:text-white mb-0.5 sm:mb-1">
@@ -582,7 +522,7 @@ export default function ReferralsPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all">
+            <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px] transition-all">
               <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-6 text-center">
                 <Activity className="w-5 h-5 sm:w-8 sm:h-8 text-primary-400 mx-auto mb-1 sm:mb-2" />
                 <div className="text-base sm:text-2xl font-semibold text-gray-900 dark:text-white mb-0.5 sm:mb-1">
@@ -598,7 +538,7 @@ export default function ReferralsPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
           >
-            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all">
+            <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px] transition-all">
               <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-6 text-center">
                 <DollarSign className="w-5 h-5 sm:w-8 sm:h-8 text-primary-400 mx-auto mb-1 sm:mb-2" />
                 <div className="text-base sm:text-2xl font-semibold text-gray-900 dark:text-white mb-0.5 sm:mb-1">
@@ -614,7 +554,7 @@ export default function ReferralsPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
           >
-            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all">
+            <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px] transition-all">
               <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-6 text-center">
                 <TrendingUp className="w-5 h-5 sm:w-8 sm:h-8 text-primary-400 mx-auto mb-1 sm:mb-2" />
                 <div className="text-base sm:text-2xl font-semibold text-gray-900 dark:text-white mb-0.5 sm:mb-1">
@@ -635,7 +575,7 @@ export default function ReferralsPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
             >
-              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
               <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
                 <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                   <Share2 className="w-5 h-5 text-primary-400" />
@@ -692,7 +632,7 @@ export default function ReferralsPage() {
             >
               <div className="grid md:grid-cols-2 gap-4">
                 {/* Commission Table */}
-                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                 <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6 transition-all">
                   <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
                     Commission per Level
@@ -1002,7 +942,7 @@ export default function ReferralsPage() {
                 {paginatedReferrals.length > 0 ? (
                   <div className="space-y-3">
                     {paginatedReferrals.map(
-                      (referral: any, index: number) => (
+                      (referral, index) => (
                         <motion.div
                           key={referral.id}
                           initial={{ opacity: 0, y: 20 }}
@@ -1145,98 +1085,13 @@ export default function ReferralsPage() {
 
           {/* ══════════ RIGHT COLUMN ══════════ */}
           <div className="space-y-6">
-            {/* ── Payout Currency ── */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.75 }}
-            >
-              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-              <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
-                <div className="flex items-center gap-2 mb-3">
-                  <Wallet className="w-5 h-5 text-primary-400" />
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                    Payout Currency
-                  </h3>
-                </div>
-                <p className="text-sm text-gray-600 dark:text-dark-400 mb-4">
-                  Choose which currency your referral commissions will be credited in. You can change this at any time.
-                </p>
-
-                {/* Dropdown */}
-                <div ref={currencyDropdownRef} className="relative">
-                  <button
-                    onClick={() => setCurrencyDropdownOpen(!currencyDropdownOpen)}
-                    className="w-full flex items-center justify-between gap-3 px-4 py-2 bg-gray-100 dark:bg-dark-900/50 border border-gray-200 dark:border-dark-700 rounded-lg hover:border-gray-300 dark:hover:border-dark-600 transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
-                      <selectedCurrency.icon size={28} variant="branded" />
-                      <div className="text-left">
-                        <div className="font-medium text-gray-900 dark:text-white text-sm">
-                          {selectedCurrency.symbol}
-                        </div>
-                        <div className="text-xs text-gray-500 dark:text-dark-500">
-                          {selectedCurrency.name} · {selectedCurrency.network}
-                        </div>
-                      </div>
-                    </div>
-                    <ChevronDown className={`w-4 h-4 text-gray-600 dark:text-dark-400 transition-transform ${currencyDropdownOpen ? 'rotate-180' : ''}`} />
-                  </button>
-
-                  <AnimatePresence>
-                    {currencyDropdownOpen && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 4 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 4 }}
-                        className="absolute z-[9999] top-full left-0 right-0 mt-1 bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg shadow-xl overflow-hidden max-h-72 overflow-y-auto"
-                      >
-                        {PAYOUT_CURRENCIES.map((currency) => {
-                          const isSelected = currency.symbol === payoutCurrency;
-                          const CurrencyIcon = currency.icon;
-                          return (
-                            <button
-                              key={currency.symbol}
-                              onClick={() => handleCurrencySelect(currency.symbol)}
-                              className={`w-full flex items-center gap-3 px-4 py-2.5 transition-colors ${
-                                isSelected
-                                  ? 'bg-primary-500/20 text-primary-400'
-                                  : 'text-gray-700 dark:text-dark-300 hover:bg-gray-100 dark:hover:bg-dark-800 hover:text-gray-900 dark:hover:text-white'
-                              }`}
-                            >
-                              <CurrencyIcon size={24} variant="branded" />
-                              <div className="flex-1 text-left">
-                                <div className="flex items-center gap-2">
-                                  <span className={`text-sm font-medium ${isSelected ? 'text-primary-400' : 'text-gray-900 dark:text-white'}`}>
-                                    {currency.symbol}
-                                  </span>
-                                  <span className="text-xs text-gray-500 dark:text-dark-500">
-                                    {currency.network}
-                                  </span>
-                                </div>
-                                <div className="text-xs text-gray-500 dark:text-dark-500">
-                                  {currency.name}
-                                </div>
-                              </div>
-                            </button>
-                          );
-                        })}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-
-              </div>
-              </div>
-            </motion.div>
-
             {/* ── Investor Presentation ── */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8 }}
             >
-              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
               <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
                 <div className="flex items-center gap-2 mb-3">
                   <Presentation className="w-5 h-5 text-primary-400" />
@@ -1434,7 +1289,7 @@ export default function ReferralsPage() {
                 </p>
                 <div className="space-y-3">
                   {recentCommissions.length > 0 ? (
-                    recentCommissions.map((bonus: any) => (
+                    recentCommissions.map((bonus) => (
                       <div
                         key={bonus.id}
                         className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-dark-900/50 rounded-xl border border-gray-200 dark:border-dark-700 hover:border-primary-500/50 transition-all"

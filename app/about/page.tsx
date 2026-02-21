@@ -31,9 +31,9 @@ const trustSignals = [
   },
   {
     icon: Lock,
-    title: '$0 Until You Profit',
+    title: '$0 Until You Withdraw',
     description:
-      'No subscriptions, no setup fees. We charge 1-2% only when you collect profit. Our success depends on yours.',
+      'No subscriptions, no setup fees. The only fee is a flat 2% on withdrawals. Free deposits, free trading.',
   },
   {
     icon: Building2,
@@ -582,9 +582,9 @@ export default function AboutPage() {
                 Aligned With <span className="text-gradient">Your Success</span>
               </h3>
               <p className="text-base sm:text-lg text-dark-200 max-w-2xl mx-auto mb-8 leading-relaxed">
-                Cloudbright charges a small 1-2% commission only when you withdraw
-                profit. If you don&apos;t profit, we don&apos;t earn. Our incentives are
-                fully aligned with yours.
+                Cloudbright charges a flat 2% commission only when you withdraw funds.
+                No deposit fees, no trading fees, no subscriptions. Simple and
+                transparent from day one.
               </p>
               <div className="flex flex-col sm:flex-row gap-6 justify-center">
                 <div className="flex items-center gap-3">

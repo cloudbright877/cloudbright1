@@ -12,8 +12,7 @@ import {
   TokenSOL,
   TokenTRX,
 } from '@web3icons/react';
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const TOKEN_ICONS: Record<string, any> = {
+const TOKEN_ICONS: Record<string, typeof TokenBTC> = {
   BTC: TokenBTC,
   ETH: TokenETH,
   USDT: TokenUSDT,
@@ -177,7 +176,7 @@ export default function DepositPage() {
           >
             {/* Step 1: Select Currency */}
             {step === 1 && (
-              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                 <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
                 <h2 className="text-2xl font-medium text-gray-900 dark:text-white mb-6">Select Currency</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -200,7 +199,7 @@ export default function DepositPage() {
 
             {/* Step 2: Select Network */}
             {step === 2 && selectedCurrency && (
-              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                 <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
                 <h2 className="text-2xl font-medium text-gray-900 dark:text-white mb-2">
                   Select Network for {selectedCurrency.name}
@@ -268,7 +267,7 @@ export default function DepositPage() {
               <div className="grid lg:grid-cols-12 gap-6">
                 {/* Left Panel - QR & Address (col-span-5) */}
                 <div className="lg:col-span-5">
-                  <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] lg:sticky top-6">
+                  <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px] lg:sticky top-6">
                     <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-4 sm:p-6">
                     <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-6">Deposit Address</h3>
 
@@ -319,7 +318,7 @@ export default function DepositPage() {
                 {/* Right Panel - Details & Warnings (col-span-7) */}
                 <div className="lg:col-span-7 space-y-4">
                   {/* Network Info */}
-                  <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                  <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                     <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-4 sm:p-6">
                     <h3 className="text-lg sm:text-xl font-medium text-gray-900 dark:text-white mb-4">Network Details</h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
@@ -385,7 +384,7 @@ export default function DepositPage() {
                   </div>
 
                   {/* Instructions */}
-                  <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                  <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
                     <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-4 sm:p-6">
                     <h3 className="text-lg sm:text-xl font-medium text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                       <Clock className="w-5 h-5 text-primary-400" />

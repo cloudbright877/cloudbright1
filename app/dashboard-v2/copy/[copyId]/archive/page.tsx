@@ -8,6 +8,8 @@ import { ArrowLeft, Archive, CheckCircle, DollarSign } from 'lucide-react';
 import { botsApi } from '@/lib/api/botsApi';
 import { getUserCopy } from '@/lib/userCopies';
 import { isLockedIn } from '@/lib/capitalReservation';
+import { LoadingScreen } from '@/components/dashboard-v2/LoadingScreen';
+import { formatNumber } from '@/lib/formatters';
 
 export default function ArchiveBotPage() {
   const params = useParams();
@@ -51,7 +53,7 @@ export default function ArchiveBotPage() {
       setBotName(stats.name || 'Bot');
       setTotalCredited(copy.totalCollectedPnL || 0);
     } catch (error) {
-      console.error('Failed to load copy info:', error);
+      // Error handled silently
     } finally {
       setLoading(false);
     }
@@ -63,26 +65,14 @@ export default function ArchiveBotPage() {
       await botsApi.closeUserCopy(copyId);
       router.push('/dashboard-v2');
     } catch (error) {
-      console.error('Failed to close copy:', error);
       alert(`Failed to archive bot: ${error}`);
     } finally {
       setArchiving(false);
     }
   };
 
-  const formatNumber = (num: number) => {
-    return new Intl.NumberFormat('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(num);
-  };
-
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-100 dark:bg-transparent flex items-center justify-center">
-        <div className="text-gray-900 dark:text-white">Loading...</div>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   return (
@@ -102,7 +92,7 @@ export default function ArchiveBotPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+          <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
           <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6 lg:p-8"
         >
           {/* Header */}
@@ -125,7 +115,7 @@ export default function ArchiveBotPage() {
                   Capital Reservation Complete
                 </div>
                 <div className="text-sm text-green-200/80">
-                  The lock-in period has ended. You can deactivate this bot and receive your full capital back.
+                  The capital reservation has ended. You can deactivate this bot and receive your full capital back.
                 </div>
               </div>
             </div>

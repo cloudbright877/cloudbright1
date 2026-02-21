@@ -254,8 +254,9 @@ export default function TopBar() {
           <div className="relative" ref={notificationsRef}>
             <button
               onClick={() => setShowNotifications(!showNotifications)}
-              className="relative p-2.5 sm:p-2 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-lg transition-colors text-gray-600 dark:text-dark-400 hover:text-gray-900 dark:hover:text-white"
-              aria-label="Notifications"
+              className="relative p-2.5 sm:p-2 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-lg transition-colors text-gray-600 dark:text-dark-400 hover:text-gray-900 dark:hover:text-white focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:outline-none"
+              aria-label="Open notifications"
+              aria-expanded={showNotifications}
             >
               <Bell className="w-5 h-5" />
               {unreadCount > 0 && (
@@ -353,7 +354,9 @@ export default function TopBar() {
           <div className="relative" ref={userMenuRef}>
             <button
               onClick={() => setShowUserMenu(!showUserMenu)}
-              className="flex items-center gap-2 sm:gap-3 p-2 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-lg transition-colors"
+              className="flex items-center gap-2 sm:gap-3 p-2 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:outline-none"
+              aria-label="Open user menu"
+              aria-expanded={showUserMenu}
             >
               {/* Avatar */}
               <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-accent-500 rounded-lg flex items-center justify-center text-white font-bold text-sm overflow-hidden">

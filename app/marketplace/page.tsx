@@ -71,21 +71,21 @@ function seededChart(seed: number, target: number, risk: string, points: number 
   return data;
 }
 
-/* Marketplace overrides: realistic 30d returns, copiers /15, varied investments & staking */
+/* Marketplace overrides: realistic 30d returns, copiers /15, varied investments & reservation */
 const marketplaceStats: Record<string, {
   return30d: number; seed: number; copiers: number;
-  minInvest: number; staking: number; winRate: number;
+  minInvest: number; reservation: number; winRate: number;
 }> = {
-  'bybit-market-maker':       { return30d: 22.4,  seed: 101, copiers: 390, minInvest: 1000,  staking: 56,  winRate: 61.2 },
-  'bitfinex-leverage-x10':    { return30d: -5.2,  seed: 202, copiers: 120, minInvest: 5000,  staking: 91,  winRate: 50.1 },
-  'kraken-breakout-trader':   { return30d: 30.0,  seed: 303, copiers: 65,  minInvest: 10000, staking: 28,  winRate: 66.4 },
-  'okx-grid-trading':         { return30d: 18.1,  seed: 404, copiers: 280, minInvest: 500,   staking: 42,  winRate: 58.3 },
-  'kucoin-flash-arbitrage':   { return30d: 15.3,  seed: 505, copiers: 210, minInvest: 200,   staking: 14,  winRate: 57.0 },
-  'binance-altcoin-scalper':  { return30d: 12.6,  seed: 606, copiers: 190, minInvest: 2500,  staking: 70,  winRate: 55.4 },
-  'poloniex-futures-x5':      { return30d: 8.4,   seed: 707, copiers: 155, minInvest: 1500,  staking: 35,  winRate: 53.2 },
-  'cryptocom-news-reactive':  { return30d: -8.0,  seed: 808, copiers: 95,  minInvest: 25000, staking: 175, winRate: 48.6 },
-  'huobi-mean-reversion':     { return30d: 25.7,  seed: 909, copiers: 75,  minInvest: 3500,  staking: 119, winRate: 63.1 },
-  'binance-bnb-bollinger':    { return30d: 19.8,  seed: 110, copiers: 145, minInvest: 50,    staking: 7,   winRate: 59.5 },
+  'bybit-market-maker':       { return30d: 22.4,  seed: 101, copiers: 390, minInvest: 1000,  reservation: 56,  winRate: 61.2 },
+  'bitfinex-leverage-x10':    { return30d: -5.2,  seed: 202, copiers: 120, minInvest: 5000,  reservation: 91,  winRate: 50.1 },
+  'kraken-breakout-trader':   { return30d: 30.0,  seed: 303, copiers: 65,  minInvest: 10000, reservation: 28,  winRate: 66.4 },
+  'okx-grid-trading':         { return30d: 18.1,  seed: 404, copiers: 280, minInvest: 500,   reservation: 42,  winRate: 58.3 },
+  'kucoin-flash-arbitrage':   { return30d: 15.3,  seed: 505, copiers: 210, minInvest: 200,   reservation: 14,  winRate: 57.0 },
+  'binance-altcoin-scalper':  { return30d: 12.6,  seed: 606, copiers: 190, minInvest: 2500,  reservation: 70,  winRate: 55.4 },
+  'poloniex-futures-x5':      { return30d: 8.4,   seed: 707, copiers: 155, minInvest: 1500,  reservation: 35,  winRate: 53.2 },
+  'cryptocom-news-reactive':  { return30d: -8.0,  seed: 808, copiers: 95,  minInvest: 25000, reservation: 175, winRate: 48.6 },
+  'huobi-mean-reversion':     { return30d: 25.7,  seed: 909, copiers: 75,  minInvest: 3500,  reservation: 119, winRate: 63.1 },
+  'binance-bnb-bollinger':    { return30d: 19.8,  seed: 110, copiers: 145, minInvest: 50,    reservation: 7,   winRate: 59.5 },
 };
 
 export default function MarketplacePage() {
@@ -150,7 +150,7 @@ export default function MarketplacePage() {
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold mb-6 md:mb-8 leading-tight">
               <span className="text-white drop-shadow-2xl">
                 Bot Marketplace:{' '}
-                <span className="text-gradient">100+ Verified Strategies</span>
+                <span className="text-gradient">Verified Trading Strategies</span>
               </span>
             </h1>
 
@@ -231,7 +231,7 @@ export default function MarketplacePage() {
                 const ret = bot.stats.return30d;
                 const isPositive = ret >= 0;
                 const override = marketplaceStats[bot.id];
-                const staking = override?.staking ?? 30;
+                const reservation = override?.reservation ?? 30;
                 return (
                   <RevealOnScroll key={bot.id} delay={index * 0.05} direction="up">
                     <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-dark-700 rounded-2xl overflow-hidden hover:border-primary-500/30 transition-colors duration-300">
@@ -299,7 +299,7 @@ export default function MarketplacePage() {
                           </div>
                         </div>
 
-                        {/* Min Investment + Staking Period */}
+                        {/* Min Investment + Reservation Period */}
                         <div className="flex gap-2 mb-4">
                           <div className="flex-1 p-2.5 bg-dark-900/50 rounded-lg border border-dark-700/50 flex items-center justify-between">
                             <div className="flex items-center gap-1.5 text-[10px] text-dark-400">
@@ -313,10 +313,10 @@ export default function MarketplacePage() {
                           <div className="flex-1 p-2.5 bg-dark-900/50 rounded-lg border border-dark-700/50 flex items-center justify-between">
                             <div className="flex items-center gap-1.5 text-[10px] text-dark-400">
                               <Clock className="w-3.5 h-3.5" />
-                              <span>Staking</span>
+                              <span>Reservation</span>
                             </div>
                             <span className="text-sm font-semibold text-white">
-                              {staking}d
+                              {reservation}d
                             </span>
                           </div>
                         </div>

@@ -46,7 +46,7 @@ export const blogPosts = [
       },
       {
         type: 'paragraph' as const,
-        text: 'The platform\'s revenue model is also notably different from industry norms. Rather than charging subscription fees or taking a cut from trading volume, Cloudbright operates on a profit-sharing basis: the company takes a 1–2% commission only when users withdraw realized profits. If users don\'t make money, neither does Cloudbright. "We deliberately chose this model because it aligns our incentives with our users," Yang explained. "Most platforms profit regardless of whether their customers succeed. We wanted to build something where our survival depends on delivering real results."',
+        text: 'The platform\'s revenue model is also notably different from industry norms. Rather than charging subscription fees or taking a cut from trading volume, Cloudbright keeps it simple: a flat 2% commission on withdrawals plus a small fixed network fee. Deposits are completely free. "We deliberately chose this model because it removes barriers to entry," Yang explained. "Most platforms profit regardless of whether their customers succeed — through spreads, subscriptions, and hidden fees. We wanted something transparent and fair, where the fee structure is clear from day one."',
       },
       {
         type: 'heading' as const,
@@ -114,7 +114,7 @@ export const blogPosts = [
       },
       {
         type: 'paragraph' as const,
-        text: 'Starting today, you can create a free account and access the full Cloudbright platform: a marketplace with 100+ verified trading bots across multiple strategies and risk levels, one-click copy trading with real-time performance tracking, custodial wallets supporting 7+ cryptocurrencies, and a comprehensive analytics dashboard with live P&L, equity curves, and detailed trade history.',
+        text: 'Starting today, you can create a free account and access the full Cloudbright platform: a marketplace with verified trading bots across multiple strategies and risk levels, one-click copy trading with real-time performance tracking, custodial wallets supporting multiple cryptocurrencies, and a comprehensive analytics dashboard with live P&L, equity curves, and detailed trade history.',
       },
       {
         type: 'paragraph' as const,
@@ -790,7 +790,7 @@ export const blogPosts = [
       },
       {
         type: 'paragraph' as const,
-        text: 'Most trading platforms profit from your activity regardless of your results — through spreads, subscriptions, and hidden fees. We deliberately chose a different model: Cloudbright charges a 1-2% commission only when you withdraw profit. If you don\'t make money, we don\'t make money. This means our entire business depends on your success, and that alignment of incentives is exactly how a financial platform should work.',
+        text: 'Most trading platforms profit from your activity regardless of your results — through spreads, subscriptions, and hidden fees. We deliberately chose a different model: Cloudbright charges a flat 2% commission only when you withdraw funds, plus a small fixed network fee. No subscriptions, no deposit fees, no trading fees. The fee structure is fully transparent and visible before every transaction.',
       },
       {
         type: 'heading' as const,
