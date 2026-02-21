@@ -146,20 +146,19 @@ export default function DashboardV2Page() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: index * 0.05 }}
-        whileHover={{ scale: 1.01, y: -4 }}
       >
-        <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-        <div className="relative bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-5 hover:border-primary-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary-500/20">
+        <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+        <div className="relative bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3.5 sm:p-5">
         {/* Header */}
-        <div className="flex items-start gap-3 mb-3">
+        <div className="flex items-center gap-3 mb-2">
           <Link href={`/dashboard-v2/traders/${event.traderUsername}`} className="group flex-shrink-0">
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center text-gray-900 dark:text-white font-bold text-lg group-hover:scale-110 transition-transform" style={getAvatarStyle(event.traderDisplayName)}>
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-white font-bold text-base sm:text-lg group-hover:scale-110 transition-transform" style={getAvatarStyle(event.traderDisplayName)}>
               {event.traderAvatar || event.traderUsername[0].toUpperCase()}
             </div>
           </Link>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-0.5">
-              <Link href={`/dashboard-v2/traders/${event.traderUsername}`} className="font-semibold text-gray-900 dark:text-white hover:text-primary-400 transition-colors truncate">
+              <Link href={`/dashboard-v2/traders/${event.traderUsername}`} className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white hover:text-primary-400 transition-colors truncate">
                 {event.traderDisplayName}
               </Link>
               {event.traderVerified && <Shield className="w-4 h-4 text-accent-400 flex-shrink-0" />}
@@ -168,12 +167,14 @@ export default function DashboardV2Page() {
                 {event.traderTier}
               </span>
             </div>
-            <div className="flex items-center gap-1.5 text-sm text-gray-700 dark:text-dark-300">
-              {icon}
-              <span className="font-medium text-gray-900 dark:text-white">{title}</span>
-            </div>
           </div>
           <div className="text-xs text-gray-500 dark:text-dark-500 flex-shrink-0">{timeAgo(event.timestamp)}</div>
+        </div>
+
+        {/* Event title */}
+        <div className="flex items-center gap-1.5 text-sm text-gray-700 dark:text-dark-300 mb-2">
+          {icon}
+          <span className="font-medium text-gray-900 dark:text-white">{title}</span>
         </div>
 
         {/* Description */}
@@ -206,10 +207,10 @@ export default function DashboardV2Page() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 md:pb-6">
+    <div className="min-h-screen bg-gray-100 dark:bg-transparent px-3 sm:px-6 lg:px-8 py-4 sm:py-6 pb-24 md:pb-6">
       {/* Filters */}
       <div className="mb-6">
-        <div className="flex items-center gap-0.5 rounded-lg bg-gray-50 dark:bg-dark-900/50 border border-gray-200 dark:border-dark-700 p-1.5 overflow-x-auto max-w-full">
+        <div className="flex items-center justify-center sm:justify-start gap-1.5 flex-wrap p-1.5">
           {([
             { key: 'all', label: 'All' },
             { key: 'milestone', label: 'Milestones' },
@@ -220,10 +221,10 @@ export default function DashboardV2Page() {
             <button
               key={key}
               onClick={() => setActiveFilter(key)}
-              className={`px-3 sm:px-6 py-2 sm:py-3 font-medium rounded-md text-xs sm:text-sm transition-all whitespace-nowrap ${
+              className={`flex-1 sm:flex-initial text-center px-3 sm:px-6 py-2 sm:py-3 font-medium rounded-lg sm:rounded-md text-xs sm:text-sm transition-all whitespace-nowrap ${
                 activeFilter === key
-                  ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white shadow-lg shadow-primary-500/30'
-                  : 'text-dark-300 hover:text-white'
+                  ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white sm:shadow-lg sm:shadow-primary-500/30'
+                  : 'bg-gray-200 dark:bg-dark-900/50 border border-gray-300 dark:border-dark-700 sm:bg-transparent sm:dark:bg-transparent sm:border-0 text-gray-700 dark:text-dark-300 hover:text-gray-900 dark:hover:text-white'
               }`}
             >
               {label}
@@ -242,7 +243,7 @@ export default function DashboardV2Page() {
             .map((event, index) => renderFeedEvent(event, index))}
 
           {/* Load More */}
-          <button className="w-full py-3 border border-gray-200 dark:border-dark-700 rounded-xl text-gray-600 dark:text-dark-400 hover:text-gray-900 dark:text-white hover:border-gray-300 dark:border-dark-600 transition-all">
+          <button className="w-full py-3 border border-gray-200 dark:border-dark-700 rounded-xl text-gray-600 dark:text-dark-400 hover:text-gray-900 dark:hover:text-white hover:border-gray-300 dark:hover:border-dark-600 transition-all">
             Load More Posts
           </button>
         </div>
@@ -254,8 +255,8 @@ export default function DashboardV2Page() {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
           >
-            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-            <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6"
+            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+            <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-4 sm:p-6"
           >
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-medium text-gray-900 dark:text-white flex items-center gap-2">
@@ -316,8 +317,8 @@ export default function DashboardV2Page() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.1 }}
           >
-            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-            <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6"
+            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+            <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-4 sm:p-6"
           >
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-medium text-gray-900 dark:text-white flex items-center gap-2">
@@ -370,8 +371,8 @@ export default function DashboardV2Page() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-            <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6"
+            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+            <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-4 sm:p-6"
           >
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-medium text-gray-900 dark:text-white flex items-center gap-2">

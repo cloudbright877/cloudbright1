@@ -18,6 +18,8 @@ export const DEFAULT_SECURITY: SecuritySettings = {
   twoFactorEnabled: false,
   twoFactorSecret: null,
   backupCodes: [],
+  pinEnabled: false,
+  pinCode: null,
   sessions: [
     {
       id: 'session_current',
@@ -49,9 +51,11 @@ export const DEFAULT_WALLETS: WalletsSettings = {
 
 export const DEFAULT_NOTIFICATIONS: NotificationSettings = {
   email: '',
-  tradeAlerts: true,
-  securityAlerts: true,
+  loginAlerts: true,
+  withdrawalConfirmations: true,
+  securityChanges: true,
   weeklyReport: false,
+  promoLetters: true,
 };
 
 export const DEFAULT_PREFERENCES: PreferencesSettings = {

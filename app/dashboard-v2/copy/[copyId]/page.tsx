@@ -10,6 +10,8 @@ import { getUserCopy, updateUserCopy } from '@/lib/userCopies';
 import { getUserCopyPnLBreakdown, type PnLBreakdown } from '@/lib/userCopyStats';
 import { isLockedIn, getDaysRemainingInReservation } from '@/lib/capitalReservation';
 import { getDemoBotById } from '@/lib/demoMarketplace';
+import { Pagination } from '@/components/dashboard-v2/Pagination';
+import { FilterDropdown } from '@/components/dashboard-v2/FilterDropdown';
 import {
   TrendingUp,
   TrendingDown,
@@ -38,6 +40,7 @@ import {
   Archive,
   Wallet,
   CheckCircle2,
+  Trophy,
 } from 'lucide-react';
 import type {
   BotDetails,
@@ -113,11 +116,25 @@ export default function UserCopyPage() {
   // Pagination & filters
   const [currentPage, setCurrentPage] = useState(1);
   const [filterPair, setFilterPair] = useState<string>('all');
+  const [filterSide, setFilterSide] = useState<'all' | 'LONG' | 'SHORT'>('all');
   const [filterResult, setFilterResult] = useState<'all' | 'wins' | 'losses'>('all');
+  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'pnl-high' | 'pnl-low' | 'size-high' | 'size-low' | 'duration'>('newest');
   const itemsPerPage = 10;
 
   // Equity Curve period filter
   const [equityPeriod, setEquityPeriod] = useState<'all' | 'day' | 'week' | 'month'>('all');
+
+  const [isDark, setIsDark] = useState(true);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    setIsDark(root.classList.contains('dark'));
+    const observer = new MutationObserver(() => {
+      setIsDark(root.classList.contains('dark'));
+    });
+    observer.observe(root, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, []);
 
   // Expanded trades for accordion
   const [expandedTrades, setExpandedTrades] = useState<Set<string>>(new Set());
@@ -493,18 +510,37 @@ export default function UserCopyPage() {
   // Get unique pairs for filter
   const uniquePairs = Array.from(new Set(tradeHistory.map(t => t.pair)));
 
-  // Filter and sort trade history (newest first)
+  // Filter and sort trade history
   const filteredTrades = tradeHistory
     .filter(trade => {
       if (filterPair !== 'all' && trade.pair !== filterPair) return false;
+      if (filterSide !== 'all' && trade.side !== filterSide) return false;
       if (filterResult === 'wins' && trade.pnl <= 0) return false;
       if (filterResult === 'losses' && trade.pnl >= 0) return false;
       return true;
     })
-    .sort((a, b) => new Date(b.closedAt).getTime() - new Date(a.closedAt).getTime());
+    .sort((a, b) => {
+      switch (sortBy) {
+        case 'oldest': return new Date(a.closedAt).getTime() - new Date(b.closedAt).getTime();
+        case 'pnl-high': return b.pnl - a.pnl;
+        case 'pnl-low': return a.pnl - b.pnl;
+        case 'size-high': return b.positionSize - a.positionSize;
+        case 'size-low': return a.positionSize - b.positionSize;
+        case 'duration': {
+          const parseDur = (d: string) => {
+            let mins = 0;
+            const hm = d.match(/(\d+)h/); if (hm) mins += parseInt(hm[1]) * 60;
+            const mm = d.match(/(\d+)m/); if (mm) mins += parseInt(mm[1]);
+            return mins;
+          };
+          return parseDur(b.duration) - parseDur(a.duration);
+        }
+        default: return new Date(b.closedAt).getTime() - new Date(a.closedAt).getTime();
+      }
+    });
 
   // Pagination
-  const totalPages = Math.ceil(filteredTrades.length / itemsPerPage);
+
   const paginatedTrades = filteredTrades.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
@@ -519,7 +555,7 @@ export default function UserCopyPage() {
 
   if (!botDetails || !botStats) {
     return (
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-100 dark:bg-dark-950 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-100 dark:bg-transparent flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <svg width="64" height="64" viewBox="0 0 64 64" className="animate-spin" style={{ animationDuration: '2s' }}>
             <polygon
@@ -545,7 +581,7 @@ export default function UserCopyPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-100 dark:bg-dark-950 text-gray-900 dark:text-white">
+    <div className="min-h-screen bg-gray-100 dark:bg-transparent text-gray-900 dark:text-white">
       <div className="max-w-[1800px] mx-auto p-4 lg:p-6">
         {/* Header */}
         <motion.div
@@ -561,53 +597,47 @@ export default function UserCopyPage() {
             <span className="text-sm">Back to Dashboard</span>
           </Link>
 
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
             <div className="flex items-center gap-3 sm:gap-4">
               {botDetails.icon && typeof botDetails.icon === 'string' && botDetails.icon.startsWith('/') ? (
-                <img src={botDetails.icon} alt={botDetails.name} className="w-10 h-10 sm:w-14 sm:h-14 object-contain" />
+                <img src={botDetails.icon} alt={botDetails.name} className="hidden sm:block w-14 h-14 object-contain" />
               ) : (
-                <div className="w-10 h-10 sm:w-14 sm:h-14 flex items-center justify-center text-2xl">
-                  <Layers className="w-6 h-6 sm:w-7 sm:h-7 text-primary-400" />
+                <div className="hidden sm:flex w-14 h-14 items-center justify-center text-2xl">
+                  <Layers className="w-7 h-7 text-primary-400" />
                 </div>
               )}
               <div>
-                <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-                  <h1 className="text-xl sm:text-3xl lg:text-4xl font-semibold text-gray-900 dark:text-white">{botDetails.name}</h1>
-                  <span className="px-3 py-1 bg-primary-500/20 border border-primary-500/30 text-primary-400 text-xs font-medium rounded-full flex items-center gap-1.5">
+                <h1 className="text-lg sm:text-3xl lg:text-4xl font-semibold text-gray-900 dark:text-white">{botDetails.name}</h1>
+                <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                  <span className="px-2 py-0.5 bg-primary-500/20 border border-primary-500/30 text-primary-400 text-[11px] sm:text-xs font-medium rounded-full flex items-center gap-1">
                     <Copy className="w-3 h-3" />
                     Copy
                   </span>
-                </div>
-                <div className="flex items-center gap-2 sm:gap-3 mt-1 flex-wrap">
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                    <span className="text-sm font-medium text-green-400">Active</span>
+                  <div className="flex items-center gap-1 px-2 py-0.5 bg-green-500/20 border border-green-500/30 rounded-full">
+                    <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                    <span className="text-[11px] sm:text-xs font-medium text-green-400">Active</span>
                   </div>
-                  <span className="text-dark-600">•</span>
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-2 h-2 rounded-full bg-primary-400 animate-pulse" />
-                    <span className="text-xs text-primary-400 font-medium">LIVE Updates (1s)</span>
+                  <div className="flex items-center gap-1 px-2 py-0.5 bg-primary-500/10 border border-primary-500/20 rounded-full">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary-400 animate-pulse" />
+                    <span className="text-[11px] sm:text-xs text-primary-400 font-medium">LIVE</span>
                   </div>
                   {masterBotName && masterBotSlug && (
-                    <>
-                      <span className="text-dark-600">•</span>
-                      <Link
-                        href={`/dashboard-v2/bots/${masterBotSlug}`}
-                        className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-dark-400 hover:text-primary-400 transition-colors"
-                      >
-                        Master: {masterBotName}
-                        <ExternalLink className="w-3 h-3" />
-                      </Link>
-                    </>
+                    <Link
+                      href={`/dashboard-v2/bots/${masterBotSlug}`}
+                      className="flex items-center gap-1 px-2 py-0.5 bg-gray-100 dark:bg-dark-800/50 border border-gray-200 dark:border-dark-700 rounded-full text-[11px] sm:text-xs text-gray-600 dark:text-dark-400 hover:text-primary-400 transition-colors"
+                    >
+                      {masterBotName}
+                      <ExternalLink className="w-2.5 h-2.5" />
+                    </Link>
                   )}
                 </div>
               </div>
             </div>
 
-            <div className="flex gap-2 sm:gap-3 flex-wrap">
+            <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
               <button
                 onClick={() => setShowSettings(true)}
-                className="px-3 sm:px-4 py-2 bg-gray-200 dark:bg-dark-700/50 hover:bg-gray-300 dark:hover:bg-dark-700 border border-gray-300 dark:border-dark-600 hover:border-gray-400 dark:hover:border-dark-500 rounded-lg font-semibold text-gray-700 dark:text-dark-300 hover:text-gray-900 dark:hover:text-white transition-all flex items-center gap-2 text-sm"
+                className="flex-1 sm:flex-initial px-3 sm:px-4 py-2 bg-gray-200 dark:bg-dark-700/50 hover:bg-gray-300 dark:hover:bg-dark-700 border border-gray-300 dark:border-dark-600 hover:border-gray-400 dark:hover:border-dark-500 rounded-lg font-semibold text-gray-700 dark:text-dark-300 hover:text-gray-900 dark:hover:text-white transition-all flex items-center justify-center gap-2 text-sm"
               >
                 <Settings className="w-4 h-4" />
                 Settings
@@ -615,16 +645,16 @@ export default function UserCopyPage() {
               {!lockedIn && (
                 <Link
                   href={`/dashboard-v2/copy/${copyId}/archive`}
-                  className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 hover:border-red-500/50 rounded-lg font-semibold text-red-400 hover:text-red-300 transition-all flex items-center gap-2"
+                  className="flex-1 sm:flex-initial p-2 sm:px-4 sm:py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 hover:border-red-500/50 rounded-lg font-semibold text-red-400 hover:text-red-300 transition-all flex items-center justify-center gap-2"
                 >
                   <Archive className="w-4 h-4" />
-                  Archive
+                  <span className="hidden sm:inline">Archive</span>
                 </Link>
               )}
               {lockedIn && lockInDaysRemaining > 0 && (
-                <div className="px-4 py-2 bg-gray-50 dark:bg-dark-800/50 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-600 dark:text-dark-400 flex items-center gap-2 text-sm">
-                  <Clock className="w-4 h-4" />
-                  Lock-in: {lockInDaysRemaining}d left
+                <div className="flex-1 sm:flex-initial px-2.5 sm:px-4 py-2 bg-gray-50 dark:bg-dark-800/50 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-600 dark:text-dark-400 flex items-center justify-center gap-1.5 sm:gap-2 text-[11px] sm:text-sm">
+                  <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  {lockInDaysRemaining}d left
                 </div>
               )}
             </div>
@@ -635,91 +665,91 @@ export default function UserCopyPage() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6">
           {/* Realized P&L */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-            <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-green-500/50 transition-all">
-              <div className="flex items-center justify-between mb-3 sm:mb-4">
-                <div className={`w-10 h-10 sm:w-12 sm:h-12 ${(pnlBreakdown?.realizedPnL ?? 0) >= 0 ? 'bg-green-500/20 border-green-500/30' : 'bg-red-500/20 border-red-500/30'} border rounded-xl flex items-center justify-center`}>
+            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+            <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-green-500/50 transition-all">
+              <div className="flex items-center justify-between mb-2 sm:mb-4">
+                <div className={`w-8 h-8 sm:w-12 sm:h-12 ${(pnlBreakdown?.realizedPnL ?? 0) >= 0 ? 'bg-green-500/20 border-green-500/30' : 'bg-red-500/20 border-red-500/30'} border rounded-lg sm:rounded-xl flex items-center justify-center`}>
                   {(pnlBreakdown?.realizedPnL ?? 0) >= 0 ? (
-                    <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-green-400" />
+                    <TrendingUp className="w-4 h-4 sm:w-6 sm:h-6 text-green-400" />
                   ) : (
-                    <TrendingDown className="w-6 h-6 text-red-400" />
+                    <TrendingDown className="w-4 h-4 sm:w-6 sm:h-6 text-red-400" />
                   )}
                 </div>
-                <div className={`text-xs font-medium px-2 py-1 rounded ${
+                <div className={`text-[10px] sm:text-xs font-medium px-1.5 py-0.5 sm:px-2 sm:py-1 rounded ${
                   (pnlBreakdown?.realizedPnL ?? 0) >= 0 ? 'text-green-400 bg-green-500/10' : 'text-red-400 bg-red-500/10'
                 }`}>
                   Closed trades
                 </div>
               </div>
-              <div className="text-sm text-gray-600 dark:text-dark-400 mb-1">Realized P&L</div>
-              <div className={`text-xl sm:text-2xl font-semibold mb-2 ${(pnlBreakdown?.realizedPnL ?? 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+              <div className="text-[10px] sm:text-sm text-gray-600 dark:text-dark-400 mb-0.5 sm:mb-1">Realized P&L</div>
+              <div className={`text-base sm:text-2xl font-semibold mb-0.5 sm:mb-2 ${(pnlBreakdown?.realizedPnL ?? 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                 {(pnlBreakdown?.realizedPnL ?? 0) >= 0 ? '+' : ''}${Math.abs(pnlBreakdown?.realizedPnL ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </div>
-              <div className="text-xs text-gray-600 dark:text-dark-400">Running for {botDetails.runningDays} days</div>
+              <div className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400">Running for {botDetails.runningDays} days</div>
             </div>
             </div>
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-            <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
-              <div className="flex items-center justify-between mb-3 sm:mb-4">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
-                  <Target className="w-5 h-5 sm:w-6 sm:h-6 text-primary-400" />
+            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+            <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
+              <div className="flex items-center justify-between mb-2 sm:mb-4">
+                <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
+                  <Target className="w-4 h-4 sm:w-6 sm:h-6 text-primary-400" />
                 </div>
-                <div className="text-xs font-medium text-primary-400 bg-primary-500/10 px-2 py-1 rounded">
-                  {botStats.totalTrades} trades
+                <div className="text-[10px] sm:text-xs font-medium text-primary-400 bg-primary-500/10 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded">
+                  {botStats.totalTrades}
                 </div>
               </div>
-              <div className="text-sm text-gray-600 dark:text-dark-400 mb-1">Win Rate</div>
-              <div className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white mb-2">{(botStats.winRate || 0).toFixed(1)}%</div>
-              <div className="text-xs text-gray-600 dark:text-dark-400">{botStats.winningTrades}W / {botStats.losingTrades}L</div>
+              <div className="text-[10px] sm:text-sm text-gray-600 dark:text-dark-400 mb-0.5 sm:mb-1">Win Rate</div>
+              <div className="text-base sm:text-2xl font-semibold text-gray-900 dark:text-white mb-0.5 sm:mb-2">{(botStats.winRate || 0).toFixed(1)}%</div>
+              <div className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400">{botStats.winningTrades}W / {botStats.losingTrades}L</div>
             </div>
             </div>
           </motion.div>
 
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-            <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
-              <div className="flex items-center justify-between mb-3 sm:mb-4">
-                <div className={`w-10 h-10 sm:w-12 sm:h-12 ${botDetails.todayPnL >= 0 ? 'bg-green-500/20 border-green-500/30' : 'bg-red-500/20 border-red-500/30'} border rounded-xl flex items-center justify-center`}>
+            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+            <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
+              <div className="flex items-center justify-between mb-2 sm:mb-4">
+                <div className={`w-8 h-8 sm:w-12 sm:h-12 ${botDetails.todayPnL >= 0 ? 'bg-green-500/20 border-green-500/30' : 'bg-red-500/20 border-red-500/30'} border rounded-lg sm:rounded-xl flex items-center justify-center`}>
                   {botDetails.todayPnL >= 0 ? (
-                    <Activity className="w-5 h-5 sm:w-6 sm:h-6 text-green-400" />
+                    <Activity className="w-4 h-4 sm:w-6 sm:h-6 text-green-400" />
                   ) : (
-                    <Activity className="w-5 h-5 sm:w-6 sm:h-6 text-red-400" />
+                    <Activity className="w-4 h-4 sm:w-6 sm:h-6 text-red-400" />
                   )}
                 </div>
-                <div className={`text-xs font-medium px-2 py-1 rounded ${
+                <div className={`text-[10px] sm:text-xs font-medium px-1.5 py-0.5 sm:px-2 sm:py-1 rounded ${
                   botDetails.todayPnL >= 0 ? 'text-green-400 bg-green-500/10' : 'text-red-400 bg-red-500/10'
                 }`}>
                   {botDetails.todayPnL >= 0 ? '+' : ''}{(botDetails.todayPnLPercent || 0).toFixed(2)}%
                 </div>
               </div>
-              <div className="text-sm text-gray-600 dark:text-dark-400 mb-1">Today's P&L</div>
-              <div className={`text-xl sm:text-2xl font-semibold mb-2 ${botDetails.todayPnL >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+              <div className="text-[10px] sm:text-sm text-gray-600 dark:text-dark-400 mb-0.5 sm:mb-1">Today's P&L</div>
+              <div className={`text-base sm:text-2xl font-semibold mb-0.5 sm:mb-2 ${botDetails.todayPnL >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                 {botDetails.todayPnL >= 0 ? '+' : ''}${Math.abs(botDetails.todayPnL).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </div>
-              <div className="text-xs text-gray-600 dark:text-dark-400">Last 24 hours</div>
+              <div className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400">Last 24 hours</div>
             </div>
             </div>
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
-            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-            <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
-              <div className="flex items-center justify-between mb-3 sm:mb-4">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
-                  <Zap className="w-5 h-5 sm:w-6 sm:h-6 text-primary-400" />
+            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+            <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
+              <div className="flex items-center justify-between mb-2 sm:mb-4">
+                <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
+                  <Zap className="w-4 h-4 sm:w-6 sm:h-6 text-primary-400" />
                 </div>
                 <div className="flex items-center gap-1">
                   <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                  <span className="text-xs font-medium text-green-400">LIVE</span>
+                  <span className="text-[10px] sm:text-xs font-medium text-green-400">LIVE</span>
                 </div>
               </div>
-              <div className="text-sm text-gray-600 dark:text-dark-400 mb-1">Live Positions</div>
-              <div className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white mb-2">{livePositions.length} / {botDetails.maxPositions}</div>
-              <div className="text-xs text-gray-600 dark:text-dark-400">
+              <div className="text-[10px] sm:text-sm text-gray-600 dark:text-dark-400 mb-0.5 sm:mb-1">Live Positions</div>
+              <div className="text-base sm:text-2xl font-semibold text-gray-900 dark:text-white mb-0.5 sm:mb-2">{livePositions.length} / {botDetails.maxPositions}</div>
+              <div className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400">
                 {livePositions.length > 0 ? 'Updating every 2s' : 'Scanning markets'}
               </div>
             </div>
@@ -734,7 +764,7 @@ export default function UserCopyPage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
             >
-              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
               <div className="bg-gray-50 dark:bg-dark-900 rounded-[calc(1rem-1px)] p-6 max-w-md w-full">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white">Bot Settings</h3>
@@ -897,25 +927,25 @@ export default function UserCopyPage() {
         {/* Performance Chart + Bot Info */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 mb-6">
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }} className="lg:col-span-8 h-full">
-            <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-            <div className="h-full bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-primary-500/50 transition-all flex flex-col">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6 flex-shrink-0">
+            <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+            <div className="h-full bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all flex flex-col">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4 sm:mb-6 flex-shrink-0">
                 <div>
-                  <h2 className="text-lg sm:text-xl font-medium text-gray-900 dark:text-white">Equity Curve</h2>
-                  <p className="text-xs text-gray-600 dark:text-dark-400">Portfolio value over time</p>
+                  <h2 className="text-sm sm:text-xl font-medium text-gray-900 dark:text-white">Equity Curve</h2>
+                  <p className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400">Portfolio value over time</p>
                 </div>
-                <div className="flex gap-1.5 sm:gap-2">
+                <div className="flex gap-1 sm:gap-2">
                   {(['day', 'week', 'month', 'all'] as const).map((period) => (
                     <button
                       key={period}
                       onClick={() => setEquityPeriod(period)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                      className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-all ${
                         equityPeriod === period
                           ? 'bg-primary-500 text-white'
                           : 'bg-gray-200 dark:bg-dark-700/50 text-gray-600 dark:text-dark-400 hover:bg-gray-300 dark:hover:bg-dark-700 hover:text-gray-900 dark:hover:text-white'
                       }`}
                     >
-                      {period === 'all' ? 'All Time' : period.charAt(0).toUpperCase() + period.slice(1)}
+                      {period === 'all' ? 'All' : period.charAt(0).toUpperCase() + period.slice(1)}
                     </button>
                   ))}
                 </div>
@@ -948,34 +978,27 @@ export default function UserCopyPage() {
                 // If filtered data is empty, show all data (like analytics)
                 const displayData = filteredEquityData.length > 0 ? filteredEquityData : equityData;
 
-                // Calculate Y-axis range with padding for better visualization
-                const values = displayData.map(p => p.value);
-                const minValue = Math.min(...values);
-                const maxValue = Math.max(...values);
-                const range = maxValue - minValue;
-                const padding = range > 0 ? range * 0.1 : maxValue * 0.02; // 10% padding or 2% of max if flat
-
                 return (
-                  <div className="flex-1 min-h-0 w-full">
+                  <div className="w-full flex-1 min-h-[320px]">
                     <Chart
                       options={{
                         chart: { type: 'area', toolbar: { show: false }, background: 'transparent', zoom: { enabled: false } },
-                        theme: { mode: 'dark' },
+                        theme: { mode: isDark ? 'dark' as const : 'light' as const },
                         dataLabels: { enabled: false },
                         stroke: { curve: 'smooth', width: 3, colors: ['#10B981'] },
                         fill: {
                           type: 'gradient',
                           gradient: {
-                            opacityFrom: 0.35,
-                            opacityTo: 0.05,
+                            opacityFrom: 0.7,
+                            opacityTo: 0.1,
                             colorStops: [
-                              { offset: 0, color: '#10B981', opacity: 0.35 },
-                              { offset: 50, color: '#10B981', opacity: 0.15 },
-                              { offset: 100, color: '#10B981', opacity: 0.02 }
+                              { offset: 0, color: '#10B981', opacity: 0.7 },
+                              { offset: 50, color: '#10B981', opacity: 0.4 },
+                              { offset: 100, color: '#10B981', opacity: 0.1 }
                             ]
                           }
                         },
-                        grid: { borderColor: '#1e293b', strokeDashArray: 4, xaxis: { lines: { show: false } } },
+                        grid: { borderColor: isDark ? '#1e293b' : '#e5e7eb', strokeDashArray: 0, xaxis: { lines: { show: false } } },
                         xaxis: {
                           type: 'datetime',
                           labels: {
@@ -986,9 +1009,10 @@ export default function UserCopyPage() {
                           axisTicks: { show: false }
                         },
                         yaxis: {
-                          min: minValue - padding,
-                          max: maxValue + padding,
-                          labels: { style: { colors: '#64748b', fontSize: '12px' }, formatter: (val: number) => `$${val.toLocaleString('en-US')}` }
+                          labels: {
+                            style: { colors: '#64748b', fontSize: '12px' },
+                            formatter: (val: number) => `$${val.toLocaleString('en-US')}`,
+                          }
                         },
                         tooltip: {
                           theme: 'dark',
@@ -1020,27 +1044,27 @@ export default function UserCopyPage() {
           </motion.div>
 
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.35 }} className="lg:col-span-4">
-            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-            <div className="h-full bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-accent-500/50 transition-all">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-primary-500/20 border border-primary-500/30 rounded-lg flex items-center justify-center">
-                  <Info className="w-5 h-5 text-primary-400" />
+            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+            <div className="h-full bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-accent-500/50 transition-all">
+              <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary-500/20 border border-primary-500/30 rounded-lg flex items-center justify-center">
+                  <Info className="w-4 h-4 sm:w-5 sm:h-5 text-primary-400" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">Bot Information</h3>
-                  <p className="text-xs text-gray-600 dark:text-dark-400">Configuration details</p>
+                  <h3 className="text-sm sm:text-lg font-medium text-gray-900 dark:text-white">Bot Information</h3>
+                  <p className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400">Configuration details</p>
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <div className="p-4 bg-gray-50 dark:bg-dark-900/50 rounded-xl border border-gray-200 dark:border-dark-700/50">
-                  <div className="text-xs text-gray-600 dark:text-dark-400 mb-1">Invested Capital</div>
-                  <div className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white">${(botDetails.invested || 0).toLocaleString('en-US')}</div>
+              <div className="space-y-3 sm:space-y-4">
+                <div className="p-2.5 sm:p-4 bg-gray-50 dark:bg-dark-900/50 rounded-xl border border-gray-200 dark:border-dark-700/50">
+                  <div className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400 mb-0.5 sm:mb-1">Invested Capital</div>
+                  <div className="text-base sm:text-2xl font-semibold text-gray-900 dark:text-white">${(botDetails.invested || 0).toLocaleString('en-US')}</div>
                 </div>
 
-                <div className="p-4 bg-gray-50 dark:bg-dark-900/50 rounded-xl border border-gray-200 dark:border-dark-700/50">
-                  <div className="text-xs text-gray-600 dark:text-dark-400 mb-1">Current Value</div>
-                  <div className={`text-xl sm:text-2xl font-semibold ${botDetails.profit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                <div className="p-2.5 sm:p-4 bg-gray-50 dark:bg-dark-900/50 rounded-xl border border-gray-200 dark:border-dark-700/50">
+                  <div className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400 mb-0.5 sm:mb-1">Current Value</div>
+                  <div className={`text-base sm:text-2xl font-semibold ${botDetails.profit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                     ${(pnlBreakdown?.currentValue ?? botDetails.currentValue ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </div>
                 </div>
@@ -1070,8 +1094,8 @@ export default function UserCopyPage() {
                   <div className="text-xs text-gray-600 dark:text-dark-400 mb-1">Risk Level</div>
                   <div className={`text-sm font-medium ${
                     botDetails.risk === 'low' ? 'text-green-400' :
-                    botDetails.risk === 'medium' ? 'text-yellow-400' :
-                    'text-red-400'
+                    botDetails.risk === 'medium' ? 'text-blue-400' :
+                    'text-orange-400'
                   }`}>
                     {botDetails.risk.charAt(0).toUpperCase() + botDetails.risk.slice(1)}
                   </div>
@@ -1106,15 +1130,15 @@ export default function UserCopyPage() {
 
         {/* Trading Statistics */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="mb-6">
-          <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-          <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-primary-500/50 transition-all">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
-                <BarChart3 className="w-6 h-6 text-primary-400" />
+          <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+          <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
+            <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+              <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
+                <BarChart3 className="w-4 h-4 sm:w-6 sm:h-6 text-primary-400" />
               </div>
               <div>
-                <h2 className="text-xl font-medium text-gray-900 dark:text-white">Trading Statistics</h2>
-                <p className="text-sm text-gray-600 dark:text-dark-400">Comprehensive performance metrics</p>
+                <h2 className="text-sm sm:text-xl font-medium text-gray-900 dark:text-white">Trading Statistics</h2>
+                <p className="text-[10px] sm:text-sm text-gray-600 dark:text-dark-400">Comprehensive performance metrics</p>
               </div>
             </div>
 
@@ -1233,6 +1257,24 @@ export default function UserCopyPage() {
                 valueColor="text-green-400"
                 subtitleColor="text-green-400"
               />
+              <StatCard
+                icon={<Trophy className="w-4 h-4 text-yellow-400" />}
+                label="Sharpe Ratio"
+                value={(botStats.sharpeRatio || 0).toFixed(2)}
+                subtitle={
+                  (botStats.sharpeRatio || 0) >= 3 ? 'Excellent' :
+                  (botStats.sharpeRatio || 0) >= 2 ? 'Very good' :
+                  (botStats.sharpeRatio || 0) >= 1 ? 'Good' :
+                  'Below average'
+                }
+                valueColor="text-yellow-400"
+                subtitleColor={
+                  (botStats.sharpeRatio || 0) >= 3 ? 'text-green-400' :
+                  (botStats.sharpeRatio || 0) >= 2 ? 'text-yellow-400' :
+                  (botStats.sharpeRatio || 0) >= 1 ? 'text-amber-400' :
+                  'text-red-400'
+                }
+              />
             </div>
           </div>
           </div>
@@ -1240,24 +1282,24 @@ export default function UserCopyPage() {
 
         {/* Open Positions Table (LIVE V2) - GRID 1 */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }} className="mb-6">
-          <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-          <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-primary-500/50 transition-all">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
-                  <TrendingUpDown className="w-6 h-6 text-primary-400" />
+          <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+          <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
+                  <TrendingUpDown className="w-4 h-4 sm:w-6 sm:h-6 text-primary-400" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-medium text-gray-900 dark:text-white">Open Positions (Live)</h2>
-                  <p className="text-sm text-gray-600 dark:text-dark-400">{livePositions.length} active position{livePositions.length !== 1 ? 's' : ''} • Updates every 2s</p>
+                  <h2 className="text-sm sm:text-xl font-medium text-gray-900 dark:text-white">Open Positions (Live)</h2>
+                  <p className="text-[10px] sm:text-sm text-gray-600 dark:text-dark-400">{livePositions.length} active position{livePositions.length !== 1 ? 's' : ''} • Updates every 2s</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 sm:gap-2">
                 <div className="relative">
                   <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
                   <div className="absolute inset-0 w-2 h-2 bg-green-400 rounded-full animate-ping" />
                 </div>
-                <span className="text-xs text-green-400 font-medium">LIVE</span>
+                <span className="text-[10px] sm:text-xs text-green-400 font-medium">LIVE</span>
               </div>
             </div>
 
@@ -1281,8 +1323,8 @@ export default function UserCopyPage() {
                   >
                     <div className="relative">
                     {/* Header Row */}
-                    <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-                      <div className="flex items-center gap-2 flex-wrap">
+                    <div className="flex flex-wrap items-center justify-between gap-y-2 mb-3">
+                      <div className="flex items-center gap-2">
                         <div className={`px-2 py-0.5 rounded text-xs font-medium ${
                           position.side === 'LONG'
                             ? 'bg-green-500/20 text-green-400 border border-green-500/30'
@@ -1291,16 +1333,14 @@ export default function UserCopyPage() {
                           {position.side} ×{position.leverage}
                         </div>
                         <span className="text-sm sm:text-base font-medium text-gray-900 dark:text-white">{position.pair}</span>
-                        {/* SL/TP after pair */}
-                        <div className="flex items-center gap-1.5">
-                          {/* Stop Loss */}
+                        {/* SL/TP — inline on sm+ */}
+                        <div className="hidden sm:flex items-center gap-1.5 ml-2">
                           <div className="px-1.5 py-0.5 bg-gray-200 dark:bg-dark-800/50 border border-gray-300 dark:border-dark-700 rounded flex items-center gap-1.5">
                             <div className="text-[9px] text-gray-600 dark:text-dark-400">SL</div>
                             <div className="font-mono text-[10px] text-red-400 font-normal">
                               ${position.stopLoss.toFixed(0)}
                             </div>
                           </div>
-                          {/* Take Profit */}
                           <div className="px-1.5 py-0.5 bg-gray-200 dark:bg-dark-800/50 border border-gray-300 dark:border-dark-700 rounded flex items-center gap-1.5">
                             <div className="text-[9px] text-gray-600 dark:text-dark-400">TP</div>
                             <div className="font-mono text-[10px] text-green-400 font-normal">
@@ -1309,22 +1349,36 @@ export default function UserCopyPage() {
                           </div>
                         </div>
                       </div>
-                      {/* Timer stays on the right */}
                       <div className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-dark-400">
                         <Clock className="w-3 h-3" />
                         {position.duration}
                       </div>
+                      {/* SL/TP — separate row on mobile */}
+                      <div className="flex sm:hidden items-center gap-1.5 w-full">
+                        <div className="px-1.5 py-0.5 bg-gray-200 dark:bg-dark-800/50 border border-gray-300 dark:border-dark-700 rounded flex items-center gap-1.5">
+                          <div className="text-[9px] text-gray-600 dark:text-dark-400">SL</div>
+                          <div className="font-mono text-[10px] text-red-400 font-normal">
+                            ${position.stopLoss.toFixed(0)}
+                          </div>
+                        </div>
+                        <div className="px-1.5 py-0.5 bg-gray-200 dark:bg-dark-800/50 border border-gray-300 dark:border-dark-700 rounded flex items-center gap-1.5">
+                          <div className="text-[9px] text-gray-600 dark:text-dark-400">TP</div>
+                          <div className="font-mono text-[10px] text-green-400 font-normal">
+                            ${position.takeProfit.toFixed(0)}
+                          </div>
+                        </div>
+                      </div>
                     </div>
 
                     {/* Price Grid */}
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-                      <div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
+                      <div className="bg-gray-100 dark:bg-dark-900/50 rounded-lg px-2.5 py-2">
                         <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-0.5">Entry Price</div>
                         <div className="font-mono text-sm text-gray-900 dark:text-white font-normal">
                           ${position.entryPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </div>
                       </div>
-                      <div>
+                      <div className="bg-gray-100 dark:bg-dark-900/50 rounded-lg px-2.5 py-2">
                         <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-0.5 flex items-center gap-1">
                           Current Price
                           {position.pnl >= 0 ? <ArrowUpRight className="w-2.5 h-2.5 text-green-400" /> : <ArrowDownRight className="w-2.5 h-2.5 text-red-400" />}
@@ -1332,42 +1386,32 @@ export default function UserCopyPage() {
                         <motion.div
                           key={`price-${position.id}-${position.currentPrice}`}
                           className="font-mono text-sm font-normal"
-                          initial={{ color: 'rgb(255, 255, 255)' }}
-                          animate={{ color: [
-                            'rgb(255, 255, 255)',
-                            position.priceDirection === 'up' ? 'rgb(74, 222, 128)' : 'rgb(248, 113, 113)',
-                            position.priceDirection === 'up' ? 'rgb(74, 222, 128)' : 'rgb(248, 113, 113)',
-                            'rgb(255, 255, 255)'
-                          ]}}
+                          initial={{ opacity: 0.5 }}
+                          animate={{ opacity: [0.5, 1, 1, 0.85], color: position.priceDirection === 'up' ? 'rgb(74, 222, 128)' : 'rgb(248, 113, 113)' }}
                           transition={{ duration: 1.5, times: [0, 0.2, 0.8, 1], ease: 'easeInOut' }}
                         >
                           ${position.currentPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </motion.div>
                       </div>
-                      <div>
+                      <div className="bg-gray-100 dark:bg-dark-900/50 rounded-lg px-2.5 py-2">
                         <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-0.5">Position Size</div>
                         <div className="font-mono text-sm text-gray-900 dark:text-white font-normal">
                           ${position.positionSize.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </div>
                       </div>
-                      <div>
+                      <div className="bg-gray-100 dark:bg-dark-900/50 rounded-lg px-2.5 py-2">
                         <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-0.5">Amount</div>
                         <div className="font-mono text-sm text-gray-900 dark:text-white font-normal">
                           {position.amount.toFixed(8)}
                         </div>
                       </div>
-                      <div>
+                      <div className={`col-span-2 sm:col-span-1 rounded-lg px-2.5 py-2 ${position.pnl >= 0 ? 'bg-green-500/10' : 'bg-red-500/10'}`}>
                         <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-0.5">P&L</div>
                         <motion.div
                           key={`pnl-${position.id}-${position.pnl}`}
                           className="font-mono text-sm font-normal"
-                          initial={{ color: position.pnl >= 0 ? 'rgb(74, 222, 128)' : 'rgb(248, 113, 113)' }}
-                          animate={{ color: [
-                            'rgb(255, 255, 255)',
-                            position.pnl >= 0 ? 'rgb(74, 222, 128)' : 'rgb(248, 113, 113)',
-                            position.pnl >= 0 ? 'rgb(74, 222, 128)' : 'rgb(248, 113, 113)',
-                            position.pnl >= 0 ? 'rgb(74, 222, 128)' : 'rgb(248, 113, 113)'
-                          ]}}
+                          initial={{ opacity: 0.5, color: position.pnl >= 0 ? 'rgb(74, 222, 128)' : 'rgb(248, 113, 113)' }}
+                          animate={{ opacity: [0.5, 1, 1, 1], color: position.pnl >= 0 ? 'rgb(74, 222, 128)' : 'rgb(248, 113, 113)' }}
                           transition={{ duration: 1.5, times: [0, 0.2, 0.8, 1], ease: 'easeInOut' }}
                         >
                           {position.pnl >= 0 ? '+' : ''}${Math.abs(position.pnl).toFixed(2)} <span className="text-[10px] opacity-70">({position.pnl >= 0 ? '+' : ''}{position.pnlPercent.toFixed(2)}%)</span>
@@ -1393,38 +1437,59 @@ export default function UserCopyPage() {
 
         {/* Trade History - GRID 1 */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="mb-6">
-          <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-          <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-accent-500/50 transition-all">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-accent-500/20 border border-accent-500/30 rounded-xl flex items-center justify-center">
-                  <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-accent-400" />
+          <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+          <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-accent-500/50 transition-all">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="w-8 h-8 sm:w-12 sm:h-12 bg-accent-500/20 border border-accent-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
+                  <Clock className="w-4 h-4 sm:w-6 sm:h-6 text-accent-400" />
                 </div>
                 <div>
-                  <h2 className="text-lg sm:text-xl font-medium text-gray-900 dark:text-white">Trade History</h2>
-                  <p className="text-sm text-gray-600 dark:text-dark-400">{filteredTrades.length} trades</p>
+                  <h2 className="text-sm sm:text-xl font-medium text-gray-900 dark:text-white">Trade History</h2>
+                  <p className="text-[10px] sm:text-sm text-gray-600 dark:text-dark-400">{filteredTrades.length} of {tradeHistory.length} trades</p>
                 </div>
               </div>
 
-              <div className="flex gap-2 sm:gap-3 flex-wrap">
-                <select
+              <div className="grid grid-cols-2 sm:flex gap-2 sm:flex-wrap w-full sm:w-auto">
+                <FilterDropdown
                   value={filterPair}
-                  onChange={(e) => { setFilterPair(e.target.value); setCurrentPage(1); }}
-                  className="px-2 sm:px-3 py-2 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-600 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:border-primary-500/50"
-                >
-                  <option value="all">All Pairs</option>
-                  {uniquePairs.map(pair => <option key={pair} value={pair}>{pair}</option>)}
-                </select>
-
-                <select
+                  onChange={(v) => { setFilterPair(v); setCurrentPage(1); }}
+                  options={[
+                    { value: 'all', label: 'All Pairs' },
+                    ...uniquePairs.map(pair => ({ value: pair, label: pair })),
+                  ]}
+                />
+                <FilterDropdown
+                  value={filterSide}
+                  onChange={(v) => { setFilterSide(v as 'all' | 'LONG' | 'SHORT'); setCurrentPage(1); }}
+                  options={[
+                    { value: 'all', label: 'All Sides' },
+                    { value: 'LONG', label: 'Long Only' },
+                    { value: 'SHORT', label: 'Short Only' },
+                  ]}
+                />
+                <FilterDropdown
                   value={filterResult}
-                  onChange={(e) => { setFilterResult(e.target.value as 'all' | 'wins' | 'losses'); setCurrentPage(1); }}
-                  className="px-2 sm:px-3 py-2 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-600 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:border-primary-500/50"
-                >
-                  <option value="all">All Results</option>
-                  <option value="wins">Wins Only</option>
-                  <option value="losses">Losses Only</option>
-                </select>
+                  onChange={(v) => { setFilterResult(v as 'all' | 'wins' | 'losses'); setCurrentPage(1); }}
+                  options={[
+                    { value: 'all', label: 'All Results' },
+                    { value: 'wins', label: 'Wins Only' },
+                    { value: 'losses', label: 'Losses Only' },
+                  ]}
+                />
+                <FilterDropdown
+                  value={sortBy}
+                  onChange={(v) => { setSortBy(v as typeof sortBy); setCurrentPage(1); }}
+                  options={[
+                    { value: 'newest', label: 'Newest First' },
+                    { value: 'oldest', label: 'Oldest First' },
+                    { value: 'pnl-high', label: 'Highest P&L' },
+                    { value: 'pnl-low', label: 'Lowest P&L' },
+                    { value: 'size-high', label: 'Largest Size' },
+                    { value: 'size-low', label: 'Smallest Size' },
+                    { value: 'duration', label: 'Longest Duration' },
+                  ]}
+                />
               </div>
             </div>
 
@@ -1435,22 +1500,46 @@ export default function UserCopyPage() {
                   <div key={trade.id} className="rounded-lg border border-gray-200 dark:border-dark-700 bg-gray-50 dark:bg-dark-900/30 overflow-hidden">
                     {/* Compact Header - Always Visible */}
                     <div
-                      className="p-3 flex items-center justify-between gap-4 cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-800/70 transition-colors"
+                      className="p-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-800/70 transition-colors"
                       onClick={() => toggleTradeExpanded(trade.id)}
                     >
-                      {/* Left: Pair & Side */}
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        <span className="text-base font-normal text-gray-900 dark:text-white">{trade.pair}</span>
-                        <div className={`px-2 py-0.5 rounded text-xs font-medium whitespace-nowrap ${
-                          trade.side === 'LONG' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
-                        }`}>
-                          {trade.side === 'LONG' ? '↑' : '↓'} {trade.side}×{trade.leverage}
+                      {/* Row 1: Pair & Side + Arrow */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-base font-normal text-gray-900 dark:text-white">{trade.pair}</span>
+                          <div className={`px-2 py-0.5 rounded text-xs font-medium whitespace-nowrap ${
+                            trade.side === 'LONG' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
+                          }`}>
+                            {trade.side === 'LONG' ? '↑' : '↓'} {trade.side}×{trade.leverage}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          {/* P&L — inline on sm+ */}
+                          <div className="hidden sm:block text-right">
+                            <div className={`text-sm font-medium ${trade.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                              {trade.pnl >= 0 ? '+' : ''}${trade.pnl.toFixed(2)}
+                            </div>
+                            <div className={`text-[10px] font-medium opacity-70 ${trade.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                              {trade.pnl >= 0 ? '+' : ''}{trade.pnlPercent.toFixed(2)}%
+                            </div>
+                          </div>
+                          {/* Timestamp — inline on sm+ */}
+                          <div className="hidden sm:block text-right">
+                            <div className="text-[10px] text-gray-600 dark:text-dark-400 whitespace-nowrap">
+                              {new Date(trade.closedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                            </div>
+                          </div>
+                          <motion.div
+                            animate={{ rotate: isExpanded ? 180 : 0 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            <ChevronRight className="w-3 h-3 text-gray-600 dark:text-dark-400" />
+                          </motion.div>
                         </div>
                       </div>
-
-                      {/* Middle: P&L (Main Focus) */}
-                      <div className="flex items-center gap-4">
-                        <div className="text-right">
+                      {/* Row 2: P&L + Date — mobile only */}
+                      <div className="flex sm:hidden items-center justify-between mt-1.5">
+                        <div className="flex items-center gap-2">
                           <div className={`text-sm font-medium ${trade.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                             {trade.pnl >= 0 ? '+' : ''}${trade.pnl.toFixed(2)}
                           </div>
@@ -1458,21 +1547,9 @@ export default function UserCopyPage() {
                             {trade.pnl >= 0 ? '+' : ''}{trade.pnlPercent.toFixed(2)}%
                           </div>
                         </div>
-                      </div>
-
-                      {/* Right: Timestamp & Arrow */}
-                      <div className="flex items-center gap-3 flex-shrink-0">
-                        <div className="text-right">
-                          <div className="text-[10px] text-gray-600 dark:text-dark-400 whitespace-nowrap">
-                            {new Date(trade.closedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                          </div>
+                        <div className="text-[10px] text-gray-600 dark:text-dark-400">
+                          {new Date(trade.closedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                         </div>
-                        <motion.div
-                          animate={{ rotate: isExpanded ? 180 : 0 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          <ChevronRight className="w-3 h-3 text-gray-600 dark:text-dark-400" />
-                        </motion.div>
                       </div>
                     </div>
 
@@ -1484,49 +1561,26 @@ export default function UserCopyPage() {
                       className="overflow-hidden"
                     >
                       <div className="px-3 pb-3 pt-0 border-t border-gray-200 dark:border-dark-700/50">
-                        {/* Row 1: Basic Details */}
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
-                          <div>
-                            <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-1">Entry Price</div>
-                            <div className="px-1.5 py-0.5 bg-gray-200 dark:bg-dark-800/50 border border-gray-300 dark:border-dark-700 rounded inline-flex items-center">
-                              <div className="font-mono text-sm text-gray-900 dark:text-white font-normal">${trade.entryPrice.toFixed(2)}</div>
-                            </div>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 mt-3">
+                          <div className="bg-gray-100 dark:bg-dark-900/50 rounded-lg px-2.5 py-2">
+                            <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-0.5">Entry Price</div>
+                            <div className="font-mono text-sm text-gray-900 dark:text-white font-normal">${trade.entryPrice.toFixed(2)}</div>
                           </div>
-                          <div>
-                            <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-1">Exit Price</div>
-                            <div className="px-1.5 py-0.5 bg-gray-200 dark:bg-dark-800/50 border border-gray-300 dark:border-dark-700 rounded inline-flex items-center">
-                              <div className="font-mono text-sm text-gray-900 dark:text-white font-normal">${trade.exitPrice.toFixed(2)}</div>
-                            </div>
+                          <div className="bg-gray-100 dark:bg-dark-900/50 rounded-lg px-2.5 py-2">
+                            <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-0.5">Exit Price</div>
+                            <div className="font-mono text-sm text-gray-900 dark:text-white font-normal">${trade.exitPrice.toFixed(2)}</div>
                           </div>
-                          <div>
-                            <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-1">Position Size</div>
+                          <div className="bg-gray-100 dark:bg-dark-900/50 rounded-lg px-2.5 py-2">
+                            <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-0.5">Position Size</div>
                             <div className="font-mono text-sm text-gray-900 dark:text-white font-normal">${trade.positionSize.toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
                           </div>
-                          <div>
-                            <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-1">Duration</div>
+                          <div className="bg-gray-100 dark:bg-dark-900/50 rounded-lg px-2.5 py-2">
+                            <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-0.5">Duration</div>
                             <div className="text-sm text-gray-900 dark:text-white font-normal">{trade.duration}</div>
                           </div>
-                        </div>
-
-                        {/* Row 2: Trading Costs */}
-                        <div className="grid grid-cols-2 gap-3 mt-3">
-                          <div>
-                            <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-1">Total Fees</div>
-                            <div className="font-mono text-sm text-red-400 font-normal">
-                              -${trade.totalFees.toFixed(2)}
-                            </div>
-                          </div>
-                          <div>
-                            <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-1">Slippage</div>
-                            {trade.slippage > 0 ? (
-                              <div className="font-mono text-sm text-amber-400 font-normal">
-                                {trade.slippage.toFixed(3)}%
-                              </div>
-                            ) : (
-                              <div className="font-mono text-sm text-gray-500 dark:text-dark-500 font-normal">
-                                0%
-                              </div>
-                            )}
+                          <div className="col-span-2 sm:col-span-1 bg-red-500/10 rounded-lg px-2.5 py-2">
+                            <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-0.5">Total Fees</div>
+                            <div className="font-mono text-sm text-red-400 font-normal">-${trade.totalFees.toFixed(2)}</div>
                           </div>
                         </div>
                       </div>
@@ -1536,56 +1590,13 @@ export default function UserCopyPage() {
               })}
             </div>
 
-            {totalPages > 1 && (
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-4 mt-4 border-t border-gray-200 dark:border-dark-700">
-                <div className="text-xs sm:text-sm text-gray-600 dark:text-dark-400">
-                  Showing {(currentPage - 1) * itemsPerPage + 1}-{Math.min(currentPage * itemsPerPage, filteredTrades.length)} of {filteredTrades.length}
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                    disabled={currentPage === 1}
-                    className="px-3 py-2 bg-gray-200 dark:bg-dark-800 border border-gray-300 dark:border-dark-600 rounded-lg text-sm text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-dark-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                    Previous
-                  </button>
-                  <div className="flex items-center gap-1">
-                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                      let pageNum;
-                      if (totalPages <= 5) {
-                        pageNum = i + 1;
-                      } else if (currentPage <= 3) {
-                        pageNum = i + 1;
-                      } else if (currentPage >= totalPages - 2) {
-                        pageNum = totalPages - 4 + i;
-                      } else {
-                        pageNum = currentPage - 2 + i;
-                      }
-                      return (
-                        <button
-                          key={pageNum}
-                          onClick={() => setCurrentPage(pageNum)}
-                          className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                            currentPage === pageNum ? 'bg-primary-500 text-white' : 'bg-gray-200 dark:bg-dark-800 border border-gray-300 dark:border-dark-600 text-gray-700 dark:text-dark-300 hover:bg-gray-300 dark:hover:bg-dark-700'
-                          }`}
-                        >
-                          {pageNum}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <button
-                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                    disabled={currentPage === totalPages}
-                    className="px-3 py-2 bg-gray-200 dark:bg-dark-800 border border-gray-300 dark:border-dark-600 rounded-lg text-sm text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-dark-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
-                  >
-                    Next
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            )}
+            <Pagination
+              currentPage={currentPage}
+              totalItems={filteredTrades.length}
+              itemsPerPage={itemsPerPage}
+              onPageChange={setCurrentPage}
+              className="pt-4 mt-4 border-t border-gray-200 dark:border-dark-700"
+            />
           </div>
           </div>
         </motion.div>
@@ -1606,13 +1617,13 @@ interface StatCardProps {
 
 function StatCard({ icon, label, value, subtitle, subtitleColor = 'text-green-400', valueColor = 'text-gray-900 dark:text-white' }: StatCardProps) {
   return (
-    <div className="p-3 sm:p-4 bg-gray-50 dark:bg-dark-900/50 rounded-xl border border-gray-200 dark:border-dark-700/50 hover:border-primary-500/30 transition-all">
-      <div className="flex items-center gap-2 mb-2">
+    <div className="p-2.5 sm:p-4 bg-gray-50 dark:bg-dark-900/50 rounded-xl border border-gray-200 dark:border-dark-700/50 hover:border-primary-500/30 transition-all">
+      <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
         {icon}
-        <div className="text-xs text-gray-600 dark:text-dark-400">{label}</div>
+        <div className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400">{label}</div>
       </div>
-      <div className={`text-lg sm:text-xl font-medium ${valueColor}`}>{value}</div>
-      <div className={`text-xs ${subtitleColor} mt-1`}>{subtitle}</div>
+      <div className={`text-sm sm:text-xl font-medium ${valueColor}`}>{value}</div>
+      <div className={`hidden sm:block text-xs ${subtitleColor} mt-1`}>{subtitle}</div>
     </div>
   );
 }

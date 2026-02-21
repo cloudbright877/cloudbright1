@@ -122,6 +122,26 @@ export function disable2FA(): void {
   });
 }
 
+export function enablePIN(pin: string): void {
+  saveSecuritySettings({
+    pinEnabled: true,
+    pinCode: pin,
+  });
+}
+
+export function disablePIN(): void {
+  saveSecuritySettings({
+    pinEnabled: false,
+    pinCode: null,
+  });
+}
+
+export function changePIN(pin: string): void {
+  saveSecuritySettings({
+    pinCode: pin,
+  });
+}
+
 export function revokeSession(sessionId: string): void {
   const current = getSecuritySettings();
   const updated = {

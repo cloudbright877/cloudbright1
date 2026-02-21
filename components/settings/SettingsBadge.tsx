@@ -15,7 +15,7 @@ export function SettingsBadge({ text, variant, icon, size = 'sm' }: SettingsBadg
     warning: 'bg-yellow-500/20 border-yellow-500/30 text-yellow-400',
     error: 'bg-red-500/20 border-red-500/30 text-red-400',
     info: 'bg-blue-500/20 border-blue-500/30 text-blue-400',
-    neutral: 'bg-dark-700 border-dark-600 text-dark-300',
+    neutral: 'bg-gray-200 dark:bg-dark-700 border-gray-300 dark:border-dark-600 text-gray-600 dark:text-dark-300',
   };
 
   const sizeClasses = {

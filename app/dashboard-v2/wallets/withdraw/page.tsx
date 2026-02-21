@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import {
   TokenBTC,
@@ -18,11 +18,16 @@ import {
   CheckCircle,
   Clock,
   Info,
+  Bookmark,
+  Hash,
+  KeyRound,
 } from 'lucide-react';
 import Stepper from '@/components/ui/Stepper';
 import CurrencyCard from '@/components/wallet/CurrencyCard';
 import { useToast } from '@/context/ToastContext';
 import { getBalance } from '@/lib/balances';
+import { getWalletsSettings, getSecuritySettings } from '@/lib/settings/settingsService';
+import type { SavedWalletAddress, NetworkType } from '@/lib/settings/settingsTypes';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const TOKEN_ICONS: Record<string, any> = {
@@ -109,6 +114,15 @@ const STEPS = [
   { label: 'Confirm', description: 'Review & submit' },
 ];
 
+// Map withdrawal page networkName → saved wallet NetworkType
+const NETWORK_TO_SAVED: Record<string, NetworkType> = {
+  ERC20: 'ETH',
+  TRC20: 'TRX',
+  BEP20: 'BNB',
+  BTC: 'BTC',
+  SOL: 'SOL',
+};
+
 export default function WithdrawPage() {
   const [step, setStep] = useState(1);
   const [selectedCurrency, setSelectedCurrency] = useState<Currency | null>(null);
@@ -120,11 +134,15 @@ export default function WithdrawPage() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [availableBalance, setAvailableBalance] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [savedWallets, setSavedWallets] = useState<SavedWalletAddress[]>([]);
+  const [showSavedWallets, setShowSavedWallets] = useState(false);
+  const pinRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const twoFARefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const toast = useToast();
 
-  const userHasPIN = true;
-  const userHas2FA = false;
+  const [userHasPIN, setUserHasPIN] = useState(false);
+  const [userHas2FA, setUserHas2FA] = useState(false);
 
   useEffect(() => {
     async function loadBalance() {
@@ -145,6 +163,13 @@ export default function WithdrawPage() {
     }
 
     loadBalance();
+
+    const walletSettings = getWalletsSettings();
+    setSavedWallets(walletSettings.addresses);
+
+    const securitySettings = getSecuritySettings();
+    setUserHasPIN(securitySettings.pinEnabled);
+    setUserHas2FA(securitySettings.twoFactorEnabled);
   }, []);
 
   const handleCurrencySelect = (currency: Currency) => {
@@ -195,6 +220,17 @@ export default function WithdrawPage() {
       return;
     }
 
+    // Mock validation: PIN = 1234, 2FA = 000000
+    if (userHasPIN && pinCode.join('') !== '1234') {
+      toast.error('Invalid PIN', 'The PIN code you entered is incorrect');
+      return;
+    }
+
+    if (userHas2FA && twoFACode.join('') !== '000000') {
+      toast.error('Invalid 2FA code', 'The authenticator code is incorrect');
+      return;
+    }
+
     setStep(4);
   };
 
@@ -214,28 +250,38 @@ export default function WithdrawPage() {
   };
 
   const handlePinInput = (index: number, value: string) => {
-    if (!/^\d*$/.test(value)) return;
+    if (value.length > 1) value = value.slice(-1);
+    if (value && !/^\d$/.test(value)) return;
     const newPin = [...pinCode];
-    newPin[index] = value.slice(-1);
+    newPin[index] = value;
     setPinCode(newPin);
 
-    // Auto-focus next input
     if (value && index < 3) {
-      const nextInput = document.getElementById(`pin-${index + 1}`);
-      nextInput?.focus();
+      pinRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handlePinKeyDown = (index: number, e: React.KeyboardEvent) => {
+    if (e.key === 'Backspace' && !pinCode[index] && index > 0) {
+      pinRefs.current[index - 1]?.focus();
     }
   };
 
   const handle2FAInput = (index: number, value: string) => {
-    if (!/^\d*$/.test(value)) return;
+    if (value.length > 1) value = value.slice(-1);
+    if (value && !/^\d$/.test(value)) return;
     const newCode = [...twoFACode];
-    newCode[index] = value.slice(-1);
+    newCode[index] = value;
     setTwoFACode(newCode);
 
-    // Auto-focus next input
     if (value && index < 5) {
-      const nextInput = document.getElementById(`2fa-${index + 1}`);
-      nextInput?.focus();
+      twoFARefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handle2FAKeyDown = (index: number, e: React.KeyboardEvent) => {
+    if (e.key === 'Backspace' && !twoFACode[index] && index > 0) {
+      twoFARefs.current[index - 1]?.focus();
     }
   };
 
@@ -255,7 +301,7 @@ export default function WithdrawPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-100 dark:bg-dark-950 text-gray-900 dark:text-white flex items-center justify-center">
+      <div className="min-h-screen bg-gray-100 dark:bg-transparent text-gray-900 dark:text-white flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-700 dark:text-dark-300">Loading...</p>
@@ -265,7 +311,7 @@ export default function WithdrawPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-100 dark:bg-dark-950 text-gray-900 dark:text-white">
+    <div className="min-h-screen bg-gray-100 dark:bg-transparent text-gray-900 dark:text-white">
       <div className="max-w-[1400px] mx-auto p-4 lg:p-6">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -305,10 +351,10 @@ export default function WithdrawPage() {
               >
                 {/* Step 1: Select Currency */}
                 {step === 1 && (
-                  <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                    <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
+                  <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                    <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
                     <h2 className="text-2xl font-medium text-gray-900 dark:text-white mb-6">Select Currency</h2>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       {CURRENCIES.map((currency, index) => (
                         <CurrencyCard
                           key={currency.symbol}
@@ -328,8 +374,8 @@ export default function WithdrawPage() {
 
                 {/* Step 2: Withdrawal Details */}
                 {step === 2 && selectedCurrency && (
-                  <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                    <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6 space-y-6">
+                  <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                    <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6 space-y-6">
                     <h2 className="text-2xl font-medium text-gray-900 dark:text-white">Withdrawal Details</h2>
 
                     {/* Network Selection */}
@@ -337,7 +383,7 @@ export default function WithdrawPage() {
                       <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-3">
                         Select Network
                       </label>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         {selectedCurrency.networks.map((network, index) => (
                           <motion.button
                             key={network.id}
@@ -416,9 +462,19 @@ export default function WithdrawPage() {
 
                     {/* Withdrawal Address */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-3">
-                        Withdrawal Address
-                      </label>
+                      <div className="flex items-center justify-between mb-3">
+                        <label className="text-sm font-medium text-gray-700 dark:text-dark-300">
+                          Withdrawal Address
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => setShowSavedWallets(!showSavedWallets)}
+                          className="flex items-center gap-1.5 text-xs font-medium text-primary-400 hover:text-primary-300 transition-colors"
+                        >
+                          <Bookmark className="w-3.5 h-3.5" />
+                          Use Saved
+                        </button>
+                      </div>
                       <input
                         type="text"
                         value={withdrawAddress}
@@ -426,6 +482,64 @@ export default function WithdrawPage() {
                         placeholder="Enter wallet address"
                         className="w-full px-4 py-3 bg-gray-50 dark:bg-dark-800 border-2 border-gray-200 dark:border-dark-700 focus:border-primary-500 rounded-xl text-gray-900 dark:text-white outline-none"
                       />
+
+                      {/* Saved Wallets Dropdown */}
+                      <AnimatePresence>
+                        {showSavedWallets && (() => {
+                          const networkKey = selectedNetwork ? NETWORK_TO_SAVED[selectedNetwork.networkName] : null;
+                          const filtered = networkKey
+                            ? savedWallets.filter((w) => w.network === networkKey)
+                            : savedWallets;
+
+                          return (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: 'auto' }}
+                              exit={{ opacity: 0, height: 0 }}
+                              className="mt-2 overflow-hidden"
+                            >
+                              {filtered.length > 0 ? (
+                                <div className="space-y-2">
+                                  {filtered.map((wallet) => (
+                                    <button
+                                      key={wallet.id}
+                                      type="button"
+                                      onClick={() => {
+                                        setWithdrawAddress(wallet.address);
+                                        setShowSavedWallets(false);
+                                      }}
+                                      className="w-full flex items-center gap-3 p-3 bg-gray-50 dark:bg-dark-800/50 hover:bg-gray-100 dark:hover:bg-dark-800 border border-gray-200 dark:border-dark-700 hover:border-primary-500/50 rounded-xl text-left transition-all"
+                                    >
+                                      <div className="w-8 h-8 flex-shrink-0 rounded-lg bg-primary-500/10 flex items-center justify-center">
+                                        <Bookmark className="w-4 h-4 text-primary-400" />
+                                      </div>
+                                      <div className="min-w-0 flex-1">
+                                        <div className="text-sm font-medium text-gray-900 dark:text-white truncate">{wallet.label}</div>
+                                        <div className="text-xs text-gray-500 dark:text-dark-500 font-mono truncate">{wallet.address}</div>
+                                      </div>
+                                      <span className="flex-shrink-0 text-[10px] font-semibold text-gray-500 dark:text-dark-500 bg-gray-200 dark:bg-dark-700 px-2 py-0.5 rounded-md">
+                                        {wallet.network}
+                                      </span>
+                                    </button>
+                                  ))}
+                                </div>
+                              ) : (
+                                <div className="p-4 bg-gray-50 dark:bg-dark-800/50 border border-gray-200 dark:border-dark-700 rounded-xl text-center">
+                                  <p className="text-sm text-gray-500 dark:text-dark-400">
+                                    No saved wallets{networkKey ? ` for ${networkKey}` : ''}.{' '}
+                                    <Link
+                                      href="/dashboard-v2/settings/wallets"
+                                      className="text-primary-400 hover:text-primary-300 font-medium"
+                                    >
+                                      Add in Settings
+                                    </Link>
+                                  </p>
+                                </div>
+                              )}
+                            </motion.div>
+                          );
+                        })()}
+                      </AnimatePresence>
                     </div>
 
                     {/* Warning */}
@@ -464,8 +578,8 @@ export default function WithdrawPage() {
 
                 {/* Step 3: Security Verification */}
                 {step === 3 && (
-                  <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                    <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6 space-y-6">
+                  <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                    <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6 space-y-6">
                     <div className="flex items-center gap-3 mb-4">
                       <div className="w-12 h-12 bg-primary-500/20 rounded-xl flex items-center justify-center">
                         <Shield className="w-6 h-6 text-primary-400" />
@@ -478,20 +592,23 @@ export default function WithdrawPage() {
 
                     {/* PIN Code */}
                     {userHasPIN && (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-3">
+                      <div className="p-5 bg-gray-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700">
+                        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-dark-300 mb-4">
+                          <Hash className="w-4 h-4" />
                           Withdrawal PIN Code
                         </label>
                         <div className="flex gap-3 justify-center">
                           {pinCode.map((digit, index) => (
                             <input
                               key={index}
-                              id={`pin-${index}`}
+                              ref={(el) => { pinRefs.current[index] = el; }}
                               type="password"
+                              inputMode="numeric"
                               maxLength={1}
                               value={digit}
                               onChange={(e) => handlePinInput(index, e.target.value)}
-                              className="w-14 h-14 sm:w-16 sm:h-16 bg-gray-50 dark:bg-dark-800 border-2 border-gray-200 dark:border-dark-700 focus:border-primary-500 rounded-xl text-gray-900 dark:text-white text-center text-xl sm:text-2xl outline-none"
+                              onKeyDown={(e) => handlePinKeyDown(index, e)}
+                              className="w-14 h-14 sm:w-16 sm:h-16 bg-white dark:bg-dark-900/50 border rounded-xl text-gray-900 dark:text-white text-center text-xl sm:text-2xl font-bold focus:outline-none border-gray-300 dark:border-dark-700 focus:border-primary-500 focus:ring-1 focus:ring-primary-500/20 transition-all"
                             />
                           ))}
                         </div>
@@ -500,22 +617,44 @@ export default function WithdrawPage() {
 
                     {/* 2FA Code */}
                     {userHas2FA && (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-3">
-                          2FA Code (Google Authenticator)
+                      <div className="p-5 bg-gray-100 dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700">
+                        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-dark-300 mb-4">
+                          <KeyRound className="w-4 h-4" />
+                          Authenticator Code
                         </label>
                         <div className="flex gap-2 justify-center">
                           {twoFACode.map((digit, index) => (
                             <input
                               key={index}
-                              id={`2fa-${index}`}
+                              ref={(el) => { twoFARefs.current[index] = el; }}
                               type="text"
+                              inputMode="numeric"
                               maxLength={1}
                               value={digit}
                               onChange={(e) => handle2FAInput(index, e.target.value)}
-                              className="w-12 h-12 bg-gray-50 dark:bg-dark-800 border-2 border-gray-200 dark:border-dark-700 focus:border-primary-500 rounded-xl text-gray-900 dark:text-white text-center text-xl outline-none"
+                              onKeyDown={(e) => handle2FAKeyDown(index, e)}
+                              className="w-12 h-12 bg-white dark:bg-dark-900/50 border rounded-xl text-gray-900 dark:text-white text-center text-xl font-bold focus:outline-none border-gray-300 dark:border-dark-700 focus:border-primary-500 focus:ring-1 focus:ring-primary-500/20 transition-all"
                             />
                           ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* No security methods */}
+                    {!userHasPIN && !userHas2FA && (
+                      <div className="p-5 bg-yellow-500/10 border border-yellow-500/30 rounded-xl">
+                        <div className="flex items-start gap-3">
+                          <AlertTriangle className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
+                          <div className="text-sm">
+                            <div className="font-medium text-yellow-300 mb-1">No security methods configured</div>
+                            <div className="text-yellow-200/80">
+                              We strongly recommend enabling a PIN code or 2FA in{' '}
+                              <Link href="/dashboard-v2/settings/security" className="text-primary-400 hover:text-primary-300 font-medium underline">
+                                Security Settings
+                              </Link>{' '}
+                              to protect your withdrawals.
+                            </div>
+                          </div>
                         </div>
                       </div>
                     )}
@@ -524,11 +663,16 @@ export default function WithdrawPage() {
                     <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl">
                       <div className="flex items-start gap-3">
                         <Info className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
-                        <div className="text-sm text-blue-200">
-                          <div className="font-medium mb-1">Security Check</div>
+                        <div className="text-sm">
+                          <div className="font-medium text-blue-300 mb-1">Security Check</div>
                           <div className="text-blue-200/80">
-                            We use PIN verification to protect your funds from unauthorized
-                            withdrawals.
+                            {userHasPIN && userHas2FA
+                              ? 'Enter your PIN and authenticator code to verify this withdrawal.'
+                              : userHasPIN
+                                ? 'Enter your withdrawal PIN to verify this transaction.'
+                                : userHas2FA
+                                  ? 'Enter your authenticator code to verify this withdrawal.'
+                                  : 'Set up PIN or 2FA in settings for enhanced security.'}
                           </div>
                         </div>
                       </div>
@@ -556,8 +700,8 @@ export default function WithdrawPage() {
 
                 {/* Step 4: Confirmation */}
                 {step === 4 && (
-                  <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                    <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6 space-y-6">
+                  <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                    <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6 space-y-6">
                     <h2 className="text-2xl font-medium text-gray-900 dark:text-white">Review Withdrawal</h2>
 
                     {/* Processing Time Info */}
@@ -600,8 +744,8 @@ export default function WithdrawPage() {
           {/* Live Summary Sidebar - col-span-5, sticky */}
           <div className="lg:col-span-5">
             <div className="sticky top-6">
-              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
+              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
                 <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-6">Withdrawal Summary</h3>
 
                 {/* Currency Icon */}
@@ -675,13 +819,13 @@ export default function WithdrawPage() {
             className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
             onClick={() => setShowConfirmModal(false)}
           >
-            <div className="max-w-md w-full rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+            <div className="max-w-md w-full rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
               <motion.div
                 initial={{ scale: 0.9, y: 20 }}
                 animate={{ scale: 1, y: 0 }}
                 exit={{ scale: 0.9, y: 20 }}
                 onClick={(e) => e.stopPropagation()}
-                className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6"
+                className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6"
               >
               <div className="text-center mb-6">
                 <motion.div

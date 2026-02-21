@@ -34,7 +34,7 @@ export function NetWorthHero({
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="col-span-2 lg:col-span-4 lg:row-span-2"
+      className="col-span-2 lg:col-span-4 lg:row-span-2 order-2 lg:order-none"
     >
       <div className="relative h-full overflow-hidden bg-gradient-to-br from-blue-500/[0.12] via-indigo-500/[0.06] to-blue-500/[0.12] dark:from-blue-500/10 dark:via-indigo-500/5 dark:to-blue-500/10 border border-blue-500/30 rounded-2xl p-4 sm:p-6">
         {/* Animated Background */}

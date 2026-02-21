@@ -79,14 +79,14 @@ export default function ArchiveBotPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-100 dark:bg-dark-950 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-100 dark:bg-transparent flex items-center justify-center">
         <div className="text-gray-900 dark:text-white">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-100 dark:bg-dark-950 text-gray-900 dark:text-white">
+    <div className="min-h-screen bg-gray-100 dark:bg-transparent text-gray-900 dark:text-white">
       <div className="max-w-4xl mx-auto p-4 lg:p-6">
         {/* Back Link */}
         <Link
@@ -102,8 +102,8 @@ export default function ArchiveBotPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-          <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6 lg:p-8"
+          <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+          <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6 lg:p-8"
         >
           {/* Header */}
           <div className="flex items-center gap-4 mb-6">

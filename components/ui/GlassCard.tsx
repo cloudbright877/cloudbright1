@@ -37,14 +37,14 @@ export default function GlassCard({
 
   const baseClasses = `
     relative rounded-2xl
-    bg-gradient-to-br from-dark-800/95 to-dark-900/95
+    bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95
     ${blurClasses[blur]}
     ${paddingClasses[padding]}
     transition-all duration-300
   `;
 
   const variantClasses = {
-    default: 'border-2 border-dark-700',
+    default: 'border-2 border-gray-200 dark:border-dark-700',
     gradient: `border-2 border-transparent bg-clip-padding`,
     glow: 'border-2 border-primary-500/20',
   };
@@ -64,7 +64,7 @@ export default function GlassCard({
           className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${gradient} -z-10 opacity-50 group-hover:opacity-100 transition-opacity duration-300`}
           style={{ padding: '2px' }}
         >
-          <div className="absolute inset-[2px] rounded-[calc(1rem-2px)] bg-gradient-to-br from-dark-800/95 to-dark-900/95" />
+          <div className="absolute inset-[2px] rounded-[calc(1rem-2px)] bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95" />
         </div>
       )}
 

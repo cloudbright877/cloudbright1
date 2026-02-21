@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { DollarSign, Wallet, Sprout, TrendingUp, BarChart3, Crown } from 'lucide-react';
 
 interface StepAmountProps {
@@ -41,20 +42,42 @@ export function StepAmount({ userBalance, selectedAmount, onSelect }: StepAmount
   return (
     <div className="space-y-6">
       <div className="text-center mb-4 sm:mb-6 lg:mb-8">
-        <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white mb-2">How much do you want to invest?</h3>
-        <p className="text-gray-600 dark:text-dark-400">Select a tier or enter a custom amount</p>
+        <h3 className="text-base sm:text-2xl font-semibold text-gray-900 dark:text-white mb-1 sm:mb-2">How much do you want to invest?</h3>
+        <p className="text-xs sm:text-base text-gray-600 dark:text-dark-400">Select a tier or enter a custom amount</p>
       </div>
 
       {/* Balance card */}
-      <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-50 dark:bg-dark-800 border border-gray-200 dark:border-dark-700">
-        <div className="w-8 h-8 rounded-lg bg-primary-500/20 flex items-center justify-center">
-          <Wallet className="w-4 h-4 text-primary-400" />
+      {userBalance < 50 ? (
+        <div className="px-4 py-3 rounded-xl bg-gradient-to-r from-primary-500/10 to-accent-500/10 border border-primary-500/30">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-primary-500/20 flex items-center justify-center flex-shrink-0">
+              <Wallet className="w-4 h-4 text-primary-400" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-primary-400">
+                {userBalance === 0 ? 'Fund your account to get started' : `You need $${(50 - userBalance).toLocaleString()} more`}
+              </p>
+              <p className="text-xs text-gray-600 dark:text-dark-400">Balance: ${userBalance.toLocaleString()} &middot; Minimum: $50</p>
+            </div>
+            <Link
+              href="/dashboard-v2/wallets/deposit?returnTo=/dashboard-v2/quick-start"
+              className="flex-shrink-0 px-4 py-2 bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 rounded-lg text-xs font-semibold text-white transition-all shadow-lg shadow-primary-500/30"
+            >
+              Deposit
+            </Link>
+          </div>
         </div>
-        <div>
-          <p className="text-[11px] text-gray-600 dark:text-dark-400 leading-tight">Available Balance</p>
-          <p className="text-base font-semibold text-gray-900 dark:text-white">${userBalance.toLocaleString()}</p>
+      ) : (
+        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-50 dark:bg-dark-800 border border-gray-200 dark:border-dark-700">
+          <div className="w-8 h-8 rounded-lg bg-primary-500/20 flex items-center justify-center">
+            <Wallet className="w-4 h-4 text-primary-400" />
+          </div>
+          <div>
+            <p className="text-[11px] text-gray-600 dark:text-dark-400 leading-tight">Available Balance</p>
+            <p className="text-base font-semibold text-gray-900 dark:text-white">${userBalance.toLocaleString()}</p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Tier cards */}
       <div className="grid grid-cols-2 gap-3">
@@ -83,7 +106,7 @@ export function StepAmount({ userBalance, selectedAmount, onSelect }: StepAmount
                   <Icon className={`w-4 h-4 ${isSelected ? 'text-primary-400' : 'text-gray-600 dark:text-dark-400'}`} />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-lg font-bold text-gray-900 dark:text-white leading-tight">${tier.amount.toLocaleString()}</p>
+                  <p className="text-sm sm:text-lg font-bold text-gray-900 dark:text-white leading-tight">${tier.amount.toLocaleString()}</p>
                   <p className={`text-xs ${isSelected ? 'text-primary-400' : 'text-gray-600 dark:text-dark-500'}`}>{tier.label}</p>
                 </div>
               </div>

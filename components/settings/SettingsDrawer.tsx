@@ -64,8 +64,8 @@ export function SettingsDrawer({ isOpen, onClose, title, children }: SettingsDra
   const panelVariants = isMobile ? mobilePanelVariants : desktopPanelVariants;
 
   const panelClasses = isMobile
-    ? 'fixed bottom-0 left-0 w-full max-h-[90vh] bg-dark-900 border-t border-dark-700 rounded-t-2xl z-50 flex flex-col shadow-2xl'
-    : 'fixed right-0 top-0 h-full w-[480px] bg-dark-900 border-l border-dark-700 z-50 flex flex-col shadow-2xl';
+    ? 'fixed bottom-0 left-0 w-full max-h-[90vh] bg-white dark:bg-dark-900 border-t border-gray-200 dark:border-dark-700 rounded-t-2xl z-50 flex flex-col shadow-2xl'
+    : 'fixed right-0 top-0 h-full w-[480px] bg-white dark:bg-dark-900 border-l border-gray-200 dark:border-dark-700 z-50 flex flex-col shadow-2xl';
 
   return (
     <AnimatePresence>
@@ -93,16 +93,16 @@ export function SettingsDrawer({ isOpen, onClose, title, children }: SettingsDra
           >
             {/* Mobile drag handle */}
             {isMobile && (
-              <div className="w-10 h-1 bg-dark-600 rounded-full mx-auto mt-2 mb-1" />
+              <div className="w-10 h-1 bg-gray-300 dark:bg-dark-600 rounded-full mx-auto mt-2 mb-1" />
             )}
 
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-dark-700 flex-shrink-0">
-              <h2 className="text-lg font-bold text-white">{title}</h2>
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-dark-700 flex-shrink-0">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white">{title}</h2>
               <button
                 type="button"
                 onClick={onClose}
-                className="w-9 h-9 rounded-lg bg-dark-800 hover:bg-dark-700 border border-dark-700 flex items-center justify-center text-dark-400 hover:text-white transition-all"
+                className="w-9 h-9 rounded-lg bg-gray-100 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 border border-gray-300 dark:border-dark-700 flex items-center justify-center text-gray-500 dark:text-dark-400 hover:text-gray-900 dark:hover:text-white transition-all"
                 aria-label="Close"
               >
                 <X className="w-5 h-5" />

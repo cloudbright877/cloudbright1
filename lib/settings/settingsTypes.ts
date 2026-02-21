@@ -15,6 +15,8 @@ export interface SecuritySettings {
   twoFactorEnabled: boolean;
   twoFactorSecret: string | null;      // mock TOTP secret, null if 2FA not enabled
   backupCodes: string[];                // array of 8 backup codes
+  pinEnabled: boolean;                  // withdrawal PIN code enabled
+  pinCode: string | null;              // 4-digit PIN, null if not set
   sessions: Session[];
 }
 
@@ -71,17 +73,19 @@ export interface WalletsSettings {
 // ==========================================
 export interface NotificationSettings {
   email: string;            // notification email address
-  tradeAlerts: boolean;
-  securityAlerts: boolean;
+  loginAlerts: boolean;     // new device login notifications
+  withdrawalConfirmations: boolean; // email confirmation for withdrawals
+  securityChanges: boolean; // password/2FA changes
   weeklyReport: boolean;
+  promoLetters: boolean;   // promotional offers and platform updates
 }
 
 // ==========================================
 // Preferences
 // ==========================================
-export type Language = 'en' | 'ru';
-export type Currency = 'USD' | 'EUR' | 'RUB';
-export type Theme = 'dark';  // only dark for now
+export type Language = 'en' | 'ru' | 'de' | 'fr' | 'es' | 'ja' | 'zh' | 'ko';
+export type Currency = 'USD' | 'EUR' | 'GBP' | 'RUB' | 'JPY' | 'CNY' | 'KRW' | 'CHF';
+export type Theme = 'dark' | 'light';
 
 export interface PreferencesSettings {
   language: Language;

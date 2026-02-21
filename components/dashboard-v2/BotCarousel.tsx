@@ -71,9 +71,6 @@ export function BotCarousel({ title, bots }: BotCarouselProps) {
                         <h3 className="text-base font-medium text-gray-900 dark:text-white truncate">
                           {bot.name}
                         </h3>
-                        {bot.verified && (
-                          <Shield className="w-4 h-4 text-accent-400 flex-shrink-0" />
-                        )}
                       </div>
                       <p className="text-[10px] text-gray-600 dark:text-dark-400 mt-1 truncate">{bot.strategy}</p>
                     </div>
@@ -111,20 +108,20 @@ export function BotCarousel({ title, bots }: BotCarouselProps) {
                   </div>
 
                   {/* Key Stats Grid */}
-                  <div className="grid grid-cols-3 gap-3 mb-5">
-                    <div className="text-center p-3 bg-gray-50 dark:bg-dark-900/50 rounded-lg border border-gray-200 dark:border-dark-700">
+                  <div className="grid grid-cols-3 gap-1.5 sm:gap-3 mb-5">
+                    <div className="text-center p-2 sm:p-3 bg-gray-50 dark:bg-dark-900/50 rounded-lg border border-gray-200 dark:border-dark-700">
                       <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-1">1Y Return</div>
-                      <div className={`text-base font-normal ${bot.stats.return1y >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      <div className={`text-xs sm:text-base font-normal ${bot.stats.return1y >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                         {bot.stats.return1y >= 0 ? '+' : ''}{bot.stats.return1y.toFixed(0)}%
                       </div>
                     </div>
-                    <div className="text-center p-3 bg-gray-50 dark:bg-dark-900/50 rounded-lg border border-gray-200 dark:border-dark-700">
+                    <div className="text-center p-2 sm:p-3 bg-gray-50 dark:bg-dark-900/50 rounded-lg border border-gray-200 dark:border-dark-700">
                       <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-1">Win Rate</div>
-                      <div className="text-base font-normal text-gray-900 dark:text-white">{bot.stats.winRate.toFixed(0)}%</div>
+                      <div className="text-xs sm:text-base font-normal text-gray-900 dark:text-white">{bot.stats.winRate.toFixed(0)}%</div>
                     </div>
-                    <div className="text-center p-3 bg-gray-50 dark:bg-dark-900/50 rounded-lg border border-gray-200 dark:border-dark-700">
+                    <div className="text-center p-2 sm:p-3 bg-gray-50 dark:bg-dark-900/50 rounded-lg border border-gray-200 dark:border-dark-700">
                       <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-1">Copiers</div>
-                      <div className="text-base font-normal text-gray-900 dark:text-white">
+                      <div className="text-xs sm:text-base font-normal text-gray-900 dark:text-white">
                         {bot.stats.copiers > 999 ? `${(bot.stats.copiers / 1000).toFixed(1)}k` : bot.stats.copiers}
                       </div>
                     </div>

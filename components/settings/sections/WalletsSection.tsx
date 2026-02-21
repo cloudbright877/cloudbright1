@@ -139,15 +139,15 @@ export function WalletsSection({ onSaved }: WalletsSectionProps) {
     <div>
       {/* Header */}
       <div className="mb-6">
-        <h3 className="text-lg font-bold text-white mb-2">Saved Withdrawal Addresses</h3>
-        <p className="text-sm text-dark-400 mb-4">{addresses.length}/10 addresses saved</p>
+        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Saved Withdrawal Addresses</h3>
+        <p className="text-sm text-gray-600 dark:text-dark-400 mb-4">{addresses.length}/10 addresses saved</p>
         <button
           type="button"
           onClick={() => setShowAddForm(true)}
           disabled={addresses.length >= 10 || showAddForm}
           className={`px-4 py-2 rounded-lg font-semibold text-sm flex items-center gap-2 transition-all ${
             addresses.length >= 10 || showAddForm
-              ? 'bg-dark-700 text-dark-500 cursor-not-allowed'
+              ? 'bg-gray-200 dark:bg-dark-700 text-gray-400 dark:text-dark-500 cursor-not-allowed'
               : 'bg-gradient-to-r from-primary-500 to-accent-500 text-white hover:shadow-lg hover:shadow-primary-500/25'
           }`}
         >
@@ -158,8 +158,8 @@ export function WalletsSection({ onSaved }: WalletsSectionProps) {
 
       {/* Add Address Form */}
       {showAddForm && (
-        <div className="mb-6 p-5 bg-dark-800/50 rounded-xl border border-dark-700">
-          <h4 className="text-base font-bold text-white mb-4">Add New Address</h4>
+        <div className="mb-6 p-5 bg-gray-50 dark:bg-dark-800/50 rounded-xl border border-gray-200 dark:border-dark-700">
+          <h4 className="text-base font-bold text-gray-900 dark:text-white mb-4">Add New Address</h4>
 
           <div className="space-y-4 mb-4">
             <SettingsFormInput
@@ -203,7 +203,7 @@ export function WalletsSection({ onSaved }: WalletsSectionProps) {
                 setFormData({ label: '', network: '', address: '' });
                 setErrors({});
               }}
-              className="px-4 py-2 border border-dark-600 rounded-lg text-dark-300 hover:text-white hover:border-dark-500 transition-all text-sm"
+              className="px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg text-gray-600 dark:text-dark-300 hover:text-gray-900 dark:hover:text-white hover:border-gray-400 dark:hover:border-dark-500 transition-all text-sm"
             >
               Cancel
             </button>
@@ -221,30 +221,30 @@ export function WalletsSection({ onSaved }: WalletsSectionProps) {
       {/* Address List */}
       {addresses.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-dark-400 mb-2">No saved addresses yet</p>
-          <p className="text-sm text-dark-500">Add withdrawal addresses for quick transfers</p>
+          <p className="text-gray-500 dark:text-dark-400 mb-2">No saved addresses yet</p>
+          <p className="text-sm text-gray-400 dark:text-dark-500">Add withdrawal addresses for quick transfers</p>
         </div>
       ) : (
         <div className="space-y-3">
           {addresses.map((addr) => (
             <div
               key={addr.id}
-              className="flex items-center justify-between p-4 bg-dark-800/50 rounded-xl border border-dark-700"
+              className="flex items-center justify-between p-4 bg-gray-50 dark:bg-dark-800/50 rounded-xl border border-gray-200 dark:border-dark-700"
             >
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
                   <SettingsBadge variant="info" text={addr.network} size="sm" />
-                  <span className="font-bold text-white text-sm">{addr.label}</span>
+                  <span className="font-bold text-gray-900 dark:text-white text-sm">{addr.label}</span>
                 </div>
-                <div className="font-mono text-xs text-dark-400 mb-1">{truncateAddress(addr.address)}</div>
-                <div className="text-xs text-dark-500">
+                <div className="font-mono text-xs text-gray-500 dark:text-dark-400 mb-1">{truncateAddress(addr.address)}</div>
+                <div className="text-xs text-gray-400 dark:text-dark-500">
                   Added {new Date(addr.createdAt).toLocaleDateString()}
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => handleDeleteClick(addr.id)}
-                className="ml-4 p-2 rounded-lg text-dark-500 hover:text-red-400 hover:bg-red-500/10 transition-all"
+                className="ml-4 p-2 rounded-lg text-gray-400 dark:text-dark-500 hover:text-red-400 hover:bg-red-500/10 transition-all"
                 aria-label="Delete address"
               >
                 <Trash2 className="w-4 h-4" />

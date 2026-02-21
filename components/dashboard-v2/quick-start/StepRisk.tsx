@@ -96,8 +96,8 @@ export function StepRisk({ selectedRisk, onSelect }: StepRiskProps) {
   return (
     <div className="space-y-5">
       <div className="text-center mb-4">
-        <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white mb-1">What is your risk profile?</h3>
-        <p className="text-sm text-gray-600 dark:text-dark-400">Choose how you want to allocate your capital</p>
+        <h3 className="text-base sm:text-2xl font-semibold text-gray-900 dark:text-white mb-1">What is your risk profile?</h3>
+        <p className="text-xs sm:text-sm text-gray-600 dark:text-dark-400">Choose how you want to allocate your capital</p>
       </div>
 
       <div className="grid grid-cols-1 gap-3">

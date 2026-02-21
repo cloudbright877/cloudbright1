@@ -14,8 +14,12 @@ import {
   ChevronRight,
   Link2,
   Inbox,
+  Copy,
+  Check,
 } from 'lucide-react';
 import { TokenUSDT } from '@web3icons/react';
+import { SettingsDrawer } from '@/components/settings/SettingsDrawer';
+import { Pagination } from '@/components/dashboard-v2/Pagination';
 import { getBalance, getUserTransactions } from '@/lib/balances';
 import type { BalanceTransaction } from '@/lib/balances';
 import { getCurrentUserId } from '@/lib/getCurrentUserId';
@@ -57,20 +61,47 @@ function mapBalanceTransaction(tx: BalanceTransaction): Transaction {
   };
 }
 
-const mockTransactions: Transaction[] = [
-  { id: '0xa3f8d2e91b4c6057ef12cd38', type: 'Replenishment', amount: 5000, currency: 'USDT', date: Date.now() - 3600000, status: 'completed' },
-  { id: '0x7b2e4f0a19d835c6e8f1a204', type: 'Deduction', amount: 2000, currency: 'USDT', date: Date.now() - 7200000, status: 'completed', relatedEntityId: 'AlphaBot Pro' },
-  { id: '0x1c9d5e3b7a0f428e6d3c8b19', type: 'Accrual', amount: 320.50, currency: 'USDT', date: Date.now() - 14400000, status: 'completed', relatedEntityId: 'AlphaBot Pro' },
-  { id: '0xe4a72f6c8d1b350a9e2f7d43', type: 'Withdrawal', amount: 1500, currency: 'USDT', date: Date.now() - 86400000, status: 'completed' },
-  { id: '0x5f0b8c3d2e6a914f7b8d1e56', type: 'Referral Bonus', amount: 75, currency: 'USDT', date: Date.now() - 172800000, status: 'completed' },
-  { id: '0x8d1e4a7c3f5b290d6e8c2a71', type: 'Turnover Bonus', amount: 150, currency: 'USDT', date: Date.now() - 259200000, status: 'completed' },
-  { id: '0x2b6f9d0e4c8a153b7d1e6f82', type: 'Replenishment', amount: 10000, currency: 'USDT', date: Date.now() - 345600000, status: 'completed' },
-  { id: '0xf3c7a1d5e9b2640f8c3d7e95', type: 'Deduction', amount: 3000, currency: 'USDT', date: Date.now() - 432000000, status: 'completed', relatedEntityId: 'GridMaster X' },
-  { id: '0x6e2d8b1f4a7c053e9d2b5c08', type: 'Accrual', amount: 580.25, currency: 'USDT', date: Date.now() - 518400000, status: 'completed', relatedEntityId: 'GridMaster X' },
-  { id: '0x9a4f1c7e3d6b825a0f4e8d13', type: 'Withdrawal', amount: 2500, currency: 'USDT', date: Date.now() - 604800000, status: 'pending' },
-  { id: '0xd5b3e8f2a1c7496d3e0b7a24', type: 'Replenishment', amount: 3000, currency: 'USDT', date: Date.now() - 691200000, status: 'completed' },
-  { id: '0x4c0a6d9e2f8b317c5a1d4e37', type: 'Referral Bonus', amount: 45, currency: 'USDT', date: Date.now() - 777600000, status: 'completed' },
-];
+function generateMockTransactions(count: number): Transaction[] {
+  const types: { type: string; amountRange: [number, number]; bot?: string }[] = [
+    { type: 'Replenishment', amountRange: [500, 15000] },
+    { type: 'Replenishment', amountRange: [100, 3000] },
+    { type: 'Withdrawal', amountRange: [200, 8000] },
+    { type: 'Deduction', amountRange: [100, 5000], bot: 'AlphaBot Pro' },
+    { type: 'Deduction', amountRange: [200, 4000], bot: 'GridMaster X' },
+    { type: 'Deduction', amountRange: [150, 3000], bot: 'ScalpHunter AI' },
+    { type: 'Accrual', amountRange: [50, 2500], bot: 'AlphaBot Pro' },
+    { type: 'Accrual', amountRange: [80, 1800], bot: 'GridMaster X' },
+    { type: 'Accrual', amountRange: [30, 1200], bot: 'ScalpHunter AI' },
+    { type: 'Referral Bonus', amountRange: [5, 250] },
+    { type: 'Turnover Bonus', amountRange: [25, 500] },
+  ];
+  const hexChars = '0123456789abcdef';
+  const txs: Transaction[] = [];
+  // Deterministic seed for consistent SSR/CSR
+  let seed = 42;
+  const nextRand = () => { seed = (seed * 16807 + 0) % 2147483647; return (seed - 1) / 2147483646; };
+
+  for (let i = 0; i < count; i++) {
+    const tpl = types[Math.floor(nextRand() * types.length)];
+    const amount = +(tpl.amountRange[0] + nextRand() * (tpl.amountRange[1] - tpl.amountRange[0])).toFixed(2);
+    let hex = '0x';
+    for (let h = 0; h < 24; h++) hex += hexChars[Math.floor(nextRand() * 16)];
+    const hoursAgo = i * 4 + Math.floor(nextRand() * 4);
+    const isPending = tpl.type === 'Withdrawal' && nextRand() < 0.15;
+    txs.push({
+      id: hex,
+      type: tpl.type,
+      amount,
+      currency: 'USDT',
+      date: Date.now() - hoursAgo * 3600000,
+      status: isPending ? 'pending' : 'completed',
+      ...(tpl.bot ? { relatedEntityId: tpl.bot } : {}),
+    });
+  }
+  return txs;
+}
+
+const mockTransactions: Transaction[] = generateMockTransactions(200);
 
 export default function WalletsPage() {
   const [balance, setBalance] = useState<{ available: number; frozen: number } | null>(null);
@@ -79,6 +110,8 @@ export default function WalletsPage() {
   const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
   const [activeTab, setActiveTab] = useState<TabType>('all');
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const [txCopied, setTxCopied] = useState(false);
   const transactionsPerPage = 10;
 
   useEffect(() => {
@@ -156,9 +189,15 @@ export default function WalletsPage() {
     }
   };
 
+  const handleCopyTxId = (txId: string) => {
+    navigator.clipboard.writeText(txId);
+    setTxCopied(true);
+    setTimeout(() => setTxCopied(false), 2000);
+  };
+
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-100 dark:bg-dark-950 text-gray-900 dark:text-white">
+      <div className="min-h-screen bg-gray-100 dark:bg-transparent text-gray-900 dark:text-white">
         <div className="max-w-[1800px] mx-auto p-4 lg:p-6">
           <div className="flex items-center justify-center min-h-[60vh]">
             <div className="text-center">
@@ -176,7 +215,7 @@ export default function WalletsPage() {
   const frozenBalance = balance ? balance.frozen : 0;
   const availablePercent = totalBalance > 0 ? (availableBalance / totalBalance) * 100 : 100;
 
-  const totalPages = Math.ceil(filteredTransactions.length / transactionsPerPage);
+
   const paginatedTransactions = filteredTransactions.slice(
     (currentPage - 1) * transactionsPerPage,
     currentPage * transactionsPerPage
@@ -198,7 +237,7 @@ export default function WalletsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-100 dark:bg-dark-950 text-gray-900 dark:text-white">
+    <div className="min-h-screen bg-gray-100 dark:bg-transparent text-gray-900 dark:text-white">
       <div className="max-w-[1800px] mx-auto p-4 lg:p-6">
         {/* Top Section: Left Actions + Right Stats */}
         <motion.div
@@ -209,47 +248,43 @@ export default function WalletsPage() {
         >
           {/* LEFT: Deposit/Withdraw */}
           <div className="lg:col-span-6">
-            <div className="grid grid-cols-2 gap-4 h-full">
-              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all hover:bg-[linear-gradient(135deg,rgba(139,92,246,0.2)_0%,rgba(139,92,246,0)_40%,rgba(139,92,246,0)_60%,rgba(139,92,246,0.2)_100%)]">
+            <div className="grid grid-cols-2 gap-2.5 sm:gap-4 h-full">
+              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all hover:bg-[linear-gradient(135deg,rgba(139,92,246,0.5)_0%,rgba(139,92,246,0.1)_40%,rgba(139,92,246,0.1)_60%,rgba(139,92,246,0.5)_100%)] dark:hover:bg-[linear-gradient(135deg,rgba(139,92,246,0.5)_0%,rgba(139,92,246,0.1)_40%,rgba(139,92,246,0.1)_60%,rgba(139,92,246,0.5)_100%)]">
                 <Link
                   href="/dashboard-v2/wallets/deposit"
-                  className="relative group overflow-hidden bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-5 block h-full"
+                  className="relative group overflow-hidden bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] py-5 px-3 sm:p-5 block h-full"
                 >
                   <div className="relative flex items-center justify-between h-full">
-                    <div className="flex items-center gap-3 sm:gap-4">
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <ArrowDownLeft className="w-5 h-5 sm:w-6 sm:h-6 text-primary-400" />
+                    <div className="flex items-center gap-2 sm:gap-4">
+                      <div className="w-9 h-9 sm:w-12 sm:h-12 bg-gray-200 dark:bg-dark-700/50 border border-gray-300 dark:border-dark-600 group-hover:bg-primary-500/20 group-hover:border-primary-500/30 rounded-xl flex items-center justify-center flex-shrink-0 transition-all">
+                        <ArrowDownLeft className="w-4 h-4 sm:w-6 sm:h-6 text-gray-700 dark:text-dark-300 group-hover:text-primary-400 transition-colors" />
                       </div>
                       <div>
-                        <h3 className="text-base sm:text-lg font-medium text-gray-900 dark:text-white">Deposit</h3>
-                        <p className="text-sm text-primary-400/70">Add funds</p>
+                        <h3 className="text-sm sm:text-lg font-medium text-gray-900 dark:text-white">Deposit</h3>
+                        <p className="text-xs sm:text-sm text-gray-600 dark:text-dark-400">Add funds</p>
                       </div>
                     </div>
-                    <div className="text-primary-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <ChevronRight className="w-6 h-6" />
-                    </div>
+                    <ChevronRight className="w-5 h-5 text-primary-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all flex-shrink-0" />
                   </div>
                 </Link>
               </div>
 
-              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all hover:bg-[linear-gradient(135deg,rgba(255,255,255,0.2)_0%,rgba(255,255,255,0)_40%,rgba(255,255,255,0)_60%,rgba(255,255,255,0.2)_100%)]">
+              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all hover:bg-[linear-gradient(135deg,rgba(139,92,246,0.5)_0%,rgba(139,92,246,0.1)_40%,rgba(139,92,246,0.1)_60%,rgba(139,92,246,0.5)_100%)] dark:hover:bg-[linear-gradient(135deg,rgba(139,92,246,0.5)_0%,rgba(139,92,246,0.1)_40%,rgba(139,92,246,0.1)_60%,rgba(139,92,246,0.5)_100%)]">
                 <Link
                   href="/dashboard-v2/wallets/withdraw"
-                  className="relative group overflow-hidden bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-5 block h-full"
+                  className="relative group overflow-hidden bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] py-5 px-3 sm:p-5 block h-full"
                 >
                   <div className="relative flex items-center justify-between h-full">
-                    <div className="flex items-center gap-3 sm:gap-4">
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-200 dark:bg-dark-700/50 border border-gray-300 dark:border-dark-600 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <ArrowUpLeft className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700 dark:text-dark-300" />
+                    <div className="flex items-center gap-2 sm:gap-4">
+                      <div className="w-9 h-9 sm:w-12 sm:h-12 bg-gray-200 dark:bg-dark-700/50 border border-gray-300 dark:border-dark-600 group-hover:bg-primary-500/20 group-hover:border-primary-500/30 rounded-xl flex items-center justify-center flex-shrink-0 transition-all">
+                        <ArrowUpLeft className="w-4 h-4 sm:w-6 sm:h-6 text-gray-700 dark:text-dark-300 group-hover:text-primary-400 transition-colors" />
                       </div>
                       <div>
-                        <h3 className="text-base sm:text-lg font-medium text-gray-900 dark:text-white">Withdraw</h3>
-                        <p className="text-sm text-gray-600 dark:text-dark-400">Transfer out</p>
+                        <h3 className="text-sm sm:text-lg font-medium text-gray-900 dark:text-white">Withdraw</h3>
+                        <p className="text-xs sm:text-sm text-gray-600 dark:text-dark-400">Transfer out</p>
                       </div>
                     </div>
-                    <div className="text-gray-600 dark:text-dark-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <ChevronRight className="w-6 h-6" />
-                    </div>
+                    <ChevronRight className="w-5 h-5 text-primary-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all flex-shrink-0" />
                   </div>
                 </Link>
               </div>
@@ -260,8 +295,8 @@ export default function WalletsPage() {
           <div className="lg:col-span-6 flex flex-col gap-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Total Balance */}
-              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                <div className="relative overflow-hidden bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-5">
+              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="relative overflow-hidden bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-5">
                   <div className="relative">
                     <div className="flex items-center gap-2 mb-2">
                       <div className="w-8 h-8 bg-primary-500/20 border border-primary-500/30 rounded-lg flex items-center justify-center">
@@ -277,8 +312,8 @@ export default function WalletsPage() {
               </div>
 
               {/* Available */}
-              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                <div className="relative overflow-hidden bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-5">
+              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="relative overflow-hidden bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-5">
                   <div className="relative">
                     <div className="flex items-center gap-2 mb-2">
                       <div className="w-8 h-8 bg-primary-500/20 border border-primary-500/30 rounded-lg flex items-center justify-center">
@@ -294,8 +329,8 @@ export default function WalletsPage() {
               </div>
 
               {/* In Copies */}
-              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                <div className="relative overflow-hidden bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-5">
+              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="relative overflow-hidden bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-5">
                   <div className="relative">
                     <div className="flex items-center gap-2 mb-2">
                       <div className="w-8 h-8 bg-primary-500/20 border border-primary-500/30 rounded-lg flex items-center justify-center">
@@ -312,8 +347,8 @@ export default function WalletsPage() {
             </div>
 
             {/* Funds Flow */}
-            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-            <div className="relative overflow-hidden bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-4">
+            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+            <div className="relative overflow-hidden bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-4">
               <div className="relative flex items-center justify-center gap-4 sm:gap-8">
                 <div>
                   <div className="text-xs text-gray-600 dark:text-dark-400 mb-0.5">Total In</div>
@@ -337,15 +372,15 @@ export default function WalletsPage() {
           transition={{ delay: 0.1 }}
         >
           {/* Tabs */}
-          <div className="flex items-center gap-0.5 rounded-lg bg-gray-50 dark:bg-dark-900/50 border border-gray-200 dark:border-dark-700 p-1.5 overflow-x-auto mb-4">
+          <div className="flex items-center justify-center sm:justify-start gap-1.5 flex-wrap p-1.5 mb-4">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-3 sm:px-6 py-2.5 sm:py-3 font-medium rounded-md text-sm transition-all whitespace-nowrap ${
+                className={`flex items-center justify-center gap-2 flex-1 sm:flex-initial px-3 sm:px-6 py-2.5 sm:py-3 font-medium rounded-lg sm:rounded-md text-sm transition-all whitespace-nowrap ${
                   activeTab === tab.id
-                    ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white shadow-lg shadow-primary-500/30'
-                    : 'text-gray-700 dark:text-dark-300 hover:text-gray-900 dark:hover:text-white'
+                    ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white sm:shadow-lg sm:shadow-primary-500/30'
+                    : 'bg-gray-200 dark:bg-dark-900/50 border border-gray-300 dark:border-dark-700 sm:bg-transparent sm:dark:bg-transparent sm:border-0 text-gray-700 dark:text-dark-300 hover:text-gray-900 dark:hover:text-white'
                 }`}
               >
                 {tab.icon}
@@ -362,8 +397,8 @@ export default function WalletsPage() {
           </div>
 
           {/* Table */}
-          <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-          <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] overflow-hidden">
+          <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+          <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] overflow-hidden">
             {filteredTransactions.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="w-full">
@@ -381,10 +416,11 @@ export default function WalletsPage() {
                     {paginatedTransactions.map((tx, index) => (
                       <motion.tr
                         key={tx.id}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
                         transition={{ delay: index * 0.03 }}
-                        className="border-b border-gray-200 dark:border-dark-800/50 hover:bg-gray-100 dark:hover:bg-dark-800/30 transition-colors"
+                        onClick={() => setSelectedTransaction(tx)}
+                        className="border-b border-gray-200 dark:border-dark-800/50 hover:bg-gray-100 dark:hover:bg-dark-800/30 transition-colors cursor-pointer"
                       >
                         <td className="py-4 px-3 sm:px-5">
                           <div className="text-sm text-gray-900 dark:text-white">{formatDate(tx.date)}</div>
@@ -412,7 +448,7 @@ export default function WalletsPage() {
                         <td className="py-4 px-3 sm:px-5 hidden lg:table-cell">
                           {(tx.type === 'Replenishment' || tx.type === 'Withdrawal') ? (
                             <button
-                              onClick={() => navigator.clipboard.writeText(tx.id)}
+                              onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(tx.id); }}
                               className="flex items-center gap-2 text-xs group/tx"
                               title="Copy TX ID"
                             >
@@ -433,31 +469,13 @@ export default function WalletsPage() {
                 </table>
 
                 {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-3 sm:px-5 py-4 border-t border-gray-200 dark:border-dark-700">
-                    <div className="text-sm text-gray-600 dark:text-dark-400">
-                      Page {currentPage} of {totalPages}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => setCurrentPage(currentPage - 1)}
-                        disabled={currentPage === 1}
-                        className="flex items-center gap-1.5 px-4 py-2 bg-gray-50 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 disabled:opacity-40 border border-gray-200 dark:border-dark-700 rounded-lg text-sm text-gray-900 dark:text-white font-medium transition-all disabled:cursor-not-allowed"
-                      >
-                        <ChevronLeft className="w-4 h-4" />
-                        Previous
-                      </button>
-                      <button
-                        onClick={() => setCurrentPage(currentPage + 1)}
-                        disabled={currentPage === totalPages}
-                        className="flex items-center gap-1.5 px-4 py-2 bg-gray-50 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 disabled:opacity-40 border border-gray-200 dark:border-dark-700 rounded-lg text-sm text-gray-900 dark:text-white font-medium transition-all disabled:cursor-not-allowed"
-                      >
-                        Next
-                        <ChevronRight className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                )}
+                <Pagination
+                  currentPage={currentPage}
+                  totalItems={filteredTransactions.length}
+                  itemsPerPage={transactionsPerPage}
+                  onPageChange={setCurrentPage}
+                  className="px-3 sm:px-5 py-4 border-t border-gray-200 dark:border-dark-700"
+                />
               </div>
             ) : (
               <div className="text-center py-16">
@@ -471,6 +489,110 @@ export default function WalletsPage() {
           </div>
           </div>
         </motion.div>
+
+        {/* Transaction Detail Drawer */}
+        <SettingsDrawer
+          isOpen={!!selectedTransaction}
+          onClose={() => setSelectedTransaction(null)}
+          title="Transaction Details"
+        >
+          {selectedTransaction && (
+            <div className="space-y-6">
+              {/* Amount hero */}
+              <div className="text-center py-4">
+                <div className={`text-3xl font-bold mb-1 ${
+                  selectedTransaction.type === 'Withdrawal' || selectedTransaction.type === 'Deduction'
+                    ? 'text-red-400' : 'text-green-400'
+                }`}>
+                  {selectedTransaction.type === 'Withdrawal' || selectedTransaction.type === 'Deduction' ? '-' : '+'}
+                  {formatNumber(selectedTransaction.amount)} USDT
+                </div>
+                <div className="text-sm text-gray-500 dark:text-dark-400">
+                  {formatDate(selectedTransaction.date)}
+                </div>
+              </div>
+
+              {/* Details list */}
+              <div className="space-y-4">
+                {/* Type */}
+                <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-dark-800">
+                  <span className="text-sm text-gray-500 dark:text-dark-400">Type</span>
+                  <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium border ${getTypeColor(selectedTransaction.type)}`}>
+                    {selectedTransaction.type}
+                  </span>
+                </div>
+
+                {/* Amount */}
+                <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-dark-800">
+                  <span className="text-sm text-gray-500 dark:text-dark-400">Amount</span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">{formatNumber(selectedTransaction.amount)}</span>
+                </div>
+
+                {/* Currency */}
+                <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-dark-800">
+                  <span className="text-sm text-gray-500 dark:text-dark-400">Currency</span>
+                  <div className="flex items-center gap-2">
+                    <TokenUSDT size={20} variant="branded" />
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">USDT</span>
+                  </div>
+                </div>
+
+                {/* Date */}
+                <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-dark-800">
+                  <span className="text-sm text-gray-500 dark:text-dark-400">Date</span>
+                  <span className="text-sm text-gray-900 dark:text-white">
+                    {new Date(selectedTransaction.date).toLocaleString('en-US', {
+                      weekday: 'short', month: 'short', day: 'numeric', year: 'numeric',
+                      hour: '2-digit', minute: '2-digit', second: '2-digit'
+                    })}
+                  </span>
+                </div>
+
+                {/* Status */}
+                <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-dark-800">
+                  <span className="text-sm text-gray-500 dark:text-dark-400">Status</span>
+                  <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium border capitalize ${getStatusColor(selectedTransaction.status)}`}>
+                    {selectedTransaction.status}
+                  </span>
+                </div>
+
+                {/* Details / TX ID */}
+                <div className="py-3">
+                  <span className="text-sm text-gray-500 dark:text-dark-400 mb-2 block">Details</span>
+                  {(selectedTransaction.type === 'Replenishment' || selectedTransaction.type === 'Withdrawal') ? (
+                    <div className="flex items-center gap-2 bg-gray-50 dark:bg-dark-900/50 rounded-lg p-3">
+                      <Link2 className="w-4 h-4 text-gray-400 dark:text-dark-500 flex-shrink-0" />
+                      <span className="font-mono text-xs text-primary-400 truncate flex-1">{selectedTransaction.id}</span>
+                      <button
+                        onClick={() => handleCopyTxId(selectedTransaction.id)}
+                        className="flex-shrink-0 w-8 h-8 rounded-lg bg-gray-200 dark:bg-dark-800 hover:bg-gray-300 dark:hover:bg-dark-700 flex items-center justify-center transition-colors"
+                        title="Copy TX ID"
+                      >
+                        {txCopied ? (
+                          <Check className="w-4 h-4 text-green-400" />
+                        ) : (
+                          <Copy className="w-4 h-4 text-gray-500 dark:text-dark-400" />
+                        )}
+                      </button>
+                    </div>
+                  ) : (selectedTransaction.type === 'Referral Bonus' || selectedTransaction.type === 'Turnover Bonus') ? (
+                    <div className="text-sm text-gray-600 dark:text-dark-400 bg-gray-50 dark:bg-dark-900/50 rounded-lg p-3">
+                      Internal system transaction
+                    </div>
+                  ) : selectedTransaction.relatedEntityId ? (
+                    <div className="text-sm text-gray-900 dark:text-white bg-gray-50 dark:bg-dark-900/50 rounded-lg p-3">
+                      Bot: {selectedTransaction.relatedEntityId}
+                    </div>
+                  ) : (
+                    <div className="text-sm text-gray-500 dark:text-dark-400 bg-gray-50 dark:bg-dark-900/50 rounded-lg p-3">
+                      No additional details
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </SettingsDrawer>
       </div>
     </div>
   );

@@ -13,7 +13,9 @@ import {
   Bot,
   TrendingUp,
   Trash2,
+  ArrowLeft,
 } from 'lucide-react';
+import Link from 'next/link';
 import GlassCard from '@/components/ui/GlassCard';
 
 interface Notification {
@@ -218,9 +220,17 @@ export default function NotificationsPage() {
   const unreadCount = notifications.filter((n: Notification) => !n.read).length;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-gray-100 dark:bg-transparent max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-        <div className="flex items-center justify-end gap-3">
+        <div className="flex items-center justify-between gap-3">
+          <Link
+            href="/dashboard-v2"
+            className="inline-flex items-center gap-2 text-gray-600 dark:text-dark-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span className="text-sm">Back</span>
+          </Link>
+          <div className="flex items-center gap-3">
           {notifications.length > 0 && (
             <button
               onClick={() => setShowDeleteModal(true)}
@@ -237,6 +247,7 @@ export default function NotificationsPage() {
               Mark all as read
             </button>
           )}
+          </div>
         </div>
       </motion.div>
 
@@ -252,8 +263,8 @@ export default function NotificationsPage() {
             {displayedNotifications.map((notification, index) => (
               <motion.div
                 key={notification.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
                 transition={{ delay: index * 0.05 }}
                 onClick={() => !notification.read && handleMarkAsRead(notification.id)}
                 className="cursor-pointer"
@@ -261,8 +272,8 @@ export default function NotificationsPage() {
                 <GlassCard>
                   <div
                     className={`
-                      relative flex items-start gap-4 p-4
-                      ${!notification.read ? `bg-gradient-to-r ${getNotificationColor()} border-l-4` : ''}
+                      relative flex items-start gap-4 p-4 rounded-2xl
+                      ${!notification.read ? 'border-l-4 border-l-primary-500 bg-primary-500/5 dark:bg-primary-500/10' : ''}
                     `}
                   >
                     {/* Icon */}
@@ -304,7 +315,7 @@ export default function NotificationsPage() {
               >
                 <button
                   onClick={handleLoadMore}
-                  className="px-8 py-3 bg-gray-50 dark:bg-dark-800 hover:bg-gray-200 dark:bg-dark-700 border-2 border-gray-200 dark:border-dark-700 hover:border-primary-500/50 rounded-xl text-gray-900 dark:text-white font-medium transition-all hover:scale-105"
+                  className="px-8 py-3 bg-gray-50 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 border-2 border-gray-200 dark:border-dark-700 hover:border-primary-500/50 rounded-xl text-gray-900 dark:text-white font-medium transition-all hover:scale-105"
                 >
                   Load More ({notifications.length - displayCount} remaining)
                 </button>
@@ -362,7 +373,7 @@ export default function NotificationsPage() {
                   <div className="flex gap-3">
                     <button
                       onClick={() => setShowDeleteModal(false)}
-                      className="flex-1 px-4 py-3 bg-gray-50 dark:bg-dark-800 hover:bg-gray-200 dark:bg-dark-700 border-2 border-gray-200 dark:border-dark-700 rounded-xl text-gray-900 dark:text-white font-medium transition-all hover:scale-105"
+                      className="flex-1 px-4 py-3 bg-gray-50 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 border-2 border-gray-200 dark:border-dark-700 rounded-xl text-gray-900 dark:text-white font-medium transition-all hover:scale-105"
                     >
                       Cancel
                     </button>

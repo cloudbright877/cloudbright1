@@ -5,9 +5,6 @@ import Link from 'next/link';
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
-  Shield,
-  AlertTriangle,
-  ArrowLeft,
   BarChart3,
   Users,
   Clock
@@ -107,26 +104,8 @@ function BotCompareContent() {
 
   const getRiskColor = (risk: string) => {
     if (risk === 'low') return 'text-green-400 bg-green-500/20 border-green-500/30';
-    if (risk === 'medium') return 'text-yellow-400 bg-yellow-500/20 border-yellow-500/30';
-    return 'text-red-400 bg-red-500/20 border-red-500/30';
-  };
-
-  const getRiskBadge = (risk: string) => {
-    if (risk === 'low') return (
-      <span className="flex items-center gap-1">
-        <AlertTriangle className="w-3 h-3" /> Low Risk
-      </span>
-    );
-    if (risk === 'medium') return (
-      <span className="flex items-center gap-1">
-        <AlertTriangle className="w-3 h-3" /> Medium Risk
-      </span>
-    );
-    return (
-      <span className="flex items-center gap-1">
-        <AlertTriangle className="w-3 h-3" /> High Risk
-      </span>
-    );
+    if (risk === 'medium') return 'text-blue-400 bg-blue-500/20 border-blue-500/30';
+    return 'text-orange-400 bg-orange-500/20 border-orange-500/30';
   };
 
   // Prepare radar chart data
@@ -149,54 +128,80 @@ function BotCompareContent() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 md:pb-6">
+    <div className="min-h-screen bg-gray-100 dark:bg-transparent p-4 lg:p-8 overflow-x-hidden">
+      <div className="max-w-7xl mx-auto min-w-0">
       {/* Bot Selectors */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-6 grid md:grid-cols-2 lg:grid-cols-3 gap-4"
+        className="mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
       >
         {selectedBots.map((bot, index) => (
           <motion.div
             key={index}
-            whileHover={{ scale: 1.02, y: -4 }}
-            className="relative rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] shadow-lg hover:shadow-2xl transition-all duration-300"
+            className="relative rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]"
           >
-            <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all duration-300">
-            {/* Glowing background on hover */}
-            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary-500/0 to-accent-500/0 hover:from-primary-500/5 hover:to-accent-500/5 transition-all duration-300 pointer-events-none" />
+            <div className="h-full bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 overflow-hidden">
 
-            <div className="relative z-10">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  {typeof bot.icon === 'string' && bot.icon.startsWith('/') ? (
-                    <img src={bot.icon} alt={bot.name} className="w-10 h-10 object-contain" />
-                  ) : (
-                    <div className="text-2xl">{bot.icon}</div>
-                  )}
-                  <div>
-                    <div className="font-medium text-gray-900 dark:text-white flex items-center gap-2">
-                      {bot.name}
-                      {bot.verified && <Shield className="w-4 h-4 text-accent-400" />}
-                    </div>
-                    <div className="text-xs text-gray-600 dark:text-dark-400">{bot.strategy}</div>
+            <div className="relative z-10 min-w-0">
+              {/* Row 1: Icon + Name/Strategy */}
+              <div className="flex items-center gap-3 mb-3">
+                {typeof bot.icon === 'string' && bot.icon.startsWith('/') ? (
+                  <img src={bot.icon} alt={bot.name} className="w-10 h-10 object-contain flex-shrink-0" />
+                ) : (
+                  <div className="text-2xl flex-shrink-0">{bot.icon}</div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium text-gray-900 dark:text-white truncate">
+                    {bot.name}
                   </div>
+                  <div className="text-xs text-gray-600 dark:text-dark-400 truncate">{bot.strategy}</div>
                 </div>
+                <span className={`flex-shrink-0 px-2 py-0.5 rounded text-[10px] font-medium border ${getRiskColor(bot.risk)}`}>
+                  {bot.risk === 'low' ? 'Low' : bot.risk === 'medium' ? 'Medium' : 'High'}
+                </span>
+              </div>
+
+              {/* Row 2: Stats */}
+              <div className="grid grid-cols-2 sm:flex sm:items-center sm:gap-4 gap-2 mb-3 py-2 border-t border-gray-100 dark:border-dark-700/50">
+                <div className="flex items-center justify-between sm:flex-col sm:text-center sm:flex-1 bg-gray-50 dark:bg-dark-900/30 sm:bg-transparent sm:dark:bg-transparent rounded-lg px-3 py-2 sm:p-0">
+                  <span className="text-xs text-gray-500 dark:text-dark-500 sm:text-[10px] sm:mb-1">30d</span>
+                  <span className={`text-sm font-medium ${getPercentColor(bot.stats.return30d)}`}>
+                    {formatPercent(bot.stats.return30d)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between sm:flex-col sm:text-center sm:flex-1 bg-gray-50 dark:bg-dark-900/30 sm:bg-transparent sm:dark:bg-transparent rounded-lg px-3 py-2 sm:p-0">
+                  <span className="text-xs text-gray-500 dark:text-dark-500 sm:text-[10px] sm:mb-1">1y</span>
+                  <span className={`text-sm font-medium ${getPercentColor(bot.stats.return1y)}`}>
+                    {formatPercent(bot.stats.return1y)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between sm:flex-col sm:text-center sm:flex-1 bg-gray-50 dark:bg-dark-900/30 sm:bg-transparent sm:dark:bg-transparent rounded-lg px-3 py-2 sm:p-0">
+                  <span className="text-xs text-gray-500 dark:text-dark-500 sm:text-[10px] sm:mb-1">Win Rate</span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">{bot.stats.winRate.toFixed(1)}%</span>
+                </div>
+                <div className="flex items-center justify-between sm:flex-col sm:text-center sm:flex-1 bg-gray-50 dark:bg-dark-900/30 sm:bg-transparent sm:dark:bg-transparent rounded-lg px-3 py-2 sm:p-0">
+                  <span className="text-xs text-gray-500 dark:text-dark-500 sm:text-[10px] sm:mb-1">Copiers</span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">
+                    {bot.stats.copiers > 999 ? `${(bot.stats.copiers / 1000).toFixed(1)}k` : bot.stats.copiers}
+                  </span>
+                </div>
+              </div>
+
+              {/* Row 3: Buttons */}
+              <div className="flex items-center gap-2">
                 <Link
                   href={`/dashboard-v2/bots/compare/select?slot=${index}&bots=${currentBotsParam}`}
-                  className="px-3 py-1 bg-primary-500/20 border border-primary-500/30 rounded-lg text-primary-400 text-sm font-semibold hover:bg-primary-500/30 hover:scale-105 transition-all"
+                  className="flex-1 px-3 py-1.5 bg-primary-500/20 border border-primary-500/30 rounded-lg text-primary-400 text-sm font-semibold hover:bg-primary-500/30 transition-all text-center"
                 >
                   Change
                 </Link>
-              </div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className={`px-3 py-1 rounded-lg text-xs font-medium border ${getRiskColor(bot.risk)}`}>
-                  {getRiskBadge(bot.risk)}
-                </span>
-                <span className="flex items-center gap-1 text-xs text-gray-600 dark:text-dark-400">
-                  <Users className="w-3 h-3" />
-                  {bot.stats.copiers.toLocaleString()} copiers
-                </span>
+                <Link
+                  href={`/dashboard-v2/bots/${bot.slug}`}
+                  className="flex-1 px-3 py-1.5 bg-gray-50 dark:bg-dark-900/50 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white text-sm font-semibold hover:border-primary-500/50 transition-all text-center"
+                >
+                  Details
+                </Link>
               </div>
             </div>
             </div>
@@ -224,17 +229,26 @@ function BotCompareContent() {
         transition={{ delay: 0.1 }}
         className="mb-6 rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]"
       >
-        <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6">
-        <h2 className="text-lg sm:text-xl font-medium text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+        <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 overflow-hidden">
+        <h2 className="text-base sm:text-xl font-medium text-gray-900 dark:text-white mb-4 flex items-center gap-2">
           <BarChart3 className="w-5 h-5 text-primary-400" />
-          Performance Comparison Overview
+          Performance Overview
         </h2>
-        <div className="h-[300px] sm:h-[400px] [&_*]:outline-none">
+        <div className="h-[280px] sm:h-[400px] [&_*]:outline-none overflow-hidden">
           <ResponsiveContainer width="100%" height="100%">
-            <RadarChart data={radarData}>
-              <PolarGrid stroke="#374151" />
-              <PolarAngleAxis dataKey="metric" tick={{ fill: '#9ca3af', fontSize: 12 }} />
-              <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fill: '#6b7280', fontSize: 10 }} />
+            <RadarChart data={radarData} cx="50%" cy="50%" outerRadius="65%">
+              <PolarGrid stroke="currentColor" className="text-gray-300 dark:text-gray-700" strokeOpacity={0.5} />
+              <PolarAngleAxis
+                dataKey="metric"
+                tick={{ fill: 'currentColor', fontSize: 10 }}
+                className="[&_text]:fill-gray-700 dark:[&_text]:fill-gray-400 sm:[&_text]:text-xs"
+              />
+              <PolarRadiusAxis
+                angle={90}
+                domain={[0, 100]}
+                tick={{ fill: 'currentColor', fontSize: 8 }}
+                className="[&_text]:fill-gray-600 dark:[&_text]:fill-gray-500"
+              />
               {selectedBots.map((bot, index) => (
                 <Radar
                   key={index}
@@ -247,9 +261,10 @@ function BotCompareContent() {
                 />
               ))}
               <Legend
-                wrapperStyle={{ paddingTop: '20px' }}
+                wrapperStyle={{ paddingTop: '12px', fontSize: '12px' }}
                 iconType="circle"
-                formatter={(value) => <span style={{ color: '#fff', fontSize: '14px' }}>{value}</span>}
+                iconSize={8}
+                formatter={(value) => <span className="text-gray-900 dark:text-white text-xs sm:text-sm">{value}</span>}
               />
             </RadarChart>
           </ResponsiveContainer>
@@ -272,8 +287,9 @@ function BotCompareContent() {
         <div className="p-3 sm:p-4 lg:p-6 border-b border-gray-200 dark:border-dark-700">
           <h2 className="text-lg sm:text-xl font-medium text-gray-900 dark:text-white mb-4">Performance Metrics</h2>
 
-          <div className="overflow-x-auto">
-            <table className="w-full">
+          {/* Desktop table */}
+          <div className="hidden sm:block overflow-x-auto -mx-3 sm:mx-0">
+            <table className="w-full min-w-0">
               <thead>
                 <tr className="border-b border-gray-200 dark:border-dark-700">
                   <th className="text-left py-3 px-4 text-sm font-medium text-gray-600 dark:text-dark-400">Metric</th>
@@ -285,84 +301,63 @@ function BotCompareContent() {
                         ) : (
                           <div className="text-lg">{bot.icon}</div>
                         )}
-                        {bot.name}
+                        <span className="truncate max-w-[120px]">{bot.name}</span>
                       </div>
                     </th>
                   ))}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-dark-700">
-                {/* 7d Return */}
                 <tr className="hover:bg-gray-50 dark:hover:bg-dark-800/50 transition-colors">
-                  <td className="py-3 px-4 text-sm text-gray-700 dark:text-dark-300">7-Day Return</td>
+                  <td className="py-3 px-4 text-sm text-gray-700 dark:text-dark-300">7d Return</td>
                   {selectedBots.map((bot) => (
                     <td key={bot.id} className="py-3 px-4 text-center">
-                      <span className={`font-medium ${getPercentColor(bot.stats.return7d)}`}>
-                        {formatPercent(bot.stats.return7d)}
-                      </span>
+                      <span className={`font-medium ${getPercentColor(bot.stats.return7d)}`}>{formatPercent(bot.stats.return7d)}</span>
                     </td>
                   ))}
                 </tr>
-
-                {/* 30d Return */}
                 <tr className="hover:bg-gray-50 dark:hover:bg-dark-800/50 transition-colors">
-                  <td className="py-3 px-4 text-sm text-gray-700 dark:text-dark-300">30-Day Return</td>
+                  <td className="py-3 px-4 text-sm text-gray-700 dark:text-dark-300">30d Return</td>
                   {selectedBots.map((bot) => (
                     <td key={bot.id} className="py-3 px-4 text-center">
-                      <span className={`font-medium ${getPercentColor(bot.stats.return30d)}`}>
-                        {formatPercent(bot.stats.return30d)}
-                      </span>
+                      <span className={`font-medium ${getPercentColor(bot.stats.return30d)}`}>{formatPercent(bot.stats.return30d)}</span>
                     </td>
                   ))}
                 </tr>
-
-                {/* 90d Return */}
                 <tr className="hover:bg-gray-50 dark:hover:bg-dark-800/50 transition-colors">
-                  <td className="py-3 px-4 text-sm text-gray-700 dark:text-dark-300">90-Day Return</td>
+                  <td className="py-3 px-4 text-sm text-gray-700 dark:text-dark-300">90d Return</td>
                   {selectedBots.map((bot) => (
                     <td key={bot.id} className="py-3 px-4 text-center">
-                      <span className={`font-medium ${getPercentColor(bot.stats.return90d)}`}>
-                        {formatPercent(bot.stats.return90d)}
-                      </span>
+                      <span className={`font-medium ${getPercentColor(bot.stats.return90d)}`}>{formatPercent(bot.stats.return90d)}</span>
                     </td>
                   ))}
                 </tr>
-
-                {/* 1y Return */}
                 <tr className="hover:bg-gray-50 dark:hover:bg-dark-800/50 transition-colors">
-                  <td className="py-3 px-4 text-sm text-gray-700 dark:text-dark-300">1-Year Return</td>
+                  <td className="py-3 px-4 text-sm text-gray-700 dark:text-dark-300">1y Return</td>
                   {selectedBots.map((bot) => (
                     <td key={bot.id} className="py-3 px-4 text-center">
-                      <span className={`font-medium ${getPercentColor(bot.stats.return1y)}`}>
-                        {formatPercent(bot.stats.return1y)}
-                      </span>
+                      <span className={`font-medium ${getPercentColor(bot.stats.return1y)}`}>{formatPercent(bot.stats.return1y)}</span>
                     </td>
                   ))}
                 </tr>
-
-                {/* Win Rate */}
                 <tr className="hover:bg-gray-50 dark:hover:bg-dark-800/50 transition-colors">
                   <td className="py-3 px-4 text-sm text-gray-700 dark:text-dark-300">Win Rate</td>
                   {selectedBots.map((bot) => (
                     <td key={bot.id} className="py-3 px-4 text-center">
-                      <span className="font-medium text-gray-900 dark:text-white">{bot.stats.winRate}%</span>
+                      <span className="font-medium text-gray-900 dark:text-white">{bot.stats.winRate.toFixed(1)}%</span>
                     </td>
                   ))}
                 </tr>
-
-                {/* Sharpe Ratio */}
                 <tr className="hover:bg-gray-50 dark:hover:bg-dark-800/50 transition-colors">
-                  <td className="py-3 px-4 text-sm text-gray-700 dark:text-dark-300">Sharpe Ratio</td>
+                  <td className="py-3 px-4 text-sm text-gray-700 dark:text-dark-300">Sharpe</td>
                   {selectedBots.map((bot) => (
                     <td key={bot.id} className="py-3 px-4 text-center">
                       <span className="font-medium text-gray-900 dark:text-white">{bot.stats.sharpeRatio}</span>
                     </td>
                   ))}
                 </tr>
-
-                {/* Capital Reservation */}
                 <tr className="hover:bg-gray-50 dark:hover:bg-dark-800/50 transition-colors">
-                  <td className="py-3 px-4 text-sm text-gray-700 dark:text-dark-300">Capital Reservation</td>
+                  <td className="py-3 px-4 text-sm text-gray-700 dark:text-dark-300">Reservation</td>
                   {selectedBots.map((bot) => (
                     <td key={bot.id} className="py-3 px-4 text-center">
                       <span className="font-medium text-gray-900 dark:text-white">{bot.stats.reservationDays || 30} days</span>
@@ -372,6 +367,38 @@ function BotCompareContent() {
               </tbody>
             </table>
           </div>
+
+          {/* Mobile: stacked cards per bot */}
+          <div className="sm:hidden space-y-4">
+            {selectedBots.map((bot) => (
+              <div key={bot.id} className="bg-gray-50 dark:bg-dark-900/30 rounded-xl p-3">
+                <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-200 dark:border-dark-700/50">
+                  {typeof bot.icon === 'string' && bot.icon.startsWith('/') ? (
+                    <img src={bot.icon} alt={bot.name} className="w-6 h-6 object-contain" />
+                  ) : (
+                    <div className="text-base">{bot.icon}</div>
+                  )}
+                  <span className="text-sm font-medium text-gray-900 dark:text-white truncate">{bot.name}</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { label: '7d Return', value: formatPercent(bot.stats.return7d), color: getPercentColor(bot.stats.return7d) },
+                    { label: '30d Return', value: formatPercent(bot.stats.return30d), color: getPercentColor(bot.stats.return30d) },
+                    { label: '90d Return', value: formatPercent(bot.stats.return90d), color: getPercentColor(bot.stats.return90d) },
+                    { label: '1y Return', value: formatPercent(bot.stats.return1y), color: getPercentColor(bot.stats.return1y) },
+                    { label: 'Win Rate', value: `${bot.stats.winRate.toFixed(1)}%`, color: 'text-gray-900 dark:text-white' },
+                    { label: 'Sharpe', value: `${bot.stats.sharpeRatio}`, color: 'text-gray-900 dark:text-white' },
+                    { label: 'Reservation', value: `${bot.stats.reservationDays || 30}d`, color: 'text-gray-900 dark:text-white' },
+                  ].map((metric) => (
+                    <div key={metric.label} className="flex items-center justify-between bg-white dark:bg-dark-800/50 rounded-lg px-3 py-2">
+                      <span className="text-xs text-gray-500 dark:text-dark-500">{metric.label}</span>
+                      <span className={`text-sm font-medium ${metric.color}`}>{metric.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Pricing & Requirements */}
@@ -380,10 +407,9 @@ function BotCompareContent() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {selectedBots.map((bot) => (
-              <motion.div
+              <div
                 key={bot.id}
-                whileHover={{ scale: 1.02, y: -4 }}
-                className="p-4 bg-gray-50 dark:bg-dark-900/50 rounded-xl border border-gray-200 dark:border-dark-700 hover:border-primary-500/50 transition-all shadow-lg hover:shadow-2xl"
+                className="p-4 bg-gray-50 dark:bg-dark-900/50 rounded-xl border border-gray-200 dark:border-dark-700 hover:border-primary-500/50 transition-all"
               >
                 <div className="text-center mb-4">
                   <div className="flex justify-center mb-2">
@@ -411,24 +437,25 @@ function BotCompareContent() {
                 </div>
                 <Link
                   href={`/dashboard-v2/bots/${bot.slug}`}
-                  className="mt-4 block w-full py-2 bg-gradient-to-r from-primary-500 to-accent-500 rounded-lg font-semibold text-white hover:shadow-lg hover:shadow-primary-500/30 transition-all text-center text-sm"
+                  className="mt-4 block w-full py-2 bg-gray-100 dark:bg-dark-800/50 border border-gray-200 dark:border-dark-700 rounded-lg font-semibold text-gray-900 dark:text-white hover:border-primary-500/50 transition-all text-center text-sm"
                 >
                   View Details
                 </Link>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
         </div>
       </motion.div>
 
+      </div>
     </div>
   );
 }
 
 export default function BotComparePage() {
   return (
-    <Suspense fallback={<div className="flex items-center justify-center min-h-[50vh] text-white">Loading...</div>}>
+    <Suspense fallback={<div className="flex items-center justify-center min-h-[50vh] text-gray-900 dark:text-white">Loading...</div>}>
       <BotCompareContent />
     </Suspense>
   );

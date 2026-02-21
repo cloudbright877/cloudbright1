@@ -7,7 +7,7 @@ import { KYCSection } from '@/components/settings/sections/KYCSection';
 
 export default function KYCSettingsPage() {
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-dark-950 p-4 lg:p-6">
+    <div className="min-h-screen bg-gray-100 dark:bg-transparent p-4 lg:p-6">
       <div className="max-w-3xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -16,7 +16,7 @@ export default function KYCSettingsPage() {
         >
           <Link
             href="/dashboard-v2/settings"
-            className="inline-flex items-center gap-2 text-dark-400 hover:text-white transition-colors mb-4"
+            className="inline-flex items-center gap-2 text-gray-600 dark:text-dark-400 hover:text-gray-900 dark:hover:text-white transition-colors mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
             <span className="text-sm">Back to Settings</span>
@@ -26,8 +26,8 @@ export default function KYCSettingsPage() {
               <FileCheck className="w-5 h-5 text-primary-400" />
             </div>
             <div>
-              <h1 className="text-2xl font-semibold text-white">Identity Verification</h1>
-              <p className="text-sm text-dark-400">Complete KYC to unlock withdrawals</p>
+              <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">Identity Verification</h1>
+              <p className="text-sm text-gray-600 dark:text-dark-400">Complete KYC to unlock withdrawals</p>
             </div>
           </div>
         </motion.div>
@@ -38,7 +38,7 @@ export default function KYCSettingsPage() {
           transition={{ delay: 0.1 }}
         >
           <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-            <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
+            <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
               <KYCSection />
             </div>
           </div>

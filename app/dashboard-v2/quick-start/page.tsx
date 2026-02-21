@@ -121,25 +121,25 @@ export default function QuickStartPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-100 dark:bg-dark-950 p-4 lg:p-6">
+    <div className="min-h-screen bg-gray-100 dark:bg-transparent p-3 sm:p-4 lg:p-6 pb-24">
       <div className="max-w-4xl mx-auto">
         {/* Progress Stepper */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.1 }}
-          className="mb-8"
+          className="mb-4 sm:mb-8"
         >
           <Stepper steps={STEPS} currentStep={step} />
         </motion.div>
 
         {/* Step Content */}
-        <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] mb-6">
+        <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] mb-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-4 sm:p-6 lg:p-8"
+            className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-4 sm:p-6 lg:p-8"
           >
           <AnimatePresence mode="wait">
             {step === 1 && (
@@ -184,6 +184,7 @@ export default function QuickStartPage() {
                 <StepResults
                   allocations={allocations}
                   totalAmount={investmentAmount || 0}
+                  userBalance={userBalance}
                   onConfirm={handleConfirm}
                   isProcessing={isProcessing}
                 />
@@ -194,29 +195,29 @@ export default function QuickStartPage() {
         </div>
 
         {/* Navigation */}
-        {step < 3 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="flex items-center justify-between"
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+          className="flex items-center justify-between"
+        >
+          <button
+            onClick={handleBack}
+            disabled={isProcessing}
+            className="px-6 py-3 rounded-lg bg-gray-50 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 text-gray-900 dark:text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
-            <button
-              onClick={handleBack}
-              disabled={isProcessing}
-              className="px-6 py-3 rounded-lg bg-gray-50 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 text-gray-900 dark:text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-            >
-              Back
-            </button>
+            Back
+          </button>
+          {step < 3 && (
             <button
               onClick={handleNext}
               disabled={!canProceed() || isProcessing}
-              className="px-6 py-3 rounded-lg bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 disabled:from-gray-300 disabled:to-gray-300 dark:disabled:from-dark-700 dark:disabled:to-dark-700 text-white font-medium disabled:cursor-not-allowed transition-all shadow-lg shadow-primary-500/30"
+              className="flex-1 sm:flex-initial px-8 py-3.5 rounded-xl bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 disabled:from-gray-300 disabled:to-gray-300 dark:disabled:from-dark-700 dark:disabled:to-dark-700 text-white font-semibold text-base disabled:cursor-not-allowed transition-all shadow-lg shadow-primary-500/30"
             >
               {step === 2 ? 'See Results' : 'Next'}
             </button>
-          </motion.div>
-        )}
+          )}
+        </motion.div>
       </div>
     </div>
   );

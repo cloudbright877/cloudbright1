@@ -75,6 +75,18 @@ export default function AnalyticsPage() {
   const [assetDistribution, setAssetDistribution] = useState<{ pair: string; percentage: number; color: string }[]>([]);
   const [botsComparison, setBotsComparison] = useState<{ name: string; profit: number }[]>([]);
 
+  const [isDark, setIsDark] = useState(true);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    setIsDark(root.classList.contains('dark'));
+    const observer = new MutationObserver(() => {
+      setIsDark(root.classList.contains('dark'));
+    });
+    observer.observe(root, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, []);
+
   useEffect(() => {
     // Load bots
     botManager.load();
@@ -318,12 +330,12 @@ export default function AnalyticsPage() {
       background: 'transparent',
       zoom: { enabled: false },
     },
-    theme: { mode: 'dark' },
+    theme: { mode: isDark ? 'dark' as const : 'light' as const },
     dataLabels: { enabled: false },
     stroke: {
       curve: 'smooth',
       width: 3,
-      colors: ['#6B7FFF'],
+      colors: ['#10B981'],
     },
     fill: {
       type: 'gradient',
@@ -331,14 +343,14 @@ export default function AnalyticsPage() {
         opacityFrom: 0.7,
         opacityTo: 0.1,
         colorStops: [
-          { offset: 0, color: '#8B5CF6', opacity: 0.7 },
-          { offset: 50, color: '#6B7FFF', opacity: 0.4 },
-          { offset: 100, color: '#6B7FFF', opacity: 0.1 }
+          { offset: 0, color: '#10B981', opacity: 0.7 },
+          { offset: 50, color: '#10B981', opacity: 0.4 },
+          { offset: 100, color: '#10B981', opacity: 0.1 }
         ]
       }
     },
     grid: {
-      borderColor: '#e5e7eb',
+      borderColor: isDark ? '#1e293b' : '#e5e7eb',
       strokeDashArray: 0,
       xaxis: { lines: { show: false } },
     },
@@ -451,7 +463,7 @@ export default function AnalyticsPage() {
       background: 'transparent',
       toolbar: { show: false },
     },
-    theme: { mode: 'dark' },
+    theme: { mode: isDark ? 'dark' as const : 'light' as const },
     plotOptions: {
       bar: {
         horizontal: false,
@@ -488,7 +500,7 @@ export default function AnalyticsPage() {
       show: false,
     },
     grid: {
-      borderColor: '#e5e7eb',
+      borderColor: isDark ? '#1e293b' : '#e5e7eb',
       strokeDashArray: 0,
       xaxis: { lines: { show: false } },
     },
@@ -506,7 +518,7 @@ export default function AnalyticsPage() {
   }];
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-dark-950 text-gray-900 dark:text-white">
+    <div className="min-h-screen bg-gray-100 dark:bg-transparent text-gray-900 dark:text-white">
       <div className="max-w-[1800px] mx-auto p-4 lg:p-6">
         {/* Navigation and Controls */}
         <motion.div
@@ -550,8 +562,8 @@ export default function AnalyticsPage() {
             animate={{ opacity: 1, scale: 1 }}
             className="lg:col-span-8"
           >
-            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-            <div className="h-full bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all group">
+            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+            <div className="h-full bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all group">
               <div className="flex items-center justify-between mb-4 lg:mb-6">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
@@ -587,25 +599,25 @@ export default function AnalyticsPage() {
               transition={{ delay: 0.1 }}
               className="flex-1"
             >
-              <div className="h-full rounded-xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-              <div className="h-full bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(0.75rem-1px)] p-5 hover:border-primary-500/50 transition-all flex items-center">
+              <div className="h-full rounded-xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="h-full bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(0.75rem-1px)] p-3 sm:p-5 hover:border-primary-500/50 transition-all flex items-center">
                 <div className="flex items-center justify-between w-full">
-                  <div className="flex items-center gap-3">
-                    <div className="w-11 h-11 bg-primary-500/20 border border-primary-500/30 rounded-lg flex items-center justify-center">
-                      <TrendingUp className="w-6 h-6 text-primary-400" />
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="w-9 h-9 sm:w-11 sm:h-11 bg-primary-500/20 border border-primary-500/30 rounded-lg flex items-center justify-center">
+                      <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-primary-400" />
                     </div>
                     <div>
-                      <div className="text-xs text-gray-600 dark:text-dark-400 mb-1">Total Profit</div>
-                      <div className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white">
+                      <div className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400 mb-0.5 sm:mb-1">Total Profit</div>
+                      <div className="text-base sm:text-2xl font-semibold text-gray-900 dark:text-white">
                         {totalProfit >= 0 ? '+' : ''}${totalProfit.toFixed(2)}
                       </div>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className={`text-base font-medium ${totalProfitPercent >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    <div className={`text-sm sm:text-base font-medium ${totalProfitPercent >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                       {totalProfitPercent >= 0 ? '+' : ''}{totalProfitPercent.toFixed(1)}%
                     </div>
-                    <div className="text-xs text-gray-600 dark:text-dark-400 mt-0.5">Invested: ${totalInvested.toLocaleString()}</div>
+                    <div className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400 mt-0.5">Invested: ${totalInvested.toLocaleString()}</div>
                   </div>
                 </div>
               </div>
@@ -618,21 +630,21 @@ export default function AnalyticsPage() {
               transition={{ delay: 0.15 }}
               className="flex-1"
             >
-              <div className="h-full rounded-xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-              <div className="h-full bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(0.75rem-1px)] p-5 hover:border-primary-500/50 transition-all flex items-center">
+              <div className="h-full rounded-xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="h-full bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(0.75rem-1px)] p-3 sm:p-5 hover:border-primary-500/50 transition-all flex items-center">
                 <div className="flex items-center justify-between w-full">
-                  <div className="flex items-center gap-3">
-                    <div className="w-11 h-11 bg-primary-500/20 border border-primary-500/30 rounded-lg flex items-center justify-center">
-                      <Activity className="w-6 h-6 text-primary-400" />
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="w-9 h-9 sm:w-11 sm:h-11 bg-primary-500/20 border border-primary-500/30 rounded-lg flex items-center justify-center">
+                      <Activity className="w-5 h-5 sm:w-6 sm:h-6 text-primary-400" />
                     </div>
                     <div>
-                      <div className="text-xs text-gray-600 dark:text-dark-400 mb-1">Win Rate</div>
-                      <div className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white">{winRate.toFixed(1)}%</div>
+                      <div className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400 mb-0.5 sm:mb-1">Win Rate</div>
+                      <div className="text-base sm:text-2xl font-semibold text-gray-900 dark:text-white">{winRate.toFixed(1)}%</div>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-base font-medium text-gray-900 dark:text-white">{totalTrades}</div>
-                    <div className="text-xs text-gray-600 dark:text-dark-400 mt-0.5">Total Trades</div>
+                    <div className="text-sm sm:text-base font-medium text-gray-900 dark:text-white">{totalTrades}</div>
+                    <div className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400 mt-0.5">Total Trades</div>
                   </div>
                 </div>
               </div>
@@ -645,23 +657,23 @@ export default function AnalyticsPage() {
               transition={{ delay: 0.25 }}
               className="flex-1"
             >
-              <div className="h-full rounded-xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-              <div className="h-full bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(0.75rem-1px)] p-5 hover:border-primary-500/50 transition-all flex items-center">
+              <div className="h-full rounded-xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="h-full bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(0.75rem-1px)] p-3 sm:p-5 hover:border-primary-500/50 transition-all flex items-center">
                 <div className="flex items-center justify-between w-full">
-                  <div className="flex items-center gap-3">
-                    <div className="w-11 h-11 bg-primary-500/20 border border-primary-500/30 rounded-lg flex items-center justify-center">
-                      <AlertTriangle className="w-6 h-6 text-primary-400" />
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="w-9 h-9 sm:w-11 sm:h-11 bg-primary-500/20 border border-primary-500/30 rounded-lg flex items-center justify-center">
+                      <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 text-primary-400" />
                     </div>
                     <div>
-                      <div className="text-xs text-gray-600 dark:text-dark-400 mb-1">Max Drawdown</div>
-                      <div className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white">{maxDrawdown.toFixed(1)}%</div>
+                      <div className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400 mb-0.5 sm:mb-1">Max Drawdown</div>
+                      <div className="text-base sm:text-2xl font-semibold text-gray-900 dark:text-white">{maxDrawdown.toFixed(1)}%</div>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-base font-medium text-red-400">
+                    <div className="text-sm sm:text-base font-medium text-red-400">
                       {Math.abs(maxDrawdown) < 5 ? 'Very safe' : Math.abs(maxDrawdown) < 10 ? 'Safe' : 'Moderate'}
                     </div>
-                    <div className="text-xs text-gray-600 dark:text-dark-400 mt-0.5">Peak to trough</div>
+                    <div className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400 mt-0.5">Peak to trough</div>
                   </div>
                 </div>
               </div>
@@ -680,8 +692,8 @@ export default function AnalyticsPage() {
             transition={{ delay: 0.3 }}
             className="lg:col-span-5"
           >
-            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-            <div className="h-full bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all flex flex-col">
+            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+            <div className="h-full bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all flex flex-col">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 bg-primary-500/20 border border-primary-500/30 rounded-lg flex items-center justify-center">
                   <PieChart className="w-5 h-5 text-primary-400" />
@@ -726,8 +738,8 @@ export default function AnalyticsPage() {
             transition={{ delay: 0.35 }}
             className="lg:col-span-7"
           >
-            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-            <div className="h-full bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all flex flex-col">
+            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+            <div className="h-full bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all flex flex-col">
               <div className="flex items-center gap-3 mb-4 lg:mb-5">
                 <div className="w-10 h-10 bg-primary-500/20 border border-primary-500/30 rounded-lg flex items-center justify-center">
                   <Activity className="w-5 h-5 text-primary-400" />
@@ -857,8 +869,8 @@ export default function AnalyticsPage() {
             transition={{ delay: 0.4 }}
             className="lg:col-span-6"
           >
-            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-            <div className="h-full bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-5 hover:border-green-500/50 transition-all flex flex-col">
+            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+            <div className="h-full bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-5 hover:border-green-500/50 transition-all flex flex-col">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-green-500/20 border border-green-500/30 rounded-lg flex items-center justify-center">
@@ -871,22 +883,22 @@ export default function AnalyticsPage() {
                 </div>
               </div>
 
-              <div className="space-y-2 flex-1">
+              <div className="space-y-1.5 sm:space-y-2 flex-1">
                 {bestTrades.length > 0 ? (
                   bestTrades.map((trade) => (
-                    <div key={trade.id} className="flex items-center justify-between p-3 bg-gray-100 dark:bg-dark-900/30 rounded-lg border border-gray-200 dark:border-dark-700/30 hover:border-green-500/30 transition-colors">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-green-500/20 border border-green-500/30 rounded-lg flex items-center justify-center">
-                          <ArrowUpRight className="w-4 h-4 text-green-400" />
+                    <div key={trade.id} className="flex items-center justify-between p-2 sm:p-3 bg-gray-100 dark:bg-dark-900/30 rounded-lg border border-gray-200 dark:border-dark-700/30 hover:border-green-500/30 transition-colors">
+                      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                        <div className="w-7 h-7 sm:w-8 sm:h-8 bg-green-500/20 border border-green-500/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <ArrowUpRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-400" />
                         </div>
-                        <div>
-                          <div className="text-sm font-normal text-gray-900 dark:text-white">{trade.pair}</div>
-                          <div className="text-xs text-gray-600 dark:text-dark-400">{trade.botName} • {trade.date}</div>
+                        <div className="min-w-0">
+                          <div className="text-xs sm:text-sm font-normal text-gray-900 dark:text-white">{trade.pair}</div>
+                          <div className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400 truncate">{trade.botName} • {trade.date}</div>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className="text-sm font-medium text-green-400">+${trade.pnl.toFixed(2)}</div>
-                        <div className="text-xs text-green-400/60">+{trade.pnlPercent.toFixed(2)}%</div>
+                      <div className="text-right flex-shrink-0 ml-2">
+                        <div className="text-xs sm:text-sm font-medium text-green-400">+${trade.pnl.toFixed(2)}</div>
+                        <div className="text-[10px] sm:text-xs text-green-400/60">+{trade.pnlPercent.toFixed(2)}%</div>
                       </div>
                     </div>
                   ))
@@ -905,8 +917,8 @@ export default function AnalyticsPage() {
             transition={{ delay: 0.45 }}
             className="lg:col-span-6"
           >
-            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-            <div className="h-full bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-5 hover:border-red-500/50 transition-all flex flex-col">
+            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+            <div className="h-full bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-5 hover:border-red-500/50 transition-all flex flex-col">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-red-500/20 border border-red-500/30 rounded-lg flex items-center justify-center">
@@ -919,22 +931,22 @@ export default function AnalyticsPage() {
                 </div>
               </div>
 
-              <div className="space-y-2 flex-1">
+              <div className="space-y-1.5 sm:space-y-2 flex-1">
                 {worstTrades.length > 0 ? (
                   worstTrades.map((trade) => (
-                    <div key={trade.id} className="flex items-center justify-between p-3 bg-gray-100 dark:bg-dark-900/30 rounded-lg border border-gray-200 dark:border-dark-700/30 hover:border-red-500/30 transition-colors">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-red-500/20 border border-red-500/30 rounded-lg flex items-center justify-center">
-                          <ArrowDownRight className="w-4 h-4 text-red-400" />
+                    <div key={trade.id} className="flex items-center justify-between p-2 sm:p-3 bg-gray-100 dark:bg-dark-900/30 rounded-lg border border-gray-200 dark:border-dark-700/30 hover:border-red-500/30 transition-colors">
+                      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                        <div className="w-7 h-7 sm:w-8 sm:h-8 bg-red-500/20 border border-red-500/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <ArrowDownRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-400" />
                         </div>
-                        <div>
-                          <div className="text-sm font-normal text-gray-900 dark:text-white">{trade.pair}</div>
-                          <div className="text-xs text-gray-600 dark:text-dark-400">{trade.botName} • {trade.date}</div>
+                        <div className="min-w-0">
+                          <div className="text-xs sm:text-sm font-normal text-gray-900 dark:text-white">{trade.pair}</div>
+                          <div className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400 truncate">{trade.botName} • {trade.date}</div>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className="text-sm font-medium text-red-400">${trade.pnl.toFixed(2)}</div>
-                        <div className="text-xs text-red-400/60">{trade.pnlPercent.toFixed(2)}%</div>
+                      <div className="text-right flex-shrink-0 ml-2">
+                        <div className="text-xs sm:text-sm font-medium text-red-400">${trade.pnl.toFixed(2)}</div>
+                        <div className="text-[10px] sm:text-xs text-red-400/60">{trade.pnlPercent.toFixed(2)}%</div>
                       </div>
                     </div>
                   ))
@@ -954,8 +966,8 @@ export default function AnalyticsPage() {
               transition={{ delay: 0.5 }}
               className="lg:col-span-12"
             >
-              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-              <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
+              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4 lg:mb-6">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">

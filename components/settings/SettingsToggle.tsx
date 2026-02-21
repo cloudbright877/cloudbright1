@@ -18,7 +18,7 @@ export function SettingsToggle({
   const trackClasses = `
     relative w-12 h-7 rounded-full transition-colors
     ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-    ${checked ? 'bg-primary-500' : 'bg-dark-600'}
+    ${checked ? 'bg-primary-500' : 'bg-gray-300 dark:bg-dark-600'}
   `.trim();
 
   const knobClasses = `
@@ -27,10 +27,10 @@ export function SettingsToggle({
   `.trim();
 
   return (
-    <div className="flex items-center justify-between p-4 bg-dark-900/50 rounded-xl border border-dark-700">
+    <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-dark-900/50 rounded-xl border border-gray-200 dark:border-dark-700">
       <div className="flex-1 mr-4">
-        <div className="font-semibold text-white text-sm">{label}</div>
-        {description && <div className="text-sm text-dark-400 mt-0.5">{description}</div>}
+        <div className="font-semibold text-gray-900 dark:text-white text-sm">{label}</div>
+        {description && <div className="text-sm text-gray-600 dark:text-dark-400 mt-0.5">{description}</div>}
       </div>
 
       <button

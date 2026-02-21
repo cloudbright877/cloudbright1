@@ -481,7 +481,7 @@ export default function DashboardPage() {
 
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-100 dark:bg-dark-950 text-gray-900 dark:text-white">
+    <div className="min-h-screen bg-gray-100 dark:bg-transparent text-gray-900 dark:text-white">
       <div className="max-w-[1800px] mx-auto p-4 lg:p-6">
         {/* Bento Grid Layout */}
         <div className="grid grid-cols-2 lg:grid-cols-12 lg:grid-rows-[auto_1fr] gap-3 lg:gap-6">
@@ -505,25 +505,28 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="col-span-1 lg:col-span-4"
+            className="col-span-1 lg:col-span-4 order-1 lg:order-none"
           >
-            <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.02)_25%,rgba(0,0,0,0.02)_75%,rgba(0,0,0,0.04)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all hover:bg-[linear-gradient(135deg,rgba(139,92,246,0.5)_0%,rgba(139,92,246,0.1)_40%,rgba(139,92,246,0.1)_60%,rgba(139,92,246,0.5)_100%)]">
+            <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.02)_25%,rgba(0,0,0,0.02)_75%,rgba(0,0,0,0.04)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all hover:bg-[linear-gradient(135deg,rgba(139,92,246,0.5)_0%,rgba(139,92,246,0.1)_40%,rgba(139,92,246,0.1)_60%,rgba(139,92,246,0.5)_100%)] dark:hover:bg-[linear-gradient(135deg,rgba(139,92,246,0.5)_0%,rgba(139,92,246,0.1)_40%,rgba(139,92,246,0.1)_60%,rgba(139,92,246,0.5)_100%)]">
               <button
                 onClick={() => router.push('/dashboard-v2/quick-start')}
                 className="w-full h-full relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-4 lg:p-5 transition-all group"
               >
                 <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500/10 rounded-full blur-3xl opacity-100 group-hover:scale-150 transition-transform" />
-                <div className="relative flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                  <div className="w-10 h-10 lg:w-12 lg:h-12 bg-primary-500/20 border border-primary-500/30 group-hover:bg-primary-500/30 group-hover:border-primary-500/50 rounded-xl flex items-center justify-center transition-all flex-shrink-0">
-                    <Zap className="w-5 h-5 lg:w-6 lg:h-6 text-primary-400 group-hover:text-primary-300 transition-colors" />
+                <div className="relative flex items-center gap-3">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 flex-1 min-w-0">
+                    <div className="w-10 h-10 lg:w-12 lg:h-12 bg-primary-500/20 border border-primary-500/30 group-hover:bg-primary-500/30 group-hover:border-primary-500/50 rounded-xl flex items-center justify-center transition-all flex-shrink-0">
+                      <Zap className="w-5 h-5 lg:w-6 lg:h-6 text-primary-400 group-hover:text-primary-300 transition-colors" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs text-gray-600 dark:text-dark-400 font-normal mb-0.5 text-left">Quick Start</p>
+                      <p className="text-lg lg:text-xl font-semibold text-gray-900 dark:text-white text-left">Start Now</p>
+                      <p className="text-xs text-primary-400 mt-0.5 text-left hidden sm:block">
+                        Get started in 3 clicks
+                      </p>
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-xs text-gray-600 dark:text-dark-400 font-normal mb-0.5 text-left">Quick Start</p>
-                    <p className="text-xl lg:text-3xl font-semibold text-gray-900 dark:text-white text-left">Start Now</p>
-                    <p className="text-xs text-primary-400 mt-0.5 text-left hidden sm:block">
-                      Get started in 3 clicks
-                    </p>
-                  </div>
+                  <ChevronRight className="w-5 h-5 text-primary-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all flex-shrink-0" />
                 </div>
               </button>
             </div>
@@ -534,25 +537,28 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 }}
-            className="col-span-1 lg:col-span-4"
+            className="col-span-1 lg:col-span-4 order-1 lg:order-none"
           >
-            <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.02)_25%,rgba(0,0,0,0.02)_75%,rgba(0,0,0,0.04)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all hover:bg-[linear-gradient(135deg,rgba(139,92,246,0.5)_0%,rgba(139,92,246,0.1)_40%,rgba(139,92,246,0.1)_60%,rgba(139,92,246,0.5)_100%)]">
+            <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.02)_25%,rgba(0,0,0,0.02)_75%,rgba(0,0,0,0.04)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all hover:bg-[linear-gradient(135deg,rgba(139,92,246,0.5)_0%,rgba(139,92,246,0.1)_40%,rgba(139,92,246,0.1)_60%,rgba(139,92,246,0.5)_100%)] dark:hover:bg-[linear-gradient(135deg,rgba(139,92,246,0.5)_0%,rgba(139,92,246,0.1)_40%,rgba(139,92,246,0.1)_60%,rgba(139,92,246,0.5)_100%)]">
               <button
                 onClick={() => router.push('/dashboard-v2/bots')}
                 className="w-full h-full relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-4 lg:p-5 transition-all group"
               >
                 <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500/10 rounded-full blur-3xl opacity-100 group-hover:scale-150 transition-transform" />
-                <div className="relative flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                  <div className="w-10 h-10 lg:w-12 lg:h-12 bg-primary-500/20 border border-primary-500/30 group-hover:bg-primary-500/30 group-hover:border-primary-500/50 rounded-xl flex items-center justify-center transition-all flex-shrink-0">
-                    <Plus className="w-5 h-5 lg:w-6 lg:h-6 text-primary-400 group-hover:text-primary-300 transition-colors" />
+                <div className="relative flex items-center gap-3">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 flex-1 min-w-0">
+                    <div className="w-10 h-10 lg:w-12 lg:h-12 bg-primary-500/20 border border-primary-500/30 group-hover:bg-primary-500/30 group-hover:border-primary-500/50 rounded-xl flex items-center justify-center transition-all flex-shrink-0">
+                      <Plus className="w-5 h-5 lg:w-6 lg:h-6 text-primary-400 group-hover:text-primary-300 transition-colors" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs text-gray-600 dark:text-dark-400 font-normal mb-0.5 text-left">Add Bot</p>
+                      <p className="text-lg lg:text-xl font-semibold text-gray-900 dark:text-white text-left">Explore</p>
+                      <p className="text-xs text-primary-400 mt-0.5 text-left hidden sm:block">
+                        Browse marketplace
+                      </p>
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-xs text-gray-600 dark:text-dark-400 font-normal mb-0.5 text-left">Add Bot</p>
-                    <p className="text-xl lg:text-3xl font-semibold text-gray-900 dark:text-white text-left">Explore</p>
-                    <p className="text-xs text-primary-400 mt-0.5 text-left hidden sm:block">
-                      Browse marketplace
-                    </p>
-                  </div>
+                  <ChevronRight className="w-5 h-5 text-primary-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all flex-shrink-0" />
                 </div>
               </button>
             </div>
@@ -563,7 +569,7 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="col-span-2 lg:col-span-8 h-full"
+            className="col-span-2 lg:col-span-8 h-full order-3 lg:order-none"
           >
             <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.02)_25%,rgba(0,0,0,0.02)_75%,rgba(0,0,0,0.04)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
             <div className="h-full bg-gradient-to-br from-gray-50 to-gray-100 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] overflow-hidden flex flex-col">
@@ -660,7 +666,7 @@ export default function DashboardPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 + index * 0.1 }}
-              className="col-span-2 lg:col-span-6"
+              className="col-span-2 lg:col-span-6 order-4 lg:order-none"
             >
               <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.02)_25%,rgba(0,0,0,0.02)_75%,rgba(0,0,0,0.04)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all">
               <div className="h-full relative bg-gradient-to-br from-gray-50 to-gray-100 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] overflow-hidden transition-all group">
@@ -676,21 +682,24 @@ export default function DashboardPage() {
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-sm sm:text-lg font-medium text-gray-900 dark:text-white sm:mb-2 truncate">{bot.name}</h3>
-                      {/* Mobile: text stats + badges centered */}
-                      <div className="flex sm:hidden flex-col items-center gap-1 mt-0.5">
-                        <div className="flex items-center gap-1.5 text-[11px]">
-                          <span className="text-gray-600 dark:text-dark-400">{bot.trades} trades</span>
-                          <span className="text-gray-600 dark:text-dark-400">{bot.openPositions.length} open</span>
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <h3 className="text-sm sm:text-lg font-medium text-gray-900 dark:text-white sm:mb-2 truncate">{bot.name}</h3>
+                          {/* Mobile: trades left-aligned */}
+                          <div className="flex sm:hidden items-center gap-1.5 text-[11px] mt-0.5">
+                            <span className="text-gray-600 dark:text-dark-400">{bot.trades} trades</span>
+                            <span className="text-gray-600 dark:text-dark-400">{bot.openPositions.length} open</span>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-1.5 text-[11px]">
+                        {/* Mobile: badges right of name */}
+                        <div className="flex sm:hidden flex-col items-end gap-1 flex-shrink-0">
                           {bot.status === 'active' && (
                             <div className="flex items-center gap-1 px-1.5 py-0.5 bg-green-500/20 border border-green-500/30 rounded-full">
                               <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
-                              <span className="font-medium text-green-400">Live</span>
+                              <span className="text-[11px] font-medium text-green-400">Live</span>
                             </div>
                           )}
-                          <div className={`px-1.5 py-0.5 rounded font-medium ${
+                          <div className={`px-1.5 py-0.5 rounded text-[11px] font-medium ${
                             bot.risk === 'low'
                               ? 'bg-green-500/20 text-green-400 border border-green-500/30'
                               : bot.risk === 'medium'
@@ -784,9 +793,9 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
-            className="col-span-2 lg:col-span-6"
+            className="col-span-2 lg:col-span-6 order-5 lg:order-none"
           >
-            <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.02)_25%,rgba(0,0,0,0.02)_75%,rgba(0,0,0,0.04)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all hover:bg-[linear-gradient(135deg,rgba(139,92,246,0.2)_0%,rgba(139,92,246,0)_40%,rgba(139,92,246,0)_60%,rgba(139,92,246,0.2)_100%)]">
+            <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.02)_25%,rgba(0,0,0,0.02)_75%,rgba(0,0,0,0.04)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all hover:bg-[linear-gradient(135deg,rgba(139,92,246,0.5)_0%,rgba(139,92,246,0.1)_40%,rgba(139,92,246,0.1)_60%,rgba(139,92,246,0.5)_100%)] dark:hover:bg-[linear-gradient(135deg,rgba(139,92,246,0.5)_0%,rgba(139,92,246,0.1)_40%,rgba(139,92,246,0.1)_60%,rgba(139,92,246,0.5)_100%)]">
               <Link
                 href="/dashboard-v2/leaderboard"
                 className="block h-full p-4 sm:p-6 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] transition-all group relative overflow-hidden"
@@ -812,9 +821,9 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.55 }}
-            className="col-span-2 lg:col-span-6"
+            className="col-span-2 lg:col-span-6 order-5 lg:order-none"
           >
-            <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.02)_25%,rgba(0,0,0,0.02)_75%,rgba(0,0,0,0.04)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all hover:bg-[linear-gradient(135deg,rgba(139,92,246,0.2)_0%,rgba(139,92,246,0)_40%,rgba(139,92,246,0)_60%,rgba(139,92,246,0.2)_100%)]">
+            <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.02)_25%,rgba(0,0,0,0.02)_75%,rgba(0,0,0,0.04)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all hover:bg-[linear-gradient(135deg,rgba(139,92,246,0.5)_0%,rgba(139,92,246,0.1)_40%,rgba(139,92,246,0.1)_60%,rgba(139,92,246,0.5)_100%)] dark:hover:bg-[linear-gradient(135deg,rgba(139,92,246,0.5)_0%,rgba(139,92,246,0.1)_40%,rgba(139,92,246,0.1)_60%,rgba(139,92,246,0.5)_100%)]">
               <Link
                 href="/dashboard-v2/analytics"
                 className="block h-full p-4 sm:p-6 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] transition-all group relative overflow-hidden"

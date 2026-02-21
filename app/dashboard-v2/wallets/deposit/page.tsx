@@ -140,7 +140,7 @@ export default function DepositPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-dark-950 text-gray-900 dark:text-white">
+    <div className="min-h-screen bg-gray-100 dark:bg-transparent text-gray-900 dark:text-white">
       <div className="max-w-[1400px] mx-auto p-4 lg:p-6">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -177,10 +177,10 @@ export default function DepositPage() {
           >
             {/* Step 1: Select Currency */}
             {step === 1 && (
-              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
+              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
                 <h2 className="text-2xl font-medium text-gray-900 dark:text-white mb-6">Select Currency</h2>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {CURRENCIES.map((currency, index) => (
                     <CurrencyCard
                       key={currency.symbol}
@@ -200,14 +200,14 @@ export default function DepositPage() {
 
             {/* Step 2: Select Network */}
             {step === 2 && selectedCurrency && (
-              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
+              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
                 <h2 className="text-2xl font-medium text-gray-900 dark:text-white mb-2">
                   Select Network for {selectedCurrency.name}
                 </h2>
                 <p className="text-gray-600 dark:text-dark-400 mb-6">Choose the blockchain network for deposit</p>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3 mb-6">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
                   {selectedCurrency.networks.map((network, index) => (
                     <motion.button
                       key={network.id}
@@ -268,14 +268,14 @@ export default function DepositPage() {
               <div className="grid lg:grid-cols-12 gap-6">
                 {/* Left Panel - QR & Address (col-span-5) */}
                 <div className="lg:col-span-5">
-                  <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] sticky top-6">
-                    <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
+                  <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] lg:sticky top-6">
+                    <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-4 sm:p-6">
                     <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-6">Deposit Address</h3>
 
                     {/* QR Code */}
                     <div className="flex flex-col items-center mb-6">
-                      <div className="bg-white rounded-2xl p-4 mb-4">
-                        <QRCodeSVG value={depositAddress} size={256} level="H" includeMargin={true} />
+                      <div className="bg-white rounded-2xl p-3 sm:p-4 mb-4 max-w-[240px] sm:max-w-none">
+                        <QRCodeSVG value={depositAddress} size={200} level="H" includeMargin={true} className="w-full h-auto max-w-[200px] sm:max-w-[256px]" />
                       </div>
                       <p className="text-sm text-dark-400">
                         Scan to deposit {selectedCurrency.symbol}
@@ -287,16 +287,16 @@ export default function DepositPage() {
                       <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-2">
                         Deposit Address
                       </label>
-                      <div className="flex gap-2">
+                      <div className="flex flex-col sm:flex-row gap-2">
                         <input
                           type="text"
                           value={depositAddress}
                           readOnly
-                          className="flex-1 px-4 py-3 bg-gray-100 dark:bg-dark-800 border-2 border-gray-200 dark:border-dark-700 rounded-xl text-gray-900 dark:text-white font-mono text-sm"
+                          className="flex-1 px-4 py-3 bg-gray-100 dark:bg-dark-800 border-2 border-gray-200 dark:border-dark-700 rounded-xl text-gray-900 dark:text-white font-mono text-xs sm:text-sm truncate"
                         />
                         <button
                           onClick={handleCopyAddress}
-                          className="px-4 py-3 bg-primary-500/10 hover:bg-primary-500/20 border-2 border-primary-500/30 rounded-xl text-primary-400 font-medium transition-colors whitespace-nowrap flex items-center gap-2"
+                          className="px-4 py-3 bg-primary-500/10 hover:bg-primary-500/20 border-2 border-primary-500/30 rounded-xl text-primary-400 font-medium transition-colors whitespace-nowrap flex items-center justify-center gap-2"
                         >
                           <Copy className="w-4 h-4" />
                           Copy
@@ -319,35 +319,35 @@ export default function DepositPage() {
                 {/* Right Panel - Details & Warnings (col-span-7) */}
                 <div className="lg:col-span-7 space-y-4">
                   {/* Network Info */}
-                  <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                    <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
-                    <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-4">Network Details</h3>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="p-4 bg-gray-100 dark:bg-dark-900/50 rounded-xl">
+                  <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                    <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-4 sm:p-6">
+                    <h3 className="text-lg sm:text-xl font-medium text-gray-900 dark:text-white mb-4">Network Details</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                      <div className="p-3 sm:p-4 bg-gray-100 dark:bg-dark-900/50 rounded-xl">
                         <div className="text-xs text-gray-600 dark:text-dark-400 mb-1">Currency</div>
                         <div className="flex items-center gap-2">
                           {(() => {
                             const Icon = TOKEN_ICONS[selectedCurrency.symbol];
                             return Icon ? <Icon size={24} variant="branded" /> : <span className="text-gray-900 dark:text-white font-medium">{selectedCurrency.symbol.charAt(0)}</span>;
                           })()}
-                          <div className="text-lg font-medium text-gray-900 dark:text-white">
+                          <div className="text-base sm:text-lg font-medium text-gray-900 dark:text-white">
                             {selectedCurrency.symbol}
                           </div>
                         </div>
                       </div>
-                      <div className="p-4 bg-gray-100 dark:bg-dark-900/50 rounded-xl">
+                      <div className="p-3 sm:p-4 bg-gray-100 dark:bg-dark-900/50 rounded-xl">
                         <div className="text-xs text-gray-600 dark:text-dark-400 mb-1">Network</div>
-                        <div className="text-lg font-medium text-gray-900 dark:text-white">
+                        <div className="text-base sm:text-lg font-medium text-gray-900 dark:text-white">
                           {selectedNetwork.networkName}
                         </div>
                       </div>
-                      <div className="p-4 bg-gray-100 dark:bg-dark-900/50 rounded-xl">
+                      <div className="p-3 sm:p-4 bg-gray-100 dark:bg-dark-900/50 rounded-xl">
                         <div className="text-xs text-gray-600 dark:text-dark-400 mb-1">Network Fee</div>
-                        <div className="text-lg font-medium text-gray-900 dark:text-white">{selectedNetwork.fee}</div>
+                        <div className="text-base sm:text-lg font-medium text-gray-900 dark:text-white">{selectedNetwork.fee}</div>
                       </div>
-                      <div className="p-4 bg-gray-100 dark:bg-dark-900/50 rounded-xl">
+                      <div className="p-3 sm:p-4 bg-gray-100 dark:bg-dark-900/50 rounded-xl">
                         <div className="text-xs text-gray-600 dark:text-dark-400 mb-1">Processing Time</div>
-                        <div className="text-lg font-medium text-gray-900 dark:text-white">3-10 min</div>
+                        <div className="text-base sm:text-lg font-medium text-gray-900 dark:text-white">3-10 min</div>
                       </div>
                     </div>
                     </div>
@@ -385,9 +385,9 @@ export default function DepositPage() {
                   </div>
 
                   {/* Instructions */}
-                  <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                    <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
-                    <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                    <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-4 sm:p-6">
+                    <h3 className="text-lg sm:text-xl font-medium text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                       <Clock className="w-5 h-5 text-primary-400" />
                       How to Deposit
                     </h3>

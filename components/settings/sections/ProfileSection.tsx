@@ -105,14 +105,14 @@ export function ProfileSection({ onClose, onSaved }: ProfileSectionProps) {
   };
 
   if (!initialData) {
-    return <div className="text-white">Loading...</div>;
+    return <div className="text-gray-900 dark:text-white">Loading...</div>;
   }
 
   return (
     <div>
       {/* Avatar Editor */}
       <div className="mb-6">
-        <label className="block text-sm font-medium text-dark-300 mb-3">Profile Picture</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-3">Profile Picture</label>
         <div className="flex items-center gap-4">
           <div className="w-20 h-20 bg-gradient-to-br from-primary-500 to-accent-500 rounded-full flex items-center justify-center text-3xl font-bold text-white">
             {formData.avatar}
@@ -125,7 +125,7 @@ export function ProfileSection({ onClose, onSaved }: ProfileSectionProps) {
             >
               Change Avatar
             </button>
-            <p className="text-xs text-dark-500 mt-2">JPG, PNG or GIF. Max 2MB</p>
+            <p className="text-xs text-gray-500 dark:text-dark-500 mt-2">JPG, PNG or GIF. Max 2MB</p>
           </div>
         </div>
       </div>

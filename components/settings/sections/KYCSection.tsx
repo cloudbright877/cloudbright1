@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Upload, CheckCircle, XCircle, Clock } from 'lucide-react';
 import Stepper from '@/components/ui/Stepper';
 import { SettingsFormInput } from '../SettingsFormInput';
-import { SettingsFormSelect, type SelectOption } from '../SettingsFormSelect';
+import { CountrySelect } from '../CountrySelect';
 import { useToast } from '@/context/ToastContext';
 import {
   getKYCData,
@@ -26,15 +26,6 @@ const KYC_STEPS = [
   { label: 'Review', description: 'Verification' },
 ];
 
-const COUNTRY_OPTIONS: SelectOption[] = [
-  { value: '', label: 'Select country' },
-  { value: 'United States', label: 'United States' },
-  { value: 'Russia', label: 'Russia' },
-  { value: 'United Kingdom', label: 'United Kingdom' },
-  { value: 'Germany', label: 'Germany' },
-  { value: 'Japan', label: 'Japan' },
-  { value: 'Other', label: 'Other' },
-];
 
 export function KYCSection({ onSaved }: KYCSectionProps) {
   const toast = useToast();
@@ -160,7 +151,7 @@ export function KYCSection({ onSaved }: KYCSectionProps) {
   };
 
   if (!kycData) {
-    return <div className="text-white">Loading...</div>;
+    return <div className="text-gray-900 dark:text-white">Loading...</div>;
   }
 
   const currentStep = getCurrentStep();
@@ -175,7 +166,7 @@ export function KYCSection({ onSaved }: KYCSectionProps) {
       {/* Step 1: Personal Info */}
       {(kycData.status === 'not_started' || kycData.status === 'personal_info') && (
         <div>
-          <h3 className="text-lg font-bold text-white mb-4">Personal Information</h3>
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Personal Information</h3>
 
           <div className="space-y-4 mb-6">
             <SettingsFormInput
@@ -200,11 +191,10 @@ export function KYCSection({ onSaved }: KYCSectionProps) {
               error={errors.dateOfBirth}
             />
 
-            <SettingsFormSelect
+            <CountrySelect
               label="Country"
               value={formData.country || ''}
               onChange={(value) => setFormData({ ...formData, country: value })}
-              options={COUNTRY_OPTIONS}
               error={errors.country}
             />
           </div>
@@ -222,9 +212,9 @@ export function KYCSection({ onSaved }: KYCSectionProps) {
       {/* Step 2: Documents */}
       {kycData.status === 'documents' && (
         <div>
-          <h3 className="text-lg font-bold text-white mb-4">Identity Document</h3>
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Identity Document</h3>
 
-          <p className="text-sm text-dark-400 mb-4">Select your document type</p>
+          <p className="text-sm text-gray-600 dark:text-dark-400 mb-4">Select your document type</p>
 
           <div className="grid grid-cols-3 gap-3 mb-6">
             {[
@@ -238,8 +228,8 @@ export function KYCSection({ onSaved }: KYCSectionProps) {
                 onClick={() => setFormData({ ...formData, documentType: doc.value as any })}
                 className={`px-4 py-3 rounded-xl font-semibold transition-all text-sm ${
                   formData.documentType === doc.value
-                    ? 'bg-primary-500/20 border-2 border-primary-500/30 text-white'
-                    : 'bg-dark-800/50 border-2 border-dark-700 text-dark-400 hover:text-white'
+                    ? 'bg-primary-500/20 border-2 border-primary-500/30 text-gray-900 dark:text-white'
+                    : 'bg-gray-50 dark:bg-dark-800/50 border-2 border-gray-200 dark:border-dark-700 text-gray-500 dark:text-dark-400 hover:text-gray-900 dark:hover:text-white'
                 }`}
               >
                 {doc.label}
@@ -253,11 +243,11 @@ export function KYCSection({ onSaved }: KYCSectionProps) {
                 <button
                   type="button"
                   onClick={handleMockUploadDocument}
-                  className="w-full border-2 border-dashed border-dark-600 rounded-xl p-8 text-center cursor-pointer hover:border-primary-500/50 transition-colors"
+                  className="w-full border-2 border-dashed border-gray-300 dark:border-dark-600 rounded-xl p-8 text-center cursor-pointer hover:border-primary-500/50 transition-colors"
                 >
-                  <Upload className="w-8 h-8 text-dark-500 mx-auto mb-2" />
-                  <p className="text-sm text-dark-300 mb-1">Click to upload or drag and drop</p>
-                  <p className="text-xs text-dark-500">PNG, JPG up to 10MB</p>
+                  <Upload className="w-8 h-8 text-gray-400 dark:text-dark-500 mx-auto mb-2" />
+                  <p className="text-sm text-gray-600 dark:text-dark-300 mb-1">Click to upload or drag and drop</p>
+                  <p className="text-xs text-gray-400 dark:text-dark-500">PNG, JPG up to 10MB</p>
                 </button>
               ) : (
                 <div className="border-2 border-green-500/50 rounded-xl p-8 text-center bg-green-500/10">
@@ -275,7 +265,7 @@ export function KYCSection({ onSaved }: KYCSectionProps) {
                 saveKYCData({ ...formData, status: 'personal_info' });
                 loadData();
               }}
-              className="px-4 py-3 border border-dark-600 rounded-xl text-dark-300 hover:text-white hover:border-dark-500 transition-all"
+              className="px-4 py-3 border border-gray-300 dark:border-dark-600 rounded-xl text-gray-600 dark:text-dark-300 hover:text-gray-900 dark:hover:text-white hover:border-gray-400 dark:hover:border-dark-500 transition-all"
             >
               Back
             </button>
@@ -293,20 +283,20 @@ export function KYCSection({ onSaved }: KYCSectionProps) {
       {/* Step 3: Selfie */}
       {kycData.status === 'selfie' && (
         <div>
-          <h3 className="text-lg font-bold text-white mb-4">Selfie Verification</h3>
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Selfie Verification</h3>
 
-          <p className="text-sm text-dark-400 mb-4">Take a selfie holding your document</p>
+          <p className="text-sm text-gray-600 dark:text-dark-400 mb-4">Take a selfie holding your document</p>
 
           <div className="mb-6">
             {!formData.selfieUploaded ? (
               <button
                 type="button"
                 onClick={handleMockUploadSelfie}
-                className="w-full border-2 border-dashed border-dark-600 rounded-xl p-8 text-center cursor-pointer hover:border-primary-500/50 transition-colors"
+                className="w-full border-2 border-dashed border-gray-300 dark:border-dark-600 rounded-xl p-8 text-center cursor-pointer hover:border-primary-500/50 transition-colors"
               >
-                <Upload className="w-8 h-8 text-dark-500 mx-auto mb-2" />
-                <p className="text-sm text-dark-300 mb-1">Click to upload or drag and drop</p>
-                <p className="text-xs text-dark-500">PNG, JPG up to 10MB</p>
+                <Upload className="w-8 h-8 text-gray-400 dark:text-dark-500 mx-auto mb-2" />
+                <p className="text-sm text-gray-600 dark:text-dark-300 mb-1">Click to upload or drag and drop</p>
+                <p className="text-xs text-gray-400 dark:text-dark-500">PNG, JPG up to 10MB</p>
               </button>
             ) : (
               <div className="border-2 border-green-500/50 rounded-xl p-8 text-center bg-green-500/10">
@@ -323,7 +313,7 @@ export function KYCSection({ onSaved }: KYCSectionProps) {
                 saveKYCData({ ...formData, status: 'documents' });
                 loadData();
               }}
-              className="px-4 py-3 border border-dark-600 rounded-xl text-dark-300 hover:text-white hover:border-dark-500 transition-all"
+              className="px-4 py-3 border border-gray-300 dark:border-dark-600 rounded-xl text-gray-600 dark:text-dark-300 hover:text-gray-900 dark:hover:text-white hover:border-gray-400 dark:hover:border-dark-500 transition-all"
             >
               Back
             </button>
@@ -342,8 +332,8 @@ export function KYCSection({ onSaved }: KYCSectionProps) {
       {kycData.status === 'under_review' && (
         <div className="text-center py-8">
           <Clock className="w-16 h-16 text-yellow-400 mx-auto mb-4" />
-          <h3 className="text-xl font-bold text-white mb-2">Your documents are being reviewed</h3>
-          <p className="text-sm text-dark-400 mb-6">This usually takes 1-3 business days</p>
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Your documents are being reviewed</h3>
+          <p className="text-sm text-gray-600 dark:text-dark-400 mb-6">This usually takes 1-3 business days</p>
           <button
             type="button"
             onClick={handleCheckStatus}
@@ -358,8 +348,8 @@ export function KYCSection({ onSaved }: KYCSectionProps) {
       {kycData.status === 'approved' && (
         <div className="text-center py-8">
           <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" />
-          <h3 className="text-xl font-bold text-white mb-2">Identity Verified</h3>
-          <p className="text-sm text-dark-400">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Identity Verified</h3>
+          <p className="text-sm text-gray-600 dark:text-dark-400">
             Verified on {kycData.reviewedAt ? new Date(kycData.reviewedAt).toLocaleDateString() : 'N/A'}
           </p>
         </div>
@@ -369,8 +359,8 @@ export function KYCSection({ onSaved }: KYCSectionProps) {
       {kycData.status === 'rejected' && (
         <div className="text-center py-8">
           <XCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-          <h3 className="text-xl font-bold text-white mb-2">Verification Rejected</h3>
-          <p className="text-sm text-dark-400 mb-6">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Verification Rejected</h3>
+          <p className="text-sm text-gray-600 dark:text-dark-400 mb-6">
             {kycData.rejectionReason || 'Document quality was insufficient'}
           </p>
           <button

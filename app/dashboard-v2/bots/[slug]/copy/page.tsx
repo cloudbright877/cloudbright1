@@ -59,6 +59,8 @@ export default function CopyBotPage() {
 
   const minInvestment = 50;
   const maxInvestment = userBalance;
+  const needsDeposit = userBalance < minInvestment;
+  const shortfall = minInvestment - userBalance;
 
   const handleAmountChange = (value: string) => {
     setInvestmentAmount(value);
@@ -118,9 +120,9 @@ export default function CopyBotPage() {
       case 'low':
         return <Shield className="w-5 h-5 text-green-400" />;
       case 'medium':
-        return <Zap className="w-5 h-5 text-yellow-400" />;
+        return <Zap className="w-5 h-5 text-blue-400" />;
       case 'high':
-        return <Target className="w-5 h-5 text-red-400" />;
+        return <Target className="w-5 h-5 text-orange-400" />;
     }
   };
 
@@ -130,22 +132,22 @@ export default function CopyBotPage() {
       case 'low':
         return 'bg-green-500/20 text-green-400 border-green-500/30';
       case 'medium':
-        return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
+        return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
       case 'high':
-        return 'bg-red-500/20 text-red-400 border-red-500/30';
+        return 'bg-orange-500/20 text-orange-400 border-orange-500/30';
     }
   };
 
   if (loading || !bot) {
     return (
-      <div className="min-h-screen bg-gray-100 dark:bg-dark-950 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-100 dark:bg-transparent flex items-center justify-center">
         <div className="text-white">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-dark-950 text-white">
+    <div className="min-h-screen bg-gray-100 dark:bg-transparent text-white">
       <div className="max-w-4xl mx-auto p-4 lg:p-6">
         {/* Back Link */}
         <Link
@@ -221,8 +223,16 @@ export default function CopyBotPage() {
               </div>
               {error && (
                 <div className="flex items-center gap-2 mt-2 text-xs text-red-400">
-                  <AlertCircle className="w-4 h-4" />
-                  {error}
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  <span>{error}</span>
+                  {error.includes('Insufficient') && (
+                    <Link
+                      href={`/dashboard-v2/wallets/deposit?returnTo=/dashboard-v2/bots/${slug}/copy`}
+                      className="ml-1 text-primary-400 hover:text-primary-300 underline underline-offset-2 whitespace-nowrap"
+                    >
+                      Deposit funds &rarr;
+                    </Link>
+                  )}
                 </div>
               )}
             </div>
@@ -243,12 +253,33 @@ export default function CopyBotPage() {
           </div>
 
           {/* Balance Info */}
-          <div className="flex items-center justify-between p-4 bg-dark-900/30 rounded-lg border border-dark-700 mb-6">
-            <span className="text-sm text-dark-400">Available Balance</span>
-            <span className="text-sm font-medium text-white">
-              ${userBalance.toLocaleString()}
-            </span>
-          </div>
+          {needsDeposit ? (
+            <div className="p-4 bg-gradient-to-r from-primary-500/10 to-accent-500/10 border border-primary-500/30 rounded-lg mb-6">
+              <div className="flex items-center gap-2 mb-2">
+                <DollarSign className="w-4 h-4 text-primary-400" />
+                <span className="text-sm font-semibold text-primary-400">
+                  {userBalance === 0 ? 'Fund your account to start' : `You need $${shortfall.toLocaleString()} more`}
+                </span>
+              </div>
+              <p className="text-xs text-dark-400 mb-3">
+                Minimum capital reservation is ${minInvestment}. Your balance: ${userBalance.toLocaleString()}.
+              </p>
+              <Link
+                href={`/dashboard-v2/wallets/deposit?returnTo=/dashboard-v2/bots/${slug}/copy`}
+                className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 rounded-lg text-sm font-semibold text-white transition-all shadow-lg shadow-primary-500/30"
+              >
+                <DollarSign className="w-4 h-4" />
+                Deposit Now
+              </Link>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between p-4 bg-dark-900/30 rounded-lg border border-dark-700 mb-6">
+              <span className="text-sm text-dark-400">Available Balance</span>
+              <span className="text-sm font-medium text-white">
+                ${userBalance.toLocaleString()}
+              </span>
+            </div>
+          )}
 
           {/* Info */}
           <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg mb-6">
@@ -318,23 +349,33 @@ export default function CopyBotPage() {
             >
               Cancel
             </button>
-            <button
-              onClick={handleConfirm}
-              disabled={!investmentAmount || !!error || isProcessing}
-              className="flex-1 px-4 py-3 bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 rounded-lg font-semibold text-white shadow-lg hover:shadow-primary-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:from-primary-500 disabled:hover:to-accent-500 flex items-center justify-center gap-2"
-            >
-              {isProcessing ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Creating Copy...
-                </>
-              ) : (
-                <>
-                  <Copy className="w-4 h-4" />
-                  Start Copying
-                </>
-              )}
-            </button>
+            {needsDeposit ? (
+              <Link
+                href={`/dashboard-v2/wallets/deposit?returnTo=/dashboard-v2/bots/${slug}/copy`}
+                className="flex-1 px-4 py-3 bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 rounded-lg font-semibold text-white shadow-lg shadow-primary-500/30 transition-all flex items-center justify-center gap-2"
+              >
+                <DollarSign className="w-4 h-4" />
+                Deposit &amp; Copy
+              </Link>
+            ) : (
+              <button
+                onClick={handleConfirm}
+                disabled={!investmentAmount || !!error || isProcessing}
+                className="flex-1 px-4 py-3 bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 rounded-lg font-semibold text-white shadow-lg hover:shadow-primary-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:from-primary-500 disabled:hover:to-accent-500 flex items-center justify-center gap-2"
+              >
+                {isProcessing ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Creating Copy...
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4" />
+                    Start Copying
+                  </>
+                )}
+              </button>
+            )}
           </div>
           </div>
         </motion.div>

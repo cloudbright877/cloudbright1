@@ -1,7 +1,7 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import {
   Users,
@@ -10,8 +10,7 @@ import {
   Activity,
   Copy,
   Search,
-  ChevronLeft,
-  ChevronRight,
+  ChevronDown,
   Gift,
   Trophy,
   Zap,
@@ -20,7 +19,28 @@ import {
   Share2,
   Shield,
   Crown,
+  Wallet,
+  FileText,
+  Presentation,
+  Download,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  Mail,
+  ChevronRight,
 } from 'lucide-react';
+import { SettingsDrawer } from '@/components/settings/SettingsDrawer';
+import {
+  TokenUSDT,
+  TokenBTC,
+  TokenETH,
+  TokenBNB,
+  TokenSOL,
+  TokenUSDC,
+  TokenTRX,
+  TokenMATIC,
+} from '@web3icons/react';
+import { Pagination } from '@/components/dashboard-v2/Pagination';
 import { getUser, getAllReferrals } from '@/lib/users';
 import { getTotalEarned, getUserCommissions } from '@/lib/referralCommissions';
 import { calculateTeamTurnover, getTurnoverStats, TURNOVER_LEVELS } from '@/lib/turnoverBonuses';
@@ -46,6 +66,17 @@ const cashflowLevels = [
   { level: 3, impact: '25%' },
   { level: 4, impact: '10%' },
   { level: 5, impact: '10%' },
+];
+
+const PAYOUT_CURRENCIES = [
+  { symbol: 'USDT', name: 'Tether', icon: TokenUSDT, network: 'TRC-20' },
+  { symbol: 'USDC', name: 'USD Coin', icon: TokenUSDC, network: 'ERC-20' },
+  { symbol: 'BTC', name: 'Bitcoin', icon: TokenBTC, network: 'Bitcoin' },
+  { symbol: 'ETH', name: 'Ethereum', icon: TokenETH, network: 'ERC-20' },
+  { symbol: 'BNB', name: 'BNB', icon: TokenBNB, network: 'BEP-20' },
+  { symbol: 'SOL', name: 'Solana', icon: TokenSOL, network: 'Solana' },
+  { symbol: 'TRX', name: 'Tron', icon: TokenTRX, network: 'TRC-20' },
+  { symbol: 'MATIC', name: 'Polygon', icon: TokenMATIC, network: 'Polygon' },
 ];
 
 /* ═══════════════════════════════════════════════════════════════
@@ -88,22 +119,240 @@ const timeAgo = (timestamp: number) => {
    PAGE
    ═══════════════════════════════════════════════════════════════ */
 
+const MOCK_REFERRAL_NAMES = [
+  'CryptoKing', 'LunaTrade', 'BlockWolf', 'SatoshiFan', 'EthMaxi',
+  'DeFiDegen', 'TokenHunter', 'ChainLink99', 'WhaleAlert', 'MoonShot',
+  'BullRunner', 'BearSlayer', 'HodlGang', 'StakeKing', 'YieldFarm',
+  'AlphaBot', 'GigaBrain', 'PumpItUp', 'DiamondHand', 'RektProof',
+];
+const MOCK_DEPOSITS = [500, 1200, 3500, 8000, 250, 15000, 750, 4200, 920, 6100, 2800, 180, 11000, 340, 7500, 1900, 5600, 430, 9200, 3100];
+const COMMISSION_RATES = [0.05, 0.03, 0.02, 0.01, 0.005];
+
+const MOCK_REFERRALS = MOCK_REFERRAL_NAMES.map((name, i) => {
+  const level = (i % 5) + 1;
+  const deposits = MOCK_DEPOSITS[i];
+  // Build parent relationships: L1 are direct referrals (no parent among mocks),
+  // L2+ point to the nearest preceding mock of the previous level
+  let parentId: string | null = null;
+  if (level >= 2) {
+    // Find the closest preceding mock with level-1
+    for (let j = i - 1; j >= 0; j--) {
+      if ((j % 5) + 1 === level - 1) {
+        parentId = `mock-ref-${j}`;
+        break;
+      }
+    }
+  }
+  return {
+    id: `mock-ref-${i}`,
+    username: name,
+    email: `${name.toLowerCase()}@mail.com`,
+    level,
+    deposits,
+    bonus: +(deposits * COMMISSION_RATES[level - 1]).toFixed(2),
+    status: (i % 3 === 0 ? 'inactive' : 'active') as 'active' | 'inactive',
+    date: Date.now() - (i + 1) * 86400000 * (2 + Math.floor(i / 3)),
+    parentId,
+  };
+});
+
+/* ═══════════════════════════════════════════════════════════════
+   BRANCH TREE
+   ═══════════════════════════════════════════════════════════════ */
+
+interface ReferralItem {
+  id: string;
+  username: string;
+  email: string;
+  level: number;
+  deposits: number;
+  bonus: number;
+  status: 'active' | 'inactive';
+  date: number;
+  parentId: string | null;
+}
+
+interface BranchNode {
+  user: ReferralItem;
+  children: BranchNode[];
+}
+
+interface BranchData {
+  root: BranchNode;
+  branchCount: number;
+  branchDeposits: number;
+  branchEarned: number;
+  branchTurnover: number;
+}
+
+const CASHFLOW_WEIGHTS = [1.0, 0.5, 0.25, 0.1, 0.1];
+
+function buildBranchTree(
+  referralId: string,
+  allReferrals: ReferralItem[],
+): BranchData {
+  const refMap = new Map(allReferrals.map((r) => [r.id, r]));
+  const rootUser = refMap.get(referralId);
+  if (!rootUser)
+    return {
+      root: { user: allReferrals[0], children: [] },
+      branchCount: 0,
+      branchDeposits: 0,
+      branchEarned: 0,
+      branchTurnover: 0,
+    };
+
+  let branchCount = 0;
+  let branchDeposits = 0;
+  let branchEarned = 0;
+  let branchTurnover = 0;
+
+  // Root user's own turnover contribution
+  const rootWeight = CASHFLOW_WEIGHTS[Math.min(rootUser.level - 1, 4)];
+  branchTurnover += rootUser.deposits * rootWeight;
+
+  function buildChildren(parentId: string): BranchNode[] {
+    const kids = allReferrals.filter((r) => r.parentId === parentId);
+    return kids.map((kid) => {
+      branchCount++;
+      branchDeposits += kid.deposits;
+      branchEarned += kid.bonus;
+      const weight = CASHFLOW_WEIGHTS[Math.min(kid.level - 1, 4)];
+      branchTurnover += kid.deposits * weight;
+      return {
+        user: kid,
+        children: buildChildren(kid.id),
+      };
+    });
+  }
+
+  const children = buildChildren(referralId);
+
+  return {
+    root: { user: rootUser, children },
+    branchCount,
+    branchDeposits,
+    branchEarned,
+    branchTurnover,
+  };
+}
+
+function BranchTreeNode({
+  node,
+  depth,
+  defaultExpanded,
+}: {
+  node: BranchNode;
+  depth: number;
+  defaultExpanded: boolean;
+}) {
+  const [expanded, setExpanded] = useState(defaultExpanded);
+  const hasChildren = node.children.length > 0;
+
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={() => hasChildren && setExpanded(!expanded)}
+        className={`w-full flex items-center gap-2 py-2 px-2 rounded-lg text-left transition-colors ${
+          hasChildren
+            ? 'hover:bg-gray-100 dark:hover:bg-dark-800 cursor-pointer'
+            : 'cursor-default'
+        }`}
+        style={{ paddingLeft: `${depth * 16 + 8}px` }}
+      >
+        {/* Expand/collapse icon */}
+        {hasChildren ? (
+          <ChevronRight
+            className={`w-3.5 h-3.5 text-gray-500 dark:text-dark-400 transition-transform flex-shrink-0 ${
+              expanded ? 'rotate-90' : ''
+            }`}
+          />
+        ) : (
+          <span className="w-3.5 flex-shrink-0" />
+        )}
+
+        {/* Mini avatar */}
+        <div
+          className="w-6 h-6 rounded-md flex items-center justify-center text-[10px] font-bold text-gray-900 dark:text-white flex-shrink-0"
+          style={getAvatarStyle(node.user.username)}
+        >
+          {node.user.username[0].toUpperCase()}
+        </div>
+
+        {/* Name + status */}
+        <div className="flex items-center gap-1.5 flex-1 min-w-0">
+          <span className="text-sm text-gray-900 dark:text-white truncate">
+            {node.user.username}
+          </span>
+          <span className="text-[10px] px-1 py-0.5 rounded bg-primary-500/15 text-primary-400 flex-shrink-0">
+            L{node.user.level}
+          </span>
+          <span
+            className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+              node.user.status === 'active' ? 'bg-green-400' : 'bg-gray-400 dark:bg-dark-500'
+            }`}
+          />
+        </div>
+
+        {/* Deposit amount */}
+        <span className="text-xs text-gray-600 dark:text-dark-400 flex-shrink-0">
+          ${formatNumber(node.user.deposits)}
+        </span>
+      </button>
+
+      {/* Children */}
+      <AnimatePresence>
+        {expanded && hasChildren && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="overflow-hidden"
+          >
+            {node.children.map((child) => (
+              <BranchTreeNode
+                key={child.user.id}
+                node={child}
+                depth={depth + 1}
+                defaultExpanded={false}
+              />
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 export default function ReferralsPage() {
   const [copied, setCopied] = useState(false);
   const [activeLevel, setActiveLevel] = useState<number | 'all'>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState<'deposits' | 'bonus' | 'date' | 'level' | 'username' | 'status'>('deposits');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+  const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
+  const sortDropdownRef = useRef<HTMLDivElement>(null);
   const referralsPerPage = 5;
 
   // Data state
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [totalEarned, setTotalEarned] = useState(0);
   const [teamTurnover, setTeamTurnover] = useState(0);
-  const [referrals, setReferrals] = useState<any[]>([]);
+  const [referrals, setReferrals] = useState<any[]>(MOCK_REFERRALS);
   const [recentCommissions, setRecentCommissions] = useState<any[]>([]);
   const [turnoverStats, setTurnoverStats] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [referrerUser, setReferrerUser] = useState<any>(null);
+  const [payoutCurrency, setPayoutCurrency] = useState('USDT');
+  const [currencyDropdownOpen, setCurrencyDropdownOpen] = useState(false);
+  const currencyDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Referral drawer state
+  const [selectedReferral, setSelectedReferral] = useState<ReferralItem | null>(null);
+  const [branchData, setBranchData] = useState<BranchData | null>(null);
 
   // Load data
   useEffect(() => {
@@ -159,13 +408,14 @@ export default function ReferralsPage() {
               level,
               deposits: totalDeposits,
               bonus: commissionsFromReferral,
-              status: isActive ? 'active' : 'inactive',
+              status: (isActive ? 'active' : 'inactive') as 'active' | 'inactive',
               date: referral.createdAt,
+              parentId: referral.referredBy,
             };
           }),
         );
 
-        setReferrals(referralsWithData);
+        setReferrals([...referralsWithData, ...MOCK_REFERRALS]);
 
         // Recent commissions
         const commissions = await getUserCommissions(currentUserId);
@@ -198,6 +448,28 @@ export default function ReferralsPage() {
     return () => clearInterval(interval);
   }, []);
 
+  // Payout currency from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('referralPayoutCurrency');
+    if (saved && PAYOUT_CURRENCIES.some((c) => c.symbol === saved)) {
+      setPayoutCurrency(saved);
+    }
+  }, []);
+
+  // Close dropdowns on outside click
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (currencyDropdownRef.current && !currencyDropdownRef.current.contains(e.target as Node)) {
+        setCurrencyDropdownOpen(false);
+      }
+      if (sortDropdownRef.current && !sortDropdownRef.current.contains(e.target as Node)) {
+        setSortDropdownOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   // Referral link
   const referralLink = currentUser
     ? `${typeof window !== 'undefined' ? window.location.origin : ''}/register?ref=${currentUser.referralCode}`
@@ -213,10 +485,23 @@ export default function ReferralsPage() {
 
   const claimedLevels = turnoverStats?.currentLevel || 0;
 
+  const selectedCurrency = PAYOUT_CURRENCIES.find((c) => c.symbol === payoutCurrency) || PAYOUT_CURRENCIES[0];
+
+  const handleCurrencySelect = (symbol: string) => {
+    setPayoutCurrency(symbol);
+    localStorage.setItem('referralPayoutCurrency', symbol);
+    setCurrencyDropdownOpen(false);
+  };
+
   const handleCopy = async () => {
     await navigator.clipboard.writeText(referralLink);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleReferralClick = (referral: ReferralItem) => {
+    setSelectedReferral(referral);
+    setBranchData(buildBranchTree(referral.id, referrals));
   };
 
   // Filter & search referrals
@@ -233,10 +518,19 @@ export default function ReferralsPage() {
       )
     : filteredReferrals;
 
-  const sortedReferrals = [...searchedReferrals].sort(
-    (a: any, b: any) => b.deposits - a.deposits,
-  );
-  const totalPages = Math.ceil(sortedReferrals.length / referralsPerPage);
+  const sortedReferrals = [...searchedReferrals].sort((a: any, b: any) => {
+    const dir = sortDir === 'asc' ? 1 : -1;
+    switch (sortBy) {
+      case 'deposits': return (a.deposits - b.deposits) * dir;
+      case 'bonus': return (a.bonus - b.bonus) * dir;
+      case 'date': return (a.date - b.date) * dir;
+      case 'level': return (a.level - b.level) * dir;
+      case 'username': return a.username.localeCompare(b.username) * dir;
+      case 'status': return a.status.localeCompare(b.status) * dir;
+      default: return 0;
+    }
+  });
+
   const paginatedReferrals = sortedReferrals.slice(
     (currentPage - 1) * referralsPerPage,
     currentPage * referralsPerPage,
@@ -251,7 +545,7 @@ export default function ReferralsPage() {
   // Loading
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-100 dark:bg-dark-950 p-4 lg:p-8">
+      <div className="min-h-screen bg-gray-100 dark:bg-transparent p-4 lg:p-8">
         <div className="max-w-7xl mx-auto flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
             <div className="w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
@@ -263,22 +557,22 @@ export default function ReferralsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-dark-950 p-4 lg:p-8">
+    <div className="min-h-screen bg-gray-100 dark:bg-transparent p-4 lg:p-8">
       <div className="max-w-7xl mx-auto">
         {/* ══════════ STATS CARDS ══════════ */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
           >
-            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all">
-              <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6 text-center">
-                <Users className="w-8 h-8 text-primary-400 mx-auto mb-2" />
-                <div className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white mb-1">
+            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all">
+              <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-6 text-center">
+                <Users className="w-5 h-5 sm:w-8 sm:h-8 text-primary-400 mx-auto mb-1 sm:mb-2" />
+                <div className="text-base sm:text-2xl font-semibold text-gray-900 dark:text-white mb-0.5 sm:mb-1">
                   {stats.totalReferrals}
                 </div>
-                <div className="text-sm text-gray-600 dark:text-dark-400">Total Referrals</div>
+                <div className="text-xs sm:text-sm text-gray-600 dark:text-dark-400">Total Referrals</div>
               </div>
             </div>
           </motion.div>
@@ -288,13 +582,13 @@ export default function ReferralsPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all">
-              <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6 text-center">
-                <Activity className="w-8 h-8 text-primary-400 mx-auto mb-2" />
-                <div className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white mb-1">
+            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all">
+              <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-6 text-center">
+                <Activity className="w-5 h-5 sm:w-8 sm:h-8 text-primary-400 mx-auto mb-1 sm:mb-2" />
+                <div className="text-base sm:text-2xl font-semibold text-gray-900 dark:text-white mb-0.5 sm:mb-1">
                   {stats.activeInvestors}
                 </div>
-                <div className="text-sm text-gray-600 dark:text-dark-400">Active Investors</div>
+                <div className="text-xs sm:text-sm text-gray-600 dark:text-dark-400">Active Investors</div>
               </div>
             </div>
           </motion.div>
@@ -304,13 +598,13 @@ export default function ReferralsPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
           >
-            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all">
-              <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6 text-center">
-                <DollarSign className="w-8 h-8 text-primary-400 mx-auto mb-2" />
-                <div className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white mb-1">
+            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all">
+              <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-6 text-center">
+                <DollarSign className="w-5 h-5 sm:w-8 sm:h-8 text-primary-400 mx-auto mb-1 sm:mb-2" />
+                <div className="text-base sm:text-2xl font-semibold text-gray-900 dark:text-white mb-0.5 sm:mb-1">
                   ${formatNumber(stats.totalEarned)}
                 </div>
-                <div className="text-sm text-gray-600 dark:text-dark-400">Total Earned</div>
+                <div className="text-xs sm:text-sm text-gray-600 dark:text-dark-400">Total Earned</div>
               </div>
             </div>
           </motion.div>
@@ -320,13 +614,13 @@ export default function ReferralsPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
           >
-            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all">
-              <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6 text-center">
-                <TrendingUp className="w-8 h-8 text-primary-400 mx-auto mb-2" />
-                <div className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white mb-1">
+            <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] transition-all">
+              <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-6 text-center">
+                <TrendingUp className="w-5 h-5 sm:w-8 sm:h-8 text-primary-400 mx-auto mb-1 sm:mb-2" />
+                <div className="text-base sm:text-2xl font-semibold text-gray-900 dark:text-white mb-0.5 sm:mb-1">
                   ${formatNumber(stats.turnover)}
                 </div>
-                <div className="text-sm text-gray-600 dark:text-dark-400">Team Turnover</div>
+                <div className="text-xs sm:text-sm text-gray-600 dark:text-dark-400">Team Turnover</div>
               </div>
             </div>
           </motion.div>
@@ -341,8 +635,8 @@ export default function ReferralsPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
             >
-              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-              <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
+              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
                 <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                   <Share2 className="w-5 h-5 text-primary-400" />
                   Your Referral Link
@@ -398,8 +692,8 @@ export default function ReferralsPage() {
             >
               <div className="grid md:grid-cols-2 gap-4">
                 {/* Commission Table */}
-                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6 transition-all">
+                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6 transition-all">
                   <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
                     Commission per Level
                   </h3>
@@ -447,7 +741,7 @@ export default function ReferralsPage() {
 
                 {/* Feature Cards */}
                 <div className="flex flex-col gap-4">
-                  <div className="flex-1 bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6 transition-all flex flex-col justify-center">
+                  <div className="flex-1 bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6 transition-all flex flex-col justify-center">
                     <Zap className="w-7 h-7 text-primary-400 mb-3" />
                     <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
                       Instant Payout
@@ -458,7 +752,7 @@ export default function ReferralsPage() {
                       minimum thresholds.
                     </p>
                   </div>
-                  <div className="flex-1 bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6 transition-all flex flex-col justify-center">
+                  <div className="flex-1 bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6 transition-all flex flex-col justify-center">
                     <Shield className="w-7 h-7 text-primary-400 mb-3" />
                     <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
                       No Deposit Required
@@ -479,37 +773,38 @@ export default function ReferralsPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7 }}
             >
-              <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+              <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-4 sm:p-6">
+                <h3 className="text-base sm:text-lg font-medium text-gray-900 dark:text-white mb-2">
                   Cashflow Levels Impact
                 </h3>
-                <p className="text-sm text-gray-600 dark:text-dark-400 mb-4">
+                <p className="text-xs sm:text-sm text-gray-600 dark:text-dark-400 mb-3 sm:mb-4">
                   Each level has a different impact on your cashflow turnover.
                   The closer the referral, the higher the contribution.
                 </p>
-                <div className="rounded-xl border border-primary-500/20 overflow-hidden overflow-x-auto">
+                <div className="rounded-xl border border-primary-500/20 overflow-hidden">
                   {/* Header */}
-                  <div className="grid grid-cols-5 bg-primary-500/[0.06] min-w-[360px]">
+                  <div className="grid grid-cols-5 bg-primary-500/[0.06]">
                     {cashflowLevels.map((l) => (
                       <div
                         key={l.level}
-                        className="px-3 py-3 text-center border-r border-primary-500/10 last:border-r-0"
+                        className="px-1 sm:px-3 py-2 sm:py-3 text-center border-r border-primary-500/10 last:border-r-0"
                       >
-                        <span className="text-xs text-gray-600 dark:text-dark-400 font-medium">
-                          Level {l.level}
+                        <span className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400 font-medium">
+                          <span className="sm:hidden">L{l.level}</span>
+                          <span className="hidden sm:inline">Level {l.level}</span>
                         </span>
                       </div>
                     ))}
                   </div>
                   {/* Impact row */}
-                  <div className="grid grid-cols-5 border-t border-primary-500/10 min-w-[360px]">
+                  <div className="grid grid-cols-5 border-t border-primary-500/10">
                     {cashflowLevels.map((l, i) => (
                       <div
                         key={l.level}
-                        className="px-3 py-5 text-center border-r border-primary-500/10 last:border-r-0"
+                        className="px-1 sm:px-3 py-3 sm:py-5 text-center border-r border-primary-500/10 last:border-r-0"
                       >
                         <span
-                          className={`text-xl sm:text-2xl font-medium ${
+                          className={`text-base sm:text-2xl font-medium ${
                             i === 0 ? 'text-primary-400' : 'text-gray-900 dark:text-white'
                           }`}
                         >
@@ -519,13 +814,13 @@ export default function ReferralsPage() {
                     ))}
                   </div>
                   {/* Label row */}
-                  <div className="grid grid-cols-5 border-t border-primary-500/10 min-w-[360px]">
+                  <div className="grid grid-cols-5 border-t border-primary-500/10">
                     {cashflowLevels.map((l) => (
                       <div
                         key={l.level}
-                        className="px-3 py-2 text-center border-r border-primary-500/10 last:border-r-0"
+                        className="px-1 sm:px-3 py-1.5 sm:py-2 text-center border-r border-primary-500/10 last:border-r-0"
                       >
-                        <span className="text-[10px] text-gray-500 dark:text-dark-500 uppercase tracking-wider">
+                        <span className="text-[9px] sm:text-[10px] text-gray-500 dark:text-dark-500 uppercase tracking-wider">
                           Impact
                         </span>
                       </div>
@@ -556,44 +851,42 @@ export default function ReferralsPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8 }}
             >
-              <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
+              <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
                 <div className="mb-6">
-                  <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-                    <h3 className="text-xl font-medium text-gray-900 dark:text-white flex items-center gap-2">
-                      <Users className="w-5 h-5 text-primary-400" />
-                      Your Referrals
-                    </h3>
-                    <div className="flex gap-2 flex-wrap">
+                  <h3 className="text-xl font-medium text-gray-900 dark:text-white flex items-center gap-2 mb-4">
+                    <Users className="w-5 h-5 text-primary-400" />
+                    Your Referrals
+                  </h3>
+                  <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-4">
+                    <button
+                      onClick={() => {
+                        setActiveLevel('all');
+                        setCurrentPage(1);
+                      }}
+                      className={`px-2 py-3 sm:py-1.5 rounded-lg text-sm font-medium transition-all ${
+                        activeLevel === 'all'
+                          ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white'
+                          : 'bg-gray-100 dark:bg-dark-900/50 text-gray-700 dark:text-dark-300 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-dark-700'
+                      }`}
+                    >
+                      All ({referrals.length})
+                    </button>
+                    {levelCounts.map((lc) => (
                       <button
+                        key={lc.level}
                         onClick={() => {
-                          setActiveLevel('all');
+                          setActiveLevel(lc.level);
                           setCurrentPage(1);
                         }}
-                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                          activeLevel === 'all'
-                            ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white'
+                        className={`px-2 py-3 sm:py-1.5 rounded-lg text-sm font-medium transition-all ${
+                          activeLevel === lc.level
+                            ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30'
                             : 'bg-gray-100 dark:bg-dark-900/50 text-gray-700 dark:text-dark-300 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-dark-700'
                         }`}
                       >
-                        All ({referrals.length})
+                        L{lc.level} ({lc.count})
                       </button>
-                      {levelCounts.map((lc) => (
-                        <button
-                          key={lc.level}
-                          onClick={() => {
-                            setActiveLevel(lc.level);
-                            setCurrentPage(1);
-                          }}
-                          className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                            activeLevel === lc.level
-                              ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30'
-                              : 'bg-gray-100 dark:bg-dark-900/50 text-gray-700 dark:text-dark-300 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-dark-700'
-                          }`}
-                        >
-                          L{lc.level} ({lc.count})
-                        </button>
-                      ))}
-                    </div>
+                    ))}
                   </div>
 
                   {/* Search */}
@@ -618,6 +911,92 @@ export default function ReferralsPage() {
                       </button>
                     )}
                   </div>
+
+                  {/* Sort controls */}
+                  <div className="flex items-center gap-3 mt-3">
+                    {/* Sort by dropdown */}
+                    <div ref={sortDropdownRef} className="relative flex-1 sm:flex-none">
+                      <button
+                        onClick={() => setSortDropdownOpen(prev => !prev)}
+                        className="w-full sm:w-auto flex items-center justify-between gap-2 px-4 py-2 bg-gray-100 dark:bg-dark-900/50 border border-gray-200 dark:border-dark-700 rounded-lg text-sm text-gray-900 dark:text-white hover:border-gray-300 dark:hover:border-dark-600 transition-colors"
+                      >
+                        <ArrowUpDown className="w-4 h-4 text-gray-600 dark:text-dark-400 flex-shrink-0" />
+                        <span className="flex-1 text-left">
+                          {{
+                            deposits: 'Deposits',
+                            bonus: 'Bonus Earned',
+                            date: 'Join Date',
+                            level: 'Level',
+                            username: 'Username',
+                            status: 'Status',
+                          }[sortBy]}
+                        </span>
+                        <ChevronDown className={`w-4 h-4 text-gray-600 dark:text-dark-400 transition-transform ${sortDropdownOpen ? 'rotate-180' : ''}`} />
+                      </button>
+
+                      <AnimatePresence>
+                        {sortDropdownOpen && (
+                          <motion.div
+                            initial={{ opacity: 0, y: 4 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 4 }}
+                            className="absolute z-[9999] top-full left-0 right-0 sm:right-auto sm:min-w-[200px] mt-1 bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg shadow-xl overflow-hidden"
+                          >
+                            {([
+                              { key: 'deposits', label: 'Deposits', icon: DollarSign },
+                              { key: 'bonus', label: 'Bonus Earned', icon: Gift },
+                              { key: 'date', label: 'Join Date', icon: Clock },
+                              { key: 'level', label: 'Level', icon: Users },
+                              { key: 'username', label: 'Username', icon: Search },
+                              { key: 'status', label: 'Status', icon: Activity },
+                            ] as const).map((option) => {
+                              const isSelected = sortBy === option.key;
+                              const Icon = option.icon;
+                              return (
+                                <button
+                                  key={option.key}
+                                  onClick={() => {
+                                    setSortBy(option.key);
+                                    setCurrentPage(1);
+                                    setSortDropdownOpen(false);
+                                  }}
+                                  className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${
+                                    isSelected
+                                      ? 'bg-primary-500/20 text-primary-400'
+                                      : 'text-gray-700 dark:text-dark-300 hover:bg-gray-100 dark:hover:bg-dark-800 hover:text-gray-900 dark:hover:text-white'
+                                  }`}
+                                >
+                                  <Icon className="w-4 h-4 flex-shrink-0" />
+                                  <span className="flex-1 text-left">{option.label}</span>
+                                </button>
+                              );
+                            })}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+
+                    {/* Direction toggle */}
+                    <button
+                      onClick={() => {
+                        setSortDir(prev => prev === 'asc' ? 'desc' : 'asc');
+                        setCurrentPage(1);
+                      }}
+                      className="flex items-center gap-1.5 px-3 py-2.5 bg-gray-50 dark:bg-dark-900/50 border border-gray-200 dark:border-dark-700 rounded-xl text-sm text-gray-700 dark:text-dark-300 hover:border-primary-500/50 transition-all"
+                    >
+                      {sortDir === 'desc' ? (
+                        <ArrowDown className="w-4 h-4 text-primary-400" />
+                      ) : (
+                        <ArrowUp className="w-4 h-4 text-primary-400" />
+                      )}
+                      <span className="hidden sm:inline">{sortDir === 'desc' ? 'High to Low' : 'Low to High'}</span>
+                    </button>
+
+                    {/* Result count */}
+                    <span className="ml-auto text-xs text-gray-500 dark:text-dark-500 hidden sm:block">
+                      {sortedReferrals.length} referral{sortedReferrals.length !== 1 ? 's' : ''}
+                    </span>
+                  </div>
                 </div>
 
                 {paginatedReferrals.length > 0 ? (
@@ -629,45 +1008,111 @@ export default function ReferralsPage() {
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: index * 0.05 }}
-                          className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-0 justify-between p-3 sm:p-4 bg-gray-50 dark:bg-dark-900/50 rounded-xl border border-gray-200 dark:border-dark-700 hover:border-primary-500/50 transition-all"
+                          onClick={() => handleReferralClick(referral)}
+                          className="group p-3 sm:p-4 bg-gray-50 dark:bg-dark-900/50 rounded-xl border border-gray-200 dark:border-dark-700 hover:border-primary-500 hover:bg-gray-100 dark:hover:bg-dark-800/50 hover:-translate-y-0.5 hover:shadow-md hover:shadow-black/5 dark:hover:shadow-black/20 transition-all cursor-pointer"
                         >
-                          <div className="flex items-center gap-4 flex-1 w-full sm:w-auto">
-                            <div className="w-12 h-12 rounded-xl flex items-center justify-center text-gray-900 dark:text-white font-bold" style={getAvatarStyle(referral.username)}>
-                              <span>
-                                {referral.username[0].toUpperCase()}
-                              </span>
+                          {/* Desktop: single row */}
+                          <div className="hidden sm:flex items-center gap-0 justify-between">
+                            <div className="flex items-center gap-4 flex-1">
+                              <div className="w-12 h-12 rounded-xl flex items-center justify-center text-gray-900 dark:text-white font-bold flex-shrink-0" style={getAvatarStyle(referral.username)}>
+                                <span>
+                                  {referral.username[0].toUpperCase()}
+                                </span>
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                  <span className="font-medium text-gray-900 dark:text-white">
+                                    {referral.username}
+                                  </span>
+                                  <span className="text-xs px-2 py-0.5 rounded bg-primary-500/20 text-primary-400 border border-primary-500/30">
+                                    Level {referral.level}
+                                  </span>
+                                  {referral.status === 'active' && (
+                                    <span className="text-xs px-2 py-0.5 rounded bg-green-500/20 text-green-400 border border-green-500/30 flex items-center gap-1">
+                                      <Activity className="w-3 h-3" />
+                                      Active
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="text-xs text-gray-500 dark:text-dark-500 flex items-center gap-1 mb-0.5">
+                                  <Mail className="w-3 h-3 flex-shrink-0" />
+                                  <span className="truncate">{referral.email}</span>
+                                </div>
+                                <div className="text-xs text-gray-500 dark:text-dark-500 flex items-center gap-1">
+                                  <Clock className="w-3 h-3 flex-shrink-0" />
+                                  Joined {formatDate(referral.date)}
+                                </div>
+                              </div>
                             </div>
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                <span className="font-medium text-gray-900 dark:text-white">
+                            <div className="text-right">
+                              <div className="text-xs text-gray-600 dark:text-dark-400 mb-1">
+                                Deposits
+                              </div>
+                              <div className="text-lg font-medium text-gray-900 dark:text-white">
+                                ${formatNumber(referral.deposits)}
+                              </div>
+                              <div className="text-sm text-green-400 flex items-center justify-end gap-1 mt-1">
+                                <DollarSign className="w-3 h-3" />$
+                                {formatNumber(referral.bonus)} earned
+                              </div>
+                            </div>
+                            <ChevronRight className="w-4 h-4 text-gray-400 dark:text-dark-500 group-hover:text-primary-400 group-hover:translate-x-0.5 transition-all ml-2 flex-shrink-0" />
+                          </div>
+
+                          {/* Mobile: stacked layout */}
+                          <div className="sm:hidden">
+                            {/* Top row: avatar + name + badges */}
+                            <div className="flex items-center gap-3 mb-3">
+                              <div className="w-10 h-10 rounded-lg flex items-center justify-center text-gray-900 dark:text-white font-bold text-sm flex-shrink-0" style={getAvatarStyle(referral.username)}>
+                                <span>
+                                  {referral.username[0].toUpperCase()}
+                                </span>
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <span className="font-medium text-gray-900 dark:text-white text-sm">
                                   {referral.username}
                                 </span>
-                                <span className="text-xs px-2 py-0.5 rounded bg-primary-500/20 text-primary-400 border border-primary-500/30">
-                                  Level {referral.level}
-                                </span>
-                                {referral.status === 'active' && (
-                                  <span className="text-xs px-2 py-0.5 rounded bg-green-500/20 text-green-400 border border-green-500/30 flex items-center gap-1">
-                                    <Activity className="w-3 h-3" />
-                                    Active
+                                <div className="flex items-center gap-1.5 mt-1">
+                                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary-500/20 text-primary-400 border border-primary-500/30">
+                                    Level {referral.level}
                                   </span>
-                                )}
+                                  {referral.status === 'active' && (
+                                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-green-500/20 text-green-400 border border-green-500/30 flex items-center gap-0.5">
+                                      <Activity className="w-2.5 h-2.5" />
+                                      Active
+                                    </span>
+                                  )}
+                                </div>
                               </div>
-                              <div className="text-sm text-gray-600 dark:text-dark-400 flex items-center gap-1">
-                                <Clock className="w-3 h-3" />
-                                Joined {formatDate(referral.date)}
+                              <ChevronRight className="w-4 h-4 text-gray-400 dark:text-dark-500 group-hover:text-primary-400 transition-colors flex-shrink-0" />
+                            </div>
+
+                            {/* Info row: email + date */}
+                            <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-dark-500 mb-3 pl-[52px]">
+                              <div className="flex items-center gap-1 min-w-0">
+                                <Mail className="w-3 h-3 flex-shrink-0" />
+                                <span className="truncate">{referral.email}</span>
                               </div>
                             </div>
-                          </div>
-                          <div className="text-left sm:text-right w-full sm:w-auto">
-                            <div className="text-xs text-gray-600 dark:text-dark-400 mb-1">
-                              Deposits
+                            <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-dark-500 mb-3 pl-[52px]">
+                              <Clock className="w-3 h-3 flex-shrink-0" />
+                              Joined {formatDate(referral.date)}
                             </div>
-                            <div className="text-lg font-medium text-gray-900 dark:text-white">
-                              ${formatNumber(referral.deposits)}
-                            </div>
-                            <div className="text-sm text-green-400 flex items-center sm:justify-end gap-1 mt-1">
-                              <DollarSign className="w-3 h-3" />$
-                              {formatNumber(referral.bonus)} earned
+
+                            {/* Bottom row: deposits + earned */}
+                            <div className="flex items-end justify-between pt-2.5 border-t border-gray-200 dark:border-dark-700/50">
+                              <div>
+                                <div className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-dark-500 mb-0.5">
+                                  Deposits
+                                </div>
+                                <div className="text-base font-medium text-gray-900 dark:text-white">
+                                  ${formatNumber(referral.deposits)}
+                                </div>
+                              </div>
+                              <div className="text-sm text-green-400 flex items-center gap-1">
+                                <DollarSign className="w-3 h-3" />$
+                                {formatNumber(referral.bonus)} earned
+                              </div>
                             </div>
                           </div>
                         </motion.div>
@@ -675,35 +1120,13 @@ export default function ReferralsPage() {
                     )}
 
                     {/* Pagination */}
-                    {totalPages > 1 && (
-                      <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-dark-700">
-                        <div className="text-sm text-gray-600 dark:text-dark-400">
-                          Page {currentPage} of {totalPages}
-                        </div>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() =>
-                              setCurrentPage(currentPage - 1)
-                            }
-                            disabled={currentPage === 1}
-                            className="px-4 py-2 bg-dark-900/50 hover:bg-dark-900 disabled:bg-gray-200 dark:bg-dark-900/20 border border-gray-200 dark:border-dark-700 rounded-xl text-gray-900 dark:text-white disabled:text-dark-600 font-medium transition-all disabled:cursor-not-allowed flex items-center gap-2"
-                          >
-                            <ChevronLeft className="w-4 h-4" />
-                            Previous
-                          </button>
-                          <button
-                            onClick={() =>
-                              setCurrentPage(currentPage + 1)
-                            }
-                            disabled={currentPage === totalPages}
-                            className="px-4 py-2 bg-dark-900/50 hover:bg-dark-900 disabled:bg-gray-200 dark:bg-dark-900/20 border border-gray-200 dark:border-dark-700 rounded-xl text-gray-900 dark:text-white disabled:text-dark-600 font-medium transition-all disabled:cursor-not-allowed flex items-center gap-2"
-                          >
-                            Next
-                            <ChevronRight className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                    )}
+                    <Pagination
+                      currentPage={currentPage}
+                      totalItems={sortedReferrals.length}
+                      itemsPerPage={referralsPerPage}
+                      onPageChange={setCurrentPage}
+                      className="pt-4 border-t border-gray-200 dark:border-dark-700"
+                    />
                   </div>
                 ) : (
                   <div className="text-center py-12 text-gray-600 dark:text-dark-400">
@@ -722,13 +1145,153 @@ export default function ReferralsPage() {
 
           {/* ══════════ RIGHT COLUMN ══════════ */}
           <div className="space-y-6">
+            {/* ── Payout Currency ── */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.75 }}
+            >
+              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <Wallet className="w-5 h-5 text-primary-400" />
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                    Payout Currency
+                  </h3>
+                </div>
+                <p className="text-sm text-gray-600 dark:text-dark-400 mb-4">
+                  Choose which currency your referral commissions will be credited in. You can change this at any time.
+                </p>
+
+                {/* Dropdown */}
+                <div ref={currencyDropdownRef} className="relative">
+                  <button
+                    onClick={() => setCurrencyDropdownOpen(!currencyDropdownOpen)}
+                    className="w-full flex items-center justify-between gap-3 px-4 py-2 bg-gray-100 dark:bg-dark-900/50 border border-gray-200 dark:border-dark-700 rounded-lg hover:border-gray-300 dark:hover:border-dark-600 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <selectedCurrency.icon size={28} variant="branded" />
+                      <div className="text-left">
+                        <div className="font-medium text-gray-900 dark:text-white text-sm">
+                          {selectedCurrency.symbol}
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-dark-500">
+                          {selectedCurrency.name} · {selectedCurrency.network}
+                        </div>
+                      </div>
+                    </div>
+                    <ChevronDown className={`w-4 h-4 text-gray-600 dark:text-dark-400 transition-transform ${currencyDropdownOpen ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  <AnimatePresence>
+                    {currencyDropdownOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 4 }}
+                        className="absolute z-[9999] top-full left-0 right-0 mt-1 bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg shadow-xl overflow-hidden max-h-72 overflow-y-auto"
+                      >
+                        {PAYOUT_CURRENCIES.map((currency) => {
+                          const isSelected = currency.symbol === payoutCurrency;
+                          const CurrencyIcon = currency.icon;
+                          return (
+                            <button
+                              key={currency.symbol}
+                              onClick={() => handleCurrencySelect(currency.symbol)}
+                              className={`w-full flex items-center gap-3 px-4 py-2.5 transition-colors ${
+                                isSelected
+                                  ? 'bg-primary-500/20 text-primary-400'
+                                  : 'text-gray-700 dark:text-dark-300 hover:bg-gray-100 dark:hover:bg-dark-800 hover:text-gray-900 dark:hover:text-white'
+                              }`}
+                            >
+                              <CurrencyIcon size={24} variant="branded" />
+                              <div className="flex-1 text-left">
+                                <div className="flex items-center gap-2">
+                                  <span className={`text-sm font-medium ${isSelected ? 'text-primary-400' : 'text-gray-900 dark:text-white'}`}>
+                                    {currency.symbol}
+                                  </span>
+                                  <span className="text-xs text-gray-500 dark:text-dark-500">
+                                    {currency.network}
+                                  </span>
+                                </div>
+                                <div className="text-xs text-gray-500 dark:text-dark-500">
+                                  {currency.name}
+                                </div>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+              </div>
+              </div>
+            </motion.div>
+
+            {/* ── Investor Presentation ── */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8 }}
+            >
+              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <Presentation className="w-5 h-5 text-primary-400" />
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                    Investor Presentation
+                  </h3>
+                </div>
+                <p className="text-sm text-gray-600 dark:text-dark-400 mb-5">
+                  Download a ready-made presentation to share with potential investors. Includes platform overview, performance stats, and commission structure.
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  <a
+                    href="/docs/Celestian_Investor_Deck.pdf"
+                    download
+                    className="group flex flex-col items-center gap-2.5 p-4 bg-gray-50 dark:bg-dark-900/50 border border-gray-200 dark:border-dark-700 rounded-xl hover:border-red-400/50 dark:hover:border-red-400/50 transition-all"
+                  >
+                    <div className="w-10 h-10 bg-red-500/15 rounded-lg flex items-center justify-center group-hover:bg-red-500/25 transition-colors">
+                      <FileText className="w-5 h-5 text-red-400" />
+                    </div>
+                    <div className="text-center">
+                      <div className="text-sm font-medium text-gray-900 dark:text-white">PDF</div>
+                      <div className="text-[10px] text-gray-500 dark:text-dark-500 mt-0.5 flex items-center gap-1 justify-center">
+                        <Download className="w-2.5 h-2.5" />
+                        Download
+                      </div>
+                    </div>
+                  </a>
+                  <a
+                    href="/docs/Celestian_Investor_Deck.pptx"
+                    download
+                    className="group flex flex-col items-center gap-2.5 p-4 bg-gray-50 dark:bg-dark-900/50 border border-gray-200 dark:border-dark-700 rounded-xl hover:border-orange-400/50 dark:hover:border-orange-400/50 transition-all"
+                  >
+                    <div className="w-10 h-10 bg-orange-500/15 rounded-lg flex items-center justify-center group-hover:bg-orange-500/25 transition-colors">
+                      <Presentation className="w-5 h-5 text-orange-400" />
+                    </div>
+                    <div className="text-center">
+                      <div className="text-sm font-medium text-gray-900 dark:text-white">PPTX</div>
+                      <div className="text-[10px] text-gray-500 dark:text-dark-500 mt-0.5 flex items-center gap-1 justify-center">
+                        <Download className="w-2.5 h-2.5" />
+                        Download
+                      </div>
+                    </div>
+                  </a>
+                </div>
+              </div>
+              </div>
+            </motion.div>
+
             {/* ── Turnover Bonuses Progress ── */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8 }}
             >
-              <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
+              <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <Crown className="w-5 h-5 text-primary-400" />
                   <h3 className="text-lg font-medium text-gray-900 dark:text-white">
@@ -861,7 +1424,7 @@ export default function ReferralsPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.9 }}
             >
-              <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
+              <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-1 flex items-center gap-2">
                   <DollarSign className="w-5 h-5 text-primary-400" />
                   Recent Commissions
@@ -919,7 +1482,7 @@ export default function ReferralsPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 1.0 }}
               >
-                <div className="bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
+                <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-xl flex items-center justify-center text-gray-900 dark:text-white font-bold" style={getAvatarStyle(referrerUser.username)}>
                       <span>
@@ -944,6 +1507,159 @@ export default function ReferralsPage() {
           </div>
         </div>
       </div>
+
+      {/* ══════════ REFERRAL NETWORK DRAWER ══════════ */}
+      <SettingsDrawer
+        isOpen={!!selectedReferral}
+        onClose={() => {
+          setSelectedReferral(null);
+          setBranchData(null);
+        }}
+        title="Referral Network"
+      >
+        {selectedReferral && branchData && (
+          <div className="space-y-6">
+            {/* ── Profile ── */}
+            <div className="flex items-center gap-4">
+              <div
+                className="w-14 h-14 rounded-xl flex items-center justify-center text-lg font-bold text-gray-900 dark:text-white flex-shrink-0"
+                style={getAvatarStyle(selectedReferral.username)}
+              >
+                {selectedReferral.username[0].toUpperCase()}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="font-semibold text-lg text-gray-900 dark:text-white">
+                  {selectedReferral.username}
+                </div>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-xs px-2 py-0.5 rounded bg-primary-500/20 text-primary-400 border border-primary-500/30">
+                    Level {selectedReferral.level}
+                  </span>
+                  <span
+                    className={`text-xs px-2 py-0.5 rounded flex items-center gap-1 ${
+                      selectedReferral.status === 'active'
+                        ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                        : 'bg-gray-200 dark:bg-dark-700 text-gray-600 dark:text-dark-400 border border-gray-300 dark:border-dark-600'
+                    }`}
+                  >
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full ${
+                        selectedReferral.status === 'active' ? 'bg-green-400' : 'bg-gray-400 dark:bg-dark-500'
+                      }`}
+                    />
+                    {selectedReferral.status === 'active' ? 'Active' : 'Inactive'}
+                  </span>
+                </div>
+                <div className="text-xs text-gray-500 dark:text-dark-500 mt-1.5 flex items-center gap-1">
+                  <Clock className="w-3 h-3" />
+                  Joined {formatDate(selectedReferral.date)}
+                </div>
+                <div className="text-xs text-gray-500 dark:text-dark-500 mt-0.5 flex items-center gap-1">
+                  <Mail className="w-3 h-3" />
+                  {selectedReferral.email}
+                </div>
+              </div>
+            </div>
+
+            {/* ── Branch Stats ── */}
+            <div>
+              <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3">
+                Branch Stats
+              </h4>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3 bg-gray-50 dark:bg-dark-800/50 rounded-xl border border-gray-200 dark:border-dark-700 text-center">
+                  <div className="text-lg font-semibold text-gray-900 dark:text-white">
+                    {branchData.branchCount}
+                  </div>
+                  <div className="text-[10px] text-gray-500 dark:text-dark-500 uppercase tracking-wider mt-0.5">
+                    People
+                  </div>
+                </div>
+                <div className="p-3 bg-gray-50 dark:bg-dark-800/50 rounded-xl border border-gray-200 dark:border-dark-700 text-center">
+                  <div className="text-lg font-semibold text-gray-900 dark:text-white">
+                    ${branchData.branchDeposits >= 1000
+                      ? `${(branchData.branchDeposits / 1000).toFixed(1)}K`
+                      : formatNumber(branchData.branchDeposits)}
+                  </div>
+                  <div className="text-[10px] text-gray-500 dark:text-dark-500 uppercase tracking-wider mt-0.5">
+                    Deposits
+                  </div>
+                </div>
+                <div className="p-3 bg-gray-50 dark:bg-dark-800/50 rounded-xl border border-gray-200 dark:border-dark-700 text-center">
+                  <div className="text-lg font-semibold text-primary-400">
+                    ${branchData.branchTurnover >= 1000
+                      ? `${(branchData.branchTurnover / 1000).toFixed(1)}K`
+                      : formatNumber(branchData.branchTurnover)}
+                  </div>
+                  <div className="text-[10px] text-gray-500 dark:text-dark-500 uppercase tracking-wider mt-0.5">
+                    Turnover
+                  </div>
+                </div>
+                <div className="p-3 bg-gray-50 dark:bg-dark-800/50 rounded-xl border border-gray-200 dark:border-dark-700 text-center">
+                  <div className="text-lg font-semibold text-green-400">
+                    ${formatNumber(branchData.branchEarned)}
+                  </div>
+                  <div className="text-[10px] text-gray-500 dark:text-dark-500 uppercase tracking-wider mt-0.5">
+                    Earned
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* ── Network Tree ── */}
+            {branchData.root.children.length > 0 && (
+              <div>
+                <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">
+                  Network Tree
+                </h4>
+                <div className="bg-gray-50 dark:bg-dark-800/30 rounded-xl border border-gray-200 dark:border-dark-700 py-1">
+                  {branchData.root.children.map((child, i) => (
+                    <BranchTreeNode
+                      key={child.user.id}
+                      node={child}
+                      depth={0}
+                      defaultExpanded={i === 0}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* ── Your Commissions ── */}
+            <div>
+              <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3">
+                Your Commissions
+              </h4>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-dark-800/50 rounded-lg border border-gray-200 dark:border-dark-700">
+                  <span className="text-sm text-gray-600 dark:text-dark-400">
+                    From {selectedReferral.username}:
+                  </span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">
+                    ${formatNumber(selectedReferral.bonus)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-dark-800/50 rounded-lg border border-gray-200 dark:border-dark-700">
+                  <span className="text-sm text-gray-600 dark:text-dark-400">
+                    From branch:
+                  </span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">
+                    ${formatNumber(branchData.branchEarned)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-primary-500/10 rounded-lg border border-primary-500/20">
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">
+                    Total:
+                  </span>
+                  <span className="text-sm font-semibold text-primary-400">
+                    ${formatNumber(selectedReferral.bonus + branchData.branchEarned)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </SettingsDrawer>
     </div>
   );
 }

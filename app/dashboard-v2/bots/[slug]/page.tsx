@@ -55,6 +55,8 @@ import type {
   Trade as ApiTrade,
   EquityPoint,
 } from '@/types/api';
+import { Pagination } from '@/components/dashboard-v2/Pagination';
+import { FilterDropdown } from '@/components/dashboard-v2/FilterDropdown';
 
 // Dynamic import of ApexCharts with ssr disabled
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
@@ -140,6 +142,26 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
   const [apiLatency, setApiLatency] = useState(12);
   const [orderBook, setOrderBook] = useState<{ asks: any[], bids: any[] }>({ asks: [], bids: [] });
   const [equityPeriod, setEquityPeriod] = useState<'1D' | '7D' | '30D' | '90D' | 'ALL'>('ALL');
+
+  const [isDark, setIsDark] = useState(true);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    setIsDark(root.classList.contains('dark'));
+    const observer = new MutationObserver(() => {
+      setIsDark(root.classList.contains('dark'));
+    });
+    observer.observe(root, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, []);
+
+  // Trade history pagination & filters
+  const [tradeHistoryPage, setTradeHistoryPage] = useState(1);
+  const tradesPerPage = 10;
+  const [tradeFilterPair, setTradeFilterPair] = useState<string>('all');
+  const [tradeFilterSide, setTradeFilterSide] = useState<'all' | 'LONG' | 'SHORT'>('all');
+  const [tradeFilterResult, setTradeFilterResult] = useState<'all' | 'wins' | 'losses'>('all');
+  const [tradeSortBy, setTradeSortBy] = useState<'newest' | 'oldest' | 'pnl-high' | 'pnl-low' | 'size-high' | 'size-low' | 'duration'>('newest');
 
   // Expanded trades for accordion
   const [expandedTrades, setExpandedTrades] = useState<Set<string>>(new Set());
@@ -809,7 +831,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
   // Show loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-100 dark:bg-dark-950 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-100 dark:bg-transparent flex items-center justify-center">
         <Loader2 className="w-16 h-16 text-primary-400 animate-spin" />
       </div>
     );
@@ -818,7 +840,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
   // Show error state
   if (error || !masterBotData) {
     return (
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-100 dark:bg-dark-950 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-100 dark:bg-transparent flex items-center justify-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -838,8 +860,38 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
     );
   }
 
+  // Trade history: unique pairs, filtering, sorting
+  const masterUniquePairs = Array.from(new Set((masterBotData?.recentTrades || []).map(t => t.pair)));
+  const filteredMasterTrades = (masterBotData?.recentTrades || [])
+    .filter(trade => {
+      if (tradeFilterPair !== 'all' && trade.pair !== tradeFilterPair) return false;
+      if (tradeFilterSide !== 'all' && trade.side !== tradeFilterSide) return false;
+      if (tradeFilterResult === 'wins' && trade.pnl <= 0) return false;
+      if (tradeFilterResult === 'losses' && trade.pnl >= 0) return false;
+      return true;
+    })
+    .sort((a, b) => {
+      switch (tradeSortBy) {
+        case 'oldest': return new Date(a.closedAt).getTime() - new Date(b.closedAt).getTime();
+        case 'pnl-high': return b.pnl - a.pnl;
+        case 'pnl-low': return a.pnl - b.pnl;
+        case 'size-high': return b.positionSize - a.positionSize;
+        case 'size-low': return a.positionSize - b.positionSize;
+        case 'duration': {
+          const parseDur = (d: string) => {
+            let mins = 0;
+            const hm = d.match(/(\d+)h/); if (hm) mins += parseInt(hm[1]) * 60;
+            const mm = d.match(/(\d+)m/); if (mm) mins += parseInt(mm[1]);
+            return mins;
+          };
+          return parseDur(b.duration) - parseDur(a.duration);
+        }
+        default: return new Date(b.closedAt).getTime() - new Date(a.closedAt).getTime();
+      }
+    });
+
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-100 dark:bg-dark-950 text-slate-200">
+    <div className="min-h-screen bg-gray-100 dark:bg-transparent text-slate-200">
       <div className="max-w-[2000px] mx-auto p-3">
         {/* Header */}
         <motion.div
@@ -847,54 +899,41 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
           animate={{ opacity: 1, y: 0 }}
           className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px] mb-3"
         >
-          <div className="bg-gradient-to-br from-[#152033] to-dark-900 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6">
-          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-            <div className="flex items-start gap-3 sm:gap-4">
+          <div className="bg-gradient-to-br from-white to-gray-50 dark:from-[#152033] dark:to-dark-900 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6">
+          {/* Mobile: stacked centered layout | Desktop: horizontal layout */}
+          <div className="flex flex-col items-center sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+            {/* Mobile: avatar centered on its own row */}
+            <div className="flex flex-col items-center sm:flex-row sm:items-start sm:gap-4 sm:flex-1">
               {masterBotData.icon.startsWith('/') ? (
-                <img src={masterBotData.icon} alt={masterBotData.name} className="w-16 h-16 object-contain" />
+                <img src={masterBotData.icon} alt={masterBotData.name} className="w-16 h-16 sm:w-16 sm:h-16 object-contain mb-2 sm:mb-0" />
               ) : (
-                <div className="w-16 h-16 flex items-center justify-center text-2xl">
+                <div className="w-16 h-16 flex items-center justify-center text-2xl mb-2 sm:mb-0">
                   {masterBotData.icon}
                 </div>
               )}
-              <div>
-                <div className="flex items-center gap-2 mb-2 flex-wrap">
-                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-900 dark:text-white">{masterBotData.name}</h1>
-                  {masterBotData.verified && (
-                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-primary-500 to-accent-500 text-gray-900 dark:text-white flex items-center gap-1">
-                      <Shield className="w-3 h-3" />
-                      VERIFIED
-                    </span>
-                  )}
-                  <div className="flex items-center gap-2 ml-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    <span className="text-xs text-green-400 font-semibold font-mono">LIVE • 99.8% UPTIME</span>
-                  </div>
+              <div className="flex flex-col items-center sm:items-start">
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-900 dark:text-white text-center sm:text-left">{masterBotData.name}</h1>
+                <div className="flex items-center gap-2 mt-1 mb-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="text-xs text-green-400 font-semibold font-mono">LIVE • 99.8% UPTIME</span>
                 </div>
-                <p className="text-slate-400 mb-2 max-w-3xl text-sm">
+                <p className="text-gray-600 dark:text-slate-400 mb-2 text-sm text-center sm:text-left">
                   {masterBotData.description}
                 </p>
                 <div className="flex items-center gap-3 text-xs flex-wrap font-mono">
                   <div className="flex items-center gap-1">
                     <Users className="w-3 h-3 text-accent-400" />
                     <span className="text-accent-400">{masterBotData.totalCopiers.toLocaleString()}</span>
-                    <span className="text-slate-400">copiers</span>
+                    <span className="text-gray-500 dark:text-slate-400">copiers</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Trophy className="w-3 h-3 text-accent-400" />
                     <span className="text-accent-400">#3</span>
-                    <span className="text-slate-400">Global</span>
+                    <span className="text-gray-500 dark:text-slate-400">Global</span>
                   </div>
                 </div>
               </div>
             </div>
-            <Link
-              href={`/dashboard-v2/bots/${slug}/copy`}
-              className="px-6 py-3 rounded-lg text-gray-900 dark:text-white font-semibold text-sm bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 transition-all flex items-center gap-2 shadow-lg shadow-primary-500/30"
-            >
-              <Rocket className="w-4 h-4" />
-              Copy This Bot
-            </Link>
           </div>
           </div>
         </motion.div>
@@ -906,17 +945,17 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
           transition={{ delay: 0.1 }}
           className="mb-6"
         >
-          <div className="flex items-center gap-0.5 rounded-lg bg-gray-50 dark:bg-dark-900/50 border border-gray-200 dark:border-dark-700 p-1.5 inline-flex overflow-x-auto">
+          <div className="flex items-center justify-center sm:justify-start gap-1.5 flex-wrap p-1.5">
             {tabs.map(tab => {
               const IconComponent = tab.icon;
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`px-4 py-2.5 font-medium rounded-md text-sm transition-all flex items-center gap-2 whitespace-nowrap ${
+                  className={`flex-1 sm:flex-initial px-4 py-2.5 font-medium rounded-lg sm:rounded-md text-sm transition-all flex items-center justify-center gap-2 whitespace-nowrap ${
                     activeTab === tab.id
-                      ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-gray-900 dark:text-white shadow-lg shadow-primary-500/30'
-                      : 'text-gray-600 dark:text-dark-300 hover:text-gray-900 dark:hover:text-white'
+                      ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white sm:shadow-lg sm:shadow-primary-500/30'
+                      : 'bg-gray-200 dark:bg-dark-900/50 border border-gray-300 dark:border-dark-700 sm:bg-transparent sm:dark:bg-transparent sm:border-0 text-gray-600 dark:text-dark-300 hover:text-gray-800 dark:hover:text-white'
                   }`}
                 >
                   <IconComponent className="w-4 h-4" />
@@ -941,17 +980,17 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
               <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                 {/* Total Invested */}
                 <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                  <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
-                    <div className="flex items-center justify-between mb-3 sm:mb-4">
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
-                        <DollarSign className="w-5 h-5 sm:w-6 sm:h-6 text-primary-400" />
+                  <div className="h-full bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
+                    <div className="flex items-center justify-between mb-2 sm:mb-4">
+                      <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
+                        <DollarSign className="w-4 h-4 sm:w-6 sm:h-6 text-primary-400" />
                       </div>
                     </div>
-                    <div className="text-xs sm:text-sm text-gray-600 dark:text-dark-400 mb-1">Total Invested</div>
-                    <div className="text-lg sm:text-2xl font-semibold text-gray-900 dark:text-white mb-1 sm:mb-2">
+                    <div className="text-[10px] sm:text-sm text-gray-600 dark:text-dark-400 mb-0.5 sm:mb-1">Total Invested</div>
+                    <div className="text-base sm:text-2xl font-semibold text-gray-900 dark:text-white mb-0.5 sm:mb-2">
                       ${masterBotData.totalInvestedByAll.toLocaleString('en-US', { maximumFractionDigits: 0 })}
                     </div>
-                    <div className="text-xs text-gray-600 dark:text-dark-400">
+                    <div className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400">
                       By all copiers
                     </div>
                   </div>
@@ -959,20 +998,20 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
 
                 {/* Aggregate P&L */}
                 <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                  <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-green-500/50 transition-all">
-                    <div className="flex items-center justify-between mb-3 sm:mb-4">
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-500/20 border border-green-500/30 rounded-xl flex items-center justify-center">
-                        <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-green-400" />
+                  <div className="h-full bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-green-500/50 transition-all">
+                    <div className="flex items-center justify-between mb-2 sm:mb-4">
+                      <div className="w-8 h-8 sm:w-12 sm:h-12 bg-green-500/20 border border-green-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
+                        <TrendingUp className="w-4 h-4 sm:w-6 sm:h-6 text-green-400" />
                       </div>
-                      <div className="text-xs font-medium text-green-400 bg-green-500/10 px-2 py-1 rounded">
+                      <div className="text-[10px] sm:text-xs font-medium text-green-400 bg-green-500/10 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded">
                         +{masterBotData.aggregateProfitPercent.toFixed(1)}%
                       </div>
                     </div>
-                    <div className="text-xs sm:text-sm text-gray-600 dark:text-dark-400 mb-1">Aggregate P&L</div>
-                    <div className="text-lg sm:text-2xl font-semibold text-green-400 mb-1 sm:mb-2">
+                    <div className="text-[10px] sm:text-sm text-gray-600 dark:text-dark-400 mb-0.5 sm:mb-1">Aggregate P&L</div>
+                    <div className="text-base sm:text-2xl font-semibold text-green-400 mb-0.5 sm:mb-2">
                       +${masterBotData.aggregateProfit.toLocaleString('en-US', { maximumFractionDigits: 0 })}
                     </div>
-                    <div className="text-xs text-gray-600 dark:text-dark-400">
+                    <div className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400">
                       Total profit (all copiers)
                     </div>
                   </div>
@@ -980,20 +1019,17 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
 
                 {/* Win Rate */}
                 <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                  <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
-                    <div className="flex items-center justify-between mb-3 sm:mb-4">
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
-                        <Target className="w-5 h-5 sm:w-6 sm:h-6 text-primary-400" />
-                      </div>
-                      <div className="text-xs font-medium text-primary-400 bg-primary-500/10 px-2 py-1 rounded">
-                        {masterBotData.stats.totalTrades} trades
+                  <div className="h-full bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
+                    <div className="flex items-center justify-between mb-2 sm:mb-4">
+                      <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
+                        <Target className="w-4 h-4 sm:w-6 sm:h-6 text-primary-400" />
                       </div>
                     </div>
-                    <div className="text-xs sm:text-sm text-gray-600 dark:text-dark-400 mb-1">Win Rate</div>
-                    <div className="text-lg sm:text-2xl font-semibold text-gray-900 dark:text-white mb-1 sm:mb-2">
+                    <div className="text-[10px] sm:text-sm text-gray-600 dark:text-dark-400 mb-0.5 sm:mb-1">Win Rate</div>
+                    <div className="text-base sm:text-2xl font-semibold text-gray-900 dark:text-white mb-0.5 sm:mb-2">
                       {masterBotData.stats.winRate.toFixed(1)}%
                     </div>
-                    <div className="text-xs text-gray-600 dark:text-dark-400">
+                    <div className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400">
                       {masterBotData.stats.winningTrades}W / {masterBotData.stats.losingTrades}L
                     </div>
                   </div>
@@ -1001,20 +1037,20 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
 
                 {/* Active Positions */}
                 <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                  <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
-                    <div className="flex items-center justify-between mb-3 sm:mb-4">
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
-                        <Layers className="w-5 h-5 sm:w-6 sm:h-6 text-primary-400" />
+                  <div className="h-full bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
+                    <div className="flex items-center justify-between mb-2 sm:mb-4">
+                      <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
+                        <Layers className="w-4 h-4 sm:w-6 sm:h-6 text-primary-400" />
                       </div>
-                      <div className="text-xs font-medium text-primary-400 bg-primary-500/10 px-2 py-1 rounded">
+                      <div className="text-[10px] sm:text-xs font-medium text-primary-400 bg-primary-500/10 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded">
                         Max {masterBotData.maxPositions}
                       </div>
                     </div>
-                    <div className="text-xs sm:text-sm text-gray-600 dark:text-dark-400 mb-1">Active Positions</div>
-                    <div className="text-lg sm:text-2xl font-semibold text-gray-900 dark:text-white mb-1 sm:mb-2">
+                    <div className="text-[10px] sm:text-sm text-gray-600 dark:text-dark-400 mb-0.5 sm:mb-1">Active Positions</div>
+                    <div className="text-base sm:text-2xl font-semibold text-gray-900 dark:text-white mb-0.5 sm:mb-2">
                       {masterBotData.activePositions} / {masterBotData.maxPositions}
                     </div>
-                    <div className="text-xs text-gray-600 dark:text-dark-400">
+                    <div className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400">
                       Currently open
                     </div>
                   </div>
@@ -1022,8 +1058,8 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
               </div>
 
               {/* Equity Curve */}
-              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
+              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-6">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
@@ -1031,7 +1067,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                     </div>
                     <div>
                       <h2 className="text-lg sm:text-xl font-medium text-gray-900 dark:text-white">Aggregate Equity Curve</h2>
-                      <p className="text-xs text-gray-600 dark:text-dark-400">Total portfolio value from all copiers</p>
+                      <p className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400">Total portfolio value from all copiers</p>
                     </div>
                   </div>
                   <div className="flex gap-1.5 sm:gap-2 flex-wrap">
@@ -1041,7 +1077,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                         onClick={() => setEquityPeriod(period)}
                         className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                           equityPeriod === period
-                            ? 'bg-primary-500 text-gray-900 dark:text-white'
+                            ? 'bg-primary-500 text-white'
                             : 'bg-gray-200 dark:bg-dark-800 text-gray-600 dark:text-dark-400 hover:bg-gray-300 dark:hover:bg-dark-700'
                         }`}
                       >
@@ -1050,16 +1086,16 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                     ))}
                   </div>
                 </div>
+                <div className="min-h-[400px]">
                 <Chart
                   options={{
                     chart: {
                       type: 'area',
-                      height: 350,
                       toolbar: { show: false },
                       background: 'transparent',
                       zoom: { enabled: false },
                     },
-                    theme: { mode: 'dark' },
+                    theme: { mode: isDark ? 'dark' as const : 'light' as const },
                     dataLabels: { enabled: false },
                     stroke: {
                       curve: 'smooth',
@@ -1069,24 +1105,25 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                     fill: {
                       type: 'gradient',
                       gradient: {
-                        opacityFrom: 0.35,
-                        opacityTo: 0.05,
+                        opacityFrom: 0.7,
+                        opacityTo: 0.1,
                         colorStops: [
-                          { offset: 0, color: '#10B981', opacity: 0.35 },
-                          { offset: 50, color: '#10B981', opacity: 0.15 },
-                          { offset: 100, color: '#10B981', opacity: 0.02 }
+                          { offset: 0, color: '#10B981', opacity: 0.7 },
+                          { offset: 50, color: '#10B981', opacity: 0.4 },
+                          { offset: 100, color: '#10B981', opacity: 0.1 }
                         ]
                       },
                     },
                     grid: {
-                      borderColor: '#1e293b',
-                      strokeDashArray: 4,
+                      borderColor: isDark ? '#1e293b' : '#e5e7eb',
+                      strokeDashArray: 0,
                       xaxis: { lines: { show: false } },
                     },
                     xaxis: {
                       type: 'datetime',
                       labels: {
                         style: { colors: '#64748b', fontSize: '12px' },
+                        datetimeUTC: false,
                       },
                       axisBorder: { show: false },
                       axisTicks: { show: false },
@@ -1094,14 +1131,19 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                     yaxis: {
                       labels: {
                         style: { colors: '#64748b', fontSize: '12px' },
-                        formatter: (val: number) => `$${(val / 1000).toFixed(0)}k`,
+                        formatter: (val: number) => `$${val.toLocaleString('en-US')}`,
                       },
                     },
                     tooltip: {
                       theme: 'dark',
-                      x: { format: 'dd MMM' },
+                      x: {
+                        formatter: (val: number) => {
+                          const date = new Date(val);
+                          return date.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false });
+                        }
+                      },
                       y: {
-                        formatter: (val: number) => `$${val.toLocaleString('en-US', { maximumFractionDigits: 0 })}`,
+                        formatter: (val: number) => `$${val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
                       },
                     },
                   }}
@@ -1115,78 +1157,183 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                     },
                   ]}
                   type="area"
-                  height={350}
+                  height="100%"
                 />
+                </div>
                 </div>
               </div>
 
               {/* Performance Statistics */}
-              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-primary-500/50 transition-all">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-12 h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
-                    <BarChart3 className="w-6 h-6 text-primary-400" />
+              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
+                <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+                  <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
+                    <BarChart3 className="w-4 h-4 sm:w-6 sm:h-6 text-primary-400" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-medium text-gray-900 dark:text-white">Performance Statistics</h2>
-                    <p className="text-sm text-gray-600 dark:text-dark-400">Master bot trading metrics</p>
+                    <h2 className="text-sm sm:text-xl font-medium text-gray-900 dark:text-white">Trading Statistics</h2>
+                    <p className="text-[10px] sm:text-sm text-gray-600 dark:text-dark-400">Comprehensive performance metrics</p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  <div className="p-4 bg-gray-50 dark:bg-dark-900/50 rounded-xl border border-gray-200 dark:border-dark-700/50">
-                    <div className="text-xs text-gray-600 dark:text-dark-400 mb-1">Total Trades</div>
-                    <div className="text-xl font-medium text-gray-900 dark:text-white">{masterBotData.stats.totalTrades}</div>
-                  </div>
-                  <div className="p-4 bg-gray-50 dark:bg-dark-900/50 rounded-xl border border-gray-200 dark:border-dark-700/50">
-                    <div className="text-xs text-gray-600 dark:text-dark-400 mb-1">Profit Factor</div>
-                    <div className="text-xl font-medium text-primary-400">{masterBotData.stats.profitFactor.toFixed(2)}</div>
-                  </div>
-                  <div className="p-4 bg-gray-50 dark:bg-dark-900/50 rounded-xl border border-gray-200 dark:border-dark-700/50">
-                    <div className="text-xs text-gray-600 dark:text-dark-400 mb-1">Avg Win</div>
-                    <div className="text-xl font-medium text-green-400">+${masterBotData.stats.averageWin.toFixed(0)}</div>
-                  </div>
-                  <div className="p-4 bg-gray-50 dark:bg-dark-900/50 rounded-xl border border-gray-200 dark:border-dark-700/50">
-                    <div className="text-xs text-gray-600 dark:text-dark-400 mb-1">Avg Loss</div>
-                    <div className="text-xl font-medium text-red-400">${masterBotData.stats.averageLoss.toFixed(0)}</div>
-                  </div>
-                  <div className="p-4 bg-gray-50 dark:bg-dark-900/50 rounded-xl border border-gray-200 dark:border-dark-700/50">
-                    <div className="text-xs text-gray-600 dark:text-dark-400 mb-1">Best Trade</div>
-                    <div className="text-xl font-medium text-green-400">+${masterBotData.stats.bestTrade.toFixed(0)}</div>
-                  </div>
-                  <div className="p-4 bg-gray-50 dark:bg-dark-900/50 rounded-xl border border-gray-200 dark:border-dark-700/50">
-                    <div className="text-xs text-gray-600 dark:text-dark-400 mb-1">Total Volume</div>
-                    <div className="text-xl font-medium text-gray-900 dark:text-white">${(masterBotData.stats.totalVolume / 1000).toFixed(0)}k</div>
-                  </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
+                  <MasterStatCard
+                    icon={<BarChart3 className="w-4 h-4 text-primary-400" />}
+                    label="Total Trades"
+                    value={masterBotData.stats.totalTrades.toString()}
+                    subtitle={`${(masterBotData.stats.totalTrades / Math.max(masterBotData.recentTrades.length > 0 ? 30 : 1, 1)).toFixed(1)}/day`}
+                    subtitleColor="text-primary-400"
+                  />
+                  <MasterStatCard
+                    icon={<Clock className="w-4 h-4 text-primary-400" />}
+                    label="Avg Hold Time"
+                    value="2.4h"
+                    subtitle="Swing trading"
+                    subtitleColor="text-primary-400"
+                  />
+                  <MasterStatCard
+                    icon={<Target className="w-4 h-4 text-primary-400" />}
+                    label="Win/Loss Ratio"
+                    value={`${(masterBotData.stats.winningTrades / Math.max(masterBotData.stats.losingTrades, 1)).toFixed(2)}:1`}
+                    subtitle={`${masterBotData.stats.winningTrades}W / ${masterBotData.stats.losingTrades}L`}
+                    subtitleColor="text-primary-400"
+                  />
+                  <MasterStatCard
+                    icon={<TrendingUp className="w-4 h-4 text-green-400" />}
+                    label="Average Win"
+                    value={`+$${masterBotData.stats.averageWin.toFixed(0)}`}
+                    subtitle={`${((masterBotData.stats.averageWin / Math.max(masterBotData.totalInvestedByAll || 1, 1)) * 100).toFixed(2)}% of capital`}
+                    valueColor="text-green-400"
+                    subtitleColor="text-green-400"
+                  />
+                  <MasterStatCard
+                    icon={<TrendingDown className="w-4 h-4 text-red-400" />}
+                    label="Average Loss"
+                    value={`$${masterBotData.stats.averageLoss.toFixed(0)}`}
+                    subtitle={`${((Math.abs(masterBotData.stats.averageLoss) / Math.max(masterBotData.totalInvestedByAll || 1, 1)) * 100).toFixed(2)}% of capital`}
+                    valueColor="text-red-400"
+                    subtitleColor="text-red-400"
+                  />
+                  <MasterStatCard
+                    icon={<Zap className="w-4 h-4 text-primary-400" />}
+                    label="Profit Factor"
+                    value={masterBotData.stats.profitFactor.toFixed(2)}
+                    subtitle={
+                      masterBotData.stats.profitFactor >= 2 ? 'Excellent' :
+                      masterBotData.stats.profitFactor >= 1.5 ? 'Good' :
+                      masterBotData.stats.profitFactor >= 1 ? 'Profitable' :
+                      'Needs improvement'
+                    }
+                    valueColor="text-primary-400"
+                    subtitleColor={
+                      masterBotData.stats.profitFactor >= 2 ? 'text-green-400' :
+                      masterBotData.stats.profitFactor >= 1.5 ? 'text-yellow-400' :
+                      masterBotData.stats.profitFactor >= 1 ? 'text-amber-400' :
+                      'text-red-400'
+                    }
+                  />
+                  <MasterStatCard
+                    icon={<AlertTriangle className="w-4 h-4 text-red-400" />}
+                    label="Max Drawdown"
+                    value={`${masterBotData.stats.maxDrawdown.toFixed(1)}%`}
+                    subtitle={
+                      masterBotData.stats.maxDrawdown < 5 ? 'Very safe' :
+                      masterBotData.stats.maxDrawdown < 10 ? 'Safe' :
+                      masterBotData.stats.maxDrawdown < 20 ? 'Moderate risk' :
+                      'High risk'
+                    }
+                    valueColor="text-red-400"
+                    subtitleColor={
+                      masterBotData.stats.maxDrawdown < 5 ? 'text-green-400' :
+                      masterBotData.stats.maxDrawdown < 10 ? 'text-yellow-400' :
+                      masterBotData.stats.maxDrawdown < 20 ? 'text-amber-400' :
+                      'text-red-400'
+                    }
+                  />
+                  <MasterStatCard
+                    icon={<DollarSign className="w-4 h-4 text-primary-400" />}
+                    label="Total Volume"
+                    value={`$${(masterBotData.stats.totalVolume / 1000).toFixed(0)}K`}
+                    subtitle={`${(masterBotData.stats.totalVolume / Math.max(masterBotData.totalInvestedByAll || 1, 1)).toFixed(1)}× turnover`}
+                    subtitleColor="text-primary-400"
+                  />
+                  <MasterStatCard
+                    icon={<TrendingUp className="w-4 h-4 text-green-400" />}
+                    label="Best Trade"
+                    value={`+$${masterBotData.stats.bestTrade.toFixed(0)}`}
+                    subtitle={`${((masterBotData.stats.bestTrade / Math.max(masterBotData.totalInvestedByAll || 1, 1)) * 100).toFixed(2)}% gain`}
+                    valueColor="text-green-400"
+                    subtitleColor="text-green-400"
+                  />
+                  <MasterStatCard
+                    icon={<TrendingDown className="w-4 h-4 text-red-400" />}
+                    label="Worst Trade"
+                    value={`$${(masterBotData.stats.worstTrade || 0).toFixed(0)}`}
+                    subtitle={`${((Math.abs(masterBotData.stats.worstTrade || 0) / Math.max(masterBotData.totalInvestedByAll || 1, 1)) * 100).toFixed(2)}% loss`}
+                    valueColor="text-red-400"
+                    subtitleColor="text-red-400"
+                  />
+                  <MasterStatCard
+                    icon={<Zap className="w-4 h-4 text-primary-400" />}
+                    label="Best Streak"
+                    value={`${masterBotData.stats.winStreak || 0} W`}
+                    subtitle={
+                      (masterBotData.stats.winStreak || 0) >= 10 ? 'Exceptional streak' :
+                      (masterBotData.stats.winStreak || 0) >= 7 ? 'Strong streak' :
+                      (masterBotData.stats.winStreak || 0) >= 5 ? 'Above average' :
+                      (masterBotData.stats.winStreak || 0) >= 3 ? 'Moderate streak' :
+                      'Early stage'
+                    }
+                    valueColor="text-green-400"
+                    subtitleColor="text-green-400"
+                  />
+                  <MasterStatCard
+                    icon={<Trophy className="w-4 h-4 text-yellow-400" />}
+                    label="Sharpe Ratio"
+                    value={(masterBotData.stats.sharpeRatio || 0).toFixed(2)}
+                    subtitle={
+                      (masterBotData.stats.sharpeRatio || 0) >= 3 ? 'Excellent' :
+                      (masterBotData.stats.sharpeRatio || 0) >= 2 ? 'Very good' :
+                      (masterBotData.stats.sharpeRatio || 0) >= 1 ? 'Good' :
+                      'Below average'
+                    }
+                    valueColor="text-yellow-400"
+                    subtitleColor={
+                      (masterBotData.stats.sharpeRatio || 0) >= 3 ? 'text-green-400' :
+                      (masterBotData.stats.sharpeRatio || 0) >= 2 ? 'text-yellow-400' :
+                      (masterBotData.stats.sharpeRatio || 0) >= 1 ? 'text-amber-400' :
+                      'text-red-400'
+                    }
+                  />
                 </div>
                 </div>
               </div>
 
               {/* Open Positions (Live Grid) */}
-              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-primary-500/50 transition-all">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
-                      <Activity className="w-6 h-6 text-primary-400" />
+              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
+                <div className="flex items-center justify-between mb-4 sm:mb-6">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
+                      <Activity className="w-4 h-4 sm:w-6 sm:h-6 text-primary-400" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-medium text-gray-900 dark:text-white">Open Positions (Live)</h2>
-                      <p className="text-sm text-gray-600 dark:text-dark-400">{masterBotData.openPositions.length} active position{masterBotData.openPositions.length !== 1 ? 's' : ''} • Real-time</p>
+                      <h2 className="text-sm sm:text-xl font-medium text-gray-900 dark:text-white">Open Positions (Live)</h2>
+                      <p className="text-[10px] sm:text-sm text-gray-600 dark:text-dark-400">{masterBotData.openPositions.length} active position{masterBotData.openPositions.length !== 1 ? 's' : ''} • Real-time</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5 sm:gap-2">
                     <div className="relative">
                       <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
                       <div className="absolute inset-0 w-2 h-2 bg-green-400 rounded-full animate-ping" />
                     </div>
-                    <span className="text-xs text-green-400 font-semibold">LIVE</span>
+                    <span className="text-[10px] sm:text-xs text-green-400 font-semibold">LIVE</span>
                   </div>
                 </div>
 
                 {masterBotData.openPositions.length === 0 ? (
                   <div className="text-center py-12">
-                    <div className="w-16 h-16 bg-gray-200 dark:bg-dark-800rounded-full flex items-center justify-center mx-auto mb-4">
+                    <div className="w-16 h-16 bg-gray-200 dark:bg-dark-800 rounded-full flex items-center justify-center mx-auto mb-4">
                       <Layers className="w-8 h-8 text-dark-600" />
                     </div>
                     <p className="text-gray-600 dark:text-dark-400">No open positions</p>
@@ -1200,7 +1347,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                         className="relative p-3 rounded-lg border border-gray-200 dark:border-dark-700 bg-gray-100 dark:bg-dark-900/30 overflow-hidden hover:border-primary-500/50 transition-all"
                       >
                         {/* Header Row */}
-                        <div className="flex items-center justify-between mb-3">
+                        <div className="flex flex-wrap items-center justify-between gap-y-2 mb-3">
                           <div className="flex items-center gap-2">
                             <div className={`px-2 py-0.5 rounded text-xs font-medium ${
                               position.side === 'LONG'
@@ -1210,8 +1357,8 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                               {position.side} ×{position.leverage}
                             </div>
                             <span className="text-base font-normal text-gray-900 dark:text-white">{position.pair}</span>
-                            {/* SL/TP */}
-                            <div className="flex items-center gap-1.5 ml-2">
+                            {/* SL/TP — inline on sm+ */}
+                            <div className="hidden sm:flex items-center gap-1.5 ml-2">
                               <div className="px-1.5 py-0.5 bg-gray-100 dark:bg-dark-800/50 border border-gray-200 dark:border-dark-700 rounded flex items-center gap-1.5">
                                 <div className="text-[9px] text-gray-600 dark:text-dark-400">SL</div>
                                 <div className="font-mono text-[10px] text-red-400 font-normal">
@@ -1230,17 +1377,32 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                             <Clock className="w-3 h-3" />
                             {position.duration}
                           </div>
+                          {/* SL/TP — separate row on mobile */}
+                          <div className="flex sm:hidden items-center gap-1.5 w-full">
+                            <div className="px-1.5 py-0.5 bg-gray-100 dark:bg-dark-800/50 border border-gray-200 dark:border-dark-700 rounded flex items-center gap-1.5">
+                              <div className="text-[9px] text-gray-600 dark:text-dark-400">SL</div>
+                              <div className="font-mono text-[10px] text-red-400 font-normal">
+                                ${position.stopLoss.toFixed(0)}
+                              </div>
+                            </div>
+                            <div className="px-1.5 py-0.5 bg-gray-100 dark:bg-dark-800/50 border border-gray-200 dark:border-dark-700 rounded flex items-center gap-1.5">
+                              <div className="text-[9px] text-gray-600 dark:text-dark-400">TP</div>
+                              <div className="font-mono text-[10px] text-green-400 font-normal">
+                                ${position.takeProfit.toFixed(0)}
+                              </div>
+                            </div>
+                          </div>
                         </div>
 
                         {/* Price Grid */}
-                        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-                          <div>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
+                          <div className="bg-gray-100 dark:bg-dark-900/50 rounded-lg px-2.5 py-2">
                             <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-0.5">Entry Price</div>
                             <div className="font-mono text-sm text-gray-900 dark:text-white font-normal">
                               ${position.entryPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </div>
                           </div>
-                          <div>
+                          <div className="bg-gray-100 dark:bg-dark-900/50 rounded-lg px-2.5 py-2">
                             <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-0.5 flex items-center gap-1">
                               Current Price
                               {position.pnl >= 0 ? <ArrowUpRight className="w-2.5 h-2.5 text-green-400" /> : <ArrowDownRight className="w-2.5 h-2.5 text-red-400" />}
@@ -1249,19 +1411,19 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                               ${position.currentPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </div>
                           </div>
-                          <div>
+                          <div className="bg-gray-100 dark:bg-dark-900/50 rounded-lg px-2.5 py-2">
                             <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-0.5">Position Size</div>
                             <div className="font-mono text-sm text-gray-900 dark:text-white font-normal">
                               ${position.positionSize.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </div>
                           </div>
-                          <div>
+                          <div className="bg-gray-100 dark:bg-dark-900/50 rounded-lg px-2.5 py-2">
                             <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-0.5">Amount</div>
                             <div className="font-mono text-sm text-gray-900 dark:text-white font-normal">
                               {position.amount.toFixed(8)}
                             </div>
                           </div>
-                          <div>
+                          <div className={`col-span-2 sm:col-span-1 rounded-lg px-2.5 py-2 ${position.pnl >= 0 ? 'bg-green-500/10' : 'bg-red-500/10'}`}>
                             <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-0.5">P&L</div>
                             <div className={`font-mono text-sm font-normal ${position.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                               {position.pnl >= 0 ? '+' : ''}${Math.abs(position.pnl).toFixed(2)} <span className="text-[10px] opacity-70">({position.pnl >= 0 ? '+' : ''}{position.pnlPercent.toFixed(2)}%)</span>
@@ -1276,52 +1438,126 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
               </div>
 
               {/* Recent Trades (Detailed Grid) */}
-              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-primary-500/50 transition-all">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
-                      <Clock className="w-6 h-6 text-primary-400" />
+              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
+                      <Clock className="w-4 h-4 sm:w-6 sm:h-6 text-primary-400" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-medium text-gray-900 dark:text-white">Trade History</h2>
-                      <p className="text-sm text-gray-600 dark:text-dark-400">{masterBotData.recentTrades.length} trades</p>
+                      <h2 className="text-sm sm:text-xl font-medium text-gray-900 dark:text-white">Trade History</h2>
+                      <p className="text-[10px] sm:text-sm text-gray-600 dark:text-dark-400">{filteredMasterTrades.length} of {masterBotData.recentTrades.length} trades</p>
                     </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:flex gap-2 sm:flex-wrap w-full sm:w-auto">
+                    <FilterDropdown
+                      value={tradeFilterPair}
+                      onChange={(v) => { setTradeFilterPair(v); setTradeHistoryPage(1); }}
+                      options={[
+                        { value: 'all', label: 'All Pairs' },
+                        ...masterUniquePairs.map(pair => ({ value: pair, label: pair })),
+                      ]}
+                    />
+                    <FilterDropdown
+                      value={tradeFilterSide}
+                      onChange={(v) => { setTradeFilterSide(v as 'all' | 'LONG' | 'SHORT'); setTradeHistoryPage(1); }}
+                      options={[
+                        { value: 'all', label: 'All Sides' },
+                        { value: 'LONG', label: 'Long Only' },
+                        { value: 'SHORT', label: 'Short Only' },
+                      ]}
+                    />
+                    <FilterDropdown
+                      value={tradeFilterResult}
+                      onChange={(v) => { setTradeFilterResult(v as 'all' | 'wins' | 'losses'); setTradeHistoryPage(1); }}
+                      options={[
+                        { value: 'all', label: 'All Results' },
+                        { value: 'wins', label: 'Wins Only' },
+                        { value: 'losses', label: 'Losses Only' },
+                      ]}
+                    />
+                    <FilterDropdown
+                      value={tradeSortBy}
+                      onChange={(v) => { setTradeSortBy(v as typeof tradeSortBy); setTradeHistoryPage(1); }}
+                      options={[
+                        { value: 'newest', label: 'Newest First' },
+                        { value: 'oldest', label: 'Oldest First' },
+                        { value: 'pnl-high', label: 'Highest P&L' },
+                        { value: 'pnl-low', label: 'Lowest P&L' },
+                        { value: 'size-high', label: 'Largest Size' },
+                        { value: 'size-low', label: 'Smallest Size' },
+                        { value: 'duration', label: 'Longest Duration' },
+                      ]}
+                    />
                   </div>
                 </div>
 
-                {masterBotData.recentTrades.length === 0 ? (
+                {filteredMasterTrades.length === 0 ? (
                   <div className="text-center py-12">
-                    <div className="w-16 h-16 bg-gray-200 dark:bg-dark-800rounded-full flex items-center justify-center mx-auto mb-4">
+                    <div className="w-16 h-16 bg-gray-200 dark:bg-dark-800 rounded-full flex items-center justify-center mx-auto mb-4">
                       <Activity className="w-8 h-8 text-dark-600" />
                     </div>
-                    <p className="text-gray-600 dark:text-dark-400">No trades yet</p>
-                    <p className="text-xs text-dark-500 mt-1">Trades will appear here</p>
+                    <p className="text-gray-600 dark:text-dark-400">
+                      {masterBotData.recentTrades.length === 0 ? 'No trades yet' : 'No trades match filters'}
+                    </p>
+                    <p className="text-xs text-dark-500 mt-1">
+                      {masterBotData.recentTrades.length === 0 ? 'Trades will appear here' : 'Try adjusting your filters'}
+                    </p>
                   </div>
                 ) : (
+                  <>
                   <div className="space-y-2">
-                    {masterBotData.recentTrades.map((trade) => {
+                    {filteredMasterTrades.slice(
+                      (tradeHistoryPage - 1) * tradesPerPage,
+                      tradeHistoryPage * tradesPerPage
+                    ).map((trade) => {
                       const isExpanded = expandedTrades.has(trade.id);
                       return (
                         <div key={trade.id} className="rounded-lg border border-gray-200 dark:border-dark-700 bg-gray-100 dark:bg-dark-900/30 overflow-hidden">
                           {/* Compact Header - Always Visible */}
                           <div
-                            className="p-3 flex items-center justify-between gap-4 cursor-pointer hover:bg-gray-200 dark:bg-dark-800/70 transition-colors"
+                            className="p-3 cursor-pointer hover:bg-gray-200 dark:hover:bg-dark-800/70 transition-colors"
                             onClick={() => toggleTradeExpanded(trade.id)}
                           >
-                            {/* Left: Pair & Side */}
-                            <div className="flex items-center gap-2 flex-shrink-0">
-                              <span className="text-base font-normal text-gray-900 dark:text-white">{trade.pair}</span>
-                              <div className={`px-2 py-0.5 rounded text-xs font-medium whitespace-nowrap ${
-                                trade.side === 'LONG' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
-                              }`}>
-                                {trade.side === 'LONG' ? '↑' : '↓'} {trade.side}×{trade.leverage}
+                            {/* Row 1: Pair & Side + Arrow */}
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <span className="text-base font-normal text-gray-900 dark:text-white">{trade.pair}</span>
+                                <div className={`px-2 py-0.5 rounded text-xs font-medium whitespace-nowrap ${
+                                  trade.side === 'LONG' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
+                                }`}>
+                                  {trade.side === 'LONG' ? '↑' : '↓'} {trade.side}×{trade.leverage}
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                {/* P&L — inline on sm+ */}
+                                <div className="hidden sm:block text-right">
+                                  <div className={`text-sm font-normal ${trade.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                    {trade.pnl >= 0 ? '+' : ''}${trade.pnl.toFixed(2)}
+                                  </div>
+                                  <div className={`text-[10px] font-normal opacity-70 ${trade.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                    {trade.pnl >= 0 ? '+' : ''}{trade.pnlPercent.toFixed(2)}%
+                                  </div>
+                                </div>
+                                {/* Timestamp — inline on sm+ */}
+                                <div className="hidden sm:block text-right">
+                                  <div className="text-[10px] text-gray-600 dark:text-dark-400 whitespace-nowrap">
+                                    {new Date(trade.closedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                  </div>
+                                </div>
+                                <motion.div
+                                  animate={{ rotate: isExpanded ? 180 : 0 }}
+                                  transition={{ duration: 0.2 }}
+                                >
+                                  <ChevronRight className="w-3 h-3 text-gray-600 dark:text-dark-400" />
+                                </motion.div>
                               </div>
                             </div>
-
-                            {/* Middle: P&L (Main Focus) */}
-                            <div className="flex items-center gap-4">
-                              <div className="text-right">
+                            {/* Row 2: P&L + Date — mobile only */}
+                            <div className="flex sm:hidden items-center justify-between mt-1.5">
+                              <div className="flex items-center gap-2">
                                 <div className={`text-sm font-normal ${trade.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                                   {trade.pnl >= 0 ? '+' : ''}${trade.pnl.toFixed(2)}
                                 </div>
@@ -1329,21 +1565,9 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                                   {trade.pnl >= 0 ? '+' : ''}{trade.pnlPercent.toFixed(2)}%
                                 </div>
                               </div>
-                            </div>
-
-                            {/* Right: Timestamp & Arrow */}
-                            <div className="flex items-center gap-3 flex-shrink-0">
-                              <div className="text-right">
-                                <div className="text-[10px] text-gray-600 dark:text-dark-400 whitespace-nowrap">
-                                  {new Date(trade.closedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                                </div>
+                              <div className="text-[10px] text-gray-600 dark:text-dark-400">
+                                {new Date(trade.closedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                               </div>
-                              <motion.div
-                                animate={{ rotate: isExpanded ? 180 : 0 }}
-                                transition={{ duration: 0.2 }}
-                              >
-                                <ChevronRight className="w-3 h-3 text-gray-600 dark:text-dark-400" />
-                              </motion.div>
                             </div>
                           </div>
 
@@ -1355,26 +1579,26 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                             className="overflow-hidden"
                           >
                             <div className="px-3 pb-3 pt-0 border-t border-gray-200 dark:border-dark-700/50">
-                              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
-                                <div>
-                                  <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-1">Entry Price</div>
-                                  <div className="px-1.5 py-0.5 bg-gray-100 dark:bg-dark-800/50 border border-gray-200 dark:border-dark-700 rounded inline-flex items-center">
-                                    <div className="font-mono text-sm text-gray-900 dark:text-white font-normal">${trade.entryPrice.toFixed(2)}</div>
-                                  </div>
+                              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 mt-3">
+                                <div className="bg-gray-100 dark:bg-dark-900/50 rounded-lg px-2.5 py-2">
+                                  <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-0.5">Entry Price</div>
+                                  <div className="font-mono text-sm text-gray-900 dark:text-white font-normal">${trade.entryPrice.toFixed(2)}</div>
                                 </div>
-                                <div>
-                                  <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-1">Exit Price</div>
-                                  <div className="px-1.5 py-0.5 bg-gray-100 dark:bg-dark-800/50 border border-gray-200 dark:border-dark-700 rounded inline-flex items-center">
-                                    <div className="font-mono text-sm text-gray-900 dark:text-white font-normal">${trade.exitPrice.toFixed(2)}</div>
-                                  </div>
+                                <div className="bg-gray-100 dark:bg-dark-900/50 rounded-lg px-2.5 py-2">
+                                  <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-0.5">Exit Price</div>
+                                  <div className="font-mono text-sm text-gray-900 dark:text-white font-normal">${trade.exitPrice.toFixed(2)}</div>
                                 </div>
-                                <div>
-                                  <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-1">Position Size</div>
+                                <div className="bg-gray-100 dark:bg-dark-900/50 rounded-lg px-2.5 py-2">
+                                  <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-0.5">Position Size</div>
                                   <div className="font-mono text-sm text-gray-900 dark:text-white font-normal">${trade.positionSize.toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
                                 </div>
-                                <div>
-                                  <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-1">Duration</div>
+                                <div className="bg-gray-100 dark:bg-dark-900/50 rounded-lg px-2.5 py-2">
+                                  <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-0.5">Duration</div>
                                   <div className="text-sm text-gray-900 dark:text-white font-normal">{trade.duration}</div>
+                                </div>
+                                <div className="col-span-2 sm:col-span-1 bg-red-500/10 rounded-lg px-2.5 py-2">
+                                  <div className="text-[10px] text-gray-600 dark:text-dark-400 mb-0.5">Total Fees</div>
+                                  <div className="font-mono text-sm text-red-400 font-normal">-${trade.totalFees.toFixed(2)}</div>
                                 </div>
                               </div>
                             </div>
@@ -1383,6 +1607,14 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                       );
                     })}
                   </div>
+                  <Pagination
+                    currentPage={tradeHistoryPage}
+                    totalItems={filteredMasterTrades.length}
+                    itemsPerPage={tradesPerPage}
+                    onPageChange={setTradeHistoryPage}
+                    className="pt-4 mt-4 border-t border-gray-200 dark:border-dark-700"
+                  />
+                  </>
                 )}
                 </div>
               </div>
@@ -1402,16 +1634,16 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 {/* Left: Copiers Growth Chart */}
                 <div className="lg:col-span-8">
-                  <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                    <div className="h-full bg-gradient-to-br from-dark-800/95 to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-primary-500/50 transition-all">
-                    <div className="flex items-center justify-between mb-6">
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
-                          <Users className="w-6 h-6 text-primary-400" />
+                  <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                    <div className="h-full bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
+                    <div className="flex items-center justify-between mb-4 sm:mb-6">
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
+                          <Users className="w-4 h-4 sm:w-6 sm:h-6 text-primary-400" />
                         </div>
                         <div>
-                          <h2 className="text-xl font-medium text-gray-900 dark:text-white">Copiers Growth</h2>
-                          <p className="text-xs text-gray-600 dark:text-dark-400">Total copiers over time (30 days)</p>
+                          <h2 className="text-sm sm:text-xl font-medium text-gray-900 dark:text-white">Copiers Growth</h2>
+                          <p className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400">Total copiers over time (30 days)</p>
                         </div>
                       </div>
                       <div className="text-right">
@@ -1494,11 +1726,11 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                 {/* Right: Stats Cards */}
                 <div className="lg:col-span-4 flex flex-col gap-4">
                   {/* Avg Investment */}
-                  <div className="flex-1 bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-gray-200 dark:border-dark-700 rounded-xl p-5 hover:border-primary-500/50 transition-all flex items-center">
+                  <div className="flex-1 bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 border border-gray-200 dark:border-dark-700 rounded-xl p-5 hover:border-primary-500/50 transition-all flex items-center">
                     <div className="flex items-center justify-between w-full">
                       <div className="flex items-center gap-3">
                         <div className="w-11 h-11 bg-primary-500/20 border border-primary-500/30 rounded-lg flex items-center justify-center">
-                          <DollarSign className="w-6 h-6 text-primary-400" />
+                          <DollarSign className="w-4 h-4 sm:w-6 sm:h-6 text-primary-400" />
                         </div>
                         <div>
                           <div className="text-xs text-gray-600 dark:text-dark-400 mb-1">Avg Investment</div>
@@ -1515,11 +1747,11 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                   </div>
 
                   {/* New Copiers 24h */}
-                  <div className="flex-1 bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-gray-200 dark:border-dark-700 rounded-xl p-5 hover:border-primary-500/50 transition-all flex items-center">
+                  <div className="flex-1 bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 border border-gray-200 dark:border-dark-700 rounded-xl p-5 hover:border-primary-500/50 transition-all flex items-center">
                     <div className="flex items-center justify-between w-full">
                       <div className="flex items-center gap-3">
                         <div className="w-11 h-11 bg-primary-500/20 border border-primary-500/30 rounded-lg flex items-center justify-center">
-                          <TrendingUp className="w-6 h-6 text-primary-400" />
+                          <TrendingUp className="w-4 h-4 sm:w-6 sm:h-6 text-primary-400" />
                         </div>
                         <div>
                           <div className="text-xs text-gray-600 dark:text-dark-400 mb-1">New (24h)</div>
@@ -1534,11 +1766,11 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                   </div>
 
                   {/* Sharpe Ratio */}
-                  <div className="flex-1 bg-gradient-to-br from-dark-800/95 to-dark-900/95 border border-gray-200 dark:border-dark-700 rounded-xl p-5 hover:border-primary-500/50 transition-all flex items-center">
+                  <div className="flex-1 bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 border border-gray-200 dark:border-dark-700 rounded-xl p-5 hover:border-primary-500/50 transition-all flex items-center">
                     <div className="flex items-center justify-between w-full">
                       <div className="flex items-center gap-3">
                         <div className="w-11 h-11 bg-primary-500/20 border border-primary-500/30 rounded-lg flex items-center justify-center">
-                          <Award className="w-6 h-6 text-primary-400" />
+                          <Award className="w-4 h-4 sm:w-6 sm:h-6 text-primary-400" />
                         </div>
                         <div>
                           <div className="text-xs text-gray-600 dark:text-dark-400 mb-1">Sharpe Ratio</div>
@@ -1558,14 +1790,14 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Geography Donut Chart */}
                 <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                  <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-primary-500/50 transition-all">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="w-12 h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
-                      <BarChart3 className="w-6 h-6 text-primary-400" />
+                  <div className="h-full bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
+                  <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+                    <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
+                      <BarChart3 className="w-4 h-4 sm:w-6 sm:h-6 text-primary-400" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-medium text-gray-900 dark:text-white">Copier Geography</h2>
-                      <p className="text-xs text-gray-600 dark:text-dark-400">Distribution by country</p>
+                      <h2 className="text-sm sm:text-xl font-medium text-gray-900 dark:text-white">Copier Geography</h2>
+                      <p className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400">Distribution by country</p>
                     </div>
                   </div>
                   <Chart
@@ -1657,14 +1889,14 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
 
                 {/* Trading Pairs Distribution */}
                 <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                  <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-primary-500/50 transition-all">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="w-12 h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
-                      <PieChart className="w-6 h-6 text-primary-400" />
+                  <div className="h-full bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
+                  <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+                    <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
+                      <PieChart className="w-4 h-4 sm:w-6 sm:h-6 text-primary-400" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-medium text-gray-900 dark:text-white">Trading Pairs</h2>
-                      <p className="text-xs text-gray-600 dark:text-dark-400">Volume distribution (30d)</p>
+                      <h2 className="text-sm sm:text-xl font-medium text-gray-900 dark:text-white">Trading Pairs</h2>
+                      <p className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400">Volume distribution (30d)</p>
                     </div>
                   </div>
 
@@ -1685,7 +1917,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
 
                         {/* Horizontal Bar */}
                         <div className="flex-1 flex items-center gap-3">
-                          <div className="flex-1 h-10 bg-gray-200 dark:bg-dark-800rounded-lg overflow-hidden relative">
+                          <div className="flex-1 h-10 bg-gray-200 dark:bg-dark-800 rounded-lg overflow-hidden relative">
                             <div
                               className="h-full rounded-lg transition-all duration-500"
                               style={{
@@ -1711,14 +1943,14 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 {/* Global Leaderboard */}
                 <div className="lg:col-span-6 rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                  <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-primary-500/50 transition-all">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="w-12 h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
-                      <Trophy className="w-6 h-6 text-primary-400" />
+                  <div className="h-full bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
+                  <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+                    <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
+                      <Trophy className="w-4 h-4 sm:w-6 sm:h-6 text-primary-400" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-medium text-gray-900 dark:text-white">Leaderboard</h2>
-                      <p className="text-xs text-gray-600 dark:text-dark-400">Global ranking</p>
+                      <h2 className="text-sm sm:text-xl font-medium text-gray-900 dark:text-white">Leaderboard</h2>
+                      <p className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400">Global ranking</p>
                     </div>
                   </div>
                   <div className="flex items-center justify-between mb-6 p-4 bg-gradient-to-r from-yellow-500/10 to-orange-500/10 rounded-xl border border-yellow-500/20">
@@ -1729,7 +1961,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                     <div className="text-right">
                       <div className="text-sm text-gray-600 dark:text-dark-400">Change</div>
                       <div className="text-3xl font-medium text-green-400">↑ 2</div>
-                      <div className="text-xs text-dark-500">This week</div>
+                      <div className="text-xs text-gray-500 dark:text-dark-500">This week</div>
                     </div>
                   </div>
                   <div className="space-y-2">
@@ -1748,10 +1980,10 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                             : 'hover:bg-gray-100 dark:bg-dark-800/50'
                         }`}
                       >
-                        <span className={leaderBot.highlight ? 'text-gray-900 dark:text-white font-normal' : 'text-slate-400'}>
+                        <span className={leaderBot.highlight ? 'text-gray-900 dark:text-white font-normal' : 'text-gray-500 dark:text-slate-400'}>
                           #{leaderBot.rank} {leaderBot.name}
                         </span>
-                        <span className={leaderBot.highlight ? 'text-yellow-400 font-normal font-mono' : 'text-slate-500 font-mono'}>
+                        <span className={leaderBot.highlight ? 'text-yellow-400 font-normal font-mono' : 'text-gray-400 dark:text-slate-500 font-mono'}>
                           {leaderBot.roi}
                         </span>
                       </div>
@@ -1762,14 +1994,14 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
 
                 {/* Top Copiers */}
                 <div className="lg:col-span-6 rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                  <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6 hover:border-primary-500/50 transition-all">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="w-12 h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
-                      <Medal className="w-6 h-6 text-primary-400" />
+                  <div className="h-full bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
+                  <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+                    <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
+                      <Medal className="w-4 h-4 sm:w-6 sm:h-6 text-primary-400" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-medium text-gray-900 dark:text-white">Top Copiers</h2>
-                      <p className="text-xs text-gray-600 dark:text-dark-400">Best performers</p>
+                      <h2 className="text-sm sm:text-xl font-medium text-gray-900 dark:text-white">Top Copiers</h2>
+                      <p className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400">Best performers</p>
                     </div>
                   </div>
                   <div className="space-y-3">
@@ -1813,15 +2045,15 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
               {/* Heatmap & Terminal Grid */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                 {/* Activity Heatmap */}
-                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6 flex flex-col">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-12 h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
-                      <Calendar className="w-6 h-6 text-primary-400" />
+                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                  <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 flex flex-col">
+                  <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                    <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
+                      <Calendar className="w-4 h-4 sm:w-6 sm:h-6 text-primary-400" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-medium text-gray-900 dark:text-white">Activity Heatmap</h2>
-                      <p className="text-xs text-gray-600 dark:text-dark-400">Last 90 days trading activity</p>
+                      <h2 className="text-sm sm:text-xl font-medium text-gray-900 dark:text-white">Activity Heatmap</h2>
+                      <p className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400">Last 30 days trading activity</p>
                     </div>
                   </div>
                   <div className="overflow-x-auto flex-1 flex items-center justify-center">
@@ -1894,30 +2126,30 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
 
               {/* Trading Hours & Days */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="w-12 h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
-                      <Clock className="w-6 h-6 text-primary-400" />
+                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                  <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6">
+                  <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+                    <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
+                      <Clock className="w-4 h-4 sm:w-6 sm:h-6 text-primary-400" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-medium text-gray-900 dark:text-white">Best Trading Hours</h2>
-                      <p className="text-xs text-gray-600 dark:text-dark-400">Optimal time periods (UTC)</p>
+                      <h2 className="text-sm sm:text-xl font-medium text-gray-900 dark:text-white">Best Trading Hours</h2>
+                      <p className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400">Optimal time periods (UTC)</p>
                     </div>
                   </div>
                   <Chart options={tradingHoursChartOptions} series={tradingHoursChartOptions.series} type="bar" height={250} />
                   </div>
                 </div>
 
-                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="w-12 h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
-                      <BarChart3 className="w-6 h-6 text-primary-400" />
+                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                  <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6">
+                  <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+                    <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
+                      <BarChart3 className="w-4 h-4 sm:w-6 sm:h-6 text-primary-400" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-medium text-gray-900 dark:text-white">Day of Week Performance</h2>
-                      <p className="text-xs text-gray-600 dark:text-dark-400">Weekly trading patterns</p>
+                      <h2 className="text-sm sm:text-xl font-medium text-gray-900 dark:text-white">Day of Week Performance</h2>
+                      <p className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400">Weekly trading patterns</p>
                     </div>
                   </div>
                   <Chart options={dayOfWeekChartOptions} series={dayOfWeekChartOptions.series} type="bar" height={250} />
@@ -1926,15 +2158,15 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
               </div>
 
               {/* Market Conditions */}
-              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-12 h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
-                    <CloudSun className="w-6 h-6 text-primary-400" />
+              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6">
+                <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+                  <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
+                    <CloudSun className="w-4 h-4 sm:w-6 sm:h-6 text-primary-400" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-medium text-gray-900 dark:text-white">Market Conditions</h2>
-                    <p className="text-xs text-gray-600 dark:text-dark-400">Performance across different market states</p>
+                    <h2 className="text-sm sm:text-xl font-medium text-gray-900 dark:text-white">Market Conditions</h2>
+                    <p className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400">Performance across different market states</p>
                   </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -1977,28 +2209,28 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
               {/* Advanced Metrics */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                 <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6 hover:border-primary-500/50 transition-all">
+                  <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
                     <div className="text-xs text-slate-400 mb-2">SORTINO RATIO</div>
                     <div className="text-xl sm:text-2xl font-medium text-primary-400 mb-2">3.12</div>
                     <div className="text-xs text-gray-600 dark:text-dark-400">Downside: 2.1%</div>
                   </div>
                 </div>
                 <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6 hover:border-primary-500/50 transition-all">
+                  <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
                     <div className="text-xs text-slate-400 mb-2">CALMAR RATIO</div>
                     <div className="text-xl sm:text-2xl font-medium text-primary-400 mb-2">2.87</div>
                     <div className="text-xs text-gray-600 dark:text-dark-400">Return/MaxDD</div>
                   </div>
                 </div>
                 <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6 hover:border-primary-500/50 transition-all">
+                  <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
                     <div className="text-xs text-slate-400 mb-2">OMEGA RATIO</div>
                     <div className="text-xl sm:text-2xl font-medium text-primary-400 mb-2">2.34</div>
                     <div className="text-xs text-gray-600 dark:text-dark-400">Threshold: 0%</div>
                   </div>
                 </div>
                 <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6 hover:border-accent-500/50 transition-all">
+                  <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-accent-500/50 transition-all">
                     <div className="text-xs text-slate-400 mb-2">TREYNOR RATIO</div>
                     <div className="text-xl sm:text-2xl font-medium text-accent-400 mb-2">1.89</div>
                     <div className="text-xs text-gray-600 dark:text-dark-400">Beta-adjusted</div>
@@ -2008,14 +2240,14 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
 
               {/* Risk/Reward Scatter */}
               <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-12 h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
-                    <BarChart className="w-6 h-6 text-primary-400" />
+                <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6">
+                <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+                  <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
+                    <BarChart className="w-4 h-4 sm:w-6 sm:h-6 text-primary-400" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-medium text-gray-900 dark:text-white">Risk/Reward Analysis</h2>
-                    <p className="text-xs text-gray-600 dark:text-dark-400">All trades performance scatter</p>
+                    <h2 className="text-sm sm:text-xl font-medium text-gray-900 dark:text-white">Risk/Reward Analysis</h2>
+                    <p className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400">All trades performance scatter</p>
                   </div>
                 </div>
                 <Chart options={riskRewardScatterOptions} series={riskRewardScatterOptions.series} type="scatter" height={300} />
@@ -2025,21 +2257,21 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
               {/* Consecutive Stats */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6 hover:border-primary-500/50 transition-all">
+                  <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
                     <div className="text-xs text-slate-400 mb-2">MAX WIN STREAK</div>
                     <div className="text-3xl font-medium text-primary-400 mb-2">47</div>
                     <div className="text-xs text-gray-600 dark:text-dark-400">Consecutive wins</div>
                   </div>
                 </div>
                 <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6 hover:border-red-500/50 transition-all">
+                  <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-red-500/50 transition-all">
                     <div className="text-xs text-slate-400 mb-2">MAX LOSS STREAK</div>
                     <div className="text-3xl font-medium text-red-400 mb-2">3</div>
                     <div className="text-xs text-gray-600 dark:text-dark-400">Consecutive losses</div>
                   </div>
                 </div>
                 <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6 hover:border-accent-500/50 transition-all">
+                  <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-accent-500/50 transition-all">
                     <div className="text-xs text-slate-400 mb-2">AVG HOLD TIME</div>
                     <div className="text-3xl font-medium text-accent-400 mb-2">4.2h</div>
                     <div className="text-xs text-gray-600 dark:text-dark-400">Per trade</div>
@@ -2049,15 +2281,15 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
 
               {/* Order Book - Full Width */}
               <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
-                      <BookOpen className="w-6 h-6 text-primary-400" />
+                <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6">
+                <div className="flex items-center justify-between mb-4 sm:mb-6">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
+                      <BookOpen className="w-4 h-4 sm:w-6 sm:h-6 text-primary-400" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-medium text-gray-900 dark:text-white">Order Book - BTC/USDT</h2>
-                      <p className="text-xs text-gray-600 dark:text-dark-400">Real-time market depth</p>
+                      <h2 className="text-sm sm:text-xl font-medium text-gray-900 dark:text-white">Order Book - BTC/USDT</h2>
+                      <p className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400">Real-time market depth</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -2115,14 +2347,14 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
 
               {/* Neural Network Visualization */}
               <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-12 h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
-                    <Brain className="w-6 h-6 text-primary-400" />
+                <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6">
+                <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+                  <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
+                    <Brain className="w-4 h-4 sm:w-6 sm:h-6 text-primary-400" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-medium text-gray-900 dark:text-white">Neural Network Architecture</h2>
-                    <p className="text-xs text-gray-600 dark:text-dark-400">LSTM + XGBoost Ensemble</p>
+                    <h2 className="text-sm sm:text-xl font-medium text-gray-900 dark:text-white">Neural Network Architecture</h2>
+                    <p className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400">LSTM + XGBoost Ensemble</p>
                   </div>
                 </div>
                 <div className="flex items-center justify-center gap-12 py-8">
@@ -2171,14 +2403,14 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
               {/* Fees & Correlation */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                 <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-12 h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
-                      <DollarSign className="w-6 h-6 text-primary-400" />
+                  <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6">
+                  <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                    <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
+                      <DollarSign className="w-4 h-4 sm:w-6 sm:h-6 text-primary-400" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-medium text-gray-900 dark:text-white">Fee & Cost Breakdown</h2>
-                      <p className="text-xs text-gray-600 dark:text-dark-400">Total operational costs</p>
+                      <h2 className="text-sm sm:text-xl font-medium text-gray-900 dark:text-white">Fee & Cost Breakdown</h2>
+                      <p className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400">Total operational costs</p>
                     </div>
                   </div>
                   <div className="space-y-3">
@@ -2204,38 +2436,38 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                   </div>
                 </div>
 
-                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6 flex flex-col">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="w-12 h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
-                      <Hash className="w-6 h-6 text-primary-400" />
+                <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                  <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-6 flex flex-col">
+                  <div className="flex items-center gap-3 mb-4 sm:mb-6">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
+                      <Hash className="w-5 h-5 sm:w-6 sm:h-6 text-primary-400" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-medium text-gray-900 dark:text-white">Correlation Matrix</h2>
-                      <p className="text-xs text-gray-600 dark:text-dark-400">Trading pairs correlation</p>
+                      <h2 className="text-lg sm:text-xl font-medium text-gray-900 dark:text-white">Correlation Matrix</h2>
+                      <p className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400">Trading pairs correlation</p>
                     </div>
                   </div>
-                  <div className="flex-1 flex items-center justify-center">
-                    <div className="flex gap-2">
-                      <div className="flex flex-col gap-2 mr-3">
-                        <div className="h-14"></div>
+                  <div className="flex-1 flex items-center justify-center overflow-x-auto">
+                    <div className="flex gap-1 sm:gap-2">
+                      <div className="flex flex-col gap-1 sm:gap-2 mr-1 sm:mr-3">
+                        <div className="h-9 sm:h-14"></div>
                         {['BTC', 'ETH', 'SOL', 'MATIC', 'AVAX'].map((pair, idx) => (
-                          <div key={idx} className="w-14 h-14 bg-gray-200 dark:bg-dark-800text-slate-400 text-xs flex items-center justify-center border border-gray-200 dark:border-dark-700 rounded font-medium">
+                          <div key={idx} className="w-9 h-9 sm:w-14 sm:h-14 bg-gray-200 dark:bg-dark-800 text-gray-700 dark:text-slate-400 text-[10px] sm:text-xs flex items-center justify-center border border-gray-300 dark:border-dark-700 rounded font-medium">
                             {pair}
                           </div>
                         ))}
                       </div>
                       <div>
-                        <div className="flex gap-2 mb-3">
+                        <div className="flex gap-1 sm:gap-2 mb-1 sm:mb-3">
                           {['BTC', 'ETH', 'SOL', 'MATIC', 'AVAX'].map((pair, idx) => (
-                            <div key={idx} className="w-14 h-14 bg-gray-200 dark:bg-dark-800text-slate-400 text-xs flex items-center justify-center border border-gray-200 dark:border-dark-700 rounded font-medium">
+                            <div key={idx} className="w-9 h-9 sm:w-14 sm:h-14 bg-gray-200 dark:bg-dark-800 text-gray-700 dark:text-slate-400 text-[10px] sm:text-xs flex items-center justify-center border border-gray-300 dark:border-dark-700 rounded font-medium">
                               {pair}
                             </div>
                           ))}
                         </div>
-                        <div className="flex flex-col gap-2">
+                        <div className="flex flex-col gap-1 sm:gap-2">
                           {[1.0, 0.87, 0.72, 0.54, 0.63].map((_, i) => (
-                            <div key={i} className="flex gap-2">
+                            <div key={i} className="flex gap-1 sm:gap-2">
                               {[1.0, 0.87, 0.72, 0.54, 0.63].map((corr, j) => {
                                 const value = i === j ? 1.0 : (Math.random() * 0.6 + 0.2);
                                 const color = value > 0.8 ? 'bg-green-500' :
@@ -2243,7 +2475,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                                              value > 0.4 ? 'bg-yellow-500' :
                                              'bg-orange-400';
                                 return (
-                                  <div key={j} className={`w-14 h-14 ${color} text-gray-900 dark:text-white text-sm flex items-center justify-center font-medium border border-gray-200 dark:border-dark-700 rounded transition-all hover:scale-110 cursor-pointer`}>
+                                  <div key={j} className={`w-9 h-9 sm:w-14 sm:h-14 ${color} text-white text-[10px] sm:text-sm flex items-center justify-center font-medium border border-gray-300 dark:border-dark-700 rounded transition-all hover:scale-110 cursor-pointer`}>
                                     {value.toFixed(2)}
                                   </div>
                                 );
@@ -2261,14 +2493,14 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
               {/* Feature Importance & Predictions */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                 <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="w-12 h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
-                      <BarChart className="w-6 h-6 text-primary-400" />
+                  <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6">
+                  <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+                    <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
+                      <BarChart className="w-4 h-4 sm:w-6 sm:h-6 text-primary-400" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-medium text-gray-900 dark:text-white">Feature Importance</h2>
-                      <p className="text-xs text-gray-600 dark:text-dark-400">Top 10 ML features</p>
+                      <h2 className="text-sm sm:text-xl font-medium text-gray-900 dark:text-white">Feature Importance</h2>
+                      <p className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400">Top 10 ML features</p>
                     </div>
                   </div>
                   <Chart options={featureImportanceChartOptions} series={featureImportanceChartOptions.series} type="bar" height={350} />
@@ -2276,14 +2508,14 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                 </div>
 
                 <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="w-12 h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
-                      <Target className="w-6 h-6 text-primary-400" />
+                  <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6">
+                  <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+                    <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
+                      <Target className="w-4 h-4 sm:w-6 sm:h-6 text-primary-400" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-medium text-gray-900 dark:text-white">Model Predictions</h2>
-                      <p className="text-xs text-gray-600 dark:text-dark-400">Vs actual returns</p>
+                      <h2 className="text-sm sm:text-xl font-medium text-gray-900 dark:text-white">Model Predictions</h2>
+                      <p className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400">Vs actual returns</p>
                     </div>
                   </div>
                   <Chart options={predictionChartOptions} series={predictionChartOptions.series} type="line" height={300} />
@@ -2299,7 +2531,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                   { label: 'THETA (Θ)', value: '-0.08', desc: 'Time decay', color: 'text-primary-400', border: 'hover:border-primary-500/50' },
                 ].map((greek, idx) => (
                   <div key={idx} className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                    <div className={`bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6 ${greek.border} transition-all`}>
+                    <div className={`bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 ${greek.border} transition-all`}>
                       <h3 className="text-sm font-medium mb-4 text-gray-900 dark:text-white">{greek.label}</h3>
                       <div className={`text-4xl font-semibold mb-2 ${greek.color}`}>{greek.value}</div>
                       <div className="text-xs text-gray-600 dark:text-dark-400">{greek.desc}</div>
@@ -2322,28 +2554,28 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
               {/* VaR Metrics */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                 <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6 hover:border-primary-500/50 transition-all">
+                  <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
                     <div className="text-xs text-slate-400 mb-2">VAR (95%)</div>
                     <div className="text-xl sm:text-2xl font-medium text-red-400 mb-2">-$1,234</div>
                     <div className="text-xs text-gray-600 dark:text-dark-400">Daily VaR</div>
                   </div>
                 </div>
                 <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6 hover:border-red-500/50 transition-all">
+                  <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-red-500/50 transition-all">
                     <div className="text-xs text-slate-400 mb-2">CVAR (95%)</div>
                     <div className="text-xl sm:text-2xl font-medium text-red-400 mb-2">-$1,567</div>
                     <div className="text-xs text-gray-600 dark:text-dark-400">Conditional VaR</div>
                   </div>
                 </div>
                 <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6 hover:border-primary-500/50 transition-all">
+                  <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
                     <div className="text-xs text-slate-400 mb-2">BETA (vs BTC)</div>
                     <div className="text-xl sm:text-2xl font-medium text-primary-400 mb-2">0.74</div>
                     <div className="text-xs text-gray-600 dark:text-dark-400">Market correlation</div>
                   </div>
                 </div>
                 <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                  <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6 hover:border-primary-500/50 transition-all">
+                  <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6 hover:border-primary-500/50 transition-all">
                     <div className="text-xs text-slate-400 mb-2">ALPHA</div>
                     <div className="text-xl sm:text-2xl font-medium text-green-400 mb-2">+12.4%</div>
                     <div className="text-xs text-gray-600 dark:text-dark-400">Excess return</div>
@@ -2352,15 +2584,15 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
               </div>
 
               {/* Monte Carlo Simulation */}
-              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-12 h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
-                    <Activity className="w-6 h-6 text-primary-400" />
+              <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+                <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6">
+                <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+                  <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
+                    <Activity className="w-4 h-4 sm:w-6 sm:h-6 text-primary-400" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-medium text-gray-900 dark:text-white">Monte Carlo Simulation</h2>
-                    <p className="text-xs text-gray-600 dark:text-dark-400">1000 runs, 30 days projection</p>
+                    <h2 className="text-sm sm:text-xl font-medium text-gray-900 dark:text-white">Monte Carlo Simulation</h2>
+                    <p className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400">1000 runs, 30 days projection</p>
                   </div>
                 </div>
                 <Chart options={monteCarloChartOptions} series={monteCarloChartOptions.series} type="line" height={300} />
@@ -2383,14 +2615,14 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
 
               {/* Underwater Chart */}
               <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-12 h-12 bg-red-500/20 border border-red-500/30 rounded-xl flex items-center justify-center">
-                    <TrendingDown className="w-6 h-6 text-red-400" />
+                <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6">
+                <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+                  <div className="w-8 h-8 sm:w-12 sm:h-12 bg-red-500/20 border border-red-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
+                    <TrendingDown className="w-4 h-4 sm:w-6 sm:h-6 text-red-400" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-medium text-gray-900 dark:text-white">Underwater Chart</h2>
-                    <p className="text-xs text-gray-600 dark:text-dark-400">Drawdown over time</p>
+                    <h2 className="text-sm sm:text-xl font-medium text-gray-900 dark:text-white">Underwater Chart</h2>
+                    <p className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400">Drawdown over time</p>
                   </div>
                 </div>
                 <Chart options={underwaterChartOptions} series={underwaterChartOptions.series} type="area" height={250} />
@@ -2399,14 +2631,14 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
 
               {/* System Health */}
               <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-                <div className="bg-gradient-to-br from-dark-800/95 to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-12 h-12 bg-primary-500/20 border border-primary-500/30 rounded-xl flex items-center justify-center">
-                    <Activity className="w-6 h-6 text-primary-400" />
+                <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 backdrop-blur-sm rounded-[calc(1rem-1px)] p-3 sm:p-4 lg:p-6">
+                <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+                  <div className="w-8 h-8 sm:w-12 sm:h-12 bg-primary-500/20 border border-primary-500/30 rounded-lg sm:rounded-xl flex items-center justify-center">
+                    <Activity className="w-4 h-4 sm:w-6 sm:h-6 text-primary-400" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-medium text-gray-900 dark:text-white">System Health Monitoring</h2>
-                    <p className="text-xs text-gray-600 dark:text-dark-400">Real-time system status</p>
+                    <h2 className="text-sm sm:text-xl font-medium text-gray-900 dark:text-white">System Health Monitoring</h2>
+                    <p className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400">Real-time system status</p>
                   </div>
                 </div>
                 <div className="space-y-6">
@@ -2415,7 +2647,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                       <span className="text-slate-400 font-mono">CPU USAGE</span>
                       <span className="text-accent-400 font-mono">{cpuUsage}%</span>
                     </div>
-                    <div className="h-2 bg-gray-200 dark:bg-dark-800rounded-full overflow-hidden">
+                    <div className="h-2 bg-gray-200 dark:bg-dark-800 rounded-full overflow-hidden">
                       <div className="h-full bg-gradient-to-r from-accent-500 to-primary-500 transition-all" style={{ width: `${cpuUsage}%` }}></div>
                     </div>
                   </div>
@@ -2425,7 +2657,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                       <span className="text-slate-400 font-mono">MEMORY</span>
                       <span className="text-green-400 font-mono">{(memUsage * 0.04).toFixed(1)}GB / 4GB</span>
                     </div>
-                    <div className="h-2 bg-gray-200 dark:bg-dark-800rounded-full overflow-hidden">
+                    <div className="h-2 bg-gray-200 dark:bg-dark-800 rounded-full overflow-hidden">
                       <div className="h-full bg-gradient-to-r from-green-500 to-emerald-500 transition-all" style={{ width: `${memUsage}%` }}></div>
                     </div>
                   </div>
@@ -2435,7 +2667,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                       <span className="text-slate-400 font-mono">API LATENCY</span>
                       <span className={`font-mono ${apiLatency < 15 ? 'text-green-400' : 'text-yellow-400'}`}>{apiLatency}ms</span>
                     </div>
-                    <div className="h-2 bg-gray-200 dark:bg-dark-800rounded-full overflow-hidden">
+                    <div className="h-2 bg-gray-200 dark:bg-dark-800 rounded-full overflow-hidden">
                       <div className="h-full bg-gradient-to-r from-green-500 to-yellow-500 transition-all" style={{ width: `${apiLatency}%` }}></div>
                     </div>
                   </div>
@@ -2445,7 +2677,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
                       <span className="text-slate-400 font-mono">UPTIME</span>
                       <span className="text-accent-400 font-mono">23d 14h 32m</span>
                     </div>
-                    <div className="h-2 bg-gray-200 dark:bg-dark-800rounded-full overflow-hidden">
+                    <div className="h-2 bg-gray-200 dark:bg-dark-800 rounded-full overflow-hidden">
                       <div className="h-full bg-gradient-to-r from-purple-500 to-pink-500" style={{ width: '100%' }}></div>
                     </div>
                   </div>
@@ -2469,6 +2701,7 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
         </AnimatePresence>
       </div>
 
+
       <style jsx global>{`
         @keyframes scroll {
           0% { transform: translateX(0); }
@@ -2483,6 +2716,58 @@ export default function CopyTradesPage({ params }: { params: Promise<{ slug: str
           to { opacity: 1; transform: translateX(0); }
         }
       `}</style>
+
+      {/* Fixed Bottom CTA Bar — offset by sidebar width on desktop */}
+      <div className="fixed bottom-[60px] lg:bottom-0 left-0 right-0 lg:left-64 z-50 border-t border-gray-200 dark:border-dark-700/50 bg-white/90 dark:bg-dark-900/90 backdrop-blur-xl">
+        <div className="px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
+          <div className="hidden sm:flex items-center gap-3 min-w-0">
+            {masterBotData.icon.startsWith('/') ? (
+              <img src={masterBotData.icon} alt={masterBotData.name} className="w-8 h-8 object-contain flex-shrink-0" />
+            ) : (
+              <span className="text-lg flex-shrink-0">{masterBotData.icon}</span>
+            )}
+            <div className="min-w-0">
+              <div className="text-sm font-semibold text-gray-900 dark:text-white truncate">{masterBotData.name}</div>
+              <div className="text-xs text-gray-500 dark:text-slate-400 font-mono">
+                from ${masterBotData.minInvestment} &middot; {(masterBotData as any).reservationDays || 30}d reservation
+              </div>
+            </div>
+            <div className="flex-shrink-0 text-right pl-3 border-l border-gray-200 dark:border-dark-700">
+              <div className="text-xs text-gray-500 dark:text-slate-400">Est. 30d ROI</div>
+              <div className="text-sm font-bold text-green-400">+{(masterBotData.stats as any).return30d || 0}%</div>
+            </div>
+          </div>
+          <Link
+            href={`/dashboard-v2/bots/${slug}/copy`}
+            className="w-full sm:w-auto px-8 py-3 rounded-xl text-white font-semibold text-sm bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary-500/30 whitespace-nowrap"
+          >
+            <Rocket className="w-4 h-4" />
+            Copy This Bot
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+interface MasterStatCardProps {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  subtitle: string;
+  subtitleColor?: string;
+  valueColor?: string;
+}
+
+function MasterStatCard({ icon, label, value, subtitle, subtitleColor = 'text-green-400', valueColor = 'text-gray-900 dark:text-white' }: MasterStatCardProps) {
+  return (
+    <div className="p-2.5 sm:p-4 bg-gray-50 dark:bg-dark-900/50 rounded-xl border border-gray-200 dark:border-dark-700/50 hover:border-primary-500/30 transition-all">
+      <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+        {icon}
+        <div className="text-[10px] sm:text-xs text-gray-600 dark:text-dark-400">{label}</div>
+      </div>
+      <div className={`text-sm sm:text-xl font-medium ${valueColor}`}>{value}</div>
+      <div className={`hidden sm:block text-xs ${subtitleColor} mt-1`}>{subtitle}</div>
     </div>
   );
 }

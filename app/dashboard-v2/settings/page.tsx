@@ -53,10 +53,10 @@ export default function SettingsPage() {
     rejected: { variant: 'error' as const, text: 'Rejected' },
   }[data.kyc.status] || { variant: 'neutral' as const, text: 'Not Started' };
 
-  const enabledNotifs = [data.notifications.tradeAlerts, data.notifications.securityAlerts, data.notifications.weeklyReport].filter(Boolean).length;
+  const enabledNotifs = [data.notifications.loginAlerts, data.notifications.withdrawalConfirmations, data.notifications.securityChanges, data.notifications.weeklyReport].filter(Boolean).length;
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-100 dark:bg-dark-950 p-4 lg:p-6">
+    <div className="min-h-screen bg-gray-100 dark:bg-transparent p-4 lg:p-6">
       <div className="max-w-[1800px] mx-auto">
         {/* Bento Grid - 12 columns like main dashboard */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4 lg:gap-6">
@@ -69,8 +69,8 @@ export default function SettingsPage() {
             className="md:col-span-1 lg:col-span-4"
           >
             <Link href="/dashboard-v2/settings/profile" className="block h-full">
-              <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-              <div className="h-full bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 hover:border-primary-500/40 rounded-[calc(1rem-1px)] p-5 transition-all group">
+              <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="h-full bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 hover:border-primary-500/40 rounded-[calc(1rem-1px)] p-5 transition-all group">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-primary-500/20 rounded-lg flex items-center justify-center">
@@ -97,95 +97,16 @@ export default function SettingsPage() {
             </Link>
           </motion.div>
 
-          {/* Security Card - col-span-4 */}
+          {/* Wallets Card - col-span-4 */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
             className="md:col-span-1 lg:col-span-4"
           >
-            <Link href="/dashboard-v2/settings/security" className="block h-full">
-              <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-              <div className="h-full bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 hover:border-primary-500/40 rounded-[calc(1rem-1px)] p-5 transition-all group">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-primary-500/20 rounded-lg flex items-center justify-center">
-                      <Shield className="w-5 h-5 text-primary-400" />
-                    </div>
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white">Security</h3>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-gray-500 dark:text-dark-500 group-hover:text-primary-400 group-hover:translate-x-0.5 transition-all" />
-                </div>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3 bg-gray-100 dark:bg-dark-900/50 rounded-lg border border-gray-200 dark:border-dark-700/50">
-                    <div className="flex items-center gap-2">
-                      <Lock className="w-4 h-4 text-gray-600 dark:text-dark-400" />
-                      <span className="text-sm text-gray-700 dark:text-dark-300">Two-Factor Auth</span>
-                    </div>
-                    <SettingsBadge
-                      variant={data.security.twoFactorEnabled ? 'success' : 'warning'}
-                      text={data.security.twoFactorEnabled ? 'On' : 'Off'}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between p-3 bg-gray-100 dark:bg-dark-900/50 rounded-lg border border-gray-200 dark:border-dark-700/50">
-                    <div className="flex items-center gap-2">
-                      <Laptop className="w-4 h-4 text-gray-600 dark:text-dark-400" />
-                      <span className="text-sm text-gray-700 dark:text-dark-300">Active Sessions</span>
-                    </div>
-                    <span className="text-sm text-gray-600 dark:text-dark-400">{data.security.sessions.length}</span>
-                  </div>
-                </div>
-              </div>
-              </div>
-            </Link>
-          </motion.div>
-
-          {/* KYC Card - col-span-4 */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-            className="md:col-span-1 lg:col-span-4"
-          >
-            <Link href="/dashboard-v2/settings/kyc" className="block h-full">
-              <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-              <div className="h-full bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 hover:border-primary-500/40 rounded-[calc(1rem-1px)] p-5 transition-all group">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-primary-500/20 rounded-lg flex items-center justify-center">
-                      <FileCheck className="w-5 h-5 text-primary-400" />
-                    </div>
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white">Verification</h3>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-gray-500 dark:text-dark-500 group-hover:text-primary-400 group-hover:translate-x-0.5 transition-all" />
-                </div>
-                <div className="flex items-center gap-3 mb-3">
-                  <SettingsBadge variant={kycBadge.variant} text={kycBadge.text} size="md" />
-                </div>
-                <p className="text-xs text-gray-600 dark:text-dark-500">
-                  {data.kyc.status === 'approved'
-                    ? `Verified on ${data.kyc.reviewedAt ? new Date(data.kyc.reviewedAt).toLocaleDateString() : 'N/A'}`
-                    : data.kyc.status === 'not_started'
-                    ? 'Complete identity verification to unlock withdrawals'
-                    : data.kyc.status === 'under_review'
-                    ? 'Your documents are being reviewed'
-                    : 'Continue your verification process'}
-                </p>
-              </div>
-              </div>
-            </Link>
-          </motion.div>
-
-          {/* Wallets Card - col-span-5 */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="md:col-span-1 lg:col-span-5"
-          >
             <Link href="/dashboard-v2/settings/wallets" className="block h-full">
-              <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-              <div className="h-full bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 hover:border-primary-500/40 rounded-[calc(1rem-1px)] p-5 transition-all group">
+              <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="h-full bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 hover:border-primary-500/40 rounded-[calc(1rem-1px)] p-5 transition-all group">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-primary-500/20 rounded-lg flex items-center justify-center">
@@ -219,6 +140,95 @@ export default function SettingsPage() {
             </Link>
           </motion.div>
 
+          {/* KYC Card - col-span-4 */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="md:col-span-1 lg:col-span-4"
+          >
+            <Link href="/dashboard-v2/settings/kyc" className="block h-full">
+              <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="h-full bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 hover:border-primary-500/40 rounded-[calc(1rem-1px)] p-5 transition-all group">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-primary-500/20 rounded-lg flex items-center justify-center">
+                      <FileCheck className="w-5 h-5 text-primary-400" />
+                    </div>
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white">Verification</h3>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-gray-500 dark:text-dark-500 group-hover:text-primary-400 group-hover:translate-x-0.5 transition-all" />
+                </div>
+                <div className="flex items-center gap-3 mb-3">
+                  <SettingsBadge variant={kycBadge.variant} text={kycBadge.text} size="md" />
+                </div>
+                <p className="text-xs text-gray-600 dark:text-dark-500">
+                  {data.kyc.status === 'approved'
+                    ? `Verified on ${data.kyc.reviewedAt ? new Date(data.kyc.reviewedAt).toLocaleDateString() : 'N/A'}`
+                    : data.kyc.status === 'not_started'
+                    ? 'Complete identity verification to unlock withdrawals'
+                    : data.kyc.status === 'under_review'
+                    ? 'Your documents are being reviewed'
+                    : 'Continue your verification process'}
+                </p>
+              </div>
+              </div>
+            </Link>
+          </motion.div>
+
+          {/* Security Card - col-span-5 */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="md:col-span-1 lg:col-span-5"
+          >
+            <Link href="/dashboard-v2/settings/security" className="block h-full">
+              <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="h-full bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 hover:border-primary-500/40 rounded-[calc(1rem-1px)] p-5 transition-all group">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-primary-500/20 rounded-lg flex items-center justify-center">
+                      <Shield className="w-5 h-5 text-primary-400" />
+                    </div>
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white">Security</h3>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-gray-500 dark:text-dark-500 group-hover:text-primary-400 group-hover:translate-x-0.5 transition-all" />
+                </div>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 bg-gray-100 dark:bg-dark-900/50 rounded-lg border border-gray-200 dark:border-dark-700/50">
+                    <div className="flex items-center gap-2">
+                      <Lock className="w-4 h-4 text-gray-600 dark:text-dark-400" />
+                      <span className="text-sm text-gray-700 dark:text-dark-300">Two-Factor Auth</span>
+                    </div>
+                    <SettingsBadge
+                      variant={data.security.twoFactorEnabled ? 'success' : 'warning'}
+                      text={data.security.twoFactorEnabled ? 'On' : 'Off'}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-100 dark:bg-dark-900/50 rounded-lg border border-gray-200 dark:border-dark-700/50">
+                    <div className="flex items-center gap-2">
+                      <Lock className="w-4 h-4 text-gray-600 dark:text-dark-400" />
+                      <span className="text-sm text-gray-700 dark:text-dark-300">Withdrawal PIN</span>
+                    </div>
+                    <SettingsBadge
+                      variant={data.security.pinEnabled ? 'success' : 'warning'}
+                      text={data.security.pinEnabled ? 'On' : 'Off'}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-100 dark:bg-dark-900/50 rounded-lg border border-gray-200 dark:border-dark-700/50">
+                    <div className="flex items-center gap-2">
+                      <Laptop className="w-4 h-4 text-gray-600 dark:text-dark-400" />
+                      <span className="text-sm text-gray-700 dark:text-dark-300">Active Sessions</span>
+                    </div>
+                    <span className="text-sm text-gray-600 dark:text-dark-400">{data.security.sessions.length}</span>
+                  </div>
+                </div>
+              </div>
+              </div>
+            </Link>
+          </motion.div>
+
           {/* Notifications Card - col-span-4 */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -227,8 +237,8 @@ export default function SettingsPage() {
             className="md:col-span-1 lg:col-span-4"
           >
             <Link href="/dashboard-v2/settings/notifications" className="block h-full">
-              <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-              <div className="h-full bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 hover:border-primary-500/40 rounded-[calc(1rem-1px)] p-5 transition-all group">
+              <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="h-full bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 hover:border-primary-500/40 rounded-[calc(1rem-1px)] p-5 transition-all group">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-primary-500/20 rounded-lg flex items-center justify-center">
@@ -240,8 +250,9 @@ export default function SettingsPage() {
                 </div>
                 <div className="space-y-2">
                   {[
-                    { label: 'Trade Alerts', on: data.notifications.tradeAlerts },
-                    { label: 'Security Alerts', on: data.notifications.securityAlerts },
+                    { label: 'Login Alerts', on: data.notifications.loginAlerts },
+                    { label: 'Withdrawal Confirmations', on: data.notifications.withdrawalConfirmations },
+                    { label: 'Security Changes', on: data.notifications.securityChanges },
                     { label: 'Weekly Report', on: data.notifications.weeklyReport },
                   ].map((item) => (
                     <div key={item.label} className="flex items-center justify-between p-2 bg-gray-100 dark:bg-dark-900/50 rounded-lg border border-gray-200 dark:border-dark-700/50">
@@ -250,7 +261,7 @@ export default function SettingsPage() {
                     </div>
                   ))}
                 </div>
-                <p className="text-xs text-gray-600 dark:text-dark-500 mt-3">{enabledNotifs}/3 enabled</p>
+                <p className="text-xs text-gray-600 dark:text-dark-500 mt-3">{enabledNotifs}/4 enabled</p>
               </div>
               </div>
             </Link>
@@ -264,8 +275,8 @@ export default function SettingsPage() {
             className="md:col-span-1 lg:col-span-3"
           >
             <Link href="/dashboard-v2/settings/preferences" className="block h-full">
-              <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
-              <div className="h-full bg-gray-50 dark:bg-gradient-to-br dark:from-dark-800/95 dark:to-dark-900/95 hover:border-primary-500/40 rounded-[calc(1rem-1px)] p-5 transition-all group">
+              <div className="h-full rounded-2xl bg-[linear-gradient(135deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.04)_75%,rgba(0,0,0,0.05)_100%)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.04)_25%,rgba(255,255,255,0.04)_75%,rgba(255,255,255,0.05)_100%)] p-[1.5px]">
+              <div className="h-full bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 hover:border-primary-500/40 rounded-[calc(1rem-1px)] p-5 transition-all group">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-primary-500/20 rounded-lg flex items-center justify-center">
@@ -286,7 +297,7 @@ export default function SettingsPage() {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-gray-600 dark:text-dark-400">Theme</span>
-                    <span className="text-xs text-gray-900 dark:text-white font-medium">Dark</span>
+                    <span className="text-xs text-gray-900 dark:text-white font-medium capitalize">{data.preferences.theme}</span>
                   </div>
                 </div>
               </div>

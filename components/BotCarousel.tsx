@@ -33,8 +33,8 @@ function getWrappedDiff(index: number, active: number, total: number) {
 
 const RISK_CFG = {
   low: { label: 'Low Risk', cls: 'text-green-400 border-green-400/30 bg-green-400/10' },
-  medium: { label: 'Med Risk', cls: 'text-yellow-400 border-yellow-400/30 bg-yellow-400/10' },
-  high: { label: 'High Risk', cls: 'text-red-400 border-red-400/30 bg-red-400/10' },
+  medium: { label: 'Med Risk', cls: 'text-blue-400 border-blue-400/30 bg-blue-400/10' },
+  high: { label: 'High Risk', cls: 'text-orange-400 border-orange-400/30 bg-orange-400/10' },
 } as const;
 
 /* Lightweight SVG sparkline — replaces heavy recharts MiniChart */
