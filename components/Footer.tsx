@@ -30,7 +30,6 @@ const socialLinks = [
   { name: 'X (Twitter)', icon: '/social/x.svg', href: 'https://x.com/cloudbright_io' },
   { name: 'Telegram', icon: '/social/telegram-app.svg', href: 'https://t.me/cloudbright_io_public' },
   { name: 'YouTube', icon: '/social/youtube.svg', href: 'https://www.youtube.com/@cloudbright_io' },
-  { name: 'Instagram', icon: '/social/instagram.svg', href: 'https://instagram.com/cloudbright.io' },
   { name: 'Facebook', icon: '/social/facebook.svg', href: 'https://www.facebook.com/cloudbright.io' },
 ];
 

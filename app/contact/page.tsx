@@ -66,7 +66,6 @@ export default function ContactPage() {
     { name: 'X (Twitter)', icon: '/social/x.svg', url: 'https://x.com/cloudbright_io' },
     { name: 'Telegram', icon: '/social/telegram-app.svg', url: 'https://t.me/cloudbright_io_public' },
     { name: 'YouTube', icon: '/social/youtube.svg', url: 'https://www.youtube.com/@cloudbright_io' },
-    { name: 'Instagram', icon: '/social/instagram.svg', url: 'https://instagram.com/cloudbright.io' },
     { name: 'Facebook', icon: '/social/facebook.svg', url: 'https://www.facebook.com/cloudbright.io' },
   ];
 

@@ -376,6 +376,35 @@ export default function AboutPage() {
           </div>
         </section>
 
+        {/* As Featured In */}
+        <section className="py-12 sm:py-16 bg-white dark:bg-dark-900">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <RevealOnScroll>
+              <div className="text-center">
+                <span className="text-xs font-bold tracking-[0.25em] uppercase text-gray-400 dark:text-dark-500">
+                  As Featured In
+                </span>
+                <div className="mt-6 flex justify-center">
+                  <a
+                    href="https://www.digitaljournal.com/pr/news/vehement-media/meet-cloudbright-hong-kong-startup-1959577616.html"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group inline-flex items-center gap-3 px-8 py-4 rounded-2xl border border-gray-200 dark:border-dark-700 hover:border-primary-500/30 dark:hover:border-primary-500/30 transition-all duration-300"
+                  >
+                    <Image
+                      src="/social/digital-journal.svg"
+                      alt="Digital Journal"
+                      width={160}
+                      height={36}
+                      className="h-8 w-auto text-gray-400 dark:text-dark-400 opacity-60 group-hover:opacity-100 transition-opacity dark:invert"
+                    />
+                  </a>
+                </div>
+              </div>
+            </RevealOnScroll>
+          </div>
+        </section>
+
         {/* Team Section */}
         <section className="relative py-16 sm:py-24 bg-white dark:bg-dark-900 overflow-hidden">
           <div

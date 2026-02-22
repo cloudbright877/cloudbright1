@@ -41,16 +41,16 @@ const cashflowLevels = [
 ];
 
 const turnoverBonuses = [
-  { lvl: 1, amount: '$100' },
-  { lvl: 2, amount: '$200' },
-  { lvl: 3, amount: '$500' },
-  { lvl: 4, amount: '$500' },
-  { lvl: 5, amount: '$1,500' },
-  { lvl: 6, amount: '$3,000' },
-  { lvl: 7, amount: '$5,000' },
-  { lvl: 8, amount: '$15,000' },
-  { lvl: 9, amount: '$30,000' },
-  { lvl: 10, amount: '$50,000' },
+  { lvl: 1, amount: '$20' },
+  { lvl: 2, amount: '$100' },
+  { lvl: 3, amount: '$200' },
+  { lvl: 4, amount: '$300' },
+  { lvl: 5, amount: '$500' },
+  { lvl: 6, amount: '$1,000' },
+  { lvl: 7, amount: '$2,000' },
+  { lvl: 8, amount: '$5,000' },
+  { lvl: 9, amount: '$10,000' },
+  { lvl: 10, amount: '$20,000' },
 ];
 
 const howItWorks = [

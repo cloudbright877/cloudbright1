@@ -6,11 +6,11 @@
  * Cashflow Impact: L1 = 100%, L2 = 50%, L3 = 25%, L4 = 10%, L5 = 10%
  * Awards: Real-time when threshold is reached
  *
- * 10 Levels:
- * Level 1: $1K turnover → $100 bonus
- * Level 2: $5K turnover → $200 bonus
+ * 10 Levels (2% of threshold):
+ * Level 1: $1K turnover → $20 bonus
+ * Level 2: $5K turnover → $100 bonus
  * ...
- * Level 10: $1M turnover → $50K bonus
+ * Level 10: $1M turnover → $20K bonus
  */
 
 import { storage } from './storage/LocalStorageAdapter';
@@ -41,18 +41,18 @@ export interface TurnoverLevel {
   bonus: number; // Fixed payout
 }
 
-// 10 turnover bonus levels
+// 10 turnover bonus levels (2% of threshold)
 export const TURNOVER_LEVELS: TurnoverLevel[] = [
-  { level: 1, threshold: 1_000, bonus: 100 },
-  { level: 2, threshold: 5_000, bonus: 200 },
-  { level: 3, threshold: 10_000, bonus: 500 },
-  { level: 4, threshold: 15_000, bonus: 500 },
-  { level: 5, threshold: 25_000, bonus: 1_500 },
-  { level: 6, threshold: 50_000, bonus: 3_000 },
-  { level: 7, threshold: 100_000, bonus: 5_000 },
-  { level: 8, threshold: 250_000, bonus: 15_000 },
-  { level: 9, threshold: 500_000, bonus: 30_000 },
-  { level: 10, threshold: 1_000_000, bonus: 50_000 },
+  { level: 1, threshold: 1_000, bonus: 20 },
+  { level: 2, threshold: 5_000, bonus: 100 },
+  { level: 3, threshold: 10_000, bonus: 200 },
+  { level: 4, threshold: 15_000, bonus: 300 },
+  { level: 5, threshold: 25_000, bonus: 500 },
+  { level: 6, threshold: 50_000, bonus: 1_000 },
+  { level: 7, threshold: 100_000, bonus: 2_000 },
+  { level: 8, threshold: 250_000, bonus: 5_000 },
+  { level: 9, threshold: 500_000, bonus: 10_000 },
+  { level: 10, threshold: 1_000_000, bonus: 20_000 },
 ];
 
 // Cashflow impact by referral level (for turnover calculation)

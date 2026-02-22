@@ -227,7 +227,7 @@ export const faqs: FaqItem[] = [
   },
   {
     question: 'How are referral rewards calculated and paid out?',
-    answer: 'You earn a commission each time a referral in your network activates a bot. The commission is a percentage of the bot activation amount, based on the referral level: 5% for Level 1, 3% for Level 2, 2% for Level 3, 1% for Level 4, and 0.5% for Level 5. On top of that, you earn turnover cash bonuses — as your network\'s active bots accumulate turnover (weighted by level: L1 = 100%, L2 = 50%, L3 = 25%, L4–L5 = 10%), you unlock milestone rewards ranging from $100 to $50,000 in USDT. All commissions and bonuses are credited to your balance instantly.',
+    answer: 'You earn a commission each time a referral in your network activates a bot. The commission is a percentage of the bot activation amount, based on the referral level: 5% for Level 1, 3% for Level 2, 2% for Level 3, 1% for Level 4, and 0.5% for Level 5. On top of that, you earn turnover cash bonuses — as your network\'s active bots accumulate turnover (weighted by level: L1 = 100%, L2 = 50%, L3 = 25%, L4–L5 = 10%), you unlock milestone rewards ranging from $20 to $20,000 in USDT (2% of the turnover threshold). All commissions and bonuses are credited to your balance instantly.',
     icon: '💸',
     category: 'Referral Program',
   },

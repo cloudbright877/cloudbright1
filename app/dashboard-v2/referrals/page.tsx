@@ -19,9 +19,6 @@ import {
   Share2,
   Shield,
   Crown,
-  FileText,
-  Presentation,
-  Download,
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
@@ -1085,61 +1082,6 @@ export default function ReferralsPage() {
 
           {/* ══════════ RIGHT COLUMN ══════════ */}
           <div className="space-y-6">
-            {/* ── Investor Presentation ── */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8 }}
-            >
-              <div className="rounded-2xl bg-bento-border dark:bg-bento-border-dark p-[1.5px]">
-              <div className="bg-gradient-to-br from-white to-gray-50 dark:from-dark-800/95 dark:to-dark-900/95 rounded-[calc(1rem-1px)] p-6">
-                <div className="flex items-center gap-2 mb-3">
-                  <Presentation className="w-5 h-5 text-primary-400" />
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                    Investor Presentation
-                  </h3>
-                </div>
-                <p className="text-sm text-gray-600 dark:text-dark-400 mb-5">
-                  Download a ready-made presentation to share with potential investors. Includes platform overview, performance stats, and commission structure.
-                </p>
-                <div className="grid grid-cols-2 gap-3">
-                  <a
-                    href="/docs/Celestian_Investor_Deck.pdf"
-                    download
-                    className="group flex flex-col items-center gap-2.5 p-4 bg-gray-50 dark:bg-dark-900/50 border border-gray-200 dark:border-dark-700 rounded-xl hover:border-red-400/50 dark:hover:border-red-400/50 transition-all"
-                  >
-                    <div className="w-10 h-10 bg-red-500/15 rounded-lg flex items-center justify-center group-hover:bg-red-500/25 transition-colors">
-                      <FileText className="w-5 h-5 text-red-400" />
-                    </div>
-                    <div className="text-center">
-                      <div className="text-sm font-medium text-gray-900 dark:text-white">PDF</div>
-                      <div className="text-[10px] text-gray-500 dark:text-dark-500 mt-0.5 flex items-center gap-1 justify-center">
-                        <Download className="w-2.5 h-2.5" />
-                        Download
-                      </div>
-                    </div>
-                  </a>
-                  <a
-                    href="/docs/Celestian_Investor_Deck.pptx"
-                    download
-                    className="group flex flex-col items-center gap-2.5 p-4 bg-gray-50 dark:bg-dark-900/50 border border-gray-200 dark:border-dark-700 rounded-xl hover:border-orange-400/50 dark:hover:border-orange-400/50 transition-all"
-                  >
-                    <div className="w-10 h-10 bg-orange-500/15 rounded-lg flex items-center justify-center group-hover:bg-orange-500/25 transition-colors">
-                      <Presentation className="w-5 h-5 text-orange-400" />
-                    </div>
-                    <div className="text-center">
-                      <div className="text-sm font-medium text-gray-900 dark:text-white">PPTX</div>
-                      <div className="text-[10px] text-gray-500 dark:text-dark-500 mt-0.5 flex items-center gap-1 justify-center">
-                        <Download className="w-2.5 h-2.5" />
-                        Download
-                      </div>
-                    </div>
-                  </a>
-                </div>
-              </div>
-              </div>
-            </motion.div>
-
             {/* ── Turnover Bonuses Progress ── */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
