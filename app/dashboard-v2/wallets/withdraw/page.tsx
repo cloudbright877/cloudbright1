@@ -32,8 +32,7 @@ import { getWalletsSettings, getSecuritySettings } from '@/lib/settings/settings
 import type { SavedWalletAddress, NetworkType } from '@/lib/settings/settingsTypes';
 import { formatNumber } from '@/lib/formatters';
 
-type TokenIconProps = { size?: number; variant?: string; className?: string };
-const TOKEN_ICONS: Record<string, ComponentType<TokenIconProps>> = {
+const TOKEN_ICONS: Record<string, ComponentType<{ size?: number; variant?: 'branded' | 'mono'; className?: string }>> = {
   BTC: TokenBTC,
   ETH: TokenETH,
   USDT: TokenUSDT,
