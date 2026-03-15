@@ -17,12 +17,27 @@ export interface BotAllocation {
 }
 
 /**
+ * Minimum investment per bot ($50)
+ */
+const MIN_PER_BOT = 50;
+
+/**
  * Risk allocation matrix (ADR-2)
+ * Tiers are sorted by priority (highest % first) for each profile
  */
 const RISK_ALLOCATIONS: Record<RiskProfile, { low: number; medium: number; high: number }> = {
   conservative: { low: 60, medium: 30, high: 10 },
   balanced: { low: 25, medium: 50, high: 25 },
   aggressive: { low: 10, medium: 30, high: 60 },
+};
+
+/**
+ * Primary tier for each risk profile (used when only 1 bot fits)
+ */
+const PRIMARY_TIER: Record<RiskProfile, 'low' | 'medium' | 'high'> = {
+  conservative: 'low',
+  balanced: 'medium',
+  aggressive: 'high',
 };
 
 /**
@@ -108,58 +123,82 @@ function generateRationale(
 
 /**
  * Main bot selection algorithm
- * Returns 2-3 bots with allocation based on risk profile
+ * Returns 1-3 bots with allocation based on risk profile and investment amount.
+ *
+ * Logic:
+ * - Each bot must receive at least $50 (MIN_PER_BOT)
+ * - $50-99  → 1 bot  (primary tier for the profile)
+ * - $100-149 → 2 bots (two tiers with highest %)
+ * - $150+   → 3 bots (all tiers; $50 guaranteed per bot, remainder split by %)
  */
 export function selectBots(answers: QuizAnswers): BotAllocation[] {
-  // Filter verified bots only
   const verifiedBots = DEMO_BOTS.filter(bot => bot.verified);
 
   if (verifiedBots.length === 0) {
     throw new Error('No verified bots available');
   }
 
-  // Get risk allocation percentages
-  const allocation = RISK_ALLOCATIONS[answers.riskProfile];
+  const { investmentAmount, riskProfile, timeHorizon } = answers;
+  const allocation = RISK_ALLOCATIONS[riskProfile];
 
   // Select best bot from each tier
-  const lowBot = selectBestBotFromTier(verifiedBots, 'low', answers.timeHorizon);
-  const mediumBot = selectBestBotFromTier(verifiedBots, 'medium', answers.timeHorizon);
-  const highBot = selectBestBotFromTier(verifiedBots, 'high', answers.timeHorizon);
+  const botsByTier: Record<'low' | 'medium' | 'high', DemoBot | null> = {
+    low: selectBestBotFromTier(verifiedBots, 'low', timeHorizon),
+    medium: selectBestBotFromTier(verifiedBots, 'medium', timeHorizon),
+    high: selectBestBotFromTier(verifiedBots, 'high', timeHorizon),
+  };
 
-  // Build allocation array (only include tiers with >0% allocation)
-  const allocations: BotAllocation[] = [];
+  type Tier = 'low' | 'medium' | 'high';
+  type TierEntry = { tier: Tier; percent: number };
 
-  if (lowBot && allocation.low > 0) {
-    allocations.push({
-      bot: lowBot,
-      allocationPercent: allocation.low,
-      amount: (answers.investmentAmount * allocation.low) / 100,
-      rationale: generateRationale(lowBot, 'low', answers.timeHorizon),
-    });
+  // Sort tiers by allocation % descending to prioritize
+  const allTiers: TierEntry[] = [
+    { tier: 'low' as Tier, percent: allocation.low },
+    { tier: 'medium' as Tier, percent: allocation.medium },
+    { tier: 'high' as Tier, percent: allocation.high },
+  ];
+  const tiers = allTiers
+    .filter((t): t is TierEntry => t.percent > 0 && botsByTier[t.tier] !== null)
+    .sort((a, b) => b.percent - a.percent);
+
+  // Determine how many bots we can afford (each needs MIN_PER_BOT)
+  const maxBots = Math.min(tiers.length, Math.floor(investmentAmount / MIN_PER_BOT));
+
+  if (maxBots === 0) {
+    throw new Error(`Minimum investment is $${MIN_PER_BOT}`);
   }
 
-  if (mediumBot && allocation.medium > 0) {
-    allocations.push({
-      bot: mediumBot,
-      allocationPercent: allocation.medium,
-      amount: (answers.investmentAmount * allocation.medium) / 100,
-      rationale: generateRationale(mediumBot, 'medium', answers.timeHorizon),
-    });
+  // If we can't fit all tiers, keep only the highest-priority ones
+  // But always include the primary tier for the profile
+  let selectedTiers = tiers.slice(0, maxBots);
+  const primary = PRIMARY_TIER[riskProfile];
+  const hasPrimary = selectedTiers.some(t => t.tier === primary);
+  if (!hasPrimary) {
+    const primaryTier = tiers.find(t => t.tier === primary);
+    if (primaryTier) {
+      selectedTiers[selectedTiers.length - 1] = primaryTier;
+    }
   }
 
-  if (highBot && allocation.high > 0) {
-    allocations.push({
-      bot: highBot,
-      allocationPercent: allocation.high,
-      amount: (answers.investmentAmount * allocation.high) / 100,
-      rationale: generateRationale(highBot, 'high', answers.timeHorizon),
-    });
-  }
+  // Recalculate percentages proportionally among selected tiers
+  const totalPercent = selectedTiers.reduce((sum, t) => sum + t.percent, 0);
 
-  // Ensure we have at least 2 bots
-  if (allocations.length === 0) {
-    throw new Error('No suitable bots found for allocation');
-  }
+  // Reserve MIN_PER_BOT for each bot, distribute remainder by proportional %
+  const reserved = maxBots * MIN_PER_BOT;
+  const remainder = investmentAmount - reserved;
+
+  const allocations: BotAllocation[] = selectedTiers.map(({ tier, percent }) => {
+    const bot = botsByTier[tier]!;
+    const proportionalPercent = (percent / totalPercent) * 100;
+    const amount = MIN_PER_BOT + (remainder * percent) / totalPercent;
+
+    return {
+      bot,
+      allocationPercent: Math.round(proportionalPercent * 10) / 10,
+      amount: Math.round(amount * 100) / 100,
+      rationale: generateRationale(bot, tier, timeHorizon),
+    };
+  });
 
   return allocations;
 }
