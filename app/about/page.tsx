@@ -20,6 +20,7 @@ const officeImages = [
   { src: '/office-slider/6.webp', alt: 'Cloudbright lounge' },
   { src: '/office-slider/7.webp', alt: 'Cloudbright office view' },
   { src: '/office-slider/8.webp', alt: 'Cloudbright common area' },
+  { src: '/office-slider/9.webp', alt: 'Cloudbright team meeting' },
 ];
 
 const trustSignals = [
@@ -75,6 +76,14 @@ const teamMembers = [
     photo: '/team/DongAiguo.webp',
   },
   {
+    name: 'Adrian Roberts',
+    role: 'Chief Marketing Officer',
+    department: 'Marketing & Growth',
+    description:
+      'Driving brand strategy, user acquisition, and global market expansion. 10+ years scaling fintech products across APAC and Europe.',
+    photo: '/team/Adrian-Roberts.webp',
+  },
+  {
     name: 'Samarth Ramesh',
     role: 'Head of Security',
     department: 'Security & Compliance',
@@ -84,11 +93,19 @@ const teamMembers = [
   },
   {
     name: 'David Okafor',
-    role: 'Head of Community',
-    department: 'Community & Support',
+    role: 'Head of Partnerships',
+    department: 'Business Development',
     description:
-      'Connecting investors worldwide and providing 24/7 assistance. From onboarding to advanced strategy guidance.',
+      'Forging strategic alliances with exchanges, funds, and ecosystem partners to expand Cloudbright\'s global reach.',
     photo: '/team/DavidOkafor.webp',
+  },
+  {
+    name: 'Kwame Asante',
+    role: 'Chief Financial Officer',
+    department: 'Finance & Risk',
+    description:
+      'Overseeing treasury, financial planning, and risk management. 14+ years in corporate finance across African and Asian markets.',
+    photo: '/team/Kwame-Asante.webp',
   },
 ];
 
@@ -485,7 +502,7 @@ export default function AboutPage() {
               </div>
             </RevealOnScroll>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {teamMembers.map((member, index) => (
                 <RevealOnScroll key={index} delay={index * 0.1}>
                   <div className="relative h-full rounded-2xl border border-gray-200/50 dark:border-dark-700/50 bg-white/80 dark:bg-dark-800/50 backdrop-blur-sm overflow-hidden">
