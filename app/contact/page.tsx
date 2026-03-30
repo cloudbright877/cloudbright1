@@ -56,7 +56,7 @@ export default function ContactPage() {
     {
       icon: MessageCircle,
       title: 'Live Chat',
-      details: 'Available 24/7',
+      details: '8 AM – 10 PM (GMT+1)',
       subDetails: 'Instant support via chat',
       href: '',
     },
@@ -80,7 +80,7 @@ export default function ContactPage() {
   const faqs = [
     {
       question: 'What are your business hours?',
-      answer: 'Our customer support is available 24/7 via live chat and email.',
+      answer: 'Our customer support is available daily from 8:00 AM to 10:00 PM (GMT+1) via live chat and email.',
     },
     {
       question: 'How quickly will I receive a response?',
@@ -333,7 +333,7 @@ export default function ContactPage() {
                       <div className="pt-3 mt-1 border-t border-gray-200/50 dark:border-dark-700/50">
                         <div className="flex items-center gap-2 text-green-400">
                           <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                          <span className="font-medium text-sm">Live Chat: 24/7 Available</span>
+                          <span className="font-medium text-sm">Live Chat: 8 AM – 10 PM (GMT+1)</span>
                         </div>
                       </div>
                     </div>

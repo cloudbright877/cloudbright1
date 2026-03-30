@@ -240,7 +240,7 @@ export const faqs: FaqItem[] = [
   },
   {
     question: 'What should I do if I lose access to my account?',
-    answer: 'If you lose access, use the "Forgot Password" option on the login page to reset your password via email. If you\'ve lost access to your 2FA device, contact our 24/7 support team with your registered email and identity verification details. Our security team will guide you through the account recovery process, which typically takes 24–48 hours to ensure your account\'s safety.',
+    answer: 'If you lose access, use the "Forgot Password" option on the login page to reset your password via email. If you\'ve lost access to your 2FA device, contact our support team (8 AM – 10 PM GMT+1) with your registered email and identity verification details. Our security team will guide you through the account recovery process, which typically takes 24–48 hours to ensure your account\'s safety.',
     icon: '🔑',
     category: 'Security',
   },
@@ -456,7 +456,7 @@ export default function FAQ({ limit }: { limit?: number }) {
                 Still Have Questions?
               </h3>
               <p className="text-sm text-gray-600 dark:text-dark-300 mb-5">
-                Browse our complete FAQ library or contact our 24/7 support team
+                Browse our complete FAQ library or contact our support team (8 AM – 10 PM GMT+1)
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <GlowButton href="/help-center" variant="primary" size="md">

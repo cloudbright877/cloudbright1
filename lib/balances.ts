@@ -65,7 +65,7 @@ export async function getBalance(userId: string): Promise<Balance> {
       userId,
       currency: 'USDT',
       frozen: 0,
-      available: 0,
+      available: 1000,
       updatedAt: Date.now(),
     };
     await storage.create(BALANCES_KEY, balance);

@@ -15,6 +15,10 @@ const LiveTradingDemo = dynamic(
   () => import('@/components/LiveTradingDemo').then(mod => ({ default: mod.LiveTradingDemo })),
   { ssr: false, loading: () => <div className="w-full h-[400px] rounded-2xl bg-gray-200/50 dark:bg-dark-800/50 animate-pulse" /> }
 );
+const Calculator = dynamic(
+  () => import('@/components/Calculator'),
+  { ssr: false, loading: () => <div className="w-full h-[600px] rounded-2xl bg-gray-200/50 dark:bg-dark-800/50 animate-pulse" /> }
+);
 import { exchangeLogos } from '@/components/ExchangeLogos';
 import { QuickStartPreview, WalletPreview, DashboardPreview, FeatureList } from '@/components/previews';
 import {
@@ -322,16 +326,16 @@ export default function PlatformPage() {
                 <RevealOnScroll delay={0.3}>
                   <div className="flex gap-8">
                     <div className="text-center">
-                      <AnimatedCounter value={26} suffix="K+" className="text-3xl font-bold text-gradient" />
-                      <p className="text-xs text-gray-100 mt-1">Copiers</p>
+                      <AnimatedCounter value={26} suffix="K+" className="text-3xl font-bold text-white" />
+                      <p className="text-xs text-gray-300 mt-1">Copiers</p>
                     </div>
                     <div className="text-center">
-                      <AnimatedCounter value={100} suffix="+" className="text-3xl font-bold text-gradient" />
-                      <p className="text-xs text-gray-100 mt-1">Bot Strategies</p>
+                      <AnimatedCounter value={10} suffix="+" className="text-3xl font-bold text-white" />
+                      <p className="text-xs text-gray-300 mt-1">Bot Strategies</p>
                     </div>
                     <div className="text-center">
-                      <AnimatedCounter value={9} suffix="+" className="text-3xl font-bold text-gradient" />
-                      <p className="text-xs text-gray-100 mt-1">Exchanges</p>
+                      <AnimatedCounter value={9} suffix="+" className="text-3xl font-bold text-white" />
+                      <p className="text-xs text-gray-300 mt-1">Exchanges</p>
                     </div>
                   </div>
                 </RevealOnScroll>
@@ -353,6 +357,9 @@ export default function PlatformPage() {
             </div>
           </div>
         </section>
+
+        {/* ══════════ SECTION 4: INVESTMENT CALCULATOR ══════════ */}
+        <Calculator />
 
         {/* ══════════ EXCHANGE MARQUEE ══════════ */}
         <div className="bg-gray-50 dark:bg-dark-900 py-8 border-y border-gray-200/30 dark:border-dark-700/30">

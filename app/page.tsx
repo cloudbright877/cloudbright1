@@ -786,6 +786,82 @@ export default function Home() {
           </div>
         </section>
 
+        {/* ── Why Cloudbright — Comparison ── */}
+        <section className="relative py-16 sm:py-20 bg-gradient-to-b from-white via-gray-50/50 to-white dark:from-dark-900 dark:via-dark-800/50 dark:to-dark-900 overflow-hidden">
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute top-0 right-1/4 w-[400px] h-[400px] bg-primary-500/5 rounded-full blur-3xl" />
+            <div className="absolute bottom-0 left-1/3 w-[350px] h-[350px] bg-accent-500/5 rounded-full blur-3xl" />
+          </div>
+
+          <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <RevealOnScroll>
+              <div className="text-center mb-10 sm:mb-14">
+                <div className="flex items-center justify-center gap-3 mb-4">
+                  <div className="w-8 h-0.5 bg-primary-500" />
+                  <span className="text-xs font-bold tracking-[0.25em] uppercase text-primary-400">Comparison</span>
+                  <div className="w-8 h-0.5 bg-primary-500" />
+                </div>
+                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-gray-900 dark:text-white">
+                  Why <span className="text-gradient">Cloudbright</span>?
+                </h2>
+                <p className="text-sm sm:text-base text-gray-600 dark:text-dark-300 mt-3 max-w-xl mx-auto">
+                  See how we compare to other copy trading platforms
+                </p>
+              </div>
+            </RevealOnScroll>
+
+            <RevealOnScroll delay={0.15}>
+              <div className="overflow-x-auto rounded-2xl border border-gray-200 dark:border-dark-700">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-gray-100 dark:bg-dark-800">
+                      <th className="text-left py-3.5 px-5 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-dark-400 w-[40%]">Feature</th>
+                      <th className="text-center py-3.5 px-4 w-[30%]">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-gradient-to-r from-primary-500/15 to-accent-500/15 border border-primary-500/30 rounded-full">
+                          <span className="text-xs font-bold text-primary-400">Cloudbright</span>
+                        </div>
+                      </th>
+                      <th className="text-center py-3.5 px-4 text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-dark-500 w-[30%]">Other Platforms</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100 dark:divide-dark-700/50">
+                    {[
+                      { feature: 'Withdrawal Fee', ours: '2% flat', theirs: '5–20% + hidden fees', highlight: true },
+                      { feature: 'Monthly Subscription', ours: 'Free', theirs: '$29–$99/mo', highlight: false },
+                      { feature: 'Minimum Investment', ours: '$50', theirs: '$500–$1,000', highlight: true },
+                      { feature: 'Daily Returns', ours: '1–3%/day', theirs: '0.3–1%/day', highlight: false },
+                      { feature: 'Capital Reservation', ours: '15–180 days (you choose)', theirs: 'Locked indefinitely', highlight: true },
+                      { feature: 'Profit Collection', ours: 'Daily', theirs: 'After lock-up only', highlight: false },
+                      { feature: 'Live Trade Transparency', ours: 'Every trade visible', theirs: 'Summary only', highlight: true },
+                    ].map((row) => (
+                      <tr key={row.feature} className={row.highlight ? 'bg-white dark:bg-dark-900/50' : 'bg-gray-50/50 dark:bg-dark-800/30'}>
+                        <td className="py-3 px-5 font-medium text-gray-700 dark:text-dark-200">{row.feature}</td>
+                        <td className="py-3 px-4 text-center">
+                          <span className="inline-flex items-center gap-1.5 text-green-500 font-semibold">
+                            <Check className="w-4 h-4 shrink-0" />
+                            {row.ours}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 text-center text-gray-400 dark:text-dark-500">{row.theirs}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </RevealOnScroll>
+
+            <RevealOnScroll delay={0.3}>
+              <div className="text-center mt-8">
+                <GlowButton href="/register" variant="primary" size="lg">
+                  <span className="flex items-center gap-2">
+                    Start Free — No Subscription <ArrowRight className="w-5 h-5" />
+                  </span>
+                </GlowButton>
+              </div>
+            </RevealOnScroll>
+          </div>
+        </section>
+
         {/* ── Security & Trust ── */}
         <section className="relative py-16 sm:py-24 bg-white dark:bg-dark-900 overflow-hidden">
           <div className="absolute inset-0 pointer-events-none">

@@ -4,9 +4,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { faqs, AnimatedLines } from '@/components/FAQ';
 import { GlowButton } from '@/components/animations/GlowButton';
+
+function slugify(text: string) {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
+}
 
 const categories = ['All', 'Getting Started', 'About Company', 'Trading Bots', 'Pricing & Investments', 'Deposits & Withdrawals', 'Referral Program', 'Security'];
 
@@ -14,6 +21,8 @@ export default function HelpCenterPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const faqRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const initialScrollDone = useRef(false);
 
   const filteredFaqs = faqs.filter(faq => {
     const matchesCategory = selectedCategory === 'All' || faq.category === selectedCategory;
@@ -23,9 +32,43 @@ export default function HelpCenterPage() {
     return matchesCategory && matchesSearch;
   });
 
-  const toggleFaq = (index: number) => {
-    setOpenFaqIndex(openFaqIndex === index ? null : index);
-  };
+  // Open FAQ from URL hash on mount
+  useEffect(() => {
+    if (initialScrollDone.current) return;
+    const hash = window.location.hash.slice(1);
+    if (!hash) return;
+
+    const faqIndex = faqs.findIndex(faq => slugify(faq.question) === hash);
+    if (faqIndex === -1) return;
+
+    const faq = faqs[faqIndex];
+    // Switch to the right category if needed
+    if (selectedCategory !== 'All' && faq.category !== selectedCategory) {
+      setSelectedCategory('All');
+    }
+
+    setOpenFaqIndex(faqIndex);
+    initialScrollDone.current = true;
+
+    // Scroll after animations settle
+    setTimeout(() => {
+      const el = faqRefs.current.get(hash);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 500);
+  }, [filteredFaqs]);
+
+  const toggleFaq = useCallback((index: number) => {
+    if (openFaqIndex === index) {
+      setOpenFaqIndex(null);
+      history.replaceState(null, '', window.location.pathname);
+    } else {
+      setOpenFaqIndex(index);
+      const slug = slugify(faqs[index].question);
+      history.replaceState(null, '', `#${slug}`);
+    }
+  }, [openFaqIndex]);
 
   return (
     <>
@@ -144,21 +187,29 @@ export default function HelpCenterPage() {
                   </p>
                 </motion.div>
               ) : (
-                filteredFaqs.map((faq, index) => (
+                filteredFaqs.map((faq, index) => {
+                  const globalIndex = faqs.indexOf(faq);
+                  const slug = slugify(faq.question);
+                  return (
                   <motion.div
                     key={faq.question}
+                    id={slug}
+                    ref={(el) => {
+                      if (el) faqRefs.current.set(slug, el);
+                      else faqRefs.current.delete(slug);
+                    }}
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.4, delay: index * 0.05 }}
                     className={`rounded-xl border overflow-hidden transition-all duration-300 ${
-                      openFaqIndex === index
+                      openFaqIndex === globalIndex
                         ? 'bg-white/80 dark:bg-dark-800/80 border-primary-500/50 shadow-lg shadow-primary-500/10'
                         : 'bg-white/50 dark:bg-dark-800/50 border-gray-200/50 dark:border-dark-700/50 hover:border-primary-500/30'
                     }`}
                   >
                     <button
-                      onClick={() => toggleFaq(index)}
+                      onClick={() => toggleFaq(globalIndex)}
                       className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-primary-500/5 transition-all duration-300"
                     >
                       <div className="flex-1 min-w-0">
@@ -170,7 +221,7 @@ export default function HelpCenterPage() {
                         </span>
                       </div>
                       <motion.span
-                        animate={{ rotate: openFaqIndex === index ? 180 : 0 }}
+                        animate={{ rotate: openFaqIndex === globalIndex ? 180 : 0 }}
                         transition={{ duration: 0.3 }}
                         className="text-xl text-primary-400 font-bold flex-shrink-0 ml-4"
                       >
@@ -179,7 +230,7 @@ export default function HelpCenterPage() {
                     </button>
 
                     <AnimatePresence>
-                      {openFaqIndex === index && (
+                      {openFaqIndex === globalIndex && (
                         <motion.div
                           initial={{ height: 0, opacity: 0 }}
                           animate={{ height: 'auto', opacity: 1 }}
@@ -194,7 +245,8 @@ export default function HelpCenterPage() {
                       )}
                     </AnimatePresence>
                   </motion.div>
-                ))
+                  );
+                })
               )}
             </div>
           </div>
@@ -222,7 +274,7 @@ export default function HelpCenterPage() {
                 Still Have Questions?
               </h2>
               <p className="text-base sm:text-lg text-dark-300 mb-8 max-w-2xl mx-auto">
-                Our support team is available 24/7 to help you with anything.
+                Our support team is available daily 8 AM – 10 PM (GMT+1) to help you.
               </p>
               <GlowButton href="/contact" variant="primary" size="lg">
                 Contact Support
