@@ -6,22 +6,26 @@ import Footer from '@/components/Footer';
 import { RevealOnScroll } from '@/components/animations/RevealOnScroll';
 import Link from 'next/link';
 import { useState } from 'react';
-import { ArrowRight, Search, BookOpen, Cpu } from 'lucide-react';
+import { ArrowRight, BookOpen, ChevronDown, Cpu } from 'lucide-react';
 import { categories, blogPosts } from './data';
+
+const POSTS_PER_PAGE = 9;
+const POSTS_INCREMENT = 6;
 
 export default function BlogPage() {
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [visibleCount, setVisibleCount] = useState(POSTS_PER_PAGE);
 
-  const filteredPosts = blogPosts.filter(post => {
-    const matchesCategory = selectedCategory === 'All' || post.category === selectedCategory;
-    const matchesSearch = !searchQuery ||
-      post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
+  const sortedPosts = [...blogPosts].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+  const filteredPosts = sortedPosts.filter(post => {
+    return selectedCategory === 'All' || post.category === selectedCategory;
   });
 
-  const featuredPost = blogPosts[0];
+  const visiblePosts = filteredPosts.slice(0, visibleCount);
+  const hasMore = visibleCount < filteredPosts.length;
+
+  const featuredPost = sortedPosts[0];
 
   return (
     <>
@@ -59,27 +63,6 @@ export default function BlogPage() {
                 Stay informed with the latest trends in crypto trading, market analysis, and platform updates from our team.
               </p>
 
-              {/* Search */}
-              <div className="max-w-2xl mx-auto">
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="Search articles..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full px-6 py-4 pl-14 bg-dark-800/80 backdrop-blur-md border border-dark-700 rounded-2xl text-white placeholder-dark-400 focus:outline-none focus:border-primary-500/50 transition-colors"
-                  />
-                  <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
-                  {searchQuery && (
-                    <button
-                      onClick={() => setSearchQuery('')}
-                      className="absolute right-5 top-1/2 -translate-y-1/2 text-dark-400 hover:text-white transition-colors"
-                    >
-                      ✕
-                    </button>
-                  )}
-                </div>
-              </div>
             </RevealOnScroll>
           </div>
         </section>
@@ -90,10 +73,11 @@ export default function BlogPage() {
             <div className="flex items-center justify-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
               {categories.map((cat) => {
                 const Icon = cat.icon;
+                const count = cat.label === 'All' ? blogPosts.length : blogPosts.filter(p => p.category === cat.label).length;
                 return (
                   <button
                     key={cat.label}
-                    onClick={() => setSelectedCategory(cat.label)}
+                    onClick={() => { setSelectedCategory(cat.label); setVisibleCount(POSTS_PER_PAGE); }}
                     className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-300 ${
                       selectedCategory === cat.label
                         ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white'
@@ -102,6 +86,9 @@ export default function BlogPage() {
                   >
                     <Icon className="w-3.5 h-3.5" />
                     {cat.label}
+                    <span className={`text-xs ${selectedCategory === cat.label ? 'text-white/70' : 'text-gray-400 dark:text-dark-500'}`}>
+                      {count}
+                    </span>
                   </button>
                 );
               })}
@@ -110,7 +97,7 @@ export default function BlogPage() {
         </div>
 
         {/* ══════════ FEATURED POST ══════════ */}
-        {selectedCategory === 'All' && !searchQuery && (
+        {selectedCategory === 'All' && (
           <section className="py-16 bg-gradient-to-b from-white to-gray-50 dark:from-dark-900 dark:to-dark-800">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <RevealOnScroll>
@@ -121,18 +108,24 @@ export default function BlogPage() {
                   </span>
                 </div>
 
-                <Link href={`/blog/${featuredPost.id}`}>
+                <Link href={`/blog/${featuredPost.slug}`}>
                   <div className="group relative rounded-2xl overflow-hidden border border-dark-700/50 hover:border-primary-500/30 transition-all duration-500">
                     {/* Background gradient */}
                     <div className={`absolute inset-0 bg-gradient-to-br ${featuredPost.gradient} opacity-[0.07] group-hover:opacity-[0.12] transition-opacity duration-500`} />
 
                     <div className="relative grid md:grid-cols-2 gap-8 p-8 md:p-10">
-                      {/* Left: image placeholder */}
+                      {/* Left: cover image */}
                       <div className="relative h-72 md:h-full min-h-[280px] rounded-xl overflow-hidden bg-gray-100 dark:bg-dark-800 border border-gray-200/50 dark:border-dark-700/50">
-                        <div className={`absolute inset-0 bg-gradient-to-br ${featuredPost.gradient} opacity-20`} />
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <Cpu className="w-16 h-16 text-white/20" />
-                        </div>
+                        {featuredPost.coverImage ? (
+                          <img src={featuredPost.coverImage} alt={featuredPost.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        ) : (
+                          <>
+                            <div className={`absolute inset-0 bg-gradient-to-br ${featuredPost.gradient} opacity-20`} />
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <Cpu className="w-16 h-16 text-white/20" />
+                            </div>
+                          </>
+                        )}
                       </div>
 
                       {/* Right: content */}
@@ -200,8 +193,9 @@ export default function BlogPage() {
                 </p>
               </motion.div>
             ) : (
+              <>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredPosts.map((post, index) => (
+                {visiblePosts.map((post, index) => (
                   <motion.div
                     key={post.id}
                     initial={{ opacity: 0, y: 20 }}
@@ -209,17 +203,23 @@ export default function BlogPage() {
                     viewport={{ once: true }}
                     transition={{ duration: 0.4, delay: index * 0.06 }}
                   >
-                    <Link href={`/blog/${post.id}`}>
+                    <Link href={`/blog/${post.slug}`}>
                       <div className="group relative h-full rounded-2xl bg-white/80 dark:bg-dark-800/50 border border-gray-200/50 dark:border-dark-700/50 overflow-hidden hover:border-primary-500/30 transition-all duration-500 flex flex-col">
                         {/* Hover gradient */}
                         <div className={`absolute inset-0 bg-gradient-to-br ${post.gradient} opacity-0 group-hover:opacity-[0.06] transition-opacity duration-500`} />
 
-                        {/* Image placeholder */}
+                        {/* Cover image */}
                         <div className="relative h-48 bg-gray-100 dark:bg-dark-800 overflow-hidden">
-                          <div className={`absolute inset-0 bg-gradient-to-br ${post.gradient} opacity-15 group-hover:opacity-25 transition-opacity duration-500`} />
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <BookOpen className="w-10 h-10 text-white/10 group-hover:text-white/20 transition-colors" />
-                          </div>
+                          {post.coverImage ? (
+                            <img src={post.coverImage} alt={post.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                          ) : (
+                            <>
+                              <div className={`absolute inset-0 bg-gradient-to-br ${post.gradient} opacity-15 group-hover:opacity-25 transition-opacity duration-500`} />
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <BookOpen className="w-10 h-10 text-white/10 group-hover:text-white/20 transition-colors" />
+                              </div>
+                            </>
+                          )}
                         </div>
 
                         {/* Content */}
@@ -252,6 +252,23 @@ export default function BlogPage() {
                   </motion.div>
                 ))}
               </div>
+
+              {hasMore && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="flex justify-center mt-12"
+                >
+                  <button
+                    onClick={() => setVisibleCount(prev => prev + POSTS_INCREMENT)}
+                    className="group flex items-center gap-2 px-8 py-3.5 rounded-xl border border-gray-200/50 dark:border-dark-700/50 text-gray-700 dark:text-dark-200 hover:border-primary-500/30 hover:text-primary-400 transition-all duration-300 text-sm font-medium"
+                  >
+                    Show More
+                    <ChevronDown className="w-4 h-4 group-hover:translate-y-0.5 transition-transform" />
+                  </button>
+                </motion.div>
+              )}
+              </>
             )}
           </div>
         </section>

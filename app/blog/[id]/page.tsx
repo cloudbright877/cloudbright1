@@ -11,8 +11,8 @@ import { blogPosts } from '../data';
 
 export default function BlogPostPage() {
   const params = useParams();
-  const postId = Number(params.id);
-  const post = blogPosts.find((p) => p.id === postId);
+  const slug = params.id as string;
+  const post = blogPosts.find((p) => p.slug === slug || p.id === Number(slug));
 
   if (!post) {
     return (
@@ -36,13 +36,13 @@ export default function BlogPostPage() {
     );
   }
 
-  const currentIndex = blogPosts.findIndex((p) => p.id === postId);
+  const currentIndex = blogPosts.findIndex((p) => p.slug === slug || p.id === Number(slug));
   const relatedPosts = blogPosts
-    .filter((p) => p.id !== postId && p.category === post.category)
+    .filter((p) => p.slug !== slug && p.category === post.category)
     .slice(0, 3);
   if (relatedPosts.length < 3) {
     const extra = blogPosts
-      .filter((p) => p.id !== postId && !relatedPosts.find((r) => r.id === p.id))
+      .filter((p) => p.slug !== slug && !relatedPosts.find((r) => r.id === p.id))
       .slice(0, 3 - relatedPosts.length);
     relatedPosts.push(...extra);
   }
@@ -107,6 +107,15 @@ export default function BlogPostPage() {
           </div>
         </section>
 
+        {/* ══════════ COVER IMAGE ══════════ */}
+        {post.coverImage && (
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-10">
+            <div className="rounded-2xl overflow-hidden border border-dark-700/50 shadow-2xl shadow-black/30">
+              <img src={post.coverImage} alt={post.title} className="w-full h-auto" />
+            </div>
+          </div>
+        )}
+
         {/* ══════════ ARTICLE CONTENT ══════════ */}
         <section className="py-16">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -169,7 +178,7 @@ export default function BlogPostPage() {
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid sm:grid-cols-2 gap-4">
               {prevPost ? (
-                <Link href={`/blog/${prevPost.id}`}>
+                <Link href={`/blog/${prevPost.slug}`}>
                   <div className="group p-5 rounded-2xl border border-dark-700/50 bg-dark-800/50 hover:border-primary-500/30 transition-all">
                     <p className="text-xs text-dark-400 mb-2 flex items-center gap-1">
                       <ArrowLeft className="w-3 h-3" /> Previous
@@ -183,7 +192,7 @@ export default function BlogPostPage() {
                 <div />
               )}
               {nextPost && (
-                <Link href={`/blog/${nextPost.id}`}>
+                <Link href={`/blog/${nextPost.slug}`}>
                   <div className="group p-5 rounded-2xl border border-dark-700/50 bg-dark-800/50 hover:border-primary-500/30 transition-all text-right">
                     <p className="text-xs text-dark-400 mb-2 flex items-center justify-end gap-1">
                       Next <ArrowRight className="w-3 h-3" />
@@ -219,15 +228,21 @@ export default function BlogPostPage() {
                   viewport={{ once: true }}
                   transition={{ duration: 0.4, delay: index * 0.08 }}
                 >
-                  <Link href={`/blog/${related.id}`}>
+                  <Link href={`/blog/${related.slug}`}>
                     <div className="group relative h-full rounded-2xl bg-dark-800/50 border border-dark-700/50 overflow-hidden hover:border-primary-500/30 transition-all duration-500 flex flex-col">
                       <div className={`absolute inset-0 bg-gradient-to-br ${related.gradient} opacity-0 group-hover:opacity-[0.06] transition-opacity duration-500`} />
 
                       <div className="relative h-40 bg-dark-800 overflow-hidden">
-                        <div className={`absolute inset-0 bg-gradient-to-br ${related.gradient} opacity-15 group-hover:opacity-25 transition-opacity duration-500`} />
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <BookOpen className="w-8 h-8 text-white/10 group-hover:text-white/20 transition-colors" />
-                        </div>
+                        {related.coverImage ? (
+                          <img src={related.coverImage} alt={related.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        ) : (
+                          <>
+                            <div className={`absolute inset-0 bg-gradient-to-br ${related.gradient} opacity-15 group-hover:opacity-25 transition-opacity duration-500`} />
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <BookOpen className="w-8 h-8 text-white/10 group-hover:text-white/20 transition-colors" />
+                            </div>
+                          </>
+                        )}
                       </div>
 
                       <div className="relative z-10 p-5 flex-1 flex flex-col">
